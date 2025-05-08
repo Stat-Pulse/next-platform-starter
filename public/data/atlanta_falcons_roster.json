@@ -1,0 +1,584 @@
+{
+  "Wide Receiver": [
+    {
+      "name": "Jamal Agnew",
+      "jersey": null,
+      "yearsExp": 8,
+      "status": "Active"
+    },
+    {
+      "name": "Chris Blair",
+      "jersey": "19",
+      "yearsExp": 1,
+      "status": "Active"
+    },
+    {
+      "name": "Phillip Dorsett II",
+      "jersey": "15",
+      "yearsExp": 9,
+      "status": "Active"
+    },
+    {
+      "name": "Dylan Drummond",
+      "jersey": "81",
+      "yearsExp": 1,
+      "status": "Active"
+    },
+    {
+      "name": "KhaDarel Hodge",
+      "jersey": "12",
+      "yearsExp": 5,
+      "status": "Active"
+    },
+    {
+      "name": "Drake London",
+      "jersey": "5",
+      "yearsExp": 3,
+      "status": "Active"
+    },
+    {
+      "name": "Jesse Matthews",
+      "jersey": "86",
+      "yearsExp": 2,
+      "status": "Active"
+    },
+    {
+      "name": "Ray-Ray McCloud III",
+      "jersey": "34",
+      "yearsExp": 7,
+      "status": "Active"
+    },
+    {
+      "name": "Darnell Mooney",
+      "jersey": "1",
+      "yearsExp": 5,
+      "status": "Active"
+    },
+    {
+      "name": "Nick Nash",
+      "jersey": null,
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Makai Polk",
+      "jersey": null,
+      "yearsExp": 2,
+      "status": "Active"
+    },
+    {
+      "name": "David Sills V",
+      "jersey": "84",
+      "yearsExp": 3,
+      "status": "Active"
+    },
+    {
+      "name": "Quincy Skinner Jr.",
+      "jersey": null,
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Casey Washington",
+      "jersey": "82",
+      "yearsExp": 0,
+      "status": "Active"
+    }
+  ],
+  "Running Back": [
+    {
+      "name": "Tyler Allgeier",
+      "jersey": "25",
+      "yearsExp": 3,
+      "status": "Active"
+    },
+    {
+      "name": "Nate Carter",
+      "jersey": null,
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Elijah Dotson",
+      "jersey": null,
+      "yearsExp": 2,
+      "status": "Active"
+    },
+    {
+      "name": "Jase McClellan",
+      "jersey": "30",
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Bijan Robinson",
+      "jersey": "7",
+      "yearsExp": 2,
+      "status": "Active"
+    },
+    {
+      "name": "Carlos Washington Jr.",
+      "jersey": "28",
+      "yearsExp": 1,
+      "status": "Active"
+    }
+  ],
+  "Guard": [
+    {
+      "name": "Matthew Bergeron",
+      "jersey": "65",
+      "yearsExp": 2,
+      "status": "Active"
+    },
+    {
+      "name": "Joey Fisher",
+      "jersey": "79",
+      "yearsExp": 1,
+      "status": "Active"
+    },
+    {
+      "name": "Joshua Gray",
+      "jersey": null,
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Jovaughn Gwyn",
+      "jersey": "56",
+      "yearsExp": 2,
+      "status": "Active"
+    },
+    {
+      "name": "Kyle Hinton",
+      "jersey": "68",
+      "yearsExp": 2,
+      "status": "Active"
+    },
+    {
+      "name": "Chris Lindstrom",
+      "jersey": "63",
+      "yearsExp": 6,
+      "status": "Active"
+    },
+    {
+      "name": "Ryan Neuzil",
+      "jersey": "64",
+      "yearsExp": 3,
+      "status": "Active"
+    }
+  ],
+  "Center": [
+    {
+      "name": "Matthew Cindric",
+      "jersey": "73",
+      "yearsExp": 0,
+      "status": "Active"
+    }
+  ],
+  "Quarterback": [
+    {
+      "name": "Kirk Cousins",
+      "jersey": "18",
+      "yearsExp": 13,
+      "status": "Active"
+    },
+    {
+      "name": "Emory Jones",
+      "jersey": "11",
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Michael Penix Jr.",
+      "jersey": "9",
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Easton Stick",
+      "jersey": null,
+      "yearsExp": 6,
+      "status": "Active"
+    }
+  ],
+  "Tight End": [
+    {
+      "name": "Feleipe Franks",
+      "jersey": null,
+      "yearsExp": 5,
+      "status": "Active"
+    },
+    {
+      "name": "Nikola Kalinic",
+      "jersey": null,
+      "yearsExp": 2,
+      "status": "Active"
+    },
+    {
+      "name": "Kyle Pitts",
+      "jersey": "8",
+      "yearsExp": 4,
+      "status": "Active"
+    },
+    {
+      "name": "Teagan Quitoriano",
+      "jersey": "85",
+      "yearsExp": 3,
+      "status": "Active"
+    },
+    {
+      "name": "Joshua Simon",
+      "jersey": null,
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Charlie Woerner",
+      "jersey": "89",
+      "yearsExp": 5,
+      "status": "Active"
+    }
+  ],
+  "Offensive Tackle": [
+    {
+      "name": "Jake Matthews",
+      "jersey": "70",
+      "yearsExp": 11,
+      "status": "Active"
+    },
+    {
+      "name": "Kaleb McGary",
+      "jersey": "76",
+      "yearsExp": 5,
+      "status": "Active"
+    },
+    {
+      "name": "Jack Nelson",
+      "jersey": null,
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Storm Norton",
+      "jersey": "77",
+      "yearsExp": 5,
+      "status": "Active"
+    },
+    {
+      "name": "Brandon Parker",
+      "jersey": "75",
+      "yearsExp": 7,
+      "status": "Active"
+    },
+    {
+      "name": "Tyrone Wheatley Jr.",
+      "jersey": "74",
+      "yearsExp": 2,
+      "status": "Active"
+    },
+    {
+      "name": "Elijah Wilkinson",
+      "jersey": "71",
+      "yearsExp": 8,
+      "status": "Active"
+    },
+    {
+      "name": "Jordan Williams",
+      "jersey": null,
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Kilian Zierer",
+      "jersey": "77",
+      "yearsExp": 2,
+      "status": "Active"
+    }
+  ],
+  "Defensive Tackle": [
+    {
+      "name": "Junior Aho",
+      "jersey": "79",
+      "yearsExp": 1,
+      "status": "Active"
+    },
+    {
+      "name": "Brandon Dorlus",
+      "jersey": "54",
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Ta'Quon Graham",
+      "jersey": "95",
+      "yearsExp": 4,
+      "status": "Active"
+    },
+    {
+      "name": "David Onyemata",
+      "jersey": "90",
+      "yearsExp": 9,
+      "status": "Active"
+    },
+    {
+      "name": "Ruke Orhorhoro",
+      "jersey": "98",
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Kentavius Street",
+      "jersey": "93",
+      "yearsExp": 6,
+      "status": "Active"
+    }
+  ],
+  "Cornerback": [
+    {
+      "name": "Dee Alford",
+      "jersey": "20",
+      "yearsExp": 3,
+      "status": "Active"
+    },
+    {
+      "name": "Natrone Brooks",
+      "jersey": "35",
+      "yearsExp": 1,
+      "status": "Active"
+    },
+    {
+      "name": "Cobee Bryant",
+      "jersey": null,
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Mike Ford Jr.",
+      "jersey": null,
+      "yearsExp": 7,
+      "status": "Active"
+    },
+    {
+      "name": "Mike Hughes",
+      "jersey": "21",
+      "yearsExp": 7,
+      "status": "Active"
+    },
+    {
+      "name": "Lamar Jackson",
+      "jersey": "38",
+      "yearsExp": 3,
+      "status": "Active"
+    },
+    {
+      "name": "Kevin King",
+      "jersey": "32",
+      "yearsExp": 6,
+      "status": "Active"
+    },
+    {
+      "name": "Dontae Manning",
+      "jersey": null,
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Clark Phillips III",
+      "jersey": "22",
+      "yearsExp": 2,
+      "status": "Active"
+    },
+    {
+      "name": "Keith Taylor Jr.",
+      "jersey": null,
+      "yearsExp": 3,
+      "status": "Active"
+    },
+    {
+      "name": "A.J. Terrell",
+      "jersey": "24",
+      "yearsExp": 5,
+      "status": "Active"
+    }
+  ],
+  "Linebacker": [
+    {
+      "name": "Troy Andersen",
+      "jersey": "44",
+      "yearsExp": 3,
+      "status": "Active"
+    },
+    {
+      "name": "JD Bertrand",
+      "jersey": "40",
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Divine Deablo",
+      "jersey": null,
+      "yearsExp": 4,
+      "status": "Active"
+    },
+    {
+      "name": "Arnold Ebiketie",
+      "jersey": "17",
+      "yearsExp": 3,
+      "status": "Active"
+    },
+    {
+      "name": "Kaden Elliss",
+      "jersey": "55",
+      "yearsExp": 6,
+      "status": "Active"
+    },
+    {
+      "name": "Khalid Kareem",
+      "jersey": "92",
+      "yearsExp": 4,
+      "status": "Active"
+    },
+    {
+      "name": "Nick Kubitz",
+      "jersey": null,
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "DeAngelo Malone",
+      "jersey": "51",
+      "yearsExp": 3,
+      "status": "Active"
+    },
+    {
+      "name": "James Pearce Jr.",
+      "jersey": null,
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Bralen Trice",
+      "jersey": "48",
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Malik Verdon",
+      "jersey": null,
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Jalon Walker",
+      "jersey": null,
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Josh Woods",
+      "jersey": "42",
+      "yearsExp": 6,
+      "status": "Active"
+    }
+  ],
+  "Defensive End": [
+    {
+      "name": "Simeon Barrow Jr.",
+      "jersey": null,
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Leonard Floyd",
+      "jersey": null,
+      "yearsExp": 10,
+      "status": "Active"
+    },
+    {
+      "name": "Morgan Fox",
+      "jersey": null,
+      "yearsExp": 8,
+      "status": "Active"
+    },
+    {
+      "name": "Zach Harrison",
+      "jersey": "96",
+      "yearsExp": 2,
+      "status": "Active"
+    },
+    {
+      "name": "LaCale London",
+      "jersey": "94",
+      "yearsExp": 2,
+      "status": "Active"
+    }
+  ],
+  "Safety": [
+    {
+      "name": "Jessie Bates III",
+      "jersey": "3",
+      "yearsExp": 7,
+      "status": "Active"
+    },
+    {
+      "name": "Billy Bowman Jr.",
+      "jersey": null,
+      "yearsExp": 0,
+      "status": "Active"
+    },
+    {
+      "name": "Jordan Fuller",
+      "jersey": null,
+      "yearsExp": 5,
+      "status": "Active"
+    },
+    {
+      "name": "DeMarcco Hellams",
+      "jersey": "23",
+      "yearsExp": 2,
+      "status": "Active"
+    },
+    {
+      "name": "Benny Sapp III",
+      "jersey": "48",
+      "yearsExp": 2,
+      "status": "Active"
+    },
+    {
+      "name": "Xavier Watts",
+      "jersey": null,
+      "yearsExp": 0,
+      "status": "Active"
+    }
+  ],
+  "Place kicker": [
+    {
+      "name": "Younghoe Koo",
+      "jersey": "6",
+      "yearsExp": 7,
+      "status": "Active"
+    },
+    {
+      "name": "Lenny Krieg",
+      "jersey": null,
+      "yearsExp": 0,
+      "status": "Active"
+    }
+  ],
+  "Long Snapper": [
+    {
+      "name": "Liam McCullough",
+      "jersey": "49",
+      "yearsExp": 3,
+      "status": "Active"
+    }
+  ],
+  "Punter": [
+    {
+      "name": "Bradley Pinion",
+      "jersey": "13",
+      "yearsExp": 10,
+      "status": "Active"
+    }
+  ]
+}
