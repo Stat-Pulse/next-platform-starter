@@ -1,3 +1,8 @@
 [build]
-  publish = ".next"
   command = "npm run build"
+  publish = ".next"
+
+[[redirects]]
+  from = "/*"
+  to = "/index"
+  status = 200
