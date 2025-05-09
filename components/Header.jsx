@@ -1,8 +1,11 @@
-import { useState } from 'react';
-import Link from 'next/link';
+// components/Header.jsx
+import { useState } from 'react'
+import Link from 'next/link'
 
 export default function Header() {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false)
+  const navItems = ['Home', 'Players', 'Compare', 'Insights', 'League', 'Fantasy', 'Profile', 'Support', 'About']
+
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
@@ -12,7 +15,7 @@ export default function Header() {
               src="/assets/logo.png"
               alt="StatPulse Logo"
               className="h-10 w-auto"
-              onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/40x40?text=Logo'; }}
+              onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/40x40?text=Logo' }}
             />
           </Link>
           <span className="text-xl font-bold text-red-600">StatPulse</span>
@@ -20,13 +23,16 @@ export default function Header() {
 
         {/* Desktop Nav */}
         <div className="hidden md:flex space-x-6 text-sm font-semibold">
-          {['Home','Players','Compare','Insights','League','Fantasy','Profile','Support','About'].map((label) => (
-            <Link key={label} href={`/${label.toLowerCase()}`}>
-              <a className={label==='Home'? 'text-red-600 font-bold':'hover:text-red-600'}>
-                {label}
-              </a>
-            </Link>
-          ))}
+          {navItems.map((label) => {
+            const href = label === 'Home' ? '/' : `/${label.toLowerCase()}`
+            return (
+              <Link key={label} href={href}>
+                <a className={label === 'Home' ? 'text-red-600 font-bold' : 'hover:text-red-600'}>
+                  {label}
+                </a>
+              </Link>
+            )
+          })}
         </div>
 
         {/* Mobile Toggle & Login */}
@@ -46,13 +52,16 @@ export default function Header() {
       {menuOpen && (
         <div className="md:hidden bg-white shadow-md">
           <div className="container mx-auto px-6 py-4 flex flex-col space-y-4 text-sm font-semibold">
-            {['Home','Players','Compare','Insights','League','Fantasy','Profile','Support','About'].map((label) => (
-              <Link key={label} href={`/${label.toLowerCase()}`}>
-                <a className={label==='Home'? 'text-red-600 font-bold':'hover:text-red-600'}>
-                  {label}
-                </a>
-              </Link>
-            ))}
+            {navItems.map((label) => {
+              const href = label === 'Home' ? '/' : `/${label.toLowerCase()}`
+              return (
+                <Link key={label} href={href}>
+                  <a className={label === 'Home' ? 'text-red-600 font-bold' : 'hover:text-red-600'}>
+                    {label}
+                  </a>
+                </Link>
+              )
+            })}
             <Link href="/login">
               <a className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700 text-center">
                 Login
@@ -62,5 +71,5 @@ export default function Header() {
         </div>
       )}
     </header>
-  );
+  )
 }
