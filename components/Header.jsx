@@ -9,17 +9,19 @@ export default function Header() {
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center space-x-4 flex-shrink overflow-hidden">
-          <Link href="/">
+        {/* Logo */}
+        <Link href="/">
+          <a className="flex-shrink-0">
             <img
               src="/assets/logo.png"
               alt="StatPulse Logo"
-              className="h-10 w-auto flex-shrink-0"
+              className="h-10 w-auto"
               onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/40x40?text=Logo' }}
             />
-          </Link>
-          <span className="text-xl font-bold text-red-600 whitespace-nowrap truncate">StatPulse</span>
-        </div>
+          </a>
+        </Link>
+        {/* Site title (hidden on small) */}
+        <span className="text-xl font-bold text-red-600 hidden md:block">StatPulse</span>
 
         {/* Desktop Nav */}
         <div className="hidden md:flex space-x-6 text-sm font-semibold">
@@ -35,39 +37,57 @@ export default function Header() {
           })}
         </div>
 
-        {/* Mobile Toggle & Login */}
-        <div className="flex items-center md:hidden space-x-2">
-          <button onClick={() => setMenuOpen(!menuOpen)} className="text-gray-800 focus:outline-none">
+        {/* Mobile Toggle */}
+        <div className="flex items-center md:hidden">
+          <button onClick={() => setMenuOpen(!menuOpen)} className="text-gray-800 focus:outline-none p-2">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
             </svg>
           </button>
-          <Link href="/login">
-            <a className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700">Login</a>
-          </Link>
         </div>
       </nav>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Panel */}
       {menuOpen && (
-        <nav className="md:hidden bg-white shadow-md">
-          <div className="container mx-auto px-6 py-4 flex flex-col space-y-4 text-sm font-semibold">
-            {navItems.map((label) => {
-              const href = label === 'Home' ? '/' : `/${label.toLowerCase()}`
-              return (
-                <Link key={label} href={href}>
-                  <a className={label === 'Home' ? 'text-red-600 font-bold' : 'hover:text-red-600'}>
-                    {label}
-                  </a>
-                </Link>
-              )
-            })}
-            <Link href="/login">
-              <a className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700 text-center">Login</a>
-            </Link>
+        <div className="md:hidden bg-white shadow-md">
+          <div className="container mx-auto px-6 py-4">
+            {/* Logo & Title */}
+            <div className="flex items-center justify-between mb-4">
+              <Link href="/">
+                <a>
+                  <img
+                    src="/assets/logo.png"
+                    alt="StatPulse Logo"
+                    className="h-8 w-auto"
+                    onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/40x40?text=Logo' }}
+                  />
+                </a>
+              </Link>
+              <span className="text-xl font-bold text-red-600">StatPulse</span>
+            </div>
+            {/* Navigation Links */}
+            <div className="flex flex-col space-y-4 text-sm font-semibold">
+              {navItems.map((label) => {
+                const href = label === 'Home' ? '/' : `/${label.toLowerCase()}`
+                return (
+                  <Link key={label} href={href}>
+                    <a className={label === 'Home' ? 'text-red-600 font-bold' : 'hover:text-red-600'}>
+                      {label}
+                    </a>
+                  </Link>
+                )
+              })}
+              {/* Login Link */}
+              <Link href="/login">
+                <a className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700 text-center">
+                  Login
+                </a>
+              </Link>
+            </div>
           </div>
-        </nav>
+        </div>
       )}
     </header>
   )
 }
+
