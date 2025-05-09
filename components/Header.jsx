@@ -9,16 +9,16 @@ export default function Header() {
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center space-x-4 min-w-0">
+        <div className="flex items-center space-x-4 flex-shrink overflow-hidden">
           <Link href="/">
             <img
               src="/assets/logo.png"
               alt="StatPulse Logo"
-              className="h-10 w-auto"
+              className="h-10 w-auto flex-shrink-0"
               onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/40x40?text=Logo' }}
             />
           </Link>
-          <span className="flex-shrink-0 text-xl font-bold text-red-600 truncate">StatPulse</span>
+          <span className="text-xl font-bold text-red-600 whitespace-nowrap truncate">StatPulse</span>
         </div>
 
         {/* Desktop Nav */}
@@ -50,7 +50,7 @@ export default function Header() {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <div className="md:hidden bg-white shadow-md">
+        <nav className="md:hidden bg-white shadow-md">
           <div className="container mx-auto px-6 py-4 flex flex-col space-y-4 text-sm font-semibold">
             {navItems.map((label) => {
               const href = label === 'Home' ? '/' : `/${label.toLowerCase()}`
@@ -63,12 +63,10 @@ export default function Header() {
               )
             })}
             <Link href="/login">
-              <a className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700 text-center">
-                Login
-              </a>
+              <a className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700 text-center">Login</a>
             </Link>
           </div>
-        </div>
+        </nav>
       )}
     </header>
   )
