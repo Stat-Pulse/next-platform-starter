@@ -9,7 +9,7 @@ export default function Header() {
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 min-w-0">
           <Link href="/">
             <img
               src="/assets/logo.png"
@@ -18,7 +18,7 @@ export default function Header() {
               onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/40x40?text=Logo' }}
             />
           </Link>
-          <span className="text-xl font-bold text-red-600">StatPulse</span>
+          <span className="flex-shrink-0 text-xl font-bold text-red-600 truncate">StatPulse</span>
         </div>
 
         {/* Desktop Nav */}
