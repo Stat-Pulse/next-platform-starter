@@ -1,47 +1,34 @@
 // components/CompareSearch.jsx
 import { useState, useEffect } from 'react'
 
-/** 
- * Allows typing to search players, shows autocomplete suggestions,
- * and displays selected player chips with remove buttons.
- */
 export default function CompareSearch({ selectedPlayers, onUpdate }) {
   const [input, setInput] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [allPlayers, setAllPlayers] = useState([])
 
-  // Load full player list once
   useEffect(() => {
     async function loadPlayers() {
       try {
         const res = await fetch('/api/players')
         if (!res.ok) throw new Error('Failed to load players')
-        const data = await res.json()
-        setAllPlayers(data)
+        setAllPlayers(await res.json())
       } catch (err) {
-        console.error('CompareSearch load error:', err)
+        console.error(err)
       }
     }
     loadPlayers()
   }, [])
 
-  // Update suggestions whenever input changes
   useEffect(() => {
-    if (input.length < 2) {
-      setSuggestions([])
-      return
-    }
-    const filtered = allPlayers.filter(p =>
-      p.name.toLowerCase().includes(input.toLowerCase()) &&
-      !selectedPlayers.includes(p.name)
-    )
-    setSuggestions(filtered.slice(0, 5))
+    if (input.length < 2) return setSuggestions([])
+    const filtered = allPlayers
+      .filter(p => p.name.toLowerCase().includes(input.toLowerCase()) && !selectedPlayers.includes(p.name))
+      .slice(0,5)
+    setSuggestions(filtered)
   }, [input, allPlayers, selectedPlayers])
 
   const handleSelect = name => {
-    if (selectedPlayers.length < 4) {
-      onUpdate([...selectedPlayers, name])
-    }
+    if (selectedPlayers.length < 4) onUpdate([...selectedPlayers, name])
     setInput('')
     setSuggestions([])
   }
@@ -62,20 +49,18 @@ export default function CompareSearch({ selectedPlayers, onUpdate }) {
         />
         {suggestions.length > 0 && (
           <div className="absolute w-full bg-white border rounded-md shadow z-10">
-            {suggestions.map(player => (
+            {suggestions.map(p => (
               <div
-                key={player.name}
+                key={p.name}
                 className="p-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => handleSelect(player.name)}
+                onClick={() => handleSelect(p.name)}
               >
-                {player.name} ({player.position}, {player.team})
+                {p.name} ({p.position}, {p.team})
               </div>
             ))}
           </div>
         )}
       </div>
-
-      {/* Selected player chips */}
       <div className="flex flex-wrap gap-2">
         {selectedPlayers.map(name => (
           <div key={name} className="bg-gray-200 p-2 rounded flex items-center">
@@ -83,12 +68,10 @@ export default function CompareSearch({ selectedPlayers, onUpdate }) {
             <button
               onClick={() => handleRemove(name)}
               className="ml-2 text-red-600 hover:text-red-800"
-            >
-              X
-            </button>
+            >X</button>
           </div>
         ))}
       </div>
     </div>
-  )
+)
 }
