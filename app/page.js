@@ -1,17 +1,20 @@
-import NavBar from '../components/NavBar';
-import Footer from '../components/Footer';
-import Card from '../components/Card';
-import Modal from '../components/Modal';
-import { useState } from 'react';
+// app/page.js
+import NavBar from '../components/NavBar'
+import Footer from '../components/Footer'
+import Card from '../components/Card'
+import Modal from '../components/Modal'
+import { useState } from 'react'
 
-export default function Home() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+export default function Page() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   return (
     <div>
       <NavBar />
       <main className="container mx-auto p-4">
-        <h1 className="text-3xl font-bold text-center mb-6">StatPulse Analytics</h1>
+        <h1 className="text-3xl font-bold text-center mb-6">
+          StatPulse Analytics
+        </h1>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card title="Users" value="1,234" />
           <Card title="Sessions" value="5,678" />
@@ -30,5 +33,5 @@ export default function Home() {
       </main>
       <Footer />
     </div>
-  );
+  )
 }
