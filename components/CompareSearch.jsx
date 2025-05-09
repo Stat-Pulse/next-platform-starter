@@ -1,7 +1,7 @@
 // components/CompareSearch.jsx
 import { useState, useEffect } from 'react'
 
-/**
+/** 
  * Allows typing to search players, shows autocomplete suggestions,
  * and displays selected player chips with remove buttons.
  */
@@ -14,7 +14,7 @@ export default function CompareSearch({ selectedPlayers, onUpdate }) {
   useEffect(() => {
     async function loadPlayers() {
       try {
-        const res = await fetch('/api/players') // adjust path to your data endpoint or JSON file
+        const res = await fetch('/api/players')
         if (!res.ok) throw new Error('Failed to load players')
         const data = await res.json()
         setAllPlayers(data)
