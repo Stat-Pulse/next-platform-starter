@@ -32,7 +32,7 @@ export default function InteractiveSection() {
 
         {/* Poll */}
         <div className="bg-gray-100 p-6 rounded-lg shadow mb-8">
-          <h3 className="text-xl font-semibold text-gray-700 mb-4">Poll: Who’s the 2025 MVP?</h3>
+          <h3 className="text-xl font-semibold text-gray-700 mb-4">Poll: Who&apos;s the 2025 MVP?</h3>
           {!pollSubmitted ? (
             <form id="pollForm" onSubmit={handlePollSubmit}>
               <label className="block mb-2">
@@ -83,7 +83,7 @@ export default function InteractiveSection() {
         {/* Depth Chart */}
         <div className="bg-gray-100 p-6 rounded-lg shadow mb-8">
           <h3 className="text-xl font-semibold text-gray-700 mb-4">Interactive Depth Chart</h3>
-          <p className="text-gray-600 mb-4">Explore the Bengals' depth chart (sample).</p>
+          <p className="text-gray-600 mb-4">Explore the Bengals&apos; depth chart (sample).</p>
           <div id="depthChart" className="text-gray-700 space-y-1">
             <p>QB1: Joe Burrow</p>
             <p>QB2: Jake Browning</p>
