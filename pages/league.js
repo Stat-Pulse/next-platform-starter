@@ -6,6 +6,9 @@ import SidebarNavigation from '../components/SidebarNavigation'
 import SectionWrapper from '../components/SectionWrapper'
 import TrendingTopics from '../components/TrendingTopics'
 import SeasonSnapshot from '../components/SeasonSnapshot'
+import KeyStatisticsLeaders from '../components/KeyStatisticsLeaders'
+import BettingOddsHighlights from '../components/BettingOddsHighlights'
+import FantasyFootballInsights from '../components/FantasyFootballInsights'
 
 export default function LeaguePage() {
   return (
@@ -31,15 +34,15 @@ export default function LeaguePage() {
            </SectionWrapper>
 
            <SectionWrapper title="Key Statistics Leaders">
-             <Key Statistics Leaders />
+             <KeyStatisticsLeaders />
            </SectionWrapper>
 
             <SectionWrapper title="Betting Odds Highlights">
-              <p className="text-gray-600">Showcase current betting lines here...</p>
+              <BettingOddsHighlights />
             </SectionWrapper>
 
             <SectionWrapper title="Fantasy Football Insights">
-              <p className="text-gray-600">Show fantasy callouts and trends here...</p>
+              <FantasyFootballInsights />
             </SectionWrapper>
 
             <SectionWrapper title="Power Rankings">
