@@ -8,7 +8,7 @@ export default function PlayerSelect({ selectedPlayer, setSelectedPlayer, view, 
       >
         <option value="Joe Burrow">Joe Burrow</option>
         <option value="Saquon Barkley">Saquon Barkley</option>
-        <option value="Ja'Marr Chase">Ja'Marr Chase</option>
+        <option value="Ja&#39;Marr Chase">Ja&#39;Marr Chase</option>
       </select>
       <div className="flex gap-2">
         <button
