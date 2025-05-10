@@ -1,36 +1,59 @@
-import { useEffect } from 'react'
-import Chart from 'chart.js/auto'
+'use client'
+
+import { useEffect, useRef } from 'react'
+import { Chart } from 'chart.js/auto'
 
 export default function FantasyChart({ data }) {
-  useEffect(() => {
-    const ctx = document.getElementById('fantasyChart')
-    if (!ctx) return
+  const canvasRef = useRef(null)
+  const chartRef = useRef(null)
 
-    new Chart(ctx, {
+  useEffect(() => {
+    // Destroy previous chart instance if it exists
+    if (chartRef.current) {
+      chartRef.current.destroy()
+    }
+
+    const ctx = canvasRef.current.getContext('2d')
+    chartRef.current = new Chart(ctx, {
       type: 'line',
       data: {
         labels: data.map((_, i) => `Week ${i + 1}`),
-        datasets: [{
-          label: 'Fantasy Points',
-          data: data,
-          borderColor: '#DC2626',
-          fill: false,
-          tension: 0.4
-        }]
+        datasets: [
+          {
+            label: 'Fantasy Points',
+            data,
+            borderColor: '#DC2626',
+            backgroundColor: 'rgba(220,38,38,0.1)',
+            tension: 0.3,
+            fill: true
+          }
+        ]
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         scales: {
-          y: { beginAtZero: true }
+          y: {
+            beginAtZero: true
+          }
         }
       }
     })
+
+    // Clean up on unmount
+    return () => {
+      if (chartRef.current) {
+        chartRef.current.destroy()
+      }
+    }
   }, [data])
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow">
-      <h3 className="text-xl font-semibold mb-4">Fantasy Points Trend</h3>
-      <canvas id="fantasyChart" className="w-full h-64"></canvas>
+    <div className="bg-white p-6 rounded-lg shadow mb-8">
+      <h3 className="text-xl font-semibold text-gray-700 mb-4">Fantasy Points Trend</h3>
+      <div className="relative h-64">
+        <canvas ref={canvasRef} id="fantasyChart"></canvas>
+      </div>
     </div>
   )
 }
