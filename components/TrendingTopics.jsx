@@ -6,52 +6,41 @@ export default function TrendingTopics() {
   const [newsItems, setNewsItems] = useState([])
 
   useEffect(() => {
-    // Placeholder for now — replace with API or dynamic source later
+    // Placeholder data
     const dummyNews = [
       {
-        id: 1,
-        title: "J.J. McCarthy Named QB1 for Vikings",
-        summary: "Vikings announce J.J. McCarthy as starter.",
-        category: "Transactions",
-        date: "2025-05-08"
+       title: 'Derek Carr Announces Retirement',
+        content: 'Saints confirm QBs Surprise Retirement.',
+        date: 'May 10, 2025',
+        category: 'Team News' 
       },
       {
-        id: 2,
-        title: "Sean Payton Returns to Denver",
-        summary: "Coach Payton confirmed for the 2025 season.",
-        category: "Coaching",
-        date: "2025-05-07"
+        title: 'Sean Payton to Coach Broncos in 2025',
+        content: 'Broncos confirm Payton’s return.',
+        date: 'May 7, 2025',
+        category: 'Coaching'
       },
       {
-        id: 3,
-        title: "NFL Introduces Kickoff Rule Changes",
-        summary: "New rules implemented to increase returns.",
-        category: "Announcements",
-        date: "2025-05-06"
+        title: 'J.J. McCarthy Named QB1 for Vikings',
+        content: 'Vikings confirm J.J. McCarthy as starter for Week 1.',
+        date: 'May 8, 2025',
+        category: 'Team News'
       }
     ]
     setNewsItems(dummyNews)
   }, [])
 
   return (
-    <section className="bg-white p-6 rounded-lg shadow">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Trending Topics</h2>
-        <input
-          type="text"
-          placeholder="Search news..."
-          className="border p-2 rounded-md w-1/3"
-        />
-      </div>
-      <ul className="space-y-4">
-        {newsItems.map(item => (
-          <li key={item.id} className="border-b pb-4">
-            <h3 className="text-lg font-semibold text-red-600">{item.title}</h3>
-            <p className="text-gray-600">{item.summary}</p>
-            <p className="text-sm text-gray-500 mt-1">{item.date} • {item.category}</p>
-          </li>
-        ))}
-      </ul>
-    </section>
+    <div className="space-y-4">
+      {newsItems.map((item, index) => (
+        <div key={index} className="bg-gray-100 p-4 rounded shadow">
+          <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
+          <p className="text-sm text-gray-600">
+            {item.content} <a href="#" className="text-red-600 hover:underline">Read more</a>
+          </p>
+          <p className="text-xs text-gray-500">{item.date} • {item.category}</p>
+        </div>
+      ))}
+    </div>
   )
 }
