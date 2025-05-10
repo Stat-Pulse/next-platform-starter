@@ -1,0 +1,67 @@
+[
+  {
+    "team": "Arizona Cardinals",
+    "position": "RB",
+    "starter": {
+      "name": "James Conner",
+      "age": 29
+    },
+    "backup": {
+      "name": "Trey Benson",
+      "age": 22
+    },
+    "notes": "Conner led with 74 carries in 2024; Benson (2024 3rd-round) had 242 yds. Per azcardinals.com."
+  },
+  {
+    "team": "Atlanta Falcons",
+    "position": "RB",
+    "starter": {
+      "name": "Bijan Robinson",
+      "age": 23
+    },
+    "backup": {
+      "name": "Tyler Allgeier",
+      "age": 25
+    },
+    "notes": "Robinson RB1 despite snap dip; Allgeier high-upside RB2. Per atlantafalcons.com."
+  },
+  {
+    "team": "Baltimore Ravens",
+    "position": "RB",
+    "starter": {
+      "name": "Derrick Henry",
+      "age": 31
+    },
+    "backup": {
+      "name": "Justice Hill",
+      "age": 27
+    },
+    "notes": "Henry (150+ yd games) RB1; Hill change-of-pace. Per baltimoreravens.com."
+  },
+  {
+    "team": "Buffalo Bills",
+    "position": "RB",
+    "starter": {
+      "name": "James Cook",
+      "age": 25
+    },
+    "backup": {
+      "name": "Ray Davis",
+      "age": 25
+    },
+    "notes": "Cook hit 1,000 yds, 18 TDs; Davis (2024 rookie) RB2. Per buffalobills.com."
+  },
+  {
+    "team": "Carolina Panthers",
+    "position": "RB",
+    "starter": {
+      "name": "Chuba Hubbard",
+      "age": 25
+    },
+    "backup": {
+      "name": "Jonathon Brooks",
+      "age": 21
+    },
+    "notes": "Hubbard took RB1; Brooks (2024 2nd-round) recovering from ACL. Per panthers.com."
+  }
+]
