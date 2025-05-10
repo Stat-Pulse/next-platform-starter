@@ -2,119 +2,83 @@ const fs = require('fs')
 const path = require('path')
 
 const players = [
-  {
-    name: 'Joe Burrow',
-    position: 'QB',
-    team: 'Cincinnati Bengals',
-    jersey: 9,
-    injuryStatus: 'Healthy',
-    recentGames: [
-      { week: 1, opponent: 'CLE', passYards: 275, passTD: 2, interceptions: 1, rushAttempts: 3, rushYards: 22, rushTD: 0 },
-      { week: 2, opponent: 'BAL', passYards: 305, passTD: 3, interceptions: 0, rushAttempts: 4, rushYards: 19, rushTD: 0 }
-    ],
-    fantasy: { pointsHistory: [22.1, 27.3] },
-    bettingTrends: [
-      { label: 'Over 208.5 Yds', hitRate: 83 },
-      { label: 'Over 1.5 Pass TDs', hitRate: 75 },
-      { label: 'Anytime TD', hitRate: 20 }
-    ],
-    coverageStats: [
-      { type: 'Cover 1', frequency: 20, successRate: 91 },
-      { type: 'Cover 2', frequency: 32, successRate: 86 },
-      { type: 'Cover 3', frequency: 48, successRate: 77 },
-      { type: 'Match', frequency: 31, successRate: 80 }
-    ]
-  },
-  {
-    name: 'Bijan Robinson',
-    position: 'RB',
-    team: 'Atlanta Falcons',
-    jersey: 7,
-    injuryStatus: 'Healthy',
-    recentGames: [
-      { week: 1, opponent: 'CAR', rushAttempts: 17, rushYards: 82, rushTD: 1, targets: 4, receptions: 3, recYards: 19, recTD: 0 },
-      { week: 2, opponent: 'NO', rushAttempts: 20, rushYards: 95, rushTD: 1, targets: 5, receptions: 5, recYards: 37, recTD: 1 }
-    ],
-    fantasy: { pointsHistory: [18.5, 23.0] },
-    bettingTrends: [
-      { label: 'Over 75 Rush Yds', hitRate: 71 },
-      { label: 'Over 2.5 Receptions', hitRate: 60 }
-    ],
-    coverageStats: []
-  },
-  {
-    name: 'Saquon Barkley',
-    position: 'RB',
-    team: 'Philadelphia Eagles',
-    jersey: 26,
-    injuryStatus: 'Questionable',
-    recentGames: [
-      { week: 1, opponent: 'WAS', rushAttempts: 18, rushYards: 77, rushTD: 0, targets: 6, receptions: 4, recYards: 30, recTD: 1 },
-      { week: 2, opponent: 'DAL', rushAttempts: 22, rushYards: 101, rushTD: 1, targets: 4, receptions: 3, recYards: 25, recTD: 0 }
-    ],
-    fantasy: { pointsHistory: [17.2, 21.8] },
-    bettingTrends: [
-      { label: 'Anytime TD', hitRate: 50 },
-      { label: 'Over 90 Rush Yds', hitRate: 67 }
-    ],
-    coverageStats: []
-  },
-  {
-    name: "Ja'Marr Chase",
-    position: 'WR',
-    team: 'Cincinnati Bengals',
-    jersey: 1,
-    injuryStatus: 'Healthy',
-    recentGames: [
-      { week: 1, opponent: 'CLE', targets: 8, receptions: 6, recYards: 89, recTD: 1, rushAttempts: 1, rushYards: 7, rushTD: 0 },
-      { week: 2, opponent: 'BAL', targets: 11, receptions: 9, recYards: 113, recTD: 2, rushAttempts: 0, rushYards: 0, rushTD: 0 }
-    ],
-    fantasy: { pointsHistory: [20.4, 26.1] },
-    bettingTrends: [
-      { label: 'Over 6.5 Receptions', hitRate: 80 },
-      { label: 'Anytime TD', hitRate: 70 }
-    ],
-    coverageStats: []
-  },
-  {
-    name: 'CeeDee Lamb',
-    position: 'WR',
-    team: 'Dallas Cowboys',
-    jersey: 88,
-    injuryStatus: 'Healthy',
-    recentGames: [
-      { week: 1, opponent: 'NYG', targets: 10, receptions: 7, recYards: 102, recTD: 1, rushAttempts: 1, rushYards: 5, rushTD: 0 },
-      { week: 2, opponent: 'PHI', targets: 9, receptions: 6, recYards: 88, recTD: 1, rushAttempts: 0, rushYards: 0, rushTD: 0 }
-    ],
-    fantasy: { pointsHistory: [19.6, 22.3] },
-    bettingTrends: [
-      { label: 'Over 80 Rec Yds', hitRate: 65 },
-      { label: 'Anytime TD', hitRate: 55 }
-    ],
-    coverageStats: []
-  },
-  {
-    name: 'Jordan Love',
-    position: 'QB',
-    team: 'Green Bay Packers',
-    jersey: 10,
-    injuryStatus: 'Healthy',
-    recentGames: [
-      { week: 1, opponent: 'CHI', passYards: 245, passTD: 3, interceptions: 0, rushAttempts: 4, rushYards: 18, rushTD: 0 },
-      { week: 2, opponent: 'ATL', passYards: 266, passTD: 2, interceptions: 1, rushAttempts: 5, rushYards: 24, rushTD: 1 }
-    ],
-    fantasy: { pointsHistory: [24.3, 21.5] },
-    bettingTrends: [
-      { label: 'Over 1.5 Pass TDs', hitRate: 78 },
-      { label: 'Over 230 Pass Yds', hitRate: 73 }
-    ],
-    coverageStats: [
-      { type: 'Cover 1', frequency: 25, successRate: 88 },
-      { type: 'Cover 3', frequency: 40, successRate: 82 }
-    ]
-  }
+  { name: 'Joe Burrow', position: 'QB', team: 'Cincinnati Bengals', jersey: 9 },
+  { name: 'Bijan Robinson', position: 'RB', team: 'Atlanta Falcons', jersey: 7 },
+  { name: 'Saquon Barkley', position: 'RB', team: 'Philadelphia Eagles', jersey: 26 },
+  { name: "Ja'Marr Chase", position: 'WR', team: 'Cincinnati Bengals', jersey: 1 },
+  { name: 'CeeDee Lamb', position: 'WR', team: 'Dallas Cowboys', jersey: 88 },
+  { name: 'Jordan Love', position: 'QB', team: 'Green Bay Packers', jersey: 10 }
 ]
 
-const outputPath = path.join(__dirname, '../public/data/player-insights.json')
-fs.writeFileSync(outputPath, JSON.stringify(players, null, 2))
-console.log('✅ player-insights.json generated successfully.')
+const dates = ['Sep 8, 2024', 'Sep 15, 2024', 'Sep 22, 2024']
+
+function getRecentGames(position) {
+  if (position === 'QB') {
+    return [1, 2, 3].map((week, i) => ({
+      week,
+      date: dates[i],
+      opponent: 'Opponent',
+      passYards: 250 + i * 10,
+      passTD: 1 + (i % 2),
+      interceptions: i % 2,
+      rushAttempts: 3,
+      rushYards: 20 + i * 5,
+      rushTD: i === 1 ? 1 : 0
+    }))
+  }
+
+  if (position === 'RB') {
+    return [1, 2, 3].map((week, i) => ({
+      week,
+      date: dates[i],
+      opponent: 'Opponent',
+      rushAttempts: 18 + i,
+      rushYards: 80 + i * 10,
+      rushTD: i === 2 ? 1 : 0,
+      targets: 4 + i,
+      receptions: 3 + (i % 2),
+      recYards: 25 + i * 10,
+      recTD: i === 0 ? 1 : 0
+    }))
+  }
+
+  if (position === 'WR') {
+    return [1, 2, 3].map((week, i) => ({
+      week,
+      date: dates[i],
+      opponent: 'Opponent',
+      targets: 8 + i,
+      receptions: 6 + (i % 2),
+      recYards: 90 + i * 15,
+      recTD: i === 1 ? 1 : 0,
+      rushAttempts: i === 0 ? 1 : 0,
+      rushYards: i === 0 ? 6 : 0,
+      rushTD: 0
+    }))
+  }
+
+  return []
+}
+
+const playerData = players.map((p) => ({
+  ...p,
+  injuryStatus: 'Healthy',
+  recentGames: getRecentGames(p.position),
+  fantasy: {
+    pointsHistory: [22 + Math.random() * 5, 18 + Math.random() * 5, 20 + Math.random() * 5]
+  },
+  bettingTrends: [
+    { label: 'Anytime TD', hitRate: Math.floor(Math.random() * 50 + 30) },
+    { label: 'Over 1.5 Pass TDs', hitRate: Math.floor(Math.random() * 50 + 40) }
+  ],
+  coverageStats: p.position === 'QB'
+    ? [
+        { type: 'Cover 1', frequency: 25, successRate: 88 },
+        { type: 'Cover 3', frequency: 40, successRate: 82 }
+      ]
+    : []
+}))
+
+const filePath = path.join(process.cwd(), 'public', 'data', 'player-insights.json')
+fs.writeFileSync(filePath, JSON.stringify(playerData, null, 2))
+console.log('✅ player-insights.json generated!')
