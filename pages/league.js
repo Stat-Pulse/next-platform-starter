@@ -4,6 +4,7 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 import SidebarNavigation from '../components/SidebarNavigation'
 import SectionWrapper from '../components/SectionWrapper'
+import TrendingTopics from '../components/TrendingTopics'
 
 export default function LeaguePage() {
   return (
@@ -21,7 +22,7 @@ export default function LeaguePage() {
             </SectionWrapper>
 
             <SectionWrapper title="Trending Topics">
-              <p className="text-gray-600">Dynamic news feed goes here...</p>
+              <TrendingTopics />
             </SectionWrapper>
 
             <SectionWrapper title="Season Snapshot">
