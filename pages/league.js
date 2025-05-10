@@ -29,10 +29,10 @@ export default function LeaguePage() {
            <SectionWrapper title="Season Snapshot">
              <SeasonSnapshot />
            </SectionWrapper>
-    
-            <SectionWrapper title="Key Statistics Leaders">
-              <p className="text-gray-600">Top leaders in stats by category go here...</p>
-            </SectionWrapper>
+
+           <SectionWrapper title="Key Statistics Leaders">
+             <Key Statistics Leaders />
+           </SectionWrapper>
 
             <SectionWrapper title="Betting Odds Highlights">
               <p className="text-gray-600">Showcase current betting lines here...</p>
