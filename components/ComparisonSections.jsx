@@ -5,16 +5,25 @@ import Chart from 'chart.js/auto'
 
 export default function ComparisonSections({ players = [], metrics = [] }) {
   // only render once we have at least 2 players
-  if (players.length < 2) return null
+  if (players.length < 2) {
+    return (
+      <div className="container mx-auto px-6 py-8">
+        <p className="text-gray-600 italic">
+          Select at least two players to compare.
+        </p>
+      </div>
+    )
+  }
 
   const [data, setData] = useState([])
 
-  // 1️⃣ Fetch full player data when players[] changes
+  // Fetch full player data when players[] changes
   useEffect(() => {
     async function load() {
       const results = await Promise.all(
         players.map((name) =>
-          fetch(`/api/player?name=${encodeURIComponent(name)}`).then((r) => r.json())
+          fetch(`/api/player?name=${encodeURIComponent(name)}`)
+            .then((r) => r.json())
         )
       )
       setData(results)
@@ -22,7 +31,7 @@ export default function ComparisonSections({ players = [], metrics = [] }) {
     load()
   }, [players])
 
-  // 2️⃣ While loading
+  // Show loading if we haven't gotten back all player details yet
   if (data.length < players.length) {
     return (
       <div className="container mx-auto px-6 py-8">
@@ -31,7 +40,7 @@ export default function ComparisonSections({ players = [], metrics = [] }) {
     )
   }
 
-  // 3️⃣ Destructure the two players
+  // We now have full data for two players
   const [p1, p2] = data
 
   return (
@@ -43,12 +52,16 @@ export default function ComparisonSections({ players = [], metrics = [] }) {
           {[p1, p2].map((p) => (
             <div key={p.name} className="bg-gray-100 p-6 rounded-lg shadow">
               <h4 className="text-xl font-semibold mb-2">{p.name}</h4>
-              <p>{p.position} | {p.team} | #{p.jersey}</p>
+              <p>{p.position} | {p.team} | #{p.jersey}</p>
               <p><strong>Upcoming:</strong> {p.upcomingGame}</p>
               <p><strong>Bye:</strong> {p.byeWeek}</p>
               <p>
                 <strong>Injury:</strong>{' '}
-                <span className={p.injuryStatus === 'Healthy' ? 'text-green-600' : 'text-red-600'}>
+                <span className={
+                  p.injuryStatus === 'Healthy'
+                    ? 'text-green-600'
+                    : 'text-red-600'
+                }>
                   {p.injuryStatus}
                 </span>
               </p>
@@ -68,10 +81,16 @@ export default function ComparisonSections({ players = [], metrics = [] }) {
                 <th className="p-2">Week</th>
                 <th className="p-2">Opp</th>
                 {p1.position === 'QB'
-                  ? ['Pass Yds','Pass TD','INT'].map((h) => <th key={h} className="p-2">{h}</th>)
+                  ? ['Pass Yds','Pass TD','INT'].map((h) => (
+                      <th key={h} className="p-2">{h}</th>
+                    ))
                   : p1.position === 'RB'
-                  ? ['Rush Yds','Rush TD','Rec Yds'].map((h) => <th key={h} className="p-2">{h}</th>)
-                  : ['Rec','Rec Yds','Rec TD'].map((h) => <th key={h} className="p-2">{h}</th>)
+                  ? ['Rush Yds','Rush TD','Rec Yds'].map((h) => (
+                      <th key={h} className="p-2">{h}</th>
+                    ))
+                  : ['Rec','Rec Yds','Rec TD'].map((h) => (
+                      <th key={h} className="p-2">{h}</th>
+                    ))
                 }
               </tr>
             </thead>
@@ -108,8 +127,6 @@ export default function ComparisonSections({ players = [], metrics = [] }) {
           </table>
         </div>
       </div>
-
-      {/* Next: Season Stats & Charts */}
     </div>
   )
 }
