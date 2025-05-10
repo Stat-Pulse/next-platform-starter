@@ -32,7 +32,7 @@ export default function EngageNFL() {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* MVP Poll */}
       <div className="bg-white p-6 rounded-lg shadow">
-        <h3 className="text-xl font-semibold text-gray-700 mb-4">Poll: Who’s the 2025 MVP?</h3>
+        <h3 className="text-xl font-semibold text-gray-700 mb-4">Poll: Who&apos;s the 2025 MVP?</h3>
         <form onSubmit={handlePollSubmit}>
           <label className="block mb-2"><input type="radio" name="mvp" value="Mahomes" /> Patrick Mahomes</label>
           <label className="block mb-2"><input type="radio" name="mvp" value="Burrow" /> Joe Burrow</label>
@@ -45,7 +45,7 @@ export default function EngageNFL() {
       {/* Depth Chart Example */}
       <div className="bg-white p-6 rounded-lg shadow">
         <h3 className="text-xl font-semibold text-gray-700 mb-4">Interactive Depth Chart</h3>
-        <p className="text-gray-600 mb-4">Explore the Bengals' depth chart (sample).</p>
+        <p className="text-gray-600 mb-4">Explore the Bengals&apos; depth chart (sample).</p>
         <div className="text-gray-700">
           <p>QB1: Joe Burrow</p>
           <p>QB2: Jake Browning</p>
