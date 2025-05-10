@@ -11,6 +11,7 @@ import BettingOddsHighlights from '../components/BettingOddsHighlights'
 import FantasyFootballInsights from '../components/FantasyFootballInsights'
 import PowerRankings from '../components/PowerRankings'
 import VideoContent from '../components/VideoContent'
+import EngageNFL from '../components/EngageNFL'
 
 export default function LeaguePage() {
   return (
@@ -60,7 +61,7 @@ export default function LeaguePage() {
             </SectionWrapper>
 
             <SectionWrapper title="Explore More">
-              <p className="text-gray-600">Call-to-action buttons linking to full pages.</p>
+             <EngageNFL />
             </SectionWrapper>
           </div>
         </div>
