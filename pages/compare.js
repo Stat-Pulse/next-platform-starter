@@ -8,9 +8,9 @@ import CustomizeMetricsModal from '../components/CustomizeMetricsModal'
 import ComparisonSections from '../components/ComparisonSections'
 
 export default function Compare() {
-  const [selectedPlayers, setSelectedPlayers] = useState([])
-  const [metrics, setMetrics] = useState(['standardFantasy'])
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [players, setPlayers] = useState([])
+  const [metrics, setMetrics] = useState(['fantasyPoints','efficiency','matchup'])
+  const [open, setOpen] = useState(false)
 
   return (
     <>
