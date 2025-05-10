@@ -1,3 +1,4 @@
+// pages/compare.js
 'use client'
 
 import { useState } from 'react'
@@ -23,9 +24,9 @@ export default function Compare() {
             Compare Players
           </h2>
 
-          {/* DEBUG #1: Show selectedPlayers array */}
+          {/* DEBUG #1: show the current selectedPlayers array */}
           <pre className="bg-red-100 text-red-800 p-2 mb-4">
-            DEBUG state.selectedPlayers = {JSON.stringify(selectedPlayers)}
+            DEBUG selectedPlayers = {JSON.stringify(selectedPlayers)}
           </pre>
 
           <CompareSearch
@@ -33,9 +34,9 @@ export default function Compare() {
             onUpdate={setSelectedPlayers}
           />
 
-          {/* DEBUG #2: Show when we’ll render ComparisonSections */}
+          {/* DEBUG #2: tell us when we have 2+ players */}
           <div className="text-blue-600 mb-4">
-            {selectedPlayers.length >= 2 && 'DEBUG: will render ComparisonSections now'}
+            {selectedPlayers.length >= 2 && 'DEBUG: ComparisonSections will render below now'}
           </div>
 
           <CompareFilters
