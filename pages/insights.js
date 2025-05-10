@@ -7,6 +7,8 @@ import PlayerSelect from '../components/PlayerSelect'
 import PlayerCard from '../components/PlayerCard'
 import GameLogTable from '../components/GameLogTable'
 import FantasyChart from '../components/FantasyChart'
+import BettingChart from '../components/BettingChart'
+import CoverageInsights from '../components/CoverageInsights'
 
 export default function Insights() {
   const [playerData, setPlayerData] = useState(null)
@@ -47,7 +49,17 @@ export default function Insights() {
             <>
               <PlayerCard player={playerData} />
               <GameLogTable games={playerData.recentGames} />
-              <FantasyChart data={playerData.fantasy.pointsHistory} />
+
+              {view === 'fantasy' && (
+                <>
+                  <FantasyChart data={playerData.fantasy.pointsHistory} />
+                  <CoverageInsights coverage={playerData.coverageStats} />
+                </>
+              )}
+
+              {view === 'betting' && (
+                <BettingChart trends={playerData.bettingTrends} />
+              )}
             </>
           )}
         </div>
