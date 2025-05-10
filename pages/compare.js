@@ -10,8 +10,8 @@ import ComparisonSections from '../components/ComparisonSections'
 
 export default function Compare() {
   const [selectedPlayers, setSelectedPlayers] = useState([])
-  const [metrics, setMetrics]           = useState(['fantasyPoints','efficiency','matchup'])
-  const [isModalOpen, setIsModalOpen]   = useState(false)
+  const [metrics, setMetrics]                 = useState(['fantasyPoints','efficiency','matchup'])
+  const [isModalOpen, setIsModalOpen]         = useState(false)
 
   return (
     <>
@@ -23,17 +23,25 @@ export default function Compare() {
             Compare Players
           </h2>
 
+          {/* DEBUG #1: Show selectedPlayers array */}
+          <pre className="bg-red-100 text-red-800 p-2 mb-4">
+            DEBUG state.selectedPlayers = {JSON.stringify(selectedPlayers)}
+          </pre>
+
           <CompareSearch
             selectedPlayers={selectedPlayers}
             onUpdate={setSelectedPlayers}
           />
 
+          {/* DEBUG #2: Show when we’ll render ComparisonSections */}
+          <div className="text-blue-600 mb-4">
+            {selectedPlayers.length >= 2 && 'DEBUG: will render ComparisonSections now'}
+          </div>
+
           <CompareFilters
             metrics={metrics}
             onOpenCustomize={() => setIsModalOpen(true)}
-            onSaveComparison={() => {
-              /* TODO: wire save logic here */
-            }}
+            onSaveComparison={() => {}}
           />
 
           <CustomizeMetricsModal
