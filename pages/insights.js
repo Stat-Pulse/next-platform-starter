@@ -48,17 +48,22 @@ export default function Insights() {
           {playerData && (
             <>
               <PlayerCard player={playerData} />
-              <GameLogTable games={playerData.recentGames} />
+              <GameLogTable
+                games={playerData.recentGames}
+                position={playerData.position}
+              />
 
               {view === 'fantasy' && (
                 <>
                   <FantasyChart data={playerData.fantasy.pointsHistory} />
-                  <CoverageInsights coverage={playerData.coverageStats} />
                 </>
               )}
 
               {view === 'betting' && (
-                <BettingChart trends={playerData.bettingTrends} />
+                <>
+                  <BettingChart trends={playerData.bettingTrends} />
+                  <CoverageInsights coverage={playerData.coverageStats} />
+                </>
               )}
             </>
           )}
