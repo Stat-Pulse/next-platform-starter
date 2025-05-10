@@ -12,6 +12,7 @@ import FantasyFootballInsights from '../components/FantasyFootballInsights'
 import PowerRankings from '../components/PowerRankings'
 import VideoContent from '../components/VideoContent'
 import EngageNFL from '../components/EngageNFL'
+import ExploreMore from '../components/ExploreMore'
 
 export default function LeaguePage() {
   return (
@@ -57,7 +58,7 @@ export default function LeaguePage() {
             </SectionWrapper>
 
             <SectionWrapper title="Engage with the NFL">
-              <p className="text-gray-600">Polls, simulations, depth chart, and comment form go here...</p>
+              <ExploreMore />
             </SectionWrapper>
 
             <SectionWrapper title="Explore More">
