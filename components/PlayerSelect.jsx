@@ -6,9 +6,12 @@ export default function PlayerSelect({ selectedPlayer, setSelectedPlayer, view, 
         value={selectedPlayer}
         onChange={(e) => setSelectedPlayer(e.target.value)}
       >
-        <option value="Joe Burrow">Joe Burrow</option>
-        <option value="Saquon Barkley">Saquon Barkley</option>
-        <option value="Ja&#39;Marr Chase">Ja&#39;Marr Chase</option>
+        <option value="Joe Burrow">Joe Burrow (QB, Bengals)</option>
+        <option value="Bijan Robinson">Bijan Robinson (RB, Falcons)</option>
+        <option value="Saquon Barkley">Saquon Barkley (RB, Eagles)</option>
+        <option value="Ja'Marr Chase">Ja'Marr Chase (WR, Bengals)</option>
+        <option value="CeeDee Lamb">CeeDee Lamb (WR, Cowboys)</option>
+        <option value="Jordan Love">Jordan Love (QB, Packers)</option>
       </select>
       <div className="flex gap-2">
         <button
