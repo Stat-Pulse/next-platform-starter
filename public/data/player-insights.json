@@ -12,6 +12,137 @@
     ],
     "fantasy": {
       "pointsHistory": [22.1, 27.3, 18.4]
-    }
+    },
+    "bettingTrends": [
+      { "label": "Over 208.5 Yds", "hitRate": 83 },
+      { "label": "Over 1.5 Pass TDs", "hitRate": 75 },
+      { "label": "Anytime TD", "hitRate": 20 }
+    ],
+    "coverageStats": [
+      { "type": "Cover 1", "frequency": 20, "successRate": 91 },
+      { "type": "Cover 2", "frequency": 32, "successRate": 86 },
+      { "type": "Cover 3", "frequency": 48, "successRate": 77 },
+      { "type": "Match", "frequency": 31, "successRate": 80 }
+    ]
+  },
+  {
+    "name": "Bijan Robinson",
+    "position": "RB",
+    "team": "Atlanta Falcons",
+    "jersey": 7,
+    "injuryStatus": "Healthy",
+    "recentGames": [
+      { "week": 1, "opponent": "CAR", "rushYards": 89, "rushTD": 1 },
+      { "week": 2, "opponent": "GB", "rushYards": 102, "rushTD": 0 },
+      { "week": 3, "opponent": "DET", "rushYards": 75, "rushTD": 1 }
+    ],
+    "fantasy": {
+      "pointsHistory": [19.8, 24.5, 17.3]
+    },
+    "bettingTrends": [
+      { "label": "Over 60.5 Rush Yds", "hitRate": 70 },
+      { "label": "Anytime TD", "hitRate": 55 },
+      { "label": "Over 2.5 Receptions", "hitRate": 60 }
+    ],
+    "coverageStats": [
+      { "type": "Zone", "frequency": 40, "successRate": 78 },
+      { "type": "Man", "frequency": 25, "successRate": 81 }
+    ]
+  },
+  {
+    "name": "Saquon Barkley",
+    "position": "RB",
+    "team": "Philadelphia Eagles",
+    "jersey": 26,
+    "injuryStatus": "Questionable",
+    "recentGames": [
+      { "week": 1, "opponent": "NYG", "rushYards": 92, "rushTD": 1 },
+      { "week": 2, "opponent": "DAL", "rushYards": 84, "rushTD": 0 },
+      { "week": 3, "opponent": "WAS", "rushYards": 63, "rushTD": 1 }
+    ],
+    "fantasy": {
+      "pointsHistory": [20.2, 18.9, 21.4]
+    },
+    "bettingTrends": [
+      { "label": "Over 65.5 Rush Yds", "hitRate": 80 },
+      { "label": "Anytime TD", "hitRate": 50 }
+    ],
+    "coverageStats": [
+      { "type": "Zone", "frequency": 50, "successRate": 76 },
+      { "type": "Blitz", "frequency": 15, "successRate": 88 }
+    ]
+  },
+  {
+    "name": "Ja'Marr Chase",
+    "position": "WR",
+    "team": "Cincinnati Bengals",
+    "jersey": 1,
+    "injuryStatus": "Healthy",
+    "recentGames": [
+      { "week": 1, "opponent": "CLE", "recYards": 110, "recTD": 1 },
+      { "week": 2, "opponent": "BAL", "recYards": 95, "recTD": 2 },
+      { "week": 3, "opponent": "LAR", "recYards": 88, "recTD": 0 }
+    ],
+    "fantasy": {
+      "pointsHistory": [23.5, 27.0, 19.8]
+    },
+    "bettingTrends": [
+      { "label": "Over 5.5 Receptions", "hitRate": 78 },
+      { "label": "Over 80.5 Rec Yds", "hitRate": 71 },
+      { "label": "Anytime TD", "hitRate": 50 }
+    ],
+    "coverageStats": [
+      { "type": "Press", "frequency": 38, "successRate": 83 },
+      { "type": "Zone", "frequency": 62, "successRate": 79 }
+    ]
+  },
+  {
+    "name": "CeeDee Lamb",
+    "position": "WR",
+    "team": "Dallas Cowboys",
+    "jersey": 88,
+    "injuryStatus": "Healthy",
+    "recentGames": [
+      { "week": 1, "opponent": "NYG", "recYards": 101, "recTD": 1 },
+      { "week": 2, "opponent": "WAS", "recYards": 112, "recTD": 2 },
+      { "week": 3, "opponent": "PHI", "recYards": 89, "recTD": 0 }
+    ],
+    "fantasy": {
+      "pointsHistory": [21.7, 26.4, 18.2]
+    },
+    "bettingTrends": [
+      { "label": "Over 6.5 Receptions", "hitRate": 75 },
+      { "label": "Over 90.5 Rec Yds", "hitRate": 69 },
+      { "label": "Anytime TD", "hitRate": 45 }
+    ],
+    "coverageStats": [
+      { "type": "Man", "frequency": 40, "successRate": 80 },
+      { "type": "Zone", "frequency": 60, "successRate": 76 }
+    ]
+  },
+  {
+    "name": "Jordan Love",
+    "position": "QB",
+    "team": "Green Bay Packers",
+    "jersey": 10,
+    "injuryStatus": "Healthy",
+    "recentGames": [
+      { "week": 1, "opponent": "CHI", "passYards": 245, "passTD": 3, "interceptions": 0 },
+      { "week": 2, "opponent": "ATL", "passYards": 265, "passTD": 2, "interceptions": 1 },
+      { "week": 3, "opponent": "NO", "passYards": 210, "passTD": 1, "interceptions": 1 }
+    ],
+    "fantasy": {
+      "pointsHistory": [21.5, 24.1, 17.9]
+    },
+    "bettingTrends": [
+      { "label": "Over 1.5 Pass TDs", "hitRate": 67 },
+      { "label": "Over 230.5 Pass Yds", "hitRate": 72 },
+      { "label": "Anytime INT", "hitRate": 30 }
+    ],
+    "coverageStats": [
+      { "type": "Cover 2", "frequency": 30, "successRate": 75 },
+      { "type": "Cover 3", "frequency": 45, "successRate": 68 },
+      { "type": "Blitz", "frequency": 25, "successRate": 82 }
+    ]
   }
 ]
