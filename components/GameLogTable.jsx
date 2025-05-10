@@ -39,9 +39,7 @@ export default function GameLogTable({ games = [], position }) {
                     <td className="p-2">{game.interceptions}</td>
                     <td className="p-2">{game.rushAttempts}</td>
                     <td className="p-2">{game.rushYards}</td>
-                    <td className="p-2">
-                      {game.rushAttempts ? (game.rushYards / game.rushAttempts).toFixed(1) : '0.0'}
-                    </td>
+                    <td className="p-2">{game.rushAttempts ? (game.rushYards / game.rushAttempts).toFixed(1) : '0.0'}</td>
                     <td className="p-2">{game.rushTD}</td>
                   </>
                 )}
@@ -50,11 +48,31 @@ export default function GameLogTable({ games = [], position }) {
                   <>
                     <td className="p-2">{game.rushAttempts}</td>
                     <td className="p-2">{game.rushYards}</td>
-                    <td className="p-2">
-                      {game.rushAttempts ? (game.rushYards / game.rushAttempts).toFixed(1) : '0.0'}
-                    </td>
+                    <td className="p-2">{game.rushAttempts ? (game.rushYards / game.rushAttempts).toFixed(1) : '0.0'}</td>
                     <td className="p-2">{game.rushTD}</td>
                     <td className="p-2">{game.targets}</td>
                     <td className="p-2">{game.receptions}</td>
                     <td className="p-2">{game.recYards}</td>
-                    <td className="p-2">{game.recTD
+                    <td className="p-2">{game.recTD}</td>
+                  </>
+                )}
+
+                {isWR && (
+                  <>
+                    <td className="p-2">{game.targets}</td>
+                    <td className="p-2">{game.receptions}</td>
+                    <td className="p-2">{game.recYards}</td>
+                    <td className="p-2">{game.recTD}</td>
+                    <td className="p-2">{game.rushYards}</td>
+                    <td className="p-2">{game.rushAttempts ? (game.rushYards / game.rushAttempts).toFixed(1) : '0.0'}</td>
+                    <td className="p-2">{game.rushTD}</td>
+                  </>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
