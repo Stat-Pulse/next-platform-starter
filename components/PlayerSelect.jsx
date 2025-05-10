@@ -9,7 +9,7 @@ export default function PlayerSelect({ selectedPlayer, setSelectedPlayer, view, 
         <option value="Joe Burrow">Joe Burrow (QB, Bengals)</option>
         <option value="Bijan Robinson">Bijan Robinson (RB, Falcons)</option>
         <option value="Saquon Barkley">Saquon Barkley (RB, Eagles)</option>
-        <option value="Ja'Marr Chase">Ja'Marr Chase (WR, Bengals)</option>
+        <option value="Ja'Marr Chase">Ja&#39;Marr Chase (WR, Bengals)</option>
         <option value="CeeDee Lamb">CeeDee Lamb (WR, Cowboys)</option>
         <option value="Jordan Love">Jordan Love (QB, Packers)</option>
       </select>
