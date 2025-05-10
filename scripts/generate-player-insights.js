@@ -1,6 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 
+// Dummy players
 const players = [
   { name: 'Joe Burrow', position: 'QB', team: 'Cincinnati Bengals', jersey: 9 },
   { name: 'Bijan Robinson', position: 'RB', team: 'Atlanta Falcons', jersey: 7 },
@@ -17,12 +18,12 @@ function getRecentGames(position) {
     return [1, 2, 3].map((week, i) => ({
       week,
       date: dates[i],
-      opponent: 'Opponent',
-      passYards: 250 + i * 10,
-      passTD: 1 + (i % 2),
+      opponent: ['CLE', 'BAL', 'LAR'][i],
+      passYards: 275 + i * 20,
+      passTD: 2 + i % 2,
       interceptions: i % 2,
-      rushAttempts: 3,
-      rushYards: 20 + i * 5,
+      rushAttempts: 3 + i,
+      rushYards: 20 + i * 4,
       rushTD: i === 1 ? 1 : 0
     }))
   }
@@ -31,9 +32,9 @@ function getRecentGames(position) {
     return [1, 2, 3].map((week, i) => ({
       week,
       date: dates[i],
-      opponent: 'Opponent',
+      opponent: ['NYG', 'WAS', 'TB'][i],
       rushAttempts: 18 + i,
-      rushYards: 80 + i * 10,
+      rushYards: 85 + i * 10,
       rushTD: i === 2 ? 1 : 0,
       targets: 4 + i,
       receptions: 3 + (i % 2),
@@ -46,13 +47,13 @@ function getRecentGames(position) {
     return [1, 2, 3].map((week, i) => ({
       week,
       date: dates[i],
-      opponent: 'Opponent',
+      opponent: ['PHI', 'NYJ', 'MIA'][i],
       targets: 8 + i,
-      receptions: 6 + (i % 2),
-      recYards: 90 + i * 15,
+      receptions: 6 + i % 2,
+      recYards: 95 + i * 10,
       recTD: i === 1 ? 1 : 0,
-      rushAttempts: i === 0 ? 1 : 0,
-      rushYards: i === 0 ? 6 : 0,
+      rushAttempts: i === 2 ? 1 : 0,
+      rushYards: i === 2 ? 8 : 0,
       rushTD: 0
     }))
   }
@@ -60,25 +61,30 @@ function getRecentGames(position) {
   return []
 }
 
+// Compose full player object
 const playerData = players.map((p) => ({
   ...p,
   injuryStatus: 'Healthy',
   recentGames: getRecentGames(p.position),
   fantasy: {
-    pointsHistory: [22 + Math.random() * 5, 18 + Math.random() * 5, 20 + Math.random() * 5]
+    pointsHistory: [22.5, 27.1, 19.8]
   },
   bettingTrends: [
-    { label: 'Anytime TD', hitRate: Math.floor(Math.random() * 50 + 30) },
-    { label: 'Over 1.5 Pass TDs', hitRate: Math.floor(Math.random() * 50 + 40) }
+    { label: 'Over 208.5 Yds', hitRate: 83 },
+    { label: 'Over 1.5 Pass TDs', hitRate: 75 },
+    { label: 'Anytime TD', hitRate: 20 }
   ],
   coverageStats: p.position === 'QB'
     ? [
-        { type: 'Cover 1', frequency: 25, successRate: 88 },
-        { type: 'Cover 3', frequency: 40, successRate: 82 }
+        { type: 'Cover 1', frequency: 20, successRate: 91 },
+        { type: 'Cover 2', frequency: 32, successRate: 86 },
+        { type: 'Cover 3', frequency: 48, successRate: 77 },
+        { type: 'Match', frequency: 31, successRate: 80 }
       ]
     : []
 }))
 
-const filePath = path.join(process.cwd(), 'public', 'data', 'player-insights.json')
-fs.writeFileSync(filePath, JSON.stringify(playerData, null, 2))
-console.log('✅ player-insights.json generated!')
+// Write to file
+const outputPath = path.join(process.cwd(), 'public', 'data', 'player-insights.json')
+fs.writeFileSync(outputPath, JSON.stringify(playerData, null, 2))
+console.log('✅ player-insights.json has been regenerated with full stat structures.')
