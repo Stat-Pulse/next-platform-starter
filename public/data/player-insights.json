@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Joe Burrow",
+    "position": "QB",
+    "team": "Cincinnati Bengals",
+    "jersey": 9,
+    "injuryStatus": "Healthy",
+    "recentGames": [
+      { "week": 1, "opponent": "CLE", "passYards": 275, "passTD": 2, "interceptions": 1 },
+      { "week": 2, "opponent": "BAL", "passYards": 305, "passTD": 3, "interceptions": 0 },
+      { "week": 3, "opponent": "LAR", "passYards": 265, "passTD": 1, "interceptions": 2 }
+    ],
+    "fantasy": {
+      "pointsHistory": [22.1, 27.3, 18.4]
+    }
+  }
+]
