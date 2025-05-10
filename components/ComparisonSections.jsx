@@ -1,36 +1,23 @@
 // components/ComparisonSections.jsx
-import { useEffect } from 'react'
-import Chart from 'chart.js/auto'
-
-export default function ComparisonSections({ players, metrics }) {
-  useEffect(() => {
-    players.forEach((player, idx) => {
-      const canvas = document.getElementById(`fantasyPointsChart-${idx}`)
-      if (!canvas) return
-      new Chart(canvas.getContext('2d'), {
-        type: 'line',
-        data: { /* …line chart config… */ },
-        options: { responsive: true }
-      })
-    })
-  }, [players, metrics])
-
+export default function ComparisonSections({ players = [], metrics = [] }) {
+  // only render once we have at least 2 players
   if (players.length < 2) {
     return (
-      <section className="py-12 bg-white">
-        <p className="text-gray-600 text-center">Select at least 2 players to compare.</p>
-      </section>
+      <div className="container mx-auto px-6 py-8">
+        <p className="text-gray-600 italic">Select at least two players to compare.</p>
+      </div>
     )
   }
 
   return (
-    <section className="py-12 bg-white">
-      <div className="container mx-auto px-6 space-y-12">
-        {/* Core Information grid */}
-        {/* Recent Game Log table */}
-        {/* Fantasy Points Trend charts (canvas id={`fantasyPointsChart-${idx}`}) */}
-        {/* Analyst Commentary */}
-      </div>
-    </section>
+    <div className="container mx-auto px-6 py-8 bg-white rounded shadow">
+      <h2 className="text-2xl font-bold mb-4">🚀 Comparison Results 🚀</h2>
+      <p className="mb-2">
+        <strong>Players:</strong> {players.join(' vs. ')}
+      </p>
+      <p>
+        <strong>Metrics enabled:</strong> {metrics.join(', ')}
+      </p>
+    </div>
   )
 }
