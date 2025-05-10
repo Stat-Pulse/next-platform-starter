@@ -5,7 +5,7 @@ export default function GameLogTable({ games = [], position }) {
   const isRB = position === 'RB'
   const isWR = position === 'WR'
 
-  const headers = ['Week', 'Opp']
+  const headers = ['Week', 'Date', 'Opp']
   if (isQB) {
     headers.push('Pass Yds', 'Pass TD', 'INT', 'Rush Att', 'Rush Yds', 'Y/A', 'Rush TD')
   } else if (isRB) {
@@ -30,6 +30,7 @@ export default function GameLogTable({ games = [], position }) {
             {games.map((game, i) => (
               <tr key={`game-${i}`} className="border-b last:border-0">
                 <td className="p-2">{game.week}</td>
+                <td className="p-2">{game.date}</td>
                 <td className="p-2">{game.opponent}</td>
 
                 {isQB && (
@@ -39,7 +40,9 @@ export default function GameLogTable({ games = [], position }) {
                     <td className="p-2">{game.interceptions}</td>
                     <td className="p-2">{game.rushAttempts}</td>
                     <td className="p-2">{game.rushYards}</td>
-                    <td className="p-2">{game.rushAttempts ? (game.rushYards / game.rushAttempts).toFixed(1) : '0.0'}</td>
+                    <td className="p-2">
+                      {(game.rushYards && game.rushAttempts ? (game.rushYards / game.rushAttempts).toFixed(1) : '0.0')}
+                    </td>
                     <td className="p-2">{game.rushTD}</td>
                   </>
                 )}
@@ -48,7 +51,9 @@ export default function GameLogTable({ games = [], position }) {
                   <>
                     <td className="p-2">{game.rushAttempts}</td>
                     <td className="p-2">{game.rushYards}</td>
-                    <td className="p-2">{game.rushAttempts ? (game.rushYards / game.rushAttempts).toFixed(1) : '0.0'}</td>
+                    <td className="p-2">
+                      {(game.rushYards && game.rushAttempts ? (game.rushYards / game.rushAttempts).toFixed(1) : '0.0')}
+                    </td>
                     <td className="p-2">{game.rushTD}</td>
                     <td className="p-2">{game.targets}</td>
                     <td className="p-2">{game.receptions}</td>
@@ -63,9 +68,11 @@ export default function GameLogTable({ games = [], position }) {
                     <td className="p-2">{game.receptions}</td>
                     <td className="p-2">{game.recYards}</td>
                     <td className="p-2">{game.recTD}</td>
-                    <td className="p-2">{game.rushYards}</td>
-                    <td className="p-2">{game.rushAttempts ? (game.rushYards / game.rushAttempts).toFixed(1) : '0.0'}</td>
-                    <td className="p-2">{game.rushTD}</td>
+                    <td className="p-2">{game.rushYards || 0}</td>
+                    <td className="p-2">
+                      {(game.rushYards && game.rushAttempts ? (game.rushYards / game.rushAttempts).toFixed(1) : '0.0')}
+                    </td>
+                    <td className="p-2">{game.rushTD || 0}</td>
                   </>
                 )}
               </tr>
