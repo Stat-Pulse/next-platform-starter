@@ -5,6 +5,7 @@ import Footer from '../components/Footer'
 import SidebarNavigation from '../components/SidebarNavigation'
 import SectionWrapper from '../components/SectionWrapper'
 import TrendingTopics from '../components/TrendingTopics'
+import SeasonSnapshot from '../components/SeasonSnapshot'
 
 export default function LeaguePage() {
   return (
@@ -25,10 +26,10 @@ export default function LeaguePage() {
               <TrendingTopics />
             </SectionWrapper>
 
-            <SectionWrapper title="Season Snapshot">
-              <p className="text-gray-600">Snapshot content (e.g., upcoming schedule, standings) goes here...</p>
-            </SectionWrapper>
-
+           <SectionWrapper title="Season Snapshot">
+             <SeasonSnapshot />
+           </SectionWrapper>
+    
             <SectionWrapper title="Key Statistics Leaders">
               <p className="text-gray-600">Top leaders in stats by category go here...</p>
             </SectionWrapper>
