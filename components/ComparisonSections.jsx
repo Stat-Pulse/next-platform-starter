@@ -4,7 +4,29 @@ import { useState, useEffect } from 'react'
 import Chart from 'chart.js/auto'
 
 export default function ComparisonSections({ players = [], metrics = [] }) {
-  // only render once we have at least 2 players
+  const [data, setData] = useState([])
+
+  useEffect(() => {
+    async function load() {
+      const results = await Promise.all(
+        players
+          .filter(name => typeof name === 'string' && name.trim() !== '')
+          .map(name =>
+            fetch(`/api/player?name=${encodeURIComponent(name)}`)
+              .then(res => {
+                if (!res.ok) throw new Error(`Failed to fetch: ${name}`)
+                return res.json()
+              })
+          )
+      )
+      setData(results)
+    }
+
+    if (players.length >= 2) {
+      load()
+    }
+  }, [players])
+
   if (players.length < 2) {
     return (
       <div className="container mx-auto px-6 py-8">
@@ -15,23 +37,6 @@ export default function ComparisonSections({ players = [], metrics = [] }) {
     )
   }
 
-  const [data, setData] = useState([])
-
-  // Fetch full player data when players[] changes
-  useEffect(() => {
-    async function load() {
-      const results = await Promise.all(
-        players.map((name) =>
-          fetch(`/api/player?name=${encodeURIComponent(name)}`)
-            .then((r) => r.json())
-        )
-      )
-      setData(results)
-    }
-    load()
-  }, [players])
-
-  // Show loading if we haven't gotten back all player details yet
   if (data.length < players.length) {
     return (
       <div className="container mx-auto px-6 py-8">
@@ -40,7 +45,6 @@ export default function ComparisonSections({ players = [], metrics = [] }) {
     )
   }
 
-  // We now have full data for two players
   const [p1, p2] = data
 
   return (
