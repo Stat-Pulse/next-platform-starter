@@ -1,31 +1,60 @@
-export default function GameLogTable({ games }) {
+'use client'
+
+export default function GameLogTable({ games = [], position }) {
+  const isQB = position === 'QB'
+  const isRB = position === 'RB'
+  const isWR = position === 'WR'
+
+  const headers = ['Week', 'Opp']
+  if (isQB) {
+    headers.push('Pass Yds', 'Pass TD', 'INT', 'Rush Att', 'Rush Yds', 'Y/A', 'Rush TD')
+  } else if (isRB) {
+    headers.push('Rush Att', 'Rush Yds', 'Y/A', 'Rush TD', 'Targets', 'Rec', 'Rec Yds', 'Rec TD')
+  } else if (isWR) {
+    headers.push('Targets', 'Rec', 'Rec Yds', 'Rec TD', 'Rush Yds', 'Y/A', 'Rush TD')
+  }
+
   return (
     <div className="bg-white p-6 rounded-lg shadow mb-8">
-      <h4 className="text-lg font-semibold mb-2">Recent Games</h4>
+      <h3 className="text-xl font-semibold text-gray-700 mb-4">Recent Game Log</h3>
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="p-2">Week</th>
-              <th className="p-2">Opp</th>
-              <th className="p-2">Pass Yds</th>
-              <th className="p-2">Pass TD</th>
-              <th className="p-2">INT</th>
+        <table className="w-full text-sm text-left">
+          <thead className="bg-gray-200">
+            <tr>
+              {headers.map(header => (
+                <th key={header} className="p-2">{header}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {games.map((g) => (
-              <tr key={g.week}>
-                <td className="p-2">{g.week}</td>
-                <td className="p-2">{g.opponent}</td>
-                <td className="p-2">{g.passYards}</td>
-                <td className="p-2">{g.passTD}</td>
-                <td className="p-2">{g.interceptions}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  )
-}
+            {games.map((game, i) => (
+              <tr key={`game-${i}`} className="border-b last:border-0">
+                <td className="p-2">{game.week}</td>
+                <td className="p-2">{game.opponent}</td>
+
+                {isQB && (
+                  <>
+                    <td className="p-2">{game.passYards}</td>
+                    <td className="p-2">{game.passTD}</td>
+                    <td className="p-2">{game.interceptions}</td>
+                    <td className="p-2">{game.rushAttempts}</td>
+                    <td className="p-2">{game.rushYards}</td>
+                    <td className="p-2">
+                      {game.rushAttempts ? (game.rushYards / game.rushAttempts).toFixed(1) : '0.0'}
+                    </td>
+                    <td className="p-2">{game.rushTD}</td>
+                  </>
+                )}
+
+                {isRB && (
+                  <>
+                    <td className="p-2">{game.rushAttempts}</td>
+                    <td className="p-2">{game.rushYards}</td>
+                    <td className="p-2">
+                      {game.rushAttempts ? (game.rushYards / game.rushAttempts).toFixed(1) : '0.0'}
+                    </td>
+                    <td className="p-2">{game.rushTD}</td>
+                    <td className="p-2">{game.targets}</td>
+                    <td className="p-2">{game.receptions}</td>
+                    <td className="p-2">{game.recYards}</td>
+                    <td className="p-2">{game.recTD
