@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from 'react'
 import Link from 'next/link'
 
@@ -9,7 +11,7 @@ export default function Header() {
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
         {/* Logo */}
-        <Link href="/" className="flex-shrink-0">
+        <Link href="/" className="flex-shrink-0 cursor-pointer">
           <img
             src="/assets/logo.png"
             alt="StatPulse Logo"
@@ -18,7 +20,7 @@ export default function Header() {
           />
         </Link>
 
-        {/* Site title (hidden on small) */}
+        {/* Site title (hidden on small screens) */}
         <span className="text-xl font-bold text-red-600 hidden md:block">StatPulse</span>
 
         {/* Desktop Nav */}
@@ -41,7 +43,7 @@ export default function Header() {
         {/* Mobile Toggle */}
         <div className="flex items-center md:hidden">
           <button onClick={() => setMenuOpen(!menuOpen)} className="text-gray-800 focus:outline-none p-2">
-            …icon…
+            {/* Insert your SVG icon here */}
           </button>
         </div>
       </nav>
@@ -52,7 +54,7 @@ export default function Header() {
           <div className="container mx-auto px-6 py-4">
             {/* Logo & Title */}
             <div className="flex items-center justify-between mb-4">
-              <Link href="/">
+              <Link href="/" className="flex-shrink-0 cursor-pointer">
                 <img
                   src="/assets/logo.png"
                   alt="StatPulse Logo"
@@ -62,6 +64,7 @@ export default function Header() {
               </Link>
               <span className="text-xl font-bold text-red-600">StatPulse</span>
             </div>
+
             {/* Navigation Links */}
             <div className="flex flex-col space-y-4 text-sm font-semibold">
               {navItems.map((label) => {
@@ -77,6 +80,7 @@ export default function Header() {
                   </Link>
                 )
               })}
+
               {/* Login Link */}
               <Link
                 href="/login"
