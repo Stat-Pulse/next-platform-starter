@@ -21,7 +21,7 @@ export default function VideoContent() {
       <div className="bg-white p-6 rounded-lg shadow">
         <h3 className="text-xl font-semibold text-gray-700 mb-2">NFL Podcast</h3>
         <p className="text-gray-600 mb-4">
-          Listen to ESPN's First Draft.{' '}
+          Listen to ESPN&apos;s First Draft.{' '}
           <a
             href="https://www.espn.com/espnradio/podcast"
             className="text-red-600 hover:underline"
