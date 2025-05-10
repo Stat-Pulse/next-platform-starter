@@ -10,6 +10,7 @@ import KeyStatisticsLeaders from '../components/KeyStatisticsLeaders'
 import BettingOddsHighlights from '../components/BettingOddsHighlights'
 import FantasyFootballInsights from '../components/FantasyFootballInsights'
 import PowerRankings from '../components/PowerRankings'
+import VideoContent from '../components/VideoContent'
 
 export default function LeaguePage() {
   return (
@@ -51,7 +52,7 @@ export default function LeaguePage() {
             </SectionWrapper>
 
             <SectionWrapper title="Video Content & Podcasts">
-              <p className="text-gray-600">Embedded video/podcast previews go here...</p>
+              <VideoContent />
             </SectionWrapper>
 
             <SectionWrapper title="Engage with the NFL">
