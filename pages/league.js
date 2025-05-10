@@ -9,6 +9,7 @@ import SeasonSnapshot from '../components/SeasonSnapshot'
 import KeyStatisticsLeaders from '../components/KeyStatisticsLeaders'
 import BettingOddsHighlights from '../components/BettingOddsHighlights'
 import FantasyFootballInsights from '../components/FantasyFootballInsights'
+import PowerRankings from '../components/PowerRankings'
 
 export default function LeaguePage() {
   return (
@@ -46,7 +47,7 @@ export default function LeaguePage() {
             </SectionWrapper>
 
             <SectionWrapper title="Power Rankings">
-              <p className="text-gray-600">Current top 5 teams...</p>
+              <PowerRankings />
             </SectionWrapper>
 
             <SectionWrapper title="Video Content & Podcasts">
