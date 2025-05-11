@@ -10,7 +10,7 @@ export default function EngageNFL() {
 
   const handlePollSubmit = (e) => {
     e.preventDefault()
-    setPollResult('Simulation: Mahomes 40%, Burrow 35%, Allen 25%')
+    setPollResult("Results: Mahomes 40%, Burrow 35%, Allen 25%")
   }
 
   const handleCommentSubmit = (e) => {
@@ -25,7 +25,7 @@ export default function EngageNFL() {
   }
 
   const handleSimulateGame = () => {
-    setSimulation('Simulation: Bengals 27, Patriots 24')
+    setSimulation("Simulation: Bengals 27, Patriots 24")
   }
 
   return (
@@ -37,7 +37,7 @@ export default function EngageNFL() {
           <label className="block mb-2"><input type="radio" name="mvp" value="Mahomes" /> Patrick Mahomes</label>
           <label className="block mb-2"><input type="radio" name="mvp" value="Burrow" /> Joe Burrow</label>
           <label className="block mb-2"><input type="radio" name="mvp" value="Allen" /> Josh Allen</label>
-          <button type="submit" className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700">Vote</button>
+          <button type="submit" className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700 mt-2">Vote</button>
         </form>
         {pollResult && <p className="text-gray-600 mt-4">{pollResult}</p>}
       </div>
@@ -56,7 +56,12 @@ export default function EngageNFL() {
       <div className="bg-white p-6 rounded-lg shadow">
         <h3 className="text-xl font-semibold text-gray-700 mb-4">Game Simulator</h3>
         <p className="text-gray-600 mb-4">Simulate Week 1 outcomes.</p>
-        <button onClick={handleSimulateGame} className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700">Run Simulation</button>
+        <button
+          onClick={handleSimulateGame}
+          className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700"
+        >
+          Run Simulation
+        </button>
         {simulation && <p className="text-gray-600 mt-4">{simulation}</p>}
       </div>
 
@@ -70,7 +75,7 @@ export default function EngageNFL() {
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
             required
-          ></textarea>
+          />
           <button type="submit" className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700">Post Comment</button>
         </form>
         <div className="mt-4 space-y-4">
