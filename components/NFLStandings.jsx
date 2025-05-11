@@ -7,7 +7,6 @@ export default function NFLStandings() {
   const [selectedDivision, setSelectedDivision] = useState('East')
   const [selectedYear, setSelectedYear] = useState('2025')
 
-  // Sample static data — replace with real API or JSON in future
   const standingsData = [
     {
       team: 'Buffalo Bills',
@@ -42,12 +41,29 @@ export default function NFLStandings() {
       last10: '6-4',
       streak: 'L1',
       divisionKey: 'AFC-East'
+    },
+    {
+      team: 'New England Patriots',
+      logo: 'https://upload.wikimedia.org/wikipedia/en/b/b9/New_England_Patriots_logo.svg',
+      record: '7-6-1',
+      winPct: 0.55,
+      gb: 2.5,
+      home: '3-3-0',
+      away: '4-3-1',
+      division: '1-3-0',
+      conference: '4-4-1',
+      pf: 290,
+      pa: 305,
+      diff: -15,
+      last10: '5-5',
+      streak: 'W1',
+      divisionKey: 'AFC-East'
     }
   ]
 
-  const filteredTeams = standingsData.filter(
-    t => t.divisionKey === `${selectedConference}-${selectedDivision}`
-  )
+  const filteredTeams = standingsData
+    .filter(t => t.divisionKey === `${selectedConference}-${selectedDivision}`)
+    .sort((a, b) => b.winPct - a.winPct)
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">
@@ -88,21 +104,26 @@ export default function NFLStandings() {
               <th className="p-2">Team</th>
               <th className="p-2">Record</th>
               <th className="p-2">Win %</th>
-              <th className="p-2">GB</th>
+              <th className="p-2" title="Games Behind the leader">GB ℹ️</th>
               <th className="p-2">Home</th>
               <th className="p-2">Away</th>
               <th className="p-2">Div</th>
               <th className="p-2">Conf</th>
-              <th className="p-2">PF</th>
-              <th className="p-2">PA</th>
-              <th className="p-2">Diff</th>
+              <th className="p-2" title="Points Scored">PF ℹ️</th>
+              <th className="p-2" title="Points Allowed">PA ℹ️</th>
+              <th className="p-2" title="Point Differential = PF - PA">Diff ℹ️</th>
               <th className="p-2">Last 10</th>
               <th className="p-2">Streak</th>
             </tr>
           </thead>
           <tbody>
             {filteredTeams.map((team, index) => (
-              <tr key={team.team} className="border-b">
+              <tr
+                key={team.team}
+                className={`border-b ${
+                  index < 2 ? 'bg-green-50' : ''
+                }`}
+              >
                 <td className="p-2">{index + 1}</td>
                 <td className="p-2 flex items-center gap-2">
                   <img src={team.logo} alt={team.team} className="w-6 h-6" />
@@ -126,7 +147,10 @@ export default function NFLStandings() {
         </table>
       </div>
 
-      <p className="text-sm text-gray-500 mt-4">Last updated: May 10, 2025</p>
+      <div className="mt-4 text-sm text-gray-600">
+        <p><span className="inline-block w-3 h-3 bg-green-400 mr-2 rounded-full"></span> = In Playoff Position</p>
+        <p className="mt-2">Last updated: May 10, 2025</p>
+      </div>
     </div>
   )
 }
