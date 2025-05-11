@@ -122,7 +122,7 @@ export default function TeamPage() {
                 <ul className="text-sm text-gray-600 space-y-1">
                   <li>Passing: <a href="/players/joe-burrow" className="text-red-600 hover:underline">Joe Burrow</a> – 3,900 yds</li>
                   <li>Rushing: <a href="/players/bijan-robinson" className="text-red-600 hover:underline">Bijan Robinson</a> – 1,140 yds</li>
-                  <li>Receiving: <a href="/players/ja-marr-chase" className="text-red-600 hover:underline">Ja'Marr Chase</a> – 1,208 yds</li>
+                  <li>Receiving: <a href="/players/ja-marr-chase" className="text-red-600 hover:underline">Ja&#39;Marr Chase</a> – 1,208 yds</li>
                   <li>Sacks: <a href="/players/trey-hendrickson" className="text-red-600 hover:underline">Trey Hendrickson</a> – 14</li>
                 </ul>
               </div>
