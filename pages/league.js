@@ -49,17 +49,14 @@ export default function LeaguePage() {
               <FantasyFootballInsights />
             </SectionWrapper>
   
-            import PowerRankings from '../components/PowerRankings'
             <SectionWrapper title="Power Rankings">
               <PowerRankings />
             </SectionWrapper>
 
-           import VideoContent from '../components/VideoContent'
             <SectionWrapper title="Video Content & Podcasts">
               <VideoContent />
             </SectionWrapper>
 
-            import EngageNFL from '../components/EngageNFL'
             <SectionWrapper title="Engage with the NFL">
               <ExploreMore />
             </SectionWrapper>
