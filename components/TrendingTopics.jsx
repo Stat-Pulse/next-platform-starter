@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 
 export default function TrendingTopics() {
   const [newsItems, setNewsItems] = useState([])
@@ -10,9 +11,9 @@ export default function TrendingTopics() {
     const dummyNews = [
       {
         title: 'Derek Carr Announces Retirement',
-        content: 'Saints HC Kellen Moore confirm QBs Surprise Retirement.',
+        content: 'Saints HC Kellen Moore confirms QB\'s surprise retirement.',
         date: 'May 10, 2025',
-        category: 'Team News & Transactions',
+        category: 'Transactions',
         team: 'Saints',
         player: 'Derek Carr',
         tags: ['QB', 'retire']
@@ -37,7 +38,7 @@ export default function TrendingTopics() {
       },
       {
         title: 'New Kickoff Rule Approved by NFL',
-        content: 'Roger Goodell "kickoff rule changes are for player safety."',
+        content: 'Roger Goodell: "Kickoff rule changes are for player safety."',
         date: 'May 6, 2025',
         category: 'Rules',
         team: '',
@@ -61,26 +62,4 @@ export default function TrendingTopics() {
   })
 
   return (
-    <div className="space-y-4">
-      <input
-        type="text"
-        value={searchQuery}
-        onChange={e => setSearchQuery(e.target.value)}
-        placeholder="Search by player, team, position, rule..."
-        className="w-full p-2 border border-gray-300 rounded mb-4"
-      />
-
-      {filteredNews.length > 0 ? (
-        filteredNews.map((item, index) => (
-          <div key={index} className="bg-gray-100 p-4 rounded shadow">
-            <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
-            <p className="text-sm text-gray-600">{item.content}</p>
-            <p className="text-xs text-gray-500">{item.date} • {item.category}</p>
-          </div>
-        ))
-      ) : (
-        <p className="text-sm text-gray-500">No matching topics found.</p>
-      )}
-    </div>
-  )
-}
+    
