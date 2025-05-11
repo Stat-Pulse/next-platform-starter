@@ -1,59 +1,38 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-
 export default function KeyStatisticsLeaders() {
-  const [leaders, setLeaders] = useState({
-    passing: [],
-    rushing: [],
-    receiving: [],
-    defense: [],
-  })
-
-  useEffect(() => {
-    // Placeholder for future API integration
-    const dummyData = {
-      passing: [
-        { name: 'Joe Burrow', team: 'Bengals', value: '4,918 yds' },
-        { name: 'Patrick Mahomes', team: 'Chiefs', value: '4,800 yds' },
-        { name: 'Josh Allen', team: 'Bills', value: '4,600 yds' },
-      ],
-      rushing: [
-        { name: 'Saquon Barkley', team: 'Giants', value: '2,000 yds' },
-        { name: 'Bijan Robinson', team: 'Falcons', value: '1,456 yds' },
-        { name: 'Derrick Henry', team: 'Titans', value: '1,421 yds' },
-      ],
-      receiving: [
-        { name: "Ja'Marr Chase", team: 'Bengals', value: '1,708 yds' },
-        { name: 'Justin Jefferson', team: 'Vikings', value: '1,533 yds' },
-        { name: 'CeeDee Lamb', team: 'Cowboys', value: '1,498 yds' },
-      ],
-      defense: [
-        { name: 'Trey Hendrickson', team: 'Bengals', value: '17.5 sacks' },
-        { name: 'Myles Garrett', team: 'Browns', value: '14 sacks' },
-        { name: 'Micah Parsons', team: 'Cowboys', value: '12 sacks' },
-      ],
-    }
-
-    setLeaders(dummyData)
-  }, [])
+  const categories = [
+    { title: 'Passing Yards', id: 'passingLeaders' },
+    { title: 'Rushing Yards', id: 'rushingLeaders' },
+    { title: 'Receiving Yards', id: 'receivingLeaders' },
+    { title: 'Sacks', id: 'defensiveLeaders' }
+  ]
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {Object.entries(leaders).map(([category, players]) => (
-        <div key={category} className="bg-gray-100 p-6 rounded-lg shadow">
-          <h3 className="text-xl font-semibold text-gray-700 mb-4 capitalize">
-            {category} Leaders
-          </h3>
-          <ul className="space-y-2 text-gray-700">
-            {players.map((player, index) => (
-              <li key={index}>
-                {player.name} ({player.team}) – {player.value}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
+    <div>
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">
+        <a href="/stat-tracker" className="hover:underline text-red-600">
+          Key Statistics Leaders
+        </a>
+      </h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {categories.map((cat) => (
+          <div key={cat.id} className="bg-gray-100 p-6 rounded-lg shadow">
+            <h3 className="text-xl font-semibold text-gray-700 mb-4">{cat.title}</h3>
+            <ul id={cat.id} className="space-y-2 text-gray-700">
+              <li>Loading...</li>
+            </ul>
+          </div>
+        ))}
+      </div>
+      <div className="mt-8 text-center">
+        <a
+          href="/stat-tracker"
+          className="bg-red-600 text-white px-6 py-3 rounded-md text-sm hover:bg-red-700"
+        >
+          View Full Stats
+        </a>
+      </div>
     </div>
   )
 }
