@@ -37,15 +37,15 @@ export default function LeaguePage() {
              <SeasonSnapshot />
            </SectionWrapper>
 
-           <SectionWrapper title="Key Statistics Leaders">
+           <SectionWrapper title={<a href="/stat-tracker" className="text-red-600 hover:underline">Key Statistics Leaders</a>}>
              <KeyStatisticsLeaders />
            </SectionWrapper>
 
-            <SectionWrapper title="Betting Odds Highlights">
+            <SectionWrapper title={<a href="/betting-book" className="text-red-600 hover:underline">Betting Odds Highlights</a>}>
               <BettingOddsHighlights />
             </SectionWrapper>
 
-            <SectionWrapper title="Fantasy Football Insights">
+            <SectionWrapper title={<a href="/fantasy" className="text-red-600 hover:underline">Fantasy Football Insights</a>}>
               <FantasyFootballInsights />
             </SectionWrapper>
   
