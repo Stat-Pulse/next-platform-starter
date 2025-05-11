@@ -1,37 +1,39 @@
 'use client'
 
 export default function KeyStatisticsLeaders() {
-  const categories = [
-    { title: 'Passing Yards', id: 'passingLeaders' },
-    { title: 'Rushing Yards', id: 'rushingLeaders' },
-    { title: 'Receiving Yards', id: 'receivingLeaders' },
-    { title: 'Sacks', id: 'defensiveLeaders' }
-  ]
-
   return (
-    <div>
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">
-        <a href="/stat-tracker" className="hover:underline text-red-600">
-          Key Statistics Leaders
-        </a>
-      </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {categories.map((cat) => (
-          <div key={cat.id} className="bg-gray-100 p-6 rounded-lg shadow">
-            <h3 className="text-xl font-semibold text-gray-700 mb-4">{cat.title}</h3>
-            <ul id={cat.id} className="space-y-2 text-gray-700">
-              <li>Loading...</li>
-            </ul>
-          </div>
-        ))}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="bg-gray-100 p-6 rounded-lg shadow">
+        <h3 className="text-xl font-semibold text-gray-700 mb-4">Passing Yards</h3>
+        <ul className="space-y-2 text-gray-700">
+          <li><a href="#" className="text-red-600 hover:underline">Joe Burrow</a> – 4,918 yds</li>
+          <li><a href="#" className="text-red-600 hover:underline">Patrick Mahomes</a> – 4,800 yds</li>
+          <li><a href="#" className="text-red-600 hover:underline">Josh Allen</a> – 4,600 yds</li>
+        </ul>
       </div>
-      <div className="mt-8 text-center">
-        <a
-          href="/stat-tracker"
-          className="bg-red-600 text-white px-6 py-3 rounded-md text-sm hover:bg-red-700"
-        >
-          View Full Stats
-        </a>
+      <div className="bg-gray-100 p-6 rounded-lg shadow">
+        <h3 className="text-xl font-semibold text-gray-700 mb-4">Rushing Yards</h3>
+        <ul className="space-y-2 text-gray-700">
+          <li><a href="#" className="text-red-600 hover:underline">Saquon Barkley</a> – 2,000 yds</li>
+          <li><a href="#" className="text-red-600 hover:underline">Bijan Robinson</a> – 1,456 yds</li>
+          <li><a href="#" className="text-red-600 hover:underline">Derrick Henry</a> – 1,921 yds</li>
+        </ul>
+      </div>
+      <div className="bg-gray-100 p-6 rounded-lg shadow">
+        <h3 className="text-xl font-semibold text-gray-700 mb-4">Receiving Yards</h3>
+        <ul className="space-y-2 text-gray-700">
+          <li><a href="#" className="text-red-600 hover:underline">Ja'Marr Chase</a> – 1,708 yds</li>
+          <li><a href="#" className="text-red-600 hover:underline">Justin Jefferson</a> – 1,533 yds</li>
+          <li><a href="#" className="text-red-600 hover:underline">Brian Thomas Jr.</a> – 1,282 yds</li>
+        </ul>
+      </div>
+      <div className="bg-gray-100 p-6 rounded-lg shadow">
+        <h3 className="text-xl font-semibold text-gray-700 mb-4">Sacks</h3>
+        <ul className="space-y-2 text-gray-700">
+          <li><a href="#" className="text-red-600 hover:underline">Trey Hendrickson</a> – 17.5 sacks</li>
+          <li><a href="#" className="text-red-600 hover:underline">Myles Garrett</a> – 14 sacks</li>
+          <li><a href="#" className="text-red-600 hover:underline">Micah Parsons</a> – 12 sacks</li>
+        </ul>
       </div>
     </div>
   )
