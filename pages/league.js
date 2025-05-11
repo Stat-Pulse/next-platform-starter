@@ -49,11 +49,11 @@ export default function LeaguePage() {
               <FantasyFootballInsights />
             </SectionWrapper>
   
-            <SectionWrapper title="Power Rankings">
+            <SectionWrapper title={<a href="/media-vault" className="hover:underline text-red-600">Power Rankings</a>}>
               <PowerRankings />
             </SectionWrapper>
 
-            <SectionWrapper title="Video Content & Podcasts">
+            <SectionWrapper title={<a href="/media-vault" className="hover:underline text-red-600">Video Content & Podcasts</a>}>
               <VideoContent />
             </SectionWrapper>
 
