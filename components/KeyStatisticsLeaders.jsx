@@ -22,7 +22,7 @@ export default function KeyStatisticsLeaders() {
       <div className="bg-gray-100 p-6 rounded-lg shadow">
         <h3 className="text-xl font-semibold text-gray-700 mb-4">Receiving Yards</h3>
         <ul className="space-y-2 text-gray-700">
-          <li><a href="#" className="text-red-600 hover:underline">Ja'Marr Chase</a> – 1,708 yds</li>
+          <li><a href="#" className="text-red-600 hover:underline">Ja&#39;Marr Chase</a> – 1,708 yds</li>
           <li><a href="#" className="text-red-600 hover:underline">Justin Jefferson</a> – 1,533 yds</li>
           <li><a href="#" className="text-red-600 hover:underline">Brian Thomas Jr.</a> – 1,282 yds</li>
         </ul>
