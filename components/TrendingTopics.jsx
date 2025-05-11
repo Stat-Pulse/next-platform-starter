@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
-export default function TrendingTopics() {
   const [newsItems, setNewsItems] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
 
