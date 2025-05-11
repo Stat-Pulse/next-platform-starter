@@ -9,9 +9,8 @@ export default function BettingOddsHighlights() {
         <Link href="/betting-book" className="text-red-600 hover:underline">
           Betting Odds Highlights
         </Link>
-      </h2>
+    
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Week 1 Key Games */}
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-xl font-semibold text-red-600 mb-4">
