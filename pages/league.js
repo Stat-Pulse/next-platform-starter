@@ -58,12 +58,13 @@ export default function LeaguePage() {
             </SectionWrapper>
 
             <SectionWrapper title="Engage with the NFL">
-              <ExploreMore />
+              <EngageNFL />
             </SectionWrapper>
 
             <SectionWrapper title="Explore More">
-             <EngageNFL />
+              <ExploreMore />
             </SectionWrapper>
+
           </div>
         </div>
       </main>
