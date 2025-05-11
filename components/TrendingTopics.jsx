@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 
+export default function TrendingTopics() {
   const [newsItems, setNewsItems] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -10,7 +10,7 @@ import Link from 'next/link'
     const dummyNews = [
       {
         title: 'Derek Carr Announces Retirement',
-        content: 'Saints HC Kellen Moore confirms QB\'s surprise retirement.',
+        content: 'Saints HC Kellen Moore confirms QBs surprise retirement.',
         date: 'May 10, 2025',
         category: 'Transactions',
         team: 'Saints',
@@ -54,39 +54,42 @@ import Link from 'next/link'
     return (
       item.title.toLowerCase().includes(query) ||
       item.content.toLowerCase().includes(query) ||
-      item.team?.toLowerCase().includes(query) ||
-      item.player?.toLowerCase().includes(query) ||
-      item.tags?.some(tag => tag.toLowerCase().includes(query))
+      item.team.toLowerCase().includes(query) ||
+      item.player.toLowerCase().includes(query) ||
+      item.tags.some(tag => tag.toLowerCase().includes(query))
     )
   })
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-xl font-bold text-gray-800">
-          <Link href="/league-news" className="hover:underline text-red-600">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold text-gray-800">
+          <a href="/league-news" className="hover:underline text-red-600">
             Trending Topics
-          </Link>
-        </h3>
+          </a>
+        </h2>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          placeholder="Search by player, team, rule..."
+          className="p-2 border border-gray-300 rounded-md"
+        />
       </div>
-
-      <input
-        type="text"
-        value={searchQuery}
-        onChange={e => setSearchQuery(e.target.value)}
-        placeholder="Search by player, team, position, rule..."
-        className="w-full p-2 border border-gray-300 rounded mb-4"
-      />
 
       {filteredNews.length > 0 ? (
         filteredNews.map((item, index) => (
-          <Link href="/league-news" key={index} className="block">
-            <div className="bg-gray-100 p-4 rounded shadow hover:bg-gray-200 transition">
-              <h4 className="text-lg font-semibold text-gray-800">{item.title}</h4>
-              <p className="text-sm text-gray-600">{item.content}</p>
-              <p className="text-xs text-gray-500 mt-1">{item.date} • {item.category}</p>
-            </div>
-          </Link>
+          <a
+            key={index}
+            href="/league-news"
+            className="block bg-gray-100 p-4 rounded shadow hover:bg-gray-200"
+          >
+            <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
+            <p className="text-sm text-gray-600">{item.content}</p>
+            <p className="text-xs text-gray-500">
+              {item.date} • {item.category}
+            </p>
+          </a>
         ))
       ) : (
         <p className="text-sm text-gray-500">No matching topics found.</p>
