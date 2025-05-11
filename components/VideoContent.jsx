@@ -11,7 +11,7 @@ export default function VideoContent() {
             src="https://www.youtube.com/embed/sample-video"
             frameBorder="0"
             allowFullScreen
-            className="w-full h-full"
+            className="w-full h-64"
           ></iframe>
         </div>
         <p className="text-gray-600">Week 1 highlights.</p>
