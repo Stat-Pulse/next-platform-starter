@@ -18,7 +18,7 @@ export default function SidebarNavigation({ current = 'league' }) {
   ]
 
   return (
-    <aside className="bg-white rounded-lg shadow p-6 space-y-2">
+    <aside className="bg-white rounded-lg shadow p-6 sticky top-24 self-start space-y-2">
       {links.map(({ href, label }) => {
         const isActive = href === current
         return (
