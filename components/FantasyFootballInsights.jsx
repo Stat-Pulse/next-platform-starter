@@ -9,9 +9,8 @@ export default function FantasyFootballInsights() {
         <Link href="/fantasy" className="text-red-600 hover:underline">
           Fantasy Football Insights
         </Link>
-      </h2>
+    
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-xl font-semibold text-gray-700 mb-2">Waiver Wire Pickups</h3>
           <p className="text-gray-600 mb-4">
