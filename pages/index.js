@@ -3,6 +3,7 @@
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import SectionWrapper from '../components/SectionWrapper'
+import Link from 'next/link'
 
 export default function HomePage() {
   return (
@@ -25,7 +26,7 @@ export default function HomePage() {
                 <p className="text-sm text-gray-600 mb-2">
                   Dive into individual team profiles, rosters, schedules, and more.
                 </p>
-                <a href="/teams" className="text-red-600 hover:underline text-sm">View All Teams</a>
+                <Link href="/teams" className="text-red-600 hover:underline text-sm">View All Teams</Link>
               </div>
 
               <div className="bg-white p-4 rounded shadow">
@@ -33,7 +34,7 @@ export default function HomePage() {
                 <p className="text-sm text-gray-600 mb-2">
                   See how your favorite team stacks up across the league.
                 </p>
-                <a href="/league-standings" className="text-red-600 hover:underline text-sm">Go to Standings</a>
+                <Link href="/league-standings" className="text-red-600 hover:underline text-sm">Go to Standings</Link>
               </div>
             </div>
           </SectionWrapper>
@@ -41,9 +42,21 @@ export default function HomePage() {
           <SectionWrapper title="Latest League News">
             <div className="bg-white p-4 rounded shadow">
               <ul className="text-sm text-gray-600 space-y-2">
-                <li><a href="/league-news" className="text-red-600 hover:underline">Burrow returns to practice, cleared for Week 6</a></li>
-                <li><a href="/league-news" className="text-red-600 hover:underline">Cowboys defense dominates in MNF victory</a></li>
-                <li><a href="/league-news" className="text-red-600 hover:underline">NFL announces international games lineup</a></li>
+                <li>
+                  <Link href="/league-news" className="text-red-600 hover:underline">
+                    Burrow returns to practice, cleared for Week 6
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/league-news" className="text-red-600 hover:underline">
+                    Cowboys defense dominates in MNF victory
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/league-news" className="text-red-600 hover:underline">
+                    NFL announces international games lineup
+                  </Link>
+                </li>
               </ul>
             </div>
           </SectionWrapper>
@@ -53,25 +66,9 @@ export default function HomePage() {
               <div className="bg-white p-4 rounded shadow">
                 <h4 className="font-semibold text-gray-700 mb-2">Fantasy Football Insights</h4>
                 <p className="text-sm text-gray-600 mb-2">Tips, trade value, sleepers and weekly projections.</p>
-                <a href="/fantasy" className="text-red-600 hover:underline text-sm">Access Fantasy Tools</a>
+                <Link href="/fantasy" className="text-red-600 hover:underline text-sm">Access Fantasy Tools</Link>
               </div>
               <div className="bg-white p-4 rounded shadow">
                 <h4 className="font-semibold text-gray-700 mb-2">Betting Book</h4>
                 <p className="text-sm text-gray-600 mb-2">Odds, line movements, and game predictions.</p>
-                <a href="/betting-book" className="text-red-600 hover:underline text-sm">View Odds</a>
-              </div>
-              <div className="bg-white p-4 rounded shadow">
-                <h4 className="font-semibold text-gray-700 mb-2">Simulations</h4>
-                <p className="text-sm text-gray-600 mb-2">Explore playoff projections and game outcomes.</p>
-                <a href="/simulations" className="text-red-600 hover:underline text-sm">Simulate Now</a>
-              </div>
-            </div>
-          </SectionWrapper>
-
-        </div>
-      </main>
-
-      <Footer />
-    </>
-  )
-}
+                <Link href="/betting-book" className="text
