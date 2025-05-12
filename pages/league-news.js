@@ -19,7 +19,7 @@ export default function LeagueNews() {
             <article className="bg-white p-4 rounded shadow">
               <h2 className="text-lg font-semibold text-gray-700">Burrow Returns to Practice</h2>
               <p className="text-sm text-gray-500">May 10, 2025</p>
-              <p className="text-gray-600 mt-2">QB Joe Burrow was a full participant in Thursday's practice.</p>
+              <p className="text-gray-600 mt-2">QB Joe Burrow was a full participant in Thursday&#39;s practice.</p>
               <a href="#" className="text-red-600 hover:underline mt-2 block text-sm">Read more</a>
             </article>
           </div>
