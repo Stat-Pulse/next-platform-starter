@@ -71,4 +71,20 @@ export default function HomePage() {
               <div className="bg-white p-4 rounded shadow">
                 <h4 className="font-semibold text-gray-700 mb-2">Betting Book</h4>
                 <p className="text-sm text-gray-600 mb-2">Odds, line movements, and game predictions.</p>
-                <Link href="/betting-book" className="text
+                <Link href="/betting-book" className="text-red-600 hover:underline text-sm">View Odds</Link>
+              </div>
+              <div className="bg-white p-4 rounded shadow">
+                <h4 className="font-semibold text-gray-700 mb-2">Simulations</h4>
+                <p className="text-sm text-gray-600 mb-2">Explore playoff projections and game outcomes.</p>
+                <Link href="/simulations" className="text-red-600 hover:underline text-sm">Simulate Now</Link>
+              </div>
+            </div>
+          </SectionWrapper>
+
+        </div>
+      </main>
+
+      <Footer />
+    </>
+  )
+}
