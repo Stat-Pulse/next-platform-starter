@@ -17,6 +17,7 @@
     "position": "RB",
     "starter": {
       "name": "Bijan Robinson",
+      "slug": "bijan-robinson",
       "age": 23
     },
     "backup": {
