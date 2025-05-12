@@ -1,20 +1,30 @@
-// pages/schedule-results.js
-import SectionWrapper from '/components/SectionWrapper'
+'use client'
+
+import Header from '../components/Header'
+import Footer from '../components/Footer'
+import SidebarNavigation from '../components/SidebarNavigation'
+import SectionWrapper from '../components/SectionWrapper'
 
 export default function ScheduleResults() {
   return (
-    <SectionWrapper title="Schedule & Results">
-      <div className="space-y-4">
-        <div className="p-4 border rounded bg-white shadow">
-          <p className="text-lg font-semibold">Week 1</p>
-          <p>Chiefs vs Lions — Final: 21-27</p>
+    <>
+      <Header />
+      <main className="bg-gray-100 py-10">
+        <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+          <aside className="md:col-span-1">
+            <SidebarNavigation active="schedule-results" />
+          </aside>
+
+          <div className="md:col-span-3 space-y-12">
+            <SectionWrapper title="Schedule & Results">
+              <p className="text-gray-600">
+                View the full NFL season schedule, game results, and upcoming matchups week by week.
+              </p>
+            </SectionWrapper>
+          </div>
         </div>
-        <div className="p-4 border rounded bg-white shadow">
-          <p className="text-lg font-semibold">Week 2</p>
-          <p>49ers vs Rams — Final: 30-23</p>
-        </div>
-        {/* Add more weekly results as needed */}
-      </div>
-    </SectionWrapper>
+      </main>
+      <Footer />
+    </>
   )
 }
