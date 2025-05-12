@@ -28,7 +28,6 @@ export default function TeamPage() {
           <section>
             <h2 className="text-2xl font-bold mb-4 text-gray-800">Latest News & Highlights</h2>
             <div className="grid md:grid-cols-2 gap-6">
-              {/* News Feed */}
               <div className="bg-white p-4 rounded shadow">
                 <h3 className="font-semibold text-lg text-gray-700 mb-2">Recent Articles</h3>
                 <ul className="space-y-2 text-sm text-gray-600">
@@ -45,11 +44,15 @@ export default function TeamPage() {
                 </ul>
               </div>
 
-              {/* Video Highlights */}
               <div className="bg-white p-4 rounded shadow">
                 <h3 className="font-semibold text-lg text-gray-700 mb-2">Video Highlights</h3>
                 <div className="aspect-w-16 aspect-h-9">
-                  <iframe src="https://www.youtube.com/embed/sample-video" allowFullScreen className="w-full h-full rounded" />
+                  <iframe
+                    src="https://www.youtube.com/embed/sample-video"
+                    allowFullScreen
+                    className="w-full h-full rounded"
+                    title="Video Highlights"
+                  />
                 </div>
               </div>
             </div>
@@ -157,4 +160,38 @@ export default function TeamPage() {
                   </li>
                   <li>
                     Receiving:{' '}
-                    <Link href="/players/ja-marr-chase" className="
+                    <Link href="/players/ja-marr-chase" className="text-red-600 hover:underline">
+                      Ja&#39;Marr Chase
+                    </Link>{' '}
+                    – 1,208 yds
+                  </li>
+                  <li>
+                    Sacks:{' '}
+                    <Link href="/players/trey-hendrickson" className="text-red-600 hover:underline">
+                      Trey Hendrickson
+                    </Link>{' '}
+                    – 14
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          {/* VI. Team Info */}
+          <section>
+            <h2 className="text-2xl font-bold mb-4 text-gray-800">Team Overview</h2>
+            <div className="bg-white p-4 rounded shadow text-sm text-gray-600">
+              <p><strong>Founded:</strong> 1968</p>
+              <p><strong>Super Bowl Titles:</strong> 0</p>
+              <p><strong>Stadium:</strong> Paycor Stadium (Cincinnati, OH, 65,000 capacity)</p>
+              <p><strong>Head Coach:</strong> Zac Taylor</p>
+            </div>
+          </section>
+
+        </div>
+      </main>
+
+      <Footer />
+    </>
+  )
+}
