@@ -8,7 +8,7 @@ export default function Header() {
   const navItems = ['Home','Players','Compare','Insights','League','Fantasy','Profile','Support','About']
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className="bg-white shadow-sm sticky top-0 z-50 overflow-x-auto whitespace-nowrap">
       <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
         {/* Logo */}
         <Link href="/" className="flex-shrink-0 cursor-pointer">
@@ -24,7 +24,7 @@ export default function Header() {
         <span className="text-xl font-bold text-red-600 hidden md:block">StatPulse</span>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex space-x-6 text-sm font-semibold">
+        <div className="hidden md:flex space-x-6 text-sm font-semibold overflow-x-auto">
           {navItems.map((label) => {
             const href = label === 'Home' ? '/' : `/${label.toLowerCase()}`
             const isHome = label === 'Home'
@@ -43,7 +43,7 @@ export default function Header() {
         {/* Mobile Toggle */}
         <div className="flex items-center md:hidden">
           <button onClick={() => setMenuOpen(!menuOpen)} className="text-gray-800 focus:outline-none p-2">
-            {/* Insert your SVG icon here */}
+            ☰
           </button>
         </div>
       </nav>
