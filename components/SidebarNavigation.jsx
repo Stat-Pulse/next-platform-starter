@@ -1,20 +1,20 @@
 'use client'
 
-export default function SidebarNavigation({ current = 'league' }) {
+export default function SidebarNavigation({ current = '' }) {
   const links = [
     { href: 'league', label: 'League Overview' },
     { href: 'league-standings', label: 'League Standings' },
     { href: 'teams', label: 'Teams' },
+    { href: 'schedule-results', label: 'Schedule & Results' },
+    { href: 'league-news', label: 'League News' },
     { href: 'betting-book', label: 'Betting Book' },
     { href: 'stat-tracker', label: 'Stat Tracker' },
     { href: 'analytics-lab', label: 'Analytics Lab' },
     { href: 'injury-report-hub', label: 'Injury Report Hub' },
-    { href: 'power-rankings', label: 'Power Rankings' },
-    { href: 'schedule-results', label: 'Schedule & Results' },
-    { href: 'league-news', label: 'League News' },
     { href: 'draft-hq', label: 'Draft HQ' },
     { href: 'media-vault', label: 'Media Vault' },
     { href: 'simulations', label: 'Simulations' },
+    { href: 'power-rankings', label: 'Power Rankings' },
   ]
 
   return (
