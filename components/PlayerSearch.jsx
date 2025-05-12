@@ -1,5 +1,4 @@
-'use client'
-
+// components/PlayerSearch.jsx
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
@@ -8,6 +7,10 @@ const positionOptions = [
   'FB', 'G', 'LB', 'LS', 'OL', 'OT', 'PK', 'P', 'C', 'CB', 'OE'
 ]
 
+function slugify(name) {
+  return name.toLowerCase().replace(/\./g, '').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+}
+
 export default function PlayerSearch() {
   const [players, setPlayers] = useState([])
   const [filtered, setFiltered] = useState([])
@@ -15,73 +18,49 @@ export default function PlayerSearch() {
   const [positionFilter, setPositionFilter] = useState('')
   const [teamFilter, setTeamFilter] = useState('')
   const [teams, setTeams] = useState([])
-  const [hasSearched, setHasSearched] = useState(false)
-
-  const generateSlug = (name) =>
-    name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
 
   useEffect(() => {
-    const sources = [
-      '/data/2024_qbs_sorted.json',
-      '/data/2024_rbs_sorted.json',
-      '/data/2024_wrs_sorted.json',
-      '/data/2024_tes_sorted.json'
-    ]
-
     async function loadAllPlayers() {
-      let all = []
-      for (const src of sources) {
-        try {
-          const res = await fetch(src)
-          const data = await res.json()
-          const cleaned = data.map(p => ({
-            name: p.display_name || 'Unknown',
-            slug: generateSlug(p.display_name || 'unknown'),
-            position: p.position || 'N/A',
-            team: p.team || p.recent_team || 'N/A'
-          }))
-          all = [...all, ...cleaned]
-        } catch (e) {
-          console.error(`Failed to load ${src}`, e)
-        }
+      try {
+        const files = [
+          '/data/2024_qbs_sorted.json',
+          '/data/2024_rbs_sorted.json',
+          '/data/2024_wrs_sorted.json',
+          '/data/2024_tes_sorted.json'
+        ]
+
+        const all = await Promise.all(files.map(path => fetch(path).then(r => r.json())))
+        const merged = all.flat().map(p => ({
+          name: p.display_name || p.name || 'Unknown',
+          position: p.position || 'N/A',
+          team: p.recent_team || p.team || 'N/A',
+          slug: slugify(p.display_name || p.name || '')
+        }))
+
+        setPlayers(merged)
+        setFiltered(merged)
+        setTeams([...new Set(merged.map(p => p.team).filter(Boolean))])
+      } catch (e) {
+        console.error('Error loading player data:', e)
       }
-      setPlayers(all)
-      setFiltered(all)
-      setTeams([...new Set(all.map(p => p.team))])
     }
 
     loadAllPlayers()
   }, [])
 
-  const handleSearch = () => {
+  useEffect(() => {
     let result = players
-
     if (search) {
-      const q = search.toLowerCase()
-      result = result.filter(p =>
-        p.name?.toLowerCase().includes(q) ||
-        p.team?.toLowerCase().includes(q) ||
-        p.position?.toLowerCase().includes(q)
-      )
+      result = result.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
     }
-
     if (positionFilter) {
       result = result.filter(p => p.position === positionFilter)
     }
-
     if (teamFilter) {
       result = result.filter(p => p.team === teamFilter)
     }
-
     setFiltered(result)
-    setHasSearched(true)
-  }
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleSearch()
-    }
-  }
+  }, [search, positionFilter, teamFilter, players])
 
   return (
     <section className="bg-white py-10">
@@ -92,10 +71,10 @@ export default function PlayerSearch() {
             placeholder="Search Players"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            onKeyDown={handleKeyDown}
             className="w-full p-2 border rounded"
+            onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
           />
-          <div className="flex space-x-4">
+          <div className="flex flex-wrap space-x-4">
             <select
               value={positionFilter}
               onChange={e => setPositionFilter(e.target.value)}
@@ -115,30 +94,21 @@ export default function PlayerSearch() {
                 <option key={team} value={team}>{team}</option>
               ))}
             </select>
-            <button
-              onClick={handleSearch}
-              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-            >
-              Search
-            </button>
           </div>
         </div>
 
         <div id="player-list" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.length > 0 ? (
-            filtered.map(player => (
-              <div key={player.slug} className="player-card bg-white p-4 rounded shadow">
-                <Link href={`/players/${player.slug}`} className="text-blue-600 hover:underline">
-                  {player.name}
-                </Link>
-                <p className="text-gray-600">{player.position}, {player.team}</p>
-              </div>
-            ))
-          ) : hasSearched ? (
-            <p className="text-gray-600 col-span-full py-4 text-center">
-              No matching players found. Try a different name, team, or position.
-            </p>
-          ) : null}
+          {filtered.map(player => (
+            <div key={player.slug} className="player-card bg-white p-4 rounded shadow">
+              <Link href={`/players/${player.slug}`} className="text-blue-600 hover:underline">
+                {player.name}
+              </Link>
+              <p className="text-gray-600 text-sm">{player.position}, {player.team}</p>
+            </div>
+          ))}
+          {filtered.length === 0 && (
+            <p className="text-gray-600 text-center py-4">No players found.</p>
+          )}
         </div>
       </div>
     </section>
