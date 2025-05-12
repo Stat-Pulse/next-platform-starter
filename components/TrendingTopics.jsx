@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 
 export default function TrendingTopics() {
   const [newsItems, setNewsItems] = useState([])
@@ -73,12 +74,14 @@ export default function TrendingTopics() {
         filteredNews.map((item, index) => (
           <div key={index} className="bg-gray-100 p-4 rounded shadow">
             <h3 className="text-lg font-semibold text-gray-800">
-              <a href="/league-news" className="hover:underline text-red-600">
+              <Link href="/league-news" className="hover:underline text-red-600">
                 {item.title}
-              </a>
+              </Link>
             </h3>
             <p className="text-sm text-gray-600">{item.content}</p>
-            <p className="text-xs text-gray-500">{item.date} • {item.category}</p>
+            <p className="text-xs text-gray-500">
+              {item.date} • {item.category}
+            </p>
           </div>
         ))
       ) : (
