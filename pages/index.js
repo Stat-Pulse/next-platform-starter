@@ -1,12 +1,11 @@
 'use client'
 
-import Header from '../../components/Header'
-import Footer from '../../components/Footer'
+import Header from '../components/Header'
+import Footer from '../components/Footer'
 import Link from 'next/link'
-import teams from '../../data/teams'
+import teams from '../data/teams'
 
 export default function TeamsIndexPage() {
-  // Group teams by conference and division
   const grouped = teams.reduce((acc, team) => {
     const { conference, division } = team
     if (!acc[conference]) acc[conference] = {}
@@ -42,7 +41,7 @@ export default function TeamsIndexPage() {
                           className="mx-auto w-16 h-16 object-contain mb-2"
                           onError={(e) => {
                             e.target.onerror = null
-                            e.target.src = '/team-logos/fallback.png' // You can add a fallback image
+                            e.target.src = '/team-logos/fallback.png'
                           }}
                         />
                         <p className="text-sm font-medium text-gray-800">{team.name}</p>
