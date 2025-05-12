@@ -35,9 +35,9 @@ export default function PlayerSearch() {
           const res = await fetch(src)
           const data = await res.json()
           const cleaned = data.map(p => ({
-            name: p.display_name,
-            slug: generateSlug(p.display_name),
-            position: p.position,
+            name: p.display_name || 'Unknown',
+            slug: generateSlug(p.display_name || 'unknown'),
+            position: p.position || 'N/A',
             team: p.team || p.recent_team || 'N/A'
           }))
           all = [...all, ...cleaned]
@@ -59,9 +59,9 @@ export default function PlayerSearch() {
     if (search) {
       const q = search.toLowerCase()
       result = result.filter(p =>
-        p.name.toLowerCase().includes(q) ||
-        p.team.toLowerCase().includes(q) ||
-        p.position.toLowerCase().includes(q)
+        p.name?.toLowerCase().includes(q) ||
+        p.team?.toLowerCase().includes(q) ||
+        p.position?.toLowerCase().includes(q)
       )
     }
 
@@ -77,6 +77,12 @@ export default function PlayerSearch() {
     setHasSearched(true)
   }
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
+  }
+
   return (
     <section className="bg-white py-10">
       <div className="container mx-auto px-6">
@@ -86,6 +92,7 @@ export default function PlayerSearch() {
             placeholder="Search Players"
             value={search}
             onChange={e => setSearch(e.target.value)}
+            onKeyDown={handleKeyDown}
             className="w-full p-2 border rounded"
           />
           <div className="flex space-x-4">
@@ -109,11 +116,11 @@ export default function PlayerSearch() {
               ))}
             </select>
             <button
-            onClick={handleSearch}
-            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-          >
-            Search
-          </button>
+              onClick={handleSearch}
+              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+            >
+              Search
+            </button>
           </div>
         </div>
 
