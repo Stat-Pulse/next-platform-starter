@@ -39,6 +39,7 @@
     },
     "backup": {
       "name": "Justice Hill",
+      "slug": "justice-hill",
       "age": 27
     },
     "notes": "Henry (150+ yd games) RB1; Hill change-of-pace. Per baltimoreravens.com."
@@ -48,10 +49,12 @@
     "position": "RB",
     "starter": {
       "name": "James Cook",
+      "slug": "james-cook",
       "age": 25
     },
     "backup": {
       "name": "Ray Davis",
+      "slug": "ray-davis",
       "age": 25
     },
     "notes": "Cook hit 1,000 yds, 18 TDs; Davis (2024 rookie) RB2. Per buffalobills.com."
@@ -61,10 +64,12 @@
     "position": "RB",
     "starter": {
       "name": "Chuba Hubbard",
+      "slug": "chuba-hubbard",
       "age": 25
     },
     "backup": {
       "name": "Jonathon Brooks",
+      "slug": "jonathon-brooks",
       "age": 21
     },
     "notes": "Hubbard took RB1; Brooks (2024 2nd-round) recovering from ACL. Per panthers.com."
