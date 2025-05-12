@@ -4,10 +4,12 @@
     "position": "RB",
     "starter": {
       "name": "James Conner",
+      "slug": "james-conner",
       "age": 29
     },
     "backup": {
       "name": "Trey Benson",
+      "slug": "trey-benson",
       "age": 22
     },
     "notes": "Conner led with 74 carries in 2024; Benson (2024 3rd-round) had 242 yds. Per azcardinals.com."
@@ -22,6 +24,7 @@
     },
     "backup": {
       "name": "Tyler Allgeier",
+      "slug": "tyler-allgeier",
       "age": 25
     },
     "notes": "Robinson RB1 despite snap dip; Allgeier high-upside RB2. Per atlantafalcons.com."
@@ -31,6 +34,7 @@
     "position": "RB",
     "starter": {
       "name": "Derrick Henry",
+      "slug": "derrick-henry",
       "age": 31
     },
     "backup": {
