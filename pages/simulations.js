@@ -2,25 +2,31 @@
 
 import Header from '../components/Header'
 import Footer from '../components/Footer'
-import SidebarNavigation from '../components/SidebarNavigation'
-import SectionWrapper from '../components/SectionWrapper'
+import { useState } from 'react'
 
 export default function Simulations() {
+  const [result, setResult] = useState(null)
+
+  const simulateGame = () => {
+    setResult('Simulation: Bengals 27, Chiefs 24')
+  }
+
   return (
     <>
       <Header />
       <main className="bg-gray-100 py-10">
-        <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-6">
-          <aside className="md:col-span-1">
-            <SidebarNavigation active="simulations" />
-          </aside>
+        <div className="container mx-auto px-6 space-y-10">
+          <h1 className="text-3xl font-bold text-gray-800 mb-4">Simulations</h1>
 
-          <div className="md:col-span-3 space-y-12">
-            <SectionWrapper title="Simulations">
-              <p className="text-gray-600">
-                Run predictive models and explore simulated game outcomes, playoff scenarios, and statistical projections.
-              </p>
-            </SectionWrapper>
+          <div className="bg-white p-6 rounded shadow">
+            <h2 className="text-xl font-semibold mb-4 text-gray-700">Run Game Simulation</h2>
+            <button
+              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+              onClick={simulateGame}
+            >
+              Simulate Week 1 Matchup
+            </button>
+            {result && <p className="mt-4 text-gray-600">{result}</p>}
           </div>
         </div>
       </main>
