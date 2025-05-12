@@ -109,7 +109,7 @@ export default function PlayerSearch() {
               ))}
             </select>
             <button
-              onClick={handleSearch}
+              <button onClick={handleSearch}>Search</button>
               className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
             >
               Search
