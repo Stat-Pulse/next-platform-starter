@@ -1,74 +1,34 @@
-'use client'
-
-import Header from '../components/Header'
-import Footer from '../components/Footer'
-import SidebarNavigation from '../components/SidebarNavigation'
-import SectionWrapper from '../components/SectionWrapper'
-import TrendingTopics from '../components/TrendingTopics'
-import SeasonSnapshot from '../components/SeasonSnapshot'
-import KeyStatisticsLeaders from '../components/KeyStatisticsLeaders'
-import BettingOddsHighlights from '../components/BettingOddsHighlights'
-import FantasyFootballInsights from '../components/FantasyFootballInsights'
-import PowerRankings from '../components/PowerRankings'
-import VideoContent from '../components/VideoContent'
-import EngageNFL from '../components/EngageNFL'
-import ExploreMore from '../components/ExploreMore'
+import Link from 'next/link'
+import SectionWrapper from '@/components/SectionWrapper'
 
 export default function LeaguePage() {
   return (
-    <>
-      <Header />
-      <main className="bg-gray-100 py-10">
-        <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-6">
-          <aside className="md:col-span-1">
-            <SidebarNavigation active="league" />
-          </aside>
-
-          <div className="md:col-span-3 space-y-12">
-            <SectionWrapper title="Personalize Your Feed" buttonLabel="Customize">
-              <p className="text-gray-600">Follow your favorite teams and players for a tailored experience.</p>
-            </SectionWrapper>
-
-            <SectionWrapper title="Trending Topics">
-              <TrendingTopics />
-            </SectionWrapper>
-
-           <SectionWrapper title="Season Snapshot">
-             <SeasonSnapshot />
-           </SectionWrapper>
-
-           <SectionWrapper title={<a href="/stat-tracker" className="text-red-600 hover:underline">Key Statistics Leaders</a>}>
-             <KeyStatisticsLeaders />
-           </SectionWrapper>
-
-            <SectionWrapper title={<a href="/betting-book" className="text-red-600 hover:underline">Betting Odds Highlights</a>}>
-              <BettingOddsHighlights />
-            </SectionWrapper>
-
-            <SectionWrapper title={<a href="/fantasy" className="text-red-600 hover:underline">Fantasy Football Insights</a>}>
-              <FantasyFootballInsights />
-            </SectionWrapper>
-  
-            <SectionWrapper title={<a href="/media-vault" className="hover:underline text-red-600">Power Rankings</a>}>
-              <PowerRankings />
-            </SectionWrapper>
-
-            <SectionWrapper title={<a href="/media-vault" className="hover:underline text-red-600">Video Content & Podcasts</a>}>
-              <VideoContent />
-            </SectionWrapper>
-
-            <SectionWrapper title="Engage with the NFL">
-              <EngageNFL />
-            </SectionWrapper>
-
-            <SectionWrapper title="Explore More">
-              <ExploreMore />
-            </SectionWrapper>
-
-          </div>
+    <SectionWrapper title="League Overview">
+      <div className="space-y-6">
+        <div className="p-4 bg-white rounded shadow">
+          <h2 className="text-xl font-semibold mb-2">Stat Tracker</h2>
+          <p className="mb-2">View the top players by position, team, or stat category.</p>
+          <Link href="/stat-tracker" className="text-red-600 hover:underline">
+            Go to Stat Tracker →
+          </Link>
         </div>
-      </main>
-      <Footer />
-    </>
+
+        <div className="p-4 bg-white rounded shadow">
+          <h2 className="text-xl font-semibold mb-2">Betting Book</h2>
+          <p className="mb-2">See lines, movement, and upcoming odds.</p>
+          <Link href="/betting-book" className="text-red-600 hover:underline">
+            Go to Betting Book →
+          </Link>
+        </div>
+
+        <div className="p-4 bg-white rounded shadow">
+          <h2 className="text-xl font-semibold mb-2">Media Vault</h2>
+          <p className="mb-2">Watch game highlights, breakdowns, and original content.</p>
+          <Link href="/media-vault" className="text-red-600 hover:underline">
+            Go to Media Vault →
+          </Link>
+        </div>
+      </div>
+    </SectionWrapper>
   )
 }
