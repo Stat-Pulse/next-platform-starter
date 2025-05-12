@@ -1,4 +1,4 @@
-import SectionWrapper from '@/components/SectionWrapper'
+import SectionWrapper from '../components/SectionWrapper'
 
 export default function AnalyticsLab() {
   return (
