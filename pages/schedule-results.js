@@ -1,5 +1,5 @@
 // pages/schedule-results.js
-import SectionWrapper from '@/components/SectionWrapper'
+import SectionWrapper from '/components/SectionWrapper'
 
 export default function ScheduleResults() {
   return (
