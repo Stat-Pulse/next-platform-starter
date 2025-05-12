@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-// Position dropdown options
 const positionOptions = [
   '', 'QB', 'RB', 'WR', 'TE', 'S', 'DB', 'DE', 'DL', 'DT', 'EDG',
   'FB', 'G', 'LB', 'LS', 'OL', 'OT', 'PK', 'P', 'C', 'CB', 'OE'
@@ -16,46 +15,45 @@ export default function PlayerSearch() {
   const [positionFilter, setPositionFilter] = useState('')
   const [teamFilter, setTeamFilter] = useState('')
   const [teams, setTeams] = useState([])
+  const [hasSearched, setHasSearched] = useState(false)
 
   const generateSlug = (name) =>
     name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
 
   useEffect(() => {
-    async function loadPlayers() {
-      const sources = [
-        '/data/2024_qbs_sorted.json',
-        '/data/2024_rbs_sorted.json',
-        '/data/2024_wrs_sorted.json',
-        '/data/2024_tes_sorted.json'
-      ]
+    const sources = [
+      '/data/2024_qbs_sorted.json',
+      '/data/2024_rbs_sorted.json',
+      '/data/2024_wrs_sorted.json',
+      '/data/2024_tes_sorted.json'
+    ]
 
+    async function loadAllPlayers() {
       let all = []
-
       for (const src of sources) {
         try {
           const res = await fetch(src)
           const data = await res.json()
-          const withSlugs = data.map(p => ({
+          const cleaned = data.map(p => ({
             name: p.display_name,
             slug: generateSlug(p.display_name),
             position: p.position,
             team: p.team || p.recent_team || 'N/A'
           }))
-          all = [...all, ...withSlugs]
+          all = [...all, ...cleaned]
         } catch (e) {
           console.error(`Failed to load ${src}`, e)
         }
       }
-
       setPlayers(all)
       setFiltered(all)
       setTeams([...new Set(all.map(p => p.team))])
     }
 
-    loadPlayers()
+    loadAllPlayers()
   }, [])
 
-  useEffect(() => {
+  const handleSearch = () => {
     let result = players
 
     if (search) {
@@ -76,12 +74,13 @@ export default function PlayerSearch() {
     }
 
     setFiltered(result)
-  }, [search, positionFilter, teamFilter, players])
+    setHasSearched(true)
+  }
 
   return (
     <section className="bg-white py-10">
       <div className="container mx-auto px-6">
-        <div id="search-container" className="mb-6">
+        <div id="search-container" className="mb-6 space-y-3">
           <input
             type="search"
             placeholder="Search Players"
@@ -89,7 +88,7 @@ export default function PlayerSearch() {
             onChange={e => setSearch(e.target.value)}
             className="w-full p-2 border rounded"
           />
-          <div className="flex space-x-4 mt-2">
+          <div className="flex space-x-4">
             <select
               value={positionFilter}
               onChange={e => setPositionFilter(e.target.value)}
@@ -109,22 +108,30 @@ export default function PlayerSearch() {
                 <option key={team} value={team}>{team}</option>
               ))}
             </select>
+            <button
+              onClick={handleSearch}
+              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+            >
+              Search
+            </button>
           </div>
         </div>
 
         <div id="player-list" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map(player => (
-            <div key={player.slug} className="player-card bg-white p-4 rounded shadow">
-              <Link href={`/players/${player.slug}`} className="text-blue-600 hover:underline">
-                {player.name}
-              </Link>
-              <p className="text-gray-600">{player.position}, {player.team}</p>
-            </div>
-          ))}
-
-          {filtered.length === 0 && (
-            <p className="text-gray-600 text-center py-4">No players found.</p>
-          )}
+          {filtered.length > 0 ? (
+            filtered.map(player => (
+              <div key={player.slug} className="player-card bg-white p-4 rounded shadow">
+                <Link href={`/players/${player.slug}`} className="text-blue-600 hover:underline">
+                  {player.name}
+                </Link>
+                <p className="text-gray-600">{player.position}, {player.team}</p>
+              </div>
+            ))
+          ) : hasSearched ? (
+            <p className="text-gray-600 col-span-full py-4 text-center">
+              No matching players found. Try a different name, team, or position.
+            </p>
+          ) : null}
         </div>
       </div>
     </section>
