@@ -19,7 +19,6 @@ export default function FantasyPage() {
   const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
-    // Simulate fetching data (will eventually be fetched from backend or API)
     import('../public/data/sampleFantasyData.json').then(data => {
       setTeams(data.teams);
       setActivity(data.recentActivity);
@@ -36,12 +35,10 @@ export default function FantasyPage() {
       <Header />
       <main className="container mx-auto px-6 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Sidebar Placeholder */}
           <aside className="bg-white rounded-lg shadow p-6 hidden md:block">
-            <p className="text-gray-600">Sidebar goes here...</p>
+            <p className="text-gray-600">Sidebar coming soon...</p>
           </aside>
 
-          {/* Main Fantasy Dashboard */}
           <div className="md:col-span-3 space-y-6">
             <section className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-semibold text-gray-800 mb-2">Fantasy Dashboard - Week 10</h2>
