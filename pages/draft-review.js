@@ -1,9 +1,9 @@
 // pages/draft-review.js
 
 import { useEffect, useState } from 'react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import TeamSidebar from '@/components/TeamSidebar';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import TeamSidebar from '../components/TeamSidebar';
 
 export default function DraftReview() {
   const [teamName, setTeamName] = useState('Thunder Cats');
