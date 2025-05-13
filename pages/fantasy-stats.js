@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react';
 import PlayerModal from '../components/fantasy/PlayerModal';
-import playersData from '../data/fantasy_stats.json'; // Ensure this file exists
+const [filteredPlayers, setFilteredPlayers] = useState([]);
+
+useEffect(() => {
+  async function fetchData() {
+    const res = await fetch('/data/fantasy_stats.json');
+    const data = await res.json();
+    setFilteredPlayers(data);
+  }
+  fetchData();
+}, []);
 
 export default function FantasyStats() {
   const [scoringFormat, setScoringFormat] = useState('ppr');
