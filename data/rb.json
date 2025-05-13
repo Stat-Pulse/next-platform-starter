@@ -7,6 +7,8 @@
       "slug": "james-conner",
       "age": 29
     },
+    "team": "Arizona Cardinals",
+    "position": "RB",
     "backup": {
       "name": "Trey Benson",
       "slug": "trey-benson",
@@ -22,6 +24,8 @@
       "slug": "bijan-robinson",
       "age": 23
     },
+    "team": "Atlanta Falcons",
+    "position": "RB",
     "backup": {
       "name": "Tyler Allgeier",
       "slug": "tyler-allgeier",
@@ -37,6 +41,8 @@
       "slug": "derrick-henry",
       "age": 31
     },
+    "team": "Baltimore Ravens",
+    "position": "RB",
     "backup": {
       "name": "Justice Hill",
       "slug": "justice-hill",
@@ -52,6 +58,8 @@
       "slug": "james-cook",
       "age": 25
     },
+    "team": "Buffalo Bills",
+    "position": "RB",
     "backup": {
       "name": "Ray Davis",
       "slug": "ray-davis",
@@ -67,6 +75,8 @@
       "slug": "chuba-hubbard",
       "age": 25
     },
+    "team": "Carolina Panthers",
+    "position": "RB",
     "backup": {
       "name": "Jonathon Brooks",
       "slug": "jonathon-brooks",
