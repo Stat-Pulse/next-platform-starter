@@ -1,7 +1,7 @@
-// pages/fantasy.js
 'use client'
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
@@ -33,15 +33,15 @@ export default function FantasyPage() {
           {/* Sidebar */}
           <aside className="bg-white rounded-lg shadow p-6 space-y-2">
             <ul className="space-y-2">
-              <li><a href="/fantasy" className="block p-2 rounded text-red-600 bg-gray-100 font-semibold">Dashboard</a></li>
-              <li><a href="/my-team" className="block p-2 rounded hover:text-red-600 hover:bg-gray-100">My Team</a></li>
-              <li><a href="/current-matchup" className="block p-2 rounded hover:text-red-600 hover:bg-gray-100">Current Matchup</a></li>
-              <li><a href="/live-scoring" className="block p-2 rounded hover:text-red-600 hover:bg-gray-100">Live Scoring</a></li>
-              <li><a href="/league-schedule" className="block p-2 rounded hover:text-red-600 hover:bg-gray-100">League Schedule</a></li>
-              <li><a href="/player-stats" className="block p-2 rounded hover:text-red-600 hover:bg-gray-100">Player Stats</a></li>
-              <li><a href="/free-agent-listings" className="block p-2 rounded hover:text-red-600 hover:bg-gray-100">Free Agents</a></li>
-              <li><a href="/trade-center" className="block p-2 rounded hover:text-red-600 hover:bg-gray-100">Trade Center</a></li>
-              <li><a href="/draft-review" className="block p-2 rounded hover:text-red-600 hover:bg-gray-100">Draft Review</a></li>
+              <li><Link href="/fantasy" className="block p-2 rounded text-red-600 bg-gray-100 font-semibold">Dashboard</Link></li>
+              <li><Link href="/my-team" className="block p-2 rounded hover:text-red-600 hover:bg-gray-100">My Team</Link></li>
+              <li><Link href="/current-matchup" className="block p-2 rounded hover:text-red-600 hover:bg-gray-100">Current Matchup</Link></li>
+              <li><Link href="/live-scoring" className="block p-2 rounded hover:text-red-600 hover:bg-gray-100">Live Scoring</Link></li>
+              <li><Link href="/league-schedule" className="block p-2 rounded hover:text-red-600 hover:bg-gray-100">League Schedule</Link></li>
+              <li><Link href="/player-stats" className="block p-2 rounded hover:text-red-600 hover:bg-gray-100">Player Stats</Link></li>
+              <li><Link href="/free-agent-listings" className="block p-2 rounded hover:text-red-600 hover:bg-gray-100">Free Agents</Link></li>
+              <li><Link href="/trade-center" className="block p-2 rounded hover:text-red-600 hover:bg-gray-100">Trade Center</Link></li>
+              <li><Link href="/draft-review" className="block p-2 rounded hover:text-red-600 hover:bg-gray-100">Draft Review</Link></li>
             </ul>
           </aside>
 
