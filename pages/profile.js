@@ -35,7 +35,9 @@ export default function ProfilePage() {
               <div>
                 <h1 className="text-3xl font-bold text-gray-800">Welcome, {username}!</h1>
                 <p className="text-gray-600">Subscription: <strong>{subscription}</strong></p>
-                <p className="text-sm text-gray-500">{subscription === 'Free' ? '🚫 Limited access' : '✅ Full access'}</p>
+                <p className="text-sm text-gray-500">
+                  {subscription === 'Free' ? '🚫 Limited access' : '✅ Full access'}
+                </p>
               </div>
             </div>
             <button onClick={() => setShowSettings(true)} className="text-gray-700 hover:text-red-600">
@@ -71,7 +73,7 @@ export default function ProfilePage() {
 
             <div className="bg-white p-6 rounded-2xl shadow">
               <h2 className="text-xl font-semibold mb-2">Community Forum</h2>
-              <p className="text-gray-600">New comment on "Is Burrow top 3?" thread.</p>
+              <p className="text-gray-600">New comment on &quot;Is Burrow top 3?&quot; thread.</p>
               <p className="text-sm text-blue-600 mt-2">View forums →</p>
             </div>
 
