@@ -1,6 +1,6 @@
 {
-  "roster": [/* your full roster here */],
-  "weeklyScores": [/* chart data */],
-  "playerNews": [/* news items */],
-  "trashTalk": [/* initial comments */]
+  "roster": [],
+  "weeklyScores": [],
+  "playerNews": [],
+  "trashTalk": []
 }
