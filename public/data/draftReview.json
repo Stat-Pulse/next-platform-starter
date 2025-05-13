@@ -1,0 +1,21 @@
+{
+  "overallGrade": "A-",
+  "analysis": "Strong QB and RB picks, but consider adding WR depth in future drafts.",
+  "picks": [
+    {
+      "round": 1,
+      "player": "Patrick Mahomes",
+      "position": "QB",
+      "team": "KC",
+      "grade": "A"
+    },
+    {
+      "round": 2,
+      "player": "Derrick Henry",
+      "position": "RB",
+      "team": "BAL",
+      "grade": "A-"
+    }
+  ],
+  "commentary": "Mahomes in Round 1: Elite QB secured, great value."
+}
