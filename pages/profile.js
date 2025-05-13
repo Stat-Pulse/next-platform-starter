@@ -157,9 +157,26 @@ export default function ProfilePage() {
                     <input name="email" defaultValue={email} type="email" className="w-full border p-2 rounded" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-600">Avatar URL</label>
-                    <input name="avatar" defaultValue={avatar} className="w-full border p-2 rounded" />
+                    <label className="block text-sm font-medium text-gray-600">Upload New Avatar</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            const updatedProfile = { ...user, avatar: reader.result };
+                            localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+                            setUser(updatedProfile);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      className="w-full border p-2 rounded"
+                    />
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-600">New Password</label>
                     <input name="password" type="password" className="w-full border p-2 rounded" />
