@@ -13,7 +13,6 @@ import PowerRankings from '../components/PowerRankings'
 import VideoContent from '../components/VideoContent'
 import EngageNFL from '../components/EngageNFL'
 import ExploreMore from '../components/ExploreMore'
-import Link from 'next/link'
 
 export default function LeaguePage() {
   return (
@@ -22,7 +21,7 @@ export default function LeaguePage() {
       <main className="bg-gray-100 py-10">
         <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-6">
           <aside className="md:col-span-1">
-            <SidebarNavigation current="league" />
+            <SidebarNavigation active="league" />
           </aside>
 
           <div className="md:col-span-3 space-y-12">
@@ -33,73 +32,31 @@ export default function LeaguePage() {
               </p>
             </SectionWrapper>
 
-            <SectionWrapper
-              title={
-                <Link href="/league-news" className="text-red-600 hover:underline">
-                  Trending Topics
-                </Link>
-              }
-            >
+            <SectionWrapper title={<a href="/league-news" className="text-red-600 hover:underline">Trending Topics</a>}>
               <TrendingTopics />
             </SectionWrapper>
 
-            <SectionWrapper
-              title={
-                <Link href="/schedule-results" className="text-red-600 hover:underline">
-                  Season Snapshot
-                </Link>
-              }
-            >
+            <SectionWrapper title={<a href="/schedule-results" className="text-red-600 hover:underline">Season Snapshot</a>}>
               <SeasonSnapshot />
             </SectionWrapper>
 
-            <SectionWrapper
-              title={
-                <Link href="/stat-tracker" className="text-red-600 hover:underline">
-                  Key Statistics Leaders
-                </Link>
-              }
-            >
-              <KeyStatisticsLeaders />
+            <SectionWrapper title={<a href="/stat-tracker" className="text-red-600 hover:underline">Key Statistics Leaders</a>}>
+              <KeyStatisticsLeaders linkPlayers />
             </SectionWrapper>
 
-            <SectionWrapper
-              title={
-                <Link href="/betting-book" className="text-red-600 hover:underline">
-                  Betting Odds Highlights
-                </Link>
-              }
-            >
+            <SectionWrapper title={<a href="/betting-book" className="text-red-600 hover:underline">Betting Odds Highlights</a>}>
               <BettingOddsHighlights />
             </SectionWrapper>
 
-            <SectionWrapper
-              title={
-                <Link href="/fantasy" className="text-red-600 hover:underline">
-                  Fantasy Football Insights
-                </Link>
-              }
-            >
+            <SectionWrapper title={<a href="/fantasy" className="text-red-600 hover:underline">Fantasy Football Insights</a>}>
               <FantasyFootballInsights />
             </SectionWrapper>
 
-            <SectionWrapper
-              title={
-                <Link href="/media-vault" className="text-red-600 hover:underline">
-                  Power Rankings
-                </Link>
-              }
-            >
+            <SectionWrapper title={<a href="/media-vault" className="text-red-600 hover:underline">Power Rankings</a>}>
               <PowerRankings />
             </SectionWrapper>
 
-            <SectionWrapper
-              title={
-                <Link href="/media-vault" className="text-red-600 hover:underline">
-                  Video Content & Podcasts
-                </Link>
-              }
-            >
+            <SectionWrapper title={<a href="/media-vault" className="text-red-600 hover:underline">Video Content & Podcasts</a>}>
               <VideoContent />
             </SectionWrapper>
 
@@ -110,6 +67,7 @@ export default function LeaguePage() {
             <SectionWrapper title="Explore More">
               <ExploreMore />
             </SectionWrapper>
+
           </div>
         </div>
       </main>
