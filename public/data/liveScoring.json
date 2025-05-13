@@ -1,0 +1,156 @@
+// pages/live-scoring.jsx
+
+import { useEffect, useState } from 'react';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import TeamSidebar from '@/components/TeamSidebar';
+
+export default function LiveScoringPage() {
+  const [matchups, setMatchups] = useState([]);
+  const [teams, setTeams] = useState([]);
+  const [filter, setFilter] = useState('all');
+  const [sort, setSort] = useState('score');
+  const [search, setSearch] = useState('');
+  const [alerts, setAlerts] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [showAlerts, setShowAlerts] = useState(false);
+
+  useEffect(() => {
+    fetch('/data/liveScoring.json')
+      .then(res => res.json())
+      .then(data => {
+        setMatchups(data.matchups);
+        setTeams(data.teams);
+        setAlerts(data.alerts);
+        setTransactions(data.transactions);
+      });
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTeams(prev => prev.map(team => ({
+        ...team,
+        roster: team.roster.map(player => {
+          if (player.status === '2nd Qtr') {
+            const delta = Math.random() * 2;
+            return { ...player, points: player.points + delta };
+          }
+          return player;
+        }),
+        score: team.roster.reduce((sum, p) => sum + p.points, 0)
+      })));
+    }, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const filteredMatchups = matchups.filter(m => {
+    if (filter === 'user') {
+      return m.team1 === 'Thunder Cats' || m.team2 === 'Thunder Cats';
+    }
+    return true;
+  }).filter(m => {
+    if (!search) return true;
+    const t1 = teams.find(t => t.name === m.team1);
+    const t2 = teams.find(t => t.name === m.team2);
+    return (
+      t1?.roster.some(p => p.name.toLowerCase().includes(search.toLowerCase())) ||
+      t2?.roster.some(p => p.name.toLowerCase().includes(search.toLowerCase()))
+    );
+  }).sort((a, b) => {
+    if (sort === 'score') return Math.abs(a.difference) - Math.abs(b.difference);
+    return a.team1.localeCompare(b.team1);
+  });
+
+  return (
+    <div className="bg-gray-50 min-h-screen text-gray-800">
+      <Header />
+      <main className="container mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-4 gap-6">
+        <TeamSidebar active="Live Scoring" />
+
+        <div className="md:col-span-3 space-y-6">
+          <section className="bg-white rounded-lg shadow p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-800">Live Scoring - Week 10</h2>
+              <div className="flex space-x-4">
+                <select onChange={e => setFilter(e.target.value)} value={filter} className="border rounded-md p-2 text-sm">
+                  <option value="all">All Matchups</option>
+                  <option value="user">My Matchup</option>
+                </select>
+                <select onChange={e => setSort(e.target.value)} value={sort} className="border rounded-md p-2 text-sm">
+                  <option value="score">Score Difference</option>
+                  <option value="name">Team Name</option>
+                </select>
+                <label className="flex items-center space-x-2 text-sm">
+                  <input type="checkbox" checked={showAlerts} onChange={e => setShowAlerts(e.target.checked)} className="h-4 w-4" />
+                  <span>Alerts</span>
+                </label>
+              </div>
+            </div>
+            <input
+              type="text"
+              placeholder="Search for a player..."
+              className="w-full p-2 border rounded-md mb-4"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+
+            <div className="space-y-4">
+              {filteredMatchups.map((m, idx) => {
+                const team1 = teams.find(t => t.name === m.team1);
+                const team2 = teams.find(t => t.name === m.team2);
+                const indicator = m.close ? 'border-l-4 border-yellow-500' : m.upset ? 'border-l-4 border-red-600' : '';
+                return (
+                  <div key={idx} className={`bg-white rounded-lg shadow p-4 ${indicator}`}>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center space-x-4">
+                        <span className="font-semibold">{team1?.name}</span>
+                        <span className="text-sm">({team1?.score?.toFixed(1)})</span>
+                        <span className="text-sm text-gray-600">vs</span>
+                        <span className="font-semibold">{team2?.name}</span>
+                        <span className="text-sm">({team2?.score?.toFixed(1)})</span>
+                      </div>
+                      <div className="text-sm">
+                        <span>Difference: {(team1?.score - team2?.score).toFixed(1)}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          <section className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-medium text-gray-800 mb-4">League Updates</h3>
+            <div className="mb-6">
+              <h4 className="text-sm font-medium text-gray-600 mb-2">Standings</h4>
+              <div className="text-sm text-gray-600">
+                {teams.sort((a, b) => a.rank - b.rank).map((t, i) => (
+                  <p key={i}>{t.rank}. {t.name} ({t.record})</p>
+                ))}
+              </div>
+            </div>
+            <div className="mb-6">
+              <h4 className="text-sm font-medium text-gray-600 mb-2">Recent Transactions</h4>
+              <ul className="space-y-2 text-sm text-gray-600">
+                {transactions.map((t, i) => (
+                  <li key={i}>{t.date}: {t.team} {t.type}ped {t.player}</li>
+                ))}
+              </ul>
+            </div>
+            {showAlerts && (
+              <div>
+                <h4 className="text-sm font-medium text-gray-600 mb-2">Alerts</h4>
+                <ul className="space-y-2 text-sm text-gray-600">
+                  {alerts.map((a, i) => (
+                    <li key={i}>{a.time}: {a.message || `${a.team} ${a.type}ped ${a.player}`}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </section>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}
