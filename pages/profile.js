@@ -86,7 +86,7 @@ export default function ProfilePage() {
             <div className="bg-white p-6 rounded-2xl shadow">
               <h2 className="text-xl font-semibold mb-2">Activity Feed</h2>
               <ul className="text-sm text-gray-600 list-disc list-inside">
-                <li>Viewed player profile: Ja'Marr Chase</li>
+                <li>Viewed player profile: Ja&rsquo;Marr Chase</li>
                 <li>Simulated: Week 6 matchup</li>
                 <li>Saved: Chiefs vs Bills recap</li>
               </ul>
