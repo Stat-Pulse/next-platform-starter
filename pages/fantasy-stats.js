@@ -1,20 +1,19 @@
 import { useState, useEffect } from 'react';
 import PlayerModal from '../components/fantasy/PlayerModal';
-const [filteredPlayers, setFilteredPlayers] = useState([]);
-
-useEffect(() => {
-  async function fetchData() {
-    const res = await fetch('/data/fantasy_stats.json');
-    const data = await res.json();
-    setFilteredPlayers(data);
-  }
-  fetchData();
-}, []);
 
 export default function FantasyStats() {
   const [scoringFormat, setScoringFormat] = useState('ppr');
   const [selectedPlayer, setSelectedPlayer] = useState(null);
-  const [filteredPlayers, setFilteredPlayers] = useState(playersData);
+  const [filteredPlayers, setFilteredPlayers] = useState([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      const res = await fetch('/data/fantasy_stats.json');
+      const data = await res.json();
+      setFilteredPlayers(data);
+    }
+    fetchData();
+  }, []);
 
   const formatPoints = (player) => {
     if (scoringFormat === 'ppr') return player.fantasy_points_ppr;
@@ -22,17 +21,9 @@ export default function FantasyStats() {
     return player.fantasy_points_std;
   };
 
-  const handleScoringChange = (e) => {
-    setScoringFormat(e.target.value);
-  };
-
-  const openPlayerModal = (player) => {
-    setSelectedPlayer(player);
-  };
-
-  const closeModal = () => {
-    setSelectedPlayer(null);
-  };
+  const handleScoringChange = (e) => setScoringFormat(e.target.value);
+  const openPlayerModal = (player) => setSelectedPlayer(player);
+  const closeModal = () => setSelectedPlayer(null);
 
   return (
     <main className="container mx-auto p-6">
