@@ -128,7 +128,7 @@ export default function Support() {
               <strong>App not loading:</strong> Clear browser cache, check your internet, or try a different browser.
             </li>
             <li>
-              <strong>Login issues:</strong> Verify your email and password, or use "Forgot Password" to reset.
+              <strong>Login issues:</strong> Verify your email and password, or use &quot;Forgot Password&quot; to reset.
             </li>
             <li>
               <strong>Data not updating:</strong> Ensure the app is updated and check <a href="/status" className="text-primary hover:underline">System Status</a>.
