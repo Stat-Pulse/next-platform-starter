@@ -1,6 +1,7 @@
 [
   {
     "display_name":"Saquon Barkley",
+    "position":"RB",
     "team":"PHI",
     "age":28,
     "carries":345,
@@ -20,6 +21,7 @@
   },
   {
     "display_name":"Derrick Henry",
+    "position":"RB",
     "team":"BAL",
     "age":31,
     "carries":325,
@@ -39,6 +41,7 @@
   },
   {
     "display_name":"Jahmyr Gibbs",
+    "position":"RB",
     "team":"DET",
     "age":23,
     "carries":250,
@@ -77,6 +80,7 @@
   },
   {
     "display_name":"Josh Jacobs",
+    "position":"RB",
     "team":"GB",
     "age":27,
     "carries":301,
@@ -96,6 +100,7 @@
   },
   {
     "display_name":"Jonathan Taylor",
+    "position":"RB",
     "team":"IND",
     "age":26,
     "carries":303,
@@ -115,6 +120,7 @@
   },
   {
     "display_name":"Aaron Jones",
+    "position":"RB",
     "team":"MIN",
     "age":30,
     "carries":255,
@@ -134,6 +140,7 @@
   },
   {
     "display_name":"Bucky Irving",
+    "position":"RB",
     "team":"TB",
     "age":22,
     "carries":207,
@@ -153,6 +160,7 @@
   },
   {
     "display_name":"James Conner",
+    "position":"RB",
     "team":"ARI",
     "age":30,
     "carries":236,
@@ -172,6 +180,7 @@
   },
   {
     "display_name":"Devon Achane",
+    "position":"RB",
     "team":"MIA",
     "age":23,
     "carries":203,
@@ -191,6 +200,7 @@
   },
   {
     "display_name":"Alvin Kamara",
+    "position":"RB",
     "team":"NO",
     "age":29,
     "carries":228,
@@ -210,6 +220,7 @@
   },
   {
     "display_name":"Kyren Williams",
+    "position":"RB",
     "team":"LAR",
     "age":24,
     "carries":316,
@@ -229,6 +240,7 @@
   },
   {
     "display_name":"Chuba Hubbard",
+    "position":"RB",
     "team":"CAR",
     "age":25,
     "carries":250,
@@ -248,6 +260,7 @@
   },
   {
     "display_name":"Breece Hall",
+    "position":"RB",
     "team":"NYJ",
     "age":23,
     "carries":209,
@@ -267,6 +280,7 @@
   },
   {
     "display_name":"Chase Brown",
+    "position":"RB",
     "team":"CIN",
     "age":25,
     "carries":229,
@@ -286,7 +300,8 @@
   },
   {
     "display_name":"D'Andre Swift",
-    "team":"DET",
+    "position":"RB",
+    "team":"CHI",
     "age":26,
     "carries":253,
     "rushing_yards":959.0,
@@ -305,6 +320,7 @@
   },
   {
     "display_name":"Rico Dowdle",
+    "position":"RB",
     "team":"FA",
     "age":26,
     "carries":235,
@@ -324,6 +340,7 @@
   },
   {
     "display_name":"Najee Harris",
+    "position":"RB",
     "team":"PIT",
     "age":27,
     "carries":263,
@@ -343,6 +360,7 @@
   },
   {
     "display_name":"Joe Mixon",
+    "position":"RB",
     "team":"HOU",
     "age":28,
     "carries":245,
@@ -362,6 +380,7 @@
   },
   {
     "display_name":"Tony Pollard",
+    "position":"RB",
     "team":"TEN",
     "age":28,
     "carries":260,
@@ -381,6 +400,7 @@
   },
   {
     "display_name":"James Cook",
+    "position":"RB",
     "team":"BUF",
     "age":25,
     "carries":207,
@@ -400,6 +420,7 @@
   },
   {
     "display_name":"Tyrone Tracy",
+    "position":"RB",
     "team":"NYG",
     "age":25,
     "carries":192,
@@ -419,6 +440,7 @@
   },
   {
     "display_name":"David Montgomery",
+    "position":"RB",
     "team":"DET",
     "age":27,
     "carries":185,
@@ -438,6 +460,8 @@
   },
   {
     "display_name":"J.K. Dobbins",
+    "position":"RB",
+    "team":"CHI",
     "age":26,
     "carries":195,
     "rushing_yards":905.0,
@@ -456,6 +480,8 @@
   },
   {
     "display_name":"Rachaad White",
+    "position":"RB",
+    "team":"TB",
     "age":26,
     "carries":144,
     "rushing_yards":613.0,
@@ -474,6 +500,8 @@
   },
   {
     "display_name":"Rhamondre Stevenson",
+    "position":"RB",
+    "team":"NE",
     "age":27,
     "carries":207,
     "rushing_yards":801.0,
@@ -510,6 +538,8 @@
   },
   {
     "display_name":"Kareem Hunt",
+    "position":"RB",
+    "team":"FA",
     "age":29,
     "carries":200,
     "rushing_yards":728.0,
@@ -528,6 +558,8 @@
   },
   {
     "display_name":"Jordan Mason",
+    "position":"RB",
+    "team":"MIN",
     "age":25,
     "carries":153,
     "rushing_yards":789.0,
@@ -546,6 +578,8 @@
   },
   {
     "display_name":"Zach Charbonnet",
+    "position":"RB",
+    "team":"SEA",
     "age":24,
     "carries":135,
     "rushing_yards":569.0,
@@ -564,6 +598,8 @@
   },
   {
     "display_name":"Kenneth Walker",
+    "position":"RB",
+    "team":"SEA",
     "age":24,
     "carries":153,
     "rushing_yards":573.0,
@@ -636,6 +672,8 @@
   },
   {
     "display_name":"Travis Etienne",
+    "position":"RB",
+    "team":"JAX",
     "age":26,
     "carries":150,
     "rushing_yards":558.0,
@@ -690,6 +728,8 @@
   },
   {
     "display_name":"Austin Ekeler",
+    "position":"RB",
+    "team":"WSH",
     "age":29,
     "carries":77,
     "rushing_yards":367.0,
@@ -708,6 +748,8 @@
   },
   {
     "display_name":"Tyler Allgeier",
+    "position":"RB",
+    "team":"ATL",
     "age":25,
     "carries":137,
     "rushing_yards":644.0,
@@ -726,6 +768,8 @@
   },
   {
     "display_name":"Alexander Mattison",
+    "position":"RB",
+    "team":"MIA",
     "age":26,
     "carries":132,
     "rushing_yards":420.0,
@@ -888,6 +932,8 @@
   },
   {
     "display_name":"Cam Akers",
+    "position":"RB",
+    "team":"LAR",
     "age":25,
     "carries":104,
     "rushing_yards":444.0,
@@ -960,6 +1006,8 @@
   },
   {
     "display_name":"Zack Moss",
+    "position":"RB",
+    "team":"BUF",
     "age":27,
     "carries":74,
     "rushing_yards":242.0,
@@ -996,6 +1044,8 @@
   },
   {
     "display_name":"Samaje Perine",
+    "position":"RB",
+    "team":"CIN",
     "age":29,
     "carries":20,
     "rushing_yards":92.0,
@@ -1032,6 +1082,8 @@
   },
   {
     "display_name":"Isiah Pacheco",
+    "position":"RB",
+    "team":"KC",
     "age":26,
     "carries":83,
     "rushing_yards":310.0,
@@ -1068,6 +1120,8 @@
   },
   {
     "display_name":"Nick Chubb",
+    "position":"RB",
+    "team":"CLE",
     "age":29,
     "carries":102,
     "rushing_yards":332.0,
@@ -1086,6 +1140,8 @@
   },
   {
     "display_name":"Miles Sanders",
+    "position":"RB",
+    "team":"PHI",
     "age":28,
     "carries":55,
     "rushing_yards":205.0,
@@ -1104,6 +1160,8 @@
   },
   {
     "display_name":"Trey Benson",
+    "position":"RB",
+    "team":"LAR",
     "age":22,
     "carries":63,
     "rushing_yards":291.0,
@@ -1122,6 +1180,8 @@
   },
   {
     "display_name":"Christian McCaffrey",
+    "position":"RB",
+    "team":"49ers",
     "age":28,
     "carries":50,
     "rushing_yards":202.0,
@@ -1194,6 +1254,8 @@
   },
   {
     "display_name":"Ezekiel Elliott",
+    "position":"RB",
+    "team":"FA",
     "age":29,
     "carries":74,
     "rushing_yards":226.0,
@@ -1248,6 +1310,8 @@
   },
   {
     "display_name":"D'Onta Foreman",
+    "position":"RB",
+    "team":"CHI",
     "age":29,
     "carries":71,
     "rushing_yards":232.0,
@@ -1266,6 +1330,8 @@
   },
   {
     "display_name":"Blake Corum",
+    "position":"RB",
+    "team":"LAC",
     "age":24,
     "carries":58,
     "rushing_yards":207.0,
@@ -1320,6 +1386,8 @@
   },
   {
     "display_name":"Roschon Johnson",
+    "position":"RB",
+    "team":"CHI",
     "age":24,
     "carries":55,
     "rushing_yards":150.0,
