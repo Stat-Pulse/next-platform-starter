@@ -15,11 +15,11 @@ export default function Support() {
       items: [
         {
           question: 'How do I create an account?',
-          answer: 'Go to the homepage and click "Sign Up". Enter your email, create a password, and follow the prompts to verify your account.',
+          answer: 'Click &quot;Forgot Password&quot; on the login page, enter your email...',
         },
         {
           question: 'How do I reset my password?',
-          answer: 'Click "Forgot Password" on the login page, enter your email, and follow the link sent to reset your password.',
+          answer: 'Click &quot;Forgot Password&quot; on the login page, enter your email, and follow the link sent to reset your password.',
         },
       ],
     },
