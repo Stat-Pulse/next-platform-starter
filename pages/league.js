@@ -32,39 +32,87 @@ export default function LeaguePage() {
               </p>
             </SectionWrapper>
 
-            <SectionWrapper title={<a href="/league-news" className="text-red-600 hover:underline">Trending Topics</a>}>
+           <SectionWrapper title={
+              <Link href="/league-news" className="text-red-600 hover:underline">
+                Schedule Results
+              </Link>
+            }>
               <TrendingTopics />
             </SectionWrapper>
 
-            <SectionWrapper title={<a href="/schedule-results" className="text-red-600 hover:underline">Season Snapshot</a>}>
+           <SectionWrapper title={
+              <Link href="/schedule-results" className="text-red-600 hover:underline">
+                Trending Topics
+              </Link>
+            }>
+              <ScheduleResults />
+            </SectionWrapper>
+
+            <SectionWrapper title={
+              <Link href="/season-snapshot" className="text-red-600 hover:underline">
+                Season Snapshot
+              </Link>
+            }>
               <SeasonSnapshot />
             </SectionWrapper>
 
-            <SectionWrapper title={<a href="/stat-tracker" className="text-red-600 hover:underline">Key Statistics Leaders</a>}>
-              <KeyStatisticsLeaders linkPlayers />
+            <SectionWrapper title={
+              <Link href="/key-statistics-leaders" className="text-red-600 hover:underline">
+                Key Statistics Leaders
+            </Link>
+            }>
+              <KeyStatisticsLeaders />
             </SectionWrapper>
 
-            <SectionWrapper title={<a href="/betting-book" className="text-red-600 hover:underline">Betting Odds Highlights</a>}>
-              <BettingOddsHighlights />
+            <SectionWrapper title={
+              <Link href="/betting-book" className="text-red-600 hover:underline">
+                Betting Book
+            </Link>
+            }>
+              <BettingBook />
             </SectionWrapper>
 
-            <SectionWrapper title={<a href="/fantasy" className="text-red-600 hover:underline">Fantasy Football Insights</a>}>
-              <FantasyFootballInsights />
+            <SectionWrapper title={
+              <Link href="/fantasy" className="text-red-600 hover:underline">
+                Fantasy
+            </Link>
+            }>
+              <Fantasy />
+            </SectionWrapper>
+
+            <SectionWrapper title={
+              <Link href="/Video-Content-&-Podcasts" className="text-red-600 hover:underline">
+                Media Vault
+            </Link>
+            }>
+              <MediaVault />
             </SectionWrapper>
 
             <SectionWrapper title={<a href="/media-vault" className="text-red-600 hover:underline">Power Rankings</a>}>
               <PowerRankings />
             </SectionWrapper>
 
-            <SectionWrapper title={<a href="/media-vault" className="text-red-600 hover:underline">Video Content & Podcasts</a>}>
-              <VideoContent />
+            <SectionWrapper title={
+              <Link href="/power-rankings" className="text-red-600 hover:underline">
+                Power Rankings
+            </Link>
+            }>
+              <PowerRankings />
             </SectionWrapper>
 
-            <SectionWrapper title="Engage with the NFL">
-              <EngageNFL />
+            <SectionWrapper title={
+              <Link href="/engage-with-the-nfl" className="text-red-600 hover:underline">
+                EngageNFL
+            </Link>
+            }>
+              <Engage NFL />
             </SectionWrapper>
 
-            <SectionWrapper title="Explore More">
+            <SectionWrapper title={
+              <Link href="/explore-more" className="text-red-600 hover:underline">
+                Explore More
+            </Link>
+            }>
               <ExploreMore />
             </SectionWrapper>
 
