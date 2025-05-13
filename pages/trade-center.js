@@ -1,92 +1,42 @@
 // pages/trade-center.js
-
-import { useState, useEffect } from 'react';
-import LeagueLayout from '@/components/LeagueLayout';
-import TradeCenterTabs from '@/components/trade/TradeCenterTabs';
-import TradeModal from '@/components/trade/TradeModal';
-import ReviewTradeModal from '@/components/trade/ReviewTradeModal';
+import React from 'react';
+import TradeTabs from '../components/TradeCenter/TradeTabs';
+import TradeModals from '../components/TradeCenter/TradeModals';
+import TradeContent from '../components/TradeCenter/TradeContent';
 
 export default function TradeCenterPage() {
-  const [activeTab, setActiveTab] = useState('new');
-  const [showTradeModal, setShowTradeModal] = useState(false);
-  const [showReviewModal, setShowReviewModal] = useState(false);
-  const [teams, setTeams] = useState([]);
-  const [pendingTrades, setPendingTrades] = useState([]);
-  const [tradeHistory, setTradeHistory] = useState([]);
-  const [rejectedTrades, setRejectedTrades] = useState([]);
-  const [tradeBlock, setTradeBlock] = useState([]);
-  const [activeTrade, setActiveTrade] = useState(null);
-
-  useEffect(() => {
-    // Load mock data here or fetch from API
-    import('@/data/mockTradeData.json').then((mod) => {
-      setTeams(mod.teams);
-      setPendingTrades(mod.pendingTrades);
-      setTradeHistory(mod.tradeHistory);
-      setRejectedTrades(mod.rejectedTrades);
-      setTradeBlock(mod.tradeBlock);
-    });
-  }, []);
-
-  const openTradeModal = (trade = null) => {
-    setActiveTrade(trade);
-    setShowTradeModal(true);
-  };
-
-  const openReviewModal = () => {
-    setShowReviewModal(true);
-  };
-
-  const closeModals = () => {
-    setShowTradeModal(false);
-    setShowReviewModal(false);
-    setActiveTrade(null);
-  };
-
   return (
-    <LeagueLayout title="Trade Center">
-      <div className="space-y-6">
-        <TradeCenterTabs
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          onStartTrade={openTradeModal}
-          teams={teams}
-          pendingTrades={pendingTrades}
-          tradeHistory={tradeHistory}
-          rejectedTrades={rejectedTrades}
-          tradeBlock={tradeBlock}
-          setPendingTrades={setPendingTrades}
-          setTradeHistory={setTradeHistory}
-          setRejectedTrades={setRejectedTrades}
-          setTradeBlock={setTradeBlock}
-          setActiveTrade={setActiveTrade}
-          openTradeModal={openTradeModal}
-        />
+    <div className="bg-gray-50 text-gray-800 min-h-screen">
+      {/* Page content wrapped for layout consistency */}
+      <main className="container mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Sidebar */}
+          <aside className="bg-white rounded-lg shadow p-6">
+            {/* You can move this sidebar into a layout if it’s used elsewhere */}
+            <ul className="space-y-2 text-sm font-medium">
+              <li><a href="/fantasy" className="text-gray-800 hover:text-red-600">Dashboard</a></li>
+              <li><a href="/my-team" className="text-gray-800 hover:text-red-600">My Team</a></li>
+              <li><a href="/current-matchup" className="text-gray-800 hover:text-red-600">Current Matchup</a></li>
+              <li><a href="/live-scoring" className="text-gray-800 hover:text-red-600">Live Scoring</a></li>
+              <li><a href="/league-schedule" className="text-gray-800 hover:text-red-600">League Schedule</a></li>
+              <li><a href="/player-stats" className="text-gray-800 hover:text-red-600">Player Stats</a></li>
+              <li><a href="/free-agent-listings" className="text-gray-800 hover:text-red-600">Free Agent Listings</a></li>
+              <li><a href="/trade-center" className="text-red-600 font-semibold bg-gray-100 rounded p-2">Trade Center</a></li>
+              <li><a href="/draft-review" className="text-gray-800 hover:text-red-600">Draft Review</a></li>
+            </ul>
+          </aside>
 
-        {showTradeModal && (
-          <TradeModal
-            teams={teams}
-            activeTrade={activeTrade}
-            onClose={closeModals}
-            onReview={openReviewModal}
-          />
-        )}
+          {/* Trade Center Content */}
+          <div className="md:col-span-3 space-y-6">
+            <h2 className="text-xl font-semibold text-gray-800">Trade Center</h2>
+            <TradeTabs />
+            <TradeContent />
+          </div>
+        </div>
+      </main>
 
-        {showReviewModal && (
-          <ReviewTradeModal
-            trade={activeTrade}
-            onSend={() => {
-              setPendingTrades((prev) => [...prev, activeTrade]);
-              closeModals();
-            }}
-            onEdit={() => {
-              setShowReviewModal(false);
-              setShowTradeModal(true);
-            }}
-            onCancel={closeModals}
-          />
-        )}
-      </div>
-    </LeagueLayout>
+      {/* Modals for Trade Proposals */}
+      <TradeModals />
+    </div>
   );
 }
