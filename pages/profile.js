@@ -16,59 +16,72 @@ export default function ProfilePage() {
 
   if (!user) return null
 
-  const { username, avatar, email, favoriteTeams, favoritePlayers, points, badges, leaderboardRank } = user
+  const { username, avatar, email, favoriteTeams, favoritePlayers, points, badges, leaderboardRank, subscription = 'Free' } = user
 
   return (
     <>
       <Header />
-      <main className="bg-gray-100 py-10">
-        <div className="container mx-auto px-6 space-y-10">
+      <main className="bg-gray-100 py-10 min-h-screen">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
 
-          {/* Welcome and settings */}
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800">Welcome, {username}!</h1>
-              <p className="text-gray-600">Track your stats, insights, and activity below.</p>
+          {/* Welcome + Avatar */}
+          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start gap-6">
+            <div className="flex items-center gap-4">
+              <img
+                src={avatar || '/images/default-avatar.png'}
+                alt="User Avatar"
+                className="w-24 h-24 rounded-full border-4 border-blue-500 shadow-md"
+              />
+              <div>
+                <h1 className="text-3xl font-bold text-gray-800">Welcome, {username}!</h1>
+                <p className="text-gray-600">Subscription: <strong>{subscription}</strong></p>
+                <p className="text-sm text-gray-500">{subscription === 'Free' ? '🚫 Limited access' : '✅ Full access'}</p>
+              </div>
             </div>
             <button onClick={() => setShowSettings(true)} className="text-gray-700 hover:text-red-600">
               <FaCog size={24} />
             </button>
           </div>
 
-          {/* Personalized blocks */}
+          {/* Personalized Content Blocks */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded shadow">
+            <div className="bg-white p-6 rounded-2xl shadow">
               <h2 className="text-xl font-semibold mb-2">Fantasy Hub</h2>
               {favoritePlayers.map(p => (
                 <p key={p} className="text-gray-600">{p}: 12.4 PPR · Waiver value high</p>
               ))}
               <p className="text-sm text-blue-600 mt-2">More fantasy insights →</p>
             </div>
-            <div className="bg-white p-6 rounded shadow">
+
+            <div className="bg-white p-6 rounded-2xl shadow">
               <h2 className="text-xl font-semibold mb-2">Betting Center</h2>
               {favoriteTeams.map(team => (
                 <p key={team} className="text-gray-600">{team} -2.5 vs Opponent · Line shifted</p>
               ))}
               <p className="text-sm text-blue-600 mt-2">View betting trends →</p>
             </div>
-            <div className="bg-white p-6 rounded shadow">
+
+            <div className="bg-white p-6 rounded-2xl shadow">
               <h2 className="text-xl font-semibold mb-2">News & Analysis</h2>
               {favoriteTeams.map(team => (
                 <p key={team} className="text-gray-600">Breaking: {team} star player injured (Week 7)</p>
               ))}
               <p className="text-sm text-blue-600 mt-2">View full news feed →</p>
             </div>
-            <div className="bg-white p-6 rounded shadow">
+
+            <div className="bg-white p-6 rounded-2xl shadow">
               <h2 className="text-xl font-semibold mb-2">Community Forum</h2>
               <p className="text-gray-600">New comment on "Is Burrow top 3?" thread.</p>
               <p className="text-sm text-blue-600 mt-2">View forums →</p>
             </div>
-            <div className="bg-white p-6 rounded shadow">
+
+            <div className="bg-white p-6 rounded-2xl shadow">
               <h2 className="text-xl font-semibold mb-2">Personalized Insights</h2>
               <p className="text-gray-600">Your team {favoriteTeams[0]} has a +EPA advantage vs opponent.</p>
               <p className="text-gray-600">{favoritePlayers[0]} projected to exceed 17.3 PPR in Week 8.</p>
             </div>
-            <div className="bg-white p-6 rounded shadow">
+
+            <div className="bg-white p-6 rounded-2xl shadow">
               <h2 className="text-xl font-semibold mb-2">Activity Feed</h2>
               <ul className="text-sm text-gray-600 list-disc list-inside">
                 <li>Viewed player profile: Ja'Marr Chase</li>
@@ -78,16 +91,16 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Saved and Followed */}
+          {/* Saved Content / Followed Entities */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white p-6 rounded shadow">
+            <div className="bg-white p-6 rounded-2xl shadow">
               <h2 className="text-xl font-semibold mb-2">Saved Content</h2>
               <ul className="list-disc list-inside text-sm text-gray-600">
                 <li>Player Comparison: Allen vs Mahomes</li>
                 <li>Article: Fantasy Sleepers Week 10</li>
               </ul>
             </div>
-            <div className="bg-white p-6 rounded shadow">
+            <div className="bg-white p-6 rounded-2xl shadow">
               <h2 className="text-xl font-semibold mb-2">Followed Entities</h2>
               <p className="text-gray-600">Teams: {favoriteTeams.join(', ')}</p>
               <p className="text-gray-600">Players: {favoritePlayers.join(', ')}</p>
@@ -96,11 +109,11 @@ export default function ProfilePage() {
 
           {/* Achievements */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded shadow">
+            <div className="bg-white p-6 rounded-2xl shadow">
               <h2 className="text-xl font-semibold mb-2">Points</h2>
               <p className="text-gray-600">{points} Points</p>
             </div>
-            <div className="bg-white p-6 rounded shadow">
+            <div className="bg-white p-6 rounded-2xl shadow">
               <h2 className="text-xl font-semibold mb-2">Badges</h2>
               <div className="flex flex-wrap gap-2">
                 {badges.map(badge => (
@@ -108,7 +121,7 @@ export default function ProfilePage() {
                 ))}
               </div>
             </div>
-            <div className="bg-white p-6 rounded shadow">
+            <div className="bg-white p-6 rounded-2xl shadow">
               <h2 className="text-xl font-semibold mb-2">Leaderboard</h2>
               <p className="text-gray-600">Rank #{leaderboardRank}</p>
             </div>
