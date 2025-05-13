@@ -13,7 +13,7 @@ import { NextResponse } from 'next/server';
          });
 
          // Test query: Fetch up to 10 rows from the users table
-         const [rows] = await connection.execute('SELECT * FROM users LIMIT 10');
+         const [rows] = await connection.execute('SELECT * FROM Players LIMIT 10');
 
          // Return the results as JSON
          return NextResponse.json({
