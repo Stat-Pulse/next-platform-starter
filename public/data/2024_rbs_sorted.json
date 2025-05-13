@@ -1,6 +1,7 @@
 [
   {
     "display_name":"Saquon Barkley",
+    "team":"PHI",
     "age":28,
     "carries":345,
     "rushing_yards":2005.0,
@@ -19,6 +20,7 @@
   },
   {
     "display_name":"Derrick Henry",
+    "team":"BAL",
     "age":31,
     "carries":325,
     "rushing_yards":1921.0,
@@ -37,6 +39,7 @@
   },
   {
     "display_name":"Jahmyr Gibbs",
+    "team":"DET",
     "age":23,
     "carries":250,
     "rushing_yards":1412.0,
@@ -55,6 +58,7 @@
   },
   {
     "display_name":"Bijan Robinson",
+    "team":"ATL",
     "age":23,
     "carries":304,
     "rushing_yards":1456.0,
@@ -73,6 +77,7 @@
   },
   {
     "display_name":"Josh Jacobs",
+    "team":"GB",
     "age":27,
     "carries":301,
     "rushing_yards":1329.0,
@@ -91,6 +96,7 @@
   },
   {
     "display_name":"Jonathan Taylor",
+    "team":"IND",
     "age":26,
     "carries":303,
     "rushing_yards":1431.0,
@@ -109,6 +115,7 @@
   },
   {
     "display_name":"Aaron Jones",
+    "team":"MIN",
     "age":30,
     "carries":255,
     "rushing_yards":1138.0,
@@ -127,6 +134,7 @@
   },
   {
     "display_name":"Bucky Irving",
+    "team":"TB",
     "age":22,
     "carries":207,
     "rushing_yards":1122.0,
@@ -145,6 +153,7 @@
   },
   {
     "display_name":"James Conner",
+    "team":"ARI",
     "age":30,
     "carries":236,
     "rushing_yards":1094.0,
@@ -163,6 +172,7 @@
   },
   {
     "display_name":"Devon Achane",
+    "team":"MIA",
     "age":23,
     "carries":203,
     "rushing_yards":907.0,
@@ -181,6 +191,7 @@
   },
   {
     "display_name":"Alvin Kamara",
+    "team":"NO",
     "age":29,
     "carries":228,
     "rushing_yards":950.0,
@@ -199,6 +210,7 @@
   },
   {
     "display_name":"Kyren Williams",
+    "team":"LAR",
     "age":24,
     "carries":316,
     "rushing_yards":1299.0,
@@ -217,6 +229,7 @@
   },
   {
     "display_name":"Chuba Hubbard",
+    "team":"CAR",
     "age":25,
     "carries":250,
     "rushing_yards":1195.0,
@@ -235,6 +248,7 @@
   },
   {
     "display_name":"Breece Hall",
+    "team":"NYJ",
     "age":23,
     "carries":209,
     "rushing_yards":876.0,
@@ -253,6 +267,7 @@
   },
   {
     "display_name":"Chase Brown",
+    "team":"CIN",
     "age":25,
     "carries":229,
     "rushing_yards":990.0,
@@ -271,6 +286,7 @@
   },
   {
     "display_name":"D'Andre Swift",
+    "team":"DET",
     "age":26,
     "carries":253,
     "rushing_yards":959.0,
@@ -289,6 +305,7 @@
   },
   {
     "display_name":"Rico Dowdle",
+    "team":"FA",
     "age":26,
     "carries":235,
     "rushing_yards":1079.0,
@@ -307,6 +324,7 @@
   },
   {
     "display_name":"Najee Harris",
+    "team":"PIT",
     "age":27,
     "carries":263,
     "rushing_yards":1043.0,
@@ -325,6 +343,7 @@
   },
   {
     "display_name":"Joe Mixon",
+    "team":"HOU",
     "age":28,
     "carries":245,
     "rushing_yards":1016.0,
@@ -343,6 +362,7 @@
   },
   {
     "display_name":"Tony Pollard",
+    "team":"TEN",
     "age":28,
     "carries":260,
     "rushing_yards":1079.0,
@@ -361,6 +381,7 @@
   },
   {
     "display_name":"James Cook",
+    "team":"BUF",
     "age":25,
     "carries":207,
     "rushing_yards":1009.0,
@@ -379,6 +400,7 @@
   },
   {
     "display_name":"Tyrone Tracy",
+    "team":"NYG",
     "age":25,
     "carries":192,
     "rushing_yards":839.0,
@@ -397,6 +419,7 @@
   },
   {
     "display_name":"David Montgomery",
+    "team":"DET",
     "age":27,
     "carries":185,
     "rushing_yards":775.0,
