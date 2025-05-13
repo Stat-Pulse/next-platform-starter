@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import PlayerModal from '../components/PlayerModal';
+import PlayerModal from '../components/fantasy/PlayerModal';
 import playersData from '../data/fantasy_stats.json'; // Ensure this file exists
 
 export default function FantasyStats() {
