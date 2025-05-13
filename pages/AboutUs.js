@@ -26,7 +26,7 @@ export default function About() {
         <section className="bg-white shadow-md rounded-lg p-6">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-700 mb-4">Our Team</h2>
           <p className="text-gray-600 mb-4">
-            We're a team of sports enthusiasts, data scientists, and developers united by a love for football and technology. Based on our passion for the game, we built StatPulse to bridge the gap between raw data and meaningful insights.
+            We&rsquo;re a team of sports enthusiasts, data scientists, and developers united by a love for football and technology.
           </p>
           <p className="text-gray-600">
             Have feedback or ideas? Reach out to us at{' '}
