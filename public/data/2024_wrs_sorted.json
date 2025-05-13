@@ -1,6 +1,8 @@
 [
   {
     "display_name":"Ja'Marr Chase",
+    "position":"WR",
+    "team":"CIN",
     "age":25,
     "targets":175,
     "receptions":127,
@@ -18,6 +20,8 @@
   },
   {
     "display_name":"Justin Jefferson",
+    "position":"WR",
+    "team":"MIN",
     "age":25,
     "targets":154,
     "receptions":103,
@@ -35,6 +39,8 @@
   },
   {
     "display_name":"Brian Thomas",
+    "position":"WR",
+    "team":"BUF",
     "age":22,
     "targets":133,
     "receptions":87,
@@ -52,6 +58,8 @@
   },
   {
     "display_name":"Amon-Ra St. Brown",
+    "position":"WR",
+    "team":"DET",
     "age":25,
     "targets":141,
     "receptions":115,
@@ -69,6 +77,8 @@
   },
   {
     "display_name":"Drake London",
+    "position":"WR",
+    "team":"ATL",
     "age":23,
     "targets":158,
     "receptions":100,
@@ -86,6 +96,8 @@
   },
   {
     "display_name":"CeeDee Lamb",
+    "position":"WR",
+    "team":"DAL",
     "age":26,
     "targets":152,
     "receptions":101,
@@ -103,6 +115,8 @@
   },
   {
     "display_name":"Jerry Jeudy",
+    "position":"WR",
+    "team":"DEN",
     "age":26,
     "targets":145,
     "receptions":90,
@@ -120,6 +134,8 @@
   },
   {
     "display_name":"Malik Nabers",
+    "position":"WR",
+    "team":"NYG",
     "age":21,
     "targets":170,
     "receptions":109,
@@ -137,6 +153,8 @@
   },
   {
     "display_name":"Jaxon Smith-Njigba",
+    "position":"WR",
+    "team":"SEA",
     "age":23,
     "targets":137,
     "receptions":100,
@@ -154,6 +172,8 @@
   },
   {
     "display_name":"Ladd McConkey",
+    "position":"WR",
+    "team":"LVR",
     "age":23,
     "targets":112,
     "receptions":82,
@@ -171,6 +191,8 @@
   },
   {
     "display_name":"Zay Flowers",
+    "position":"WR",
+    "team":"BAL",
     "age":24,
     "targets":116,
     "receptions":74,
@@ -188,6 +210,8 @@
   },
   {
     "display_name":"Garrett Wilson",
+    "position":"WR",
+    "team":"NYJ",
     "age":24,
     "targets":153,
     "receptions":101,
@@ -205,6 +229,8 @@
   },
   {
     "display_name":"Terry McLaurin",
+    "position":"WR",
+    "team":"WSH",
     "age":29,
     "targets":117,
     "receptions":82,
@@ -222,6 +248,8 @@
   },
   {
     "display_name":"Courtland Sutton",
+    "position":"WR",
+    "team":"DEN",
     "age":29,
     "targets":135,
     "receptions":81,
@@ -239,6 +267,8 @@
   },
   {
     "display_name":"A.J. Brown",
+    "position":"WR",
+    "team":"PHI",
     "age":27,
     "targets":97,
     "receptions":67,
@@ -256,6 +286,8 @@
   },
   {
     "display_name":"Calvin Ridley",
+    "position":"WR",
+    "team":"ATL",
     "age":30,
     "targets":120,
     "receptions":64,
@@ -273,6 +305,8 @@
   },
   {
     "display_name":"Davante Adams",
+    "position":"WR",
+    "team":"FA",
     "age":32,
     "targets":141,
     "receptions":85,
@@ -290,6 +324,8 @@
   },
   {
     "display_name":"Jameson Williams",
+    "position":"WR",
+    "team":"DET",
     "age":24,
     "targets":91,
     "receptions":58,
@@ -307,6 +343,8 @@
   },
   {
     "display_name":"Jakobi Meyers",
+    "position":"WR",
+    "team":"LVR",
     "age":28,
     "targets":129,
     "receptions":87,
@@ -324,6 +362,8 @@
   },
   {
     "display_name":"D.J. Moore",
+    "position":"WR",
+    "team":"CAR",
     "age":28,
     "targets":140,
     "receptions":98,
@@ -341,6 +381,8 @@
   },
   {
     "display_name":"Puka Nacua",
+    "position":"WR",
+    "team":"LAR",
     "age":23,
     "targets":106,
     "receptions":79,
@@ -358,6 +400,8 @@
   },
   {
     "display_name":"Jayden Reed",
+    "position":"WR",
+    "team":"GB",
     "age":25,
     "targets":75,
     "receptions":55,
@@ -375,6 +419,8 @@
   },
   {
     "display_name":"Tyreek Hill",
+    "position":"WR",
+    "team":"MIA",
     "age":31,
     "targets":122,
     "receptions":81,
@@ -392,6 +438,8 @@
   },
   {
     "display_name":"Nico Collins",
+    "position":"WR",
+    "team":"HOU",
     "age":26,
     "targets":99,
     "receptions":68,
@@ -409,6 +457,8 @@
   },
   {
     "display_name":"Mike Evans",
+    "position":"WR",
+    "team":"TB",
     "age":31,
     "targets":110,
     "receptions":74,
@@ -426,6 +476,8 @@
   },
   {
     "display_name":"DK Metcalf",
+    "position":"WR",
+    "team":"PIT",
     "age":27,
     "targets":108,
     "receptions":66,
@@ -443,6 +495,8 @@
   },
   {
     "display_name":"Darnell Mooney",
+    "position":"WR",
+    "team":"ATL",
     "age":27,
     "targets":106,
     "receptions":64,
@@ -460,6 +514,8 @@
   },
   {
     "display_name":"Jauan Jennings",
+    "position":"WR",
+    "team":"49ers",
     "age":27,
     "targets":113,
     "receptions":77,
@@ -477,6 +533,8 @@
   },
   {
     "display_name":"Tee Higgins",
+    "position":"WR",
+    "team":"CIN",
     "age":26,
     "targets":109,
     "receptions":73,
@@ -494,6 +552,8 @@
   },
   {
     "display_name":"Jordan Addison",
+    "position":"WR",
+    "team":"MIN",
     "age":23,
     "targets":99,
     "receptions":63,
@@ -511,6 +571,8 @@
   },
   {
     "display_name":"George Pickens",
+    "position":"WR",
+    "team":"DAL",
     "age":24,
     "targets":103,
     "receptions":59,
@@ -527,7 +589,9 @@
     "fantasy_points_ppr":164.4
   },
   {
-    "display_name":"Marvin Harrison",
+    "display_name":"Marvin Harrison Jr.",
+    "position":"WR",
+    "team":"ARI",
     "age":22,
     "targets":116,
     "receptions":62,
@@ -545,6 +609,8 @@
   },
   {
     "display_name":"DeVonta Smith",
+    "position":"WR",
+    "team":"PHI",
     "age":26,
     "targets":89,
     "receptions":68,
@@ -613,6 +679,8 @@
   },
   {
     "display_name":"Deebo Samuel",
+    "position":"WR",
+    "team":"49ers",
     "age":29,
     "targets":81,
     "receptions":51,
@@ -664,6 +732,8 @@
   },
   {
     "display_name":"Rashod Bateman",
+    "position":"WR",
+    "team":"BAL",
     "age":25,
     "targets":72,
     "receptions":45,
@@ -681,6 +751,8 @@
   },
   {
     "display_name":"Jaylen Waddle",
+    "position":"WR",
+    "team":"MIA",
     "age":26,
     "targets":83,
     "receptions":58,
@@ -698,6 +770,8 @@
   },
   {
     "display_name":"Rome Odunze",
+    "position":"WR",
+    "team":"CHI",
     "age":23,
     "targets":101,
     "receptions":54,
@@ -715,6 +789,8 @@
   },
   {
     "display_name":"Keenan Allen",
+    "position":"WR",
+    "team":"FA",
     "age":33,
     "targets":121,
     "receptions":70,
@@ -732,6 +808,8 @@
   },
   {
     "display_name":"Xavier Worthy",
+    "position":"WR",
+    "team":"KC",
     "age":22,
     "targets":98,
     "receptions":59,
@@ -749,6 +827,8 @@
   },
   {
     "display_name":"Cooper Kupp",
+    "position":"WR",
+    "team":"SEA",
     "age":31,
     "targets":100,
     "receptions":67,
@@ -800,6 +880,8 @@
   },
   {
     "display_name":"Tank Dell",
+    "position":"WR",
+    "team":"HOU",
     "age":25,
     "targets":81,
     "receptions":51,
@@ -817,6 +899,8 @@
   },
   {
     "display_name":"Christian Watson",
+    "position":"WR",
+    "team":"GB",
     "age":26,
     "targets":53,
     "receptions":29,
@@ -851,6 +935,8 @@
   },
   {
     "display_name":"Adam Thielen",
+    "position":"WR",
+    "team":"CAR",
     "age":34,
     "targets":62,
     "receptions":48,
@@ -919,6 +1005,8 @@
   },
   {
     "display_name":"Tyler Lockett",
+    "position":"WR",
+    "team":"SEA",
     "age":32,
     "targets":74,
     "receptions":49,
@@ -970,6 +1058,8 @@
   },
   {
     "display_name":"Josh Palmer",
+    "position":"WR",
+    "team":"LAC",
     "age":25,
     "targets":65,
     "receptions":39,
@@ -1004,6 +1094,8 @@
   },
   {
     "display_name":"Chris Godwin",
+    "position":"WR",
+    "team":"TB",
     "age":29,
     "targets":62,
     "receptions":50,
@@ -1021,6 +1113,8 @@
   },
   {
     "display_name":"Tutu Atwell",
+    "position":"WR",
+    "team":"LAR",
     "age":25,
     "targets":62,
     "receptions":42,
@@ -1038,6 +1132,8 @@
   },
   {
     "display_name":"Keon Coleman",
+    "position":"WR",
+    "team":"BUF",
     "age":21,
     "targets":57,
     "receptions":29,
@@ -1106,6 +1202,8 @@
   },
   {
     "display_name":"Marvin Mims",
+    "position":"WR",
+    "team":"DEN",
     "age":23,
     "targets":52,
     "receptions":39,
@@ -1242,6 +1340,8 @@
   },
   {
     "display_name":"Stefon Diggs",
+    "position":"WR",
+    "team":"FA",
     "age":31,
     "targets":64,
     "receptions":47,
@@ -1327,6 +1427,8 @@
   },
   {
     "display_name":"Noah Brown",
+    "position":"WR",
+    "team":"WSH",
     "age":29,
     "targets":56,
     "receptions":35,
@@ -1412,6 +1514,8 @@
   },
   {
     "display_name":"Chris Olave",
+    "position":"WR",
+    "team":"NO",
     "age":24,
     "targets":44,
     "receptions":32,
@@ -1514,6 +1618,8 @@
   },
   {
     "display_name":"Christian Kirk",
+    "position":"WR",
+    "team":"JAX",
     "age":28,
     "targets":47,
     "receptions":27,
@@ -1565,6 +1671,8 @@
   },
   {
     "display_name":"Brandon Aiyuk",
+    "position":"WR",
+    "team":"49ers",
     "age":27,
     "targets":47,
     "receptions":25,
@@ -1650,6 +1758,8 @@
   },
   {
     "display_name":"Adonai Mitchell",
+    "position":"WR",
+    "team":"IND",
     "age":22,
     "targets":55,
     "receptions":23,
@@ -1684,6 +1794,8 @@
   },
   {
     "display_name":"Jordan Whittington",
+    "position":"WR",
+    "team":"LAR",
     "age":24,
     "targets":28,
     "receptions":22,
@@ -1701,6 +1813,8 @@
   },
   {
     "display_name":"Mike Williams",
+    "position":"WR",
+    "team":"LAC",
     "age":30,
     "targets":34,
     "receptions":21,
@@ -1718,6 +1832,8 @@
   },
   {
     "display_name":"Lil'Jordan Humphrey",
+    "position":"WR",
+    "team":"DEN",
     "age":27,
     "targets":45,
     "receptions":31,
@@ -1837,6 +1953,8 @@
   },
   {
     "display_name":"Brandin Cooks",
+    "position":"WR",
+    "team":"DAL",
     "age":31,
     "targets":54,
     "receptions":26,
@@ -1854,6 +1972,8 @@
   },
   {
     "display_name":"John Metchie",
+    "position":"WR",
+    "team":"HOU",
     "age":24,
     "targets":37,
     "receptions":24,
@@ -1888,6 +2008,8 @@
   },
   {
     "display_name":"Gabe Davis",
+    "position":"WR",
+    "team":"BUF",
     "age":26,
     "targets":42,
     "receptions":20,
@@ -1973,6 +2095,8 @@
   },
   {
     "display_name":"Cedrick Wilson",
+    "position":"WR",
+    "team":"MIA",
     "age":30,
     "targets":27,
     "receptions":20,
