@@ -1,6 +1,9 @@
+// File: components/fantasy/PlayerProfile.js
+
 'use client'
 
 import { useEffect, useState } from 'react'
+import TrendLineChart from '../charts/TrendLineChart'
 
 export default function PlayerProfile({ playerId }) {
   const [player, setPlayer] = useState(null)
@@ -63,6 +66,12 @@ export default function PlayerProfile({ playerId }) {
         <p><strong>Height:</strong> {player.height_inches} in</p>
         <p><strong>Weight:</strong> {player.weight} lbs</p>
       </div>
+
+      {gameLogs.length > 0 && (
+        <div className="mb-8">
+          <TrendLineChart data={gameLogs} stat="fantasy_points_ppr" label="Fantasy Points (PPR)" />
+        </div>
+      )}
 
       {gameLogs.length > 0 && (
         <div className="mt-8">
