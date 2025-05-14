@@ -34,7 +34,7 @@ exports.handler = async function (event) {
       body: JSON.stringify(rows),
     };
   } catch (err) {
-    console.error('DB Error:', err);
+    console.error('DB Error:', err.message);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Database error' }),
