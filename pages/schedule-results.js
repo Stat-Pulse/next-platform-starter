@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import Link from 'next/link'
 
 export default function ScheduleResults() {
   const [games, setGames] = useState([])
@@ -42,7 +43,6 @@ export default function ScheduleResults() {
 
   const today = new Date()
 
-  // Filter by selected team
   const filteredGames = selectedTeam
     ? games.filter(
         g => g.home_team_name === selectedTeam || g.away_team_name === selectedTeam
@@ -77,7 +77,6 @@ export default function ScheduleResults() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
               >
                 <option value="2024">2024</option>
-                {/* Add more options as you add seasons */}
               </select>
             </div>
 
@@ -113,6 +112,18 @@ export default function ScheduleResults() {
               </select>
             </div>
           </div>
+
+          {/* View Profile Link */}
+          {selectedPlayer && (
+            <div className="text-right mt-2">
+              <Link
+                href={`/player-stats?player_id=${selectedPlayer}`}
+                className="text-blue-600 hover:underline text-sm"
+              >
+                View Full Profile →
+              </Link>
+            </div>
+          )}
 
           {/* Schedule Table */}
           {loading ? (
