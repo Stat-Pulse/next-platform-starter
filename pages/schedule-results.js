@@ -6,11 +6,21 @@ import Footer from '../components/Footer'
 
 export default function ScheduleResults() {
   const [games, setGames] = useState([])
+  const [players, setPlayers] = useState([])
   const [loading, setLoading] = useState(true)
+
+  const [season, setSeason] = useState('2024')
   const [selectedTeam, setSelectedTeam] = useState('')
+  const [selectedPlayer, setSelectedPlayer] = useState('')
 
   useEffect(() => {
-    fetch('/.netlify/functions/getGames')
+    const query = new URLSearchParams({
+      season,
+      ...(selectedPlayer && { player: selectedPlayer })
+    }).toString()
+
+    setLoading(true)
+    fetch(`/.netlify/functions/getGames?${query}`)
       .then(res => res.json())
       .then(data => {
         setGames(data)
@@ -20,6 +30,14 @@ export default function ScheduleResults() {
         console.error('Error loading schedule:', err)
         setLoading(false)
       })
+  }, [season, selectedPlayer])
+
+  // Load player list separately
+  useEffect(() => {
+    fetch('/.netlify/functions/getPlayers')
+      .then(res => res.json())
+      .then(data => setPlayers(data))
+      .catch(err => console.error('Failed to load players:', err))
   }, [])
 
   const today = new Date()
@@ -31,14 +49,12 @@ export default function ScheduleResults() {
       )
     : games
 
-  // Group games by week
   const gamesByWeek = filteredGames.reduce((acc, game) => {
     acc[game.week] = acc[game.week] || []
     acc[game.week].push(game)
     return acc
   }, {})
 
-  // Get unique teams for filter dropdown
   const allTeams = Array.from(
     new Set(games.flatMap(g => [g.home_team_name, g.away_team_name]))
   ).sort()
@@ -48,27 +64,57 @@ export default function ScheduleResults() {
       <Header />
       <main className="bg-gray-100 py-10">
         <div className="container mx-auto px-6 space-y-10">
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">2024 Schedule & Results</h1>
+          <h1 className="text-3xl font-bold text-gray-800 mb-4">Schedule & Results</h1>
 
-          {/* Team Filter */}
-          <div className="mb-4">
-            <label htmlFor="team-filter" className="block mb-1 text-gray-700 font-medium">
-              Filter by Team
-            </label>
-            <select
-              id="team-filter"
-              value={selectedTeam}
-              onChange={(e) => setSelectedTeam(e.target.value)}
-              className="w-full md:w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm"
-            >
-              <option value="">All Teams</option>
-              {allTeams.map((team) => (
-                <option key={team} value={team}>{team}</option>
-              ))}
-            </select>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Season Selector */}
+            <div>
+              <label htmlFor="season" className="block mb-1 text-gray-700 font-medium">Season</label>
+              <select
+                id="season"
+                value={season}
+                onChange={(e) => setSeason(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+              >
+                <option value="2024">2024</option>
+                {/* Add more options as you add seasons */}
+              </select>
+            </div>
+
+            {/* Team Filter */}
+            <div>
+              <label htmlFor="team-filter" className="block mb-1 text-gray-700 font-medium">Filter by Team</label>
+              <select
+                id="team-filter"
+                value={selectedTeam}
+                onChange={(e) => setSelectedTeam(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+              >
+                <option value="">All Teams</option>
+                {allTeams.map((team) => (
+                  <option key={team} value={team}>{team}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Player Filter */}
+            <div>
+              <label htmlFor="player-filter" className="block mb-1 text-gray-700 font-medium">Filter by Player</label>
+              <select
+                id="player-filter"
+                value={selectedPlayer}
+                onChange={(e) => setSelectedPlayer(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+              >
+                <option value="">All Players</option>
+                {players.map((p) => (
+                  <option key={p.player_id} value={p.player_id}>{p.player_name}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          {/* Game Table by Week */}
+          {/* Schedule Table */}
           {loading ? (
             <p className="text-gray-600">Loading schedule...</p>
           ) : (
@@ -108,7 +154,9 @@ export default function ScheduleResults() {
                           <tr key={game.game_id}>
                             <td className="p-2">
                               {formattedDate}
-                              {formattedTime && <span className="block text-xs text-gray-500">{formattedTime} CST</span>}
+                              {formattedTime && (
+                                <span className="block text-xs text-gray-500">{formattedTime} CST</span>
+                              )}
                             </td>
                             <td className="p-2">{game.home_team_name} vs {game.away_team_name}</td>
                             <td className="p-2">
