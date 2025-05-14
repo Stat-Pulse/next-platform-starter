@@ -9,8 +9,12 @@ import CustomizeMetricsModal from '../components/CustomizeMetricsModal'
 import ComparisonSections from '../components/ComparisonSections'
 
 export default function Compare() {
-  const [selectedPlayers, setSelectedPlayers] = useState([])
-  const [metrics, setMetrics] = useState(['fantasyPoints', 'efficiency', 'matchup'])
+  const [selectedPlayers, setSelectedPlayers] = useState([
+    '00-0023459', // Example: Aaron Rodgers
+    '00-0033873'  // Example: Josh Allen
+  ])
+  const [metrics, setMetrics] = useState(['tds', 'passYards', 'rushYards', 'receivingYards'])
+  const [viewMode, setViewMode] = useState('career')
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   return (
@@ -30,6 +34,8 @@ export default function Compare() {
 
           <CompareFilters
             metrics={metrics}
+            viewMode={viewMode}
+            onChangeViewMode={setViewMode}
             onOpenCustomize={() => setIsModalOpen(true)}
             onSaveComparison={() => {}}
           />
@@ -46,6 +52,7 @@ export default function Compare() {
       <ComparisonSections
         players={selectedPlayers}
         metrics={metrics}
+        viewMode={viewMode}
       />
 
       <Footer />
