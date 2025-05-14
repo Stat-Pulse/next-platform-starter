@@ -20,9 +20,10 @@ exports.handler = async function (event) {
 
     const [rows] = await connection.execute(`
       SELECT 
-        PSG.player_id, P.player_name, P.position, P.team_id,
+        PSG.player_id, PSG.week,
+        P.player_name, P.position, P.team_id,
         PSG.passing_yards, PSG.rushing_yards, PSG.receiving_yards,
-        PSG.receiving_tds
+        PSG.receptions
       FROM Player_Stats_Game PSG
       JOIN Players P ON PSG.player_id = P.player_id
       WHERE PSG.game_id = ?
