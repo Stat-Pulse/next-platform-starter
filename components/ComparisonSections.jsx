@@ -1,6 +1,7 @@
 // File: components/ComparisonSections.js
 
 import { useEffect, useState } from 'react'
+import CompareBarChart from './charts/CompareBarChart'
 
 export default function ComparisonSections({ players = [], metrics = [], viewMode = 'weekly' }) {
   const [data, setData] = useState([])
@@ -50,28 +51,34 @@ export default function ComparisonSections({ players = [], metrics = [], viewMod
         ) : players.length === 0 ? (
           <p className="text-gray-500">No players selected.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm text-left">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="p-2">Metric</th>
-                  {players.map((p, i) => (
-                    <th key={i} className="p-2">{p || `Player ${i + 1}`}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {metrics.map((metric) => (
-                  <tr key={metric} className="border-t">
-                    <td className="p-2 font-medium text-gray-700">{metric}</td>
-                    {players.map((pid, i) => (
-                      <td key={i} className="p-2 text-gray-700">{getStatValue(pid, metric)}</td>
+          <>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm text-left">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="p-2">Metric</th>
+                    {players.map((p, i) => (
+                      <th key={i} className="p-2">{p || `Player ${i + 1}`}</th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {metrics.map((metric) => (
+                    <tr key={metric} className="border-t">
+                      <td className="p-2 font-medium text-gray-700">{metric}</td>
+                      {players.map((pid, i) => (
+                        <td key={i} className="p-2 text-gray-700">{getStatValue(pid, metric)}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {metrics.includes('tds') && (
+              <CompareBarChart data={data} stat="tds" label="Touchdowns" />
+            )}
+          </>
         )}
       </div>
     </div>
