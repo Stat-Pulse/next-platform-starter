@@ -20,7 +20,7 @@ exports.handler = async function (event) {
 
     const [rows] = await connection.execute(`
       SELECT 
-        PSG.player_id, PSG.week,
+        PSG.player_id,
         P.player_name, P.position, P.team_id,
         PSG.passing_yards, PSG.rushing_yards, PSG.receiving_yards,
         PSG.receptions
