@@ -1,42 +1,107 @@
-// pages/trade-center.js
-import React from 'react';
+import React, { useState } from 'react';
 import TradeTabs from '../components/TradeCenter/TradeTabs';
-import TradeModals from '../components/TradeCenter/TradeModals';
-import TradeContent from '../components/TradeCenter/TradeContent';
+import { TradeModal, ReviewTradeModal } from '../components/TradeCenter/TradeModals';
 
 export default function TradeCenterPage() {
-  return (
-    <div className="bg-gray-50 text-gray-800 min-h-screen">
-      {/* Page content wrapped for layout consistency */}
-      <main className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Sidebar */}
-          <aside className="bg-white rounded-lg shadow p-6">
-            {/* You can move this sidebar into a layout if it’s used elsewhere */}
-            <ul className="space-y-2 text-sm font-medium">
-              <li><a href="/fantasy" className="text-gray-800 hover:text-red-600">Dashboard</a></li>
-              <li><a href="/my-team" className="text-gray-800 hover:text-red-600">My Team</a></li>
-              <li><a href="/current-matchup" className="text-gray-800 hover:text-red-600">Current Matchup</a></li>
-              <li><a href="/live-scoring" className="text-gray-800 hover:text-red-600">Live Scoring</a></li>
-              <li><a href="/league-schedule" className="text-gray-800 hover:text-red-600">League Schedule</a></li>
-              <li><a href="/player-stats" className="text-gray-800 hover:text-red-600">Player Stats</a></li>
-              <li><a href="/free-agent-listings" className="text-gray-800 hover:text-red-600">Free Agent Listings</a></li>
-              <li><a href="/trade-center" className="text-red-600 font-semibold bg-gray-100 rounded p-2">Trade Center</a></li>
-              <li><a href="/draft-review" className="text-gray-800 hover:text-red-600">Draft Review</a></li>
-            </ul>
-          </aside>
+  const [activeTab, setActiveTab] = useState('newTrade');
+  const [showModal, setShowModal] = useState(false);
+  const [showReview, setShowReview] = useState(false);
 
-          {/* Trade Center Content */}
-          <div className="md:col-span-3 space-y-6">
-            <h2 className="text-xl font-semibold text-gray-800">Trade Center</h2>
-            <TradeTabs />
-            <TradeContent />
+  const [partner, setPartner] = useState('');
+  const [offer, setOffer] = useState([]);
+  const [request, setRequest] = useState([]);
+  const [message, setMessage] = useState('');
+
+  const yourAssets = ['Patrick Mahomes', '2026 1st'];
+  const allPartners = ['Gridiron Gurus', 'Touchdown Titans', 'Pigskin Pros'];
+  const partnerAssets = ['Josh Allen', '2026 2nd'];
+
+  const handleReview = () => setShowReview(true);
+  const handleSend = () => {
+    console.log('Trade sent:', { partner, offer, request, message });
+    setShowReview(false);
+    setShowModal(false);
+    resetForm();
+  };
+  const handleEdit = () => {
+    setShowReview(false);
+    setShowModal(true);
+  };
+  const resetForm = () => {
+    setPartner('');
+    setOffer([]);
+    setRequest([]);
+    setMessage('');
+  };
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'newTrade':
+        return (
+          <div>
+            <button
+              onClick={() => setShowModal(true)}
+              className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700"
+            >
+              Start Trade
+            </button>
+            <p className="text-sm text-gray-600 mt-2">
+              Initiate a trade with another team by selecting players and picks.
+            </p>
           </div>
-        </div>
-      </main>
+        );
+      case 'pendingTrades':
+        return <p className="text-gray-600">Pending trades list will be here.</p>;
+      case 'tradeHistory':
+        return <p className="text-gray-600">Accepted & rejected trades history will be here.</p>;
+      case 'tradeBlock':
+        return <p className="text-gray-600">Manage your trade block players here.</p>;
+      case 'rules':
+        return (
+          <ul className="space-y-2 text-sm text-gray-600">
+            <li><strong>Trade Deadline:</strong> November 20, 2025</li>
+            <li><strong>Review Period:</strong> 24 hours for league vote</li>
+            <li><strong>Commissioner Override:</strong> Possible in case of collusion</li>
+          </ul>
+        );
+      default:
+        return null;
+    }
+  };
 
-      {/* Modals for Trade Proposals */}
-      <TradeModals />
-    </div>
+  return (
+    <main className="container mx-auto px-6 py-8">
+      <section className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Trade Center</h2>
+        <TradeTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+        {renderTabContent()}
+      </section>
+
+      {/* Trade Creation Modal */}
+      <TradeModal
+        show={showModal}
+        onClose={() => setShowModal(false)}
+        onReview={handleReview}
+        partner={partner}
+        setPartner={setPartner}
+        offer={offer}
+        setOffer={setOffer}
+        request={request}
+        setRequest={setRequest}
+        message={message}
+        setMessage={setMessage}
+        partners={allPartners}
+        yourAssets={yourAssets}
+        partnerAssets={partnerAssets}
+      />
+
+      {/* Review Modal */}
+      <ReviewTradeModal
+        show={showReview}
+        onEdit={handleEdit}
+        onSend={handleSend}
+        tradeSummary={{ partner, offer, request, message }}
+      />
+    </main>
   );
 }
