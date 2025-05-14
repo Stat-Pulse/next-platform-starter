@@ -13,8 +13,10 @@ exports.handler = async function (event) {
 
   try {
     let query = `
-      SELECT 
-        G.game_id, G.week, G.game_date, G.game_time,
+     SELECT 
+       G.game_id, G.week,
+       DATE_FORMAT(G.game_date, '%Y-%m-%d') AS game_date,
+       TIME_FORMAT(G.game_time, '%H:%i:%s') AS game_time,
         G.home_score, G.away_score,
         G.stadium_name, 
         H.team_abbr AS home_team_name,
