@@ -7,6 +7,7 @@ import Footer from '../components/Footer'
 export default function ScheduleResults() {
   const [games, setGames] = useState([])
   const [loading, setLoading] = useState(true)
+  const [selectedTeam, setSelectedTeam] = useState('')
 
   useEffect(() => {
     fetch('/.netlify/functions/getGames')
@@ -23,12 +24,24 @@ export default function ScheduleResults() {
 
   const today = new Date()
 
+  // Filter by selected team
+  const filteredGames = selectedTeam
+    ? games.filter(
+        g => g.home_team_name === selectedTeam || g.away_team_name === selectedTeam
+      )
+    : games
+
   // Group games by week
-  const gamesByWeek = games.reduce((acc, game) => {
+  const gamesByWeek = filteredGames.reduce((acc, game) => {
     acc[game.week] = acc[game.week] || []
     acc[game.week].push(game)
     return acc
   }, {})
+
+  // Get unique teams for filter dropdown
+  const allTeams = Array.from(
+    new Set(games.flatMap(g => [g.home_team_name, g.away_team_name]))
+  ).sort()
 
   return (
     <>
@@ -37,6 +50,25 @@ export default function ScheduleResults() {
         <div className="container mx-auto px-6 space-y-10">
           <h1 className="text-3xl font-bold text-gray-800 mb-4">2024 Schedule & Results</h1>
 
+          {/* Team Filter */}
+          <div className="mb-4">
+            <label htmlFor="team-filter" className="block mb-1 text-gray-700 font-medium">
+              Filter by Team
+            </label>
+            <select
+              id="team-filter"
+              value={selectedTeam}
+              onChange={(e) => setSelectedTeam(e.target.value)}
+              className="w-full md:w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+            >
+              <option value="">All Teams</option>
+              {allTeams.map((team) => (
+                <option key={team} value={team}>{team}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Game Table by Week */}
           {loading ? (
             <p className="text-gray-600">Loading schedule...</p>
           ) : (
@@ -55,11 +87,29 @@ export default function ScheduleResults() {
                     </thead>
                     <tbody>
                       {gamesByWeek[week].map(game => {
-                        const gameDate = new Date(game.game_date)
+                        const gameDate = new Date(`${game.game_date}T${game.game_time || '00:00:00'}`)
                         const isPast = gameDate < today
+
+                        const formattedDate = gameDate.toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })
+
+                        const formattedTime = game.game_time
+                          ? gameDate.toLocaleTimeString('en-US', {
+                              hour: 'numeric',
+                              minute: '2-digit',
+                              timeZone: 'America/Chicago',
+                            })
+                          : null
+
                         return (
                           <tr key={game.game_id}>
-                            <td className="p-2">{game.game_date}</td>
+                            <td className="p-2">
+                              {formattedDate}
+                              {formattedTime && <span className="block text-xs text-gray-500">{formattedTime} CST</span>}
+                            </td>
                             <td className="p-2">{game.home_team_name} vs {game.away_team_name}</td>
                             <td className="p-2">
                               {game.home_score !== null && game.away_score !== null ? (
