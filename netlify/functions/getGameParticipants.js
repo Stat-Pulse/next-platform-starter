@@ -33,11 +33,10 @@ exports.handler = async function (event) {
       statusCode: 200,
       body: JSON.stringify(rows),
     };
-  } catch (err) {
-    console.error('DB Error:', err.message);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Database error' }),
-    };
-  }
+catch (err) {
+  return {
+    statusCode: 500,
+    body: JSON.stringify({ error: err.message }),
+  };
+}
 };
