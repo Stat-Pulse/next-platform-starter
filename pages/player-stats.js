@@ -26,7 +26,7 @@ export default function PlayerStatsPage() {
 
   useEffect(() => {
     async function fetchData() {
-      const res = await fetch('/data/fantasy/2024_players.json'); // Adjust path as needed
+      const res = await fetch('/data/fantasy/2024_qbs_sorted.json','/data/fantasy/2024_rbs_sorted.json', '/data/fantasy/2024_wrs_sorted.json', '/data/fantasy/2024_tes_sorted.json'); // Adjust path as needed
       const data = await res.json();
       setPlayers(data);
       setFilteredPlayers(data);
