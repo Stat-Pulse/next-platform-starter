@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-export default function PlayerProfile({ playerId }) {
+export default function PlayerStatsClient({ playerId }) {
   const [player, setPlayer] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
