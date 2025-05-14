@@ -1,12 +1,16 @@
-// File: pages/player-stats.js
-import dynamic from 'next/dynamic';
+'use client'
 
-// Dynamically load client-only component to avoid SSR errors with fetch
+import { useSearchParams } from 'next/navigation'
+import dynamic from 'next/dynamic'
+
 const PlayerStatsClient = dynamic(
   () => import('../components/fantasy/PlayerStatsClient'),
   { ssr: false }
-);
+)
 
 export default function PlayerStatsPage() {
-  return <PlayerStatsClient />;
+  const searchParams = useSearchParams()
+  const playerId = searchParams.get('player_id')
+
+  return <PlayerStatsClient playerId={playerId} />
 }
