@@ -16,20 +16,8 @@ exports.handler = async function () {
         P.player_id,
         P.player_name,
         P.position,
-        P.college,
-        P.draft_team,
-        P.draft_year,
-        P.draft_round,
-        P.draft_pick,
-        PSG.team_id AS team
+        P.college
       FROM Players P
-      LEFT JOIN Player_Stats_Game PSG
-        ON P.player_id = PSG.player_id
-      WHERE PSG.game_id = (
-        SELECT MAX(game_id)
-        FROM Player_Stats_Game psg2
-        WHERE psg2.player_id = P.player_id
-      )
       ORDER BY P.player_name
     `);
 
