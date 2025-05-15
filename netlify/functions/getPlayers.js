@@ -1,15 +1,16 @@
-// File: netlify/functions/getPlayers.js
 const mysql = require('mysql2/promise');
 
 exports.handler = async function () {
-  const connection = await mysql.createConnection({
-    host: 'stat-pulse-analytics-db.ci1uue2w2sxp.us-east-1.rds.amazonaws.com',
-    user: 'StatadminPULS3',
-    password: 'wyjGiz-justo6-gesmyh',
-    database: 'nfl_analytics',
-  });
+  let connection;
 
   try {
+    connection = await mysql.createConnection({
+      host: 'stat-pulse-analytics-db.ci1uue2w2sxp.us-east-1.rds.amazonaws.com',
+      user: 'StatadminPULS3',
+      password: 'wyjGiz-justo6-gesmyh',
+      database: 'nfl_analytics',
+    });
+
     const [rows] = await connection.execute(`
       SELECT DISTINCT
         P.player_id,
@@ -28,10 +29,12 @@ exports.handler = async function () {
       body: JSON.stringify(rows),
     };
   } catch (error) {
-    console.error('Database error:', error.message);
+    console.error('❌ DATABASE ERROR:', error); // This will appear in Netlify logs
+    if (connection) await connection.end();
+
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to fetch player data.' }),
+      body: JSON.stringify({ error: 'Failed to fetch player data.', details: error.message }),
     };
   }
 };
