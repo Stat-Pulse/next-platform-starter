@@ -16,6 +16,30 @@ export default function HomePage() {
     <>
       <Header />
 
+  import SearchBar from '../components/SearchBar';
+
+  export default function HomePage() {
+  const searchIndex = [
+    { label: 'Patrick Mahomes', url: '/players/00-0031234' },
+    { label: 'San Francisco 49ers', url: '/teams/SF' },
+    { label: 'QB Leaders 2024', url: '/stats/qb-leaders' },
+    { label: 'Settings', url: '/profile/settings' },
+    { label: 'Subscribe to Premium', url: '/subscribe' },
+    { label: 'Fantasy Compare Tool', url: '/compare' },
+    { label: 'Referee Assignments', url: '/refs' }
+  ];
+
+  return (
+    <>
+      <header className="py-12 px-6 bg-gray-900 text-white text-center">
+        <h1 className="text-4xl font-bold mb-4">Welcome to StatPulse</h1>
+        <SearchBar data={searchIndex} />
+      </header>
+      {
+    </>
+  );
+}
+    
       {/* Hero Section */}
       <section className="relative bg-cover bg-center text-white py-20 px-6" style={{ backgroundImage: "url('/images/featured-game.jpg')" }}>
         <div className="bg-black bg-opacity-60 p-8 rounded-lg max-w-3xl mx-auto text-center">
