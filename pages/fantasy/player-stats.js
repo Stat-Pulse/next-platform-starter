@@ -1,4 +1,7 @@
 'use client'
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import TeamSidebar from '@/components/TeamSidebar';
 
 import { useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
