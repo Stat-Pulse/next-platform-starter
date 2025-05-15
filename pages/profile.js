@@ -9,35 +9,44 @@ export default function ProfilePage() {
   const [user, setUser] = useState(null)
   const [showSettings, setShowSettings] = useState(false)
 
-useEffect(() => {
-  const stored = localStorage.getItem('userProfile')
-  if (stored) {
-    setUser(JSON.parse(stored))
-  } else {
-    // Temporary fallback user for testing at work
-    setUser({
-      username: "Jacob",
-      avatar: "/images/default-avatar.png",
-      email: "jacob@statpulse.com",
-      favoriteTeams: ["BUF", "KC"],
-      favoritePlayers: ["Josh Allen", "Travis Kelce"],
-      points: 1320,
-      badges: ["Veteran", "Insider"],
-      leaderboardRank: 42,
-      subscription: "Free"
-    })
-  }
-}, [])
+  useEffect(() => {
+    const stored = localStorage.getItem('userProfile')
+    if (stored) {
+      setUser(JSON.parse(stored))
+    } else {
+      setUser({
+        username: "Jacob",
+        avatar: "/images/default-avatar.png",
+        email: "jacob@statpulse.com",
+        favoriteTeams: ["BUF", "KC"],
+        favoritePlayers: ["Josh Allen", "Travis Kelce"],
+        points: 1320,
+        badges: ["Veteran", "Insider"],
+        leaderboardRank: 42,
+        subscription: "Free"
+      })
+    }
+  }, [])
 
-  if (!user) return null
+  if (!user) {
+    return (
+      <>
+        <Header />
+        <main className="bg-gray-100 py-10 min-h-screen flex items-center justify-center text-gray-700">
+          <p>Loading profile...</p>
+        </main>
+        <Footer />
+      </>
+    )
+  }
 
   const { username, avatar, email, favoriteTeams, favoritePlayers, points, badges, leaderboardRank, subscription = 'Free' } = user
 
   return (
     <>
       <Header />
-      <main className="bg-gray-100 py-10 min-h-screen">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <main className="bg-gray-100 py-8 min-h-screen">
+        <div className="container mx-auto px-4 space-y-10">
 
           {/* Welcome + Avatar */}
           <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start gap-6">
@@ -45,12 +54,12 @@ useEffect(() => {
               <img
                 src={avatar || '/images/default-avatar.png'}
                 alt="User Avatar"
-                className="w-24 h-24 rounded-full border-4 border-blue-500 shadow-md"
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-blue-500 shadow-md object-cover"
               />
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800">Welcome, {username}!</h1>
-                <p className="text-gray-600">Subscription: <strong>{subscription}</strong></p>
-                <p className="text-sm text-gray-500">
+              <div className="text-center sm:text-left">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Welcome, {username}!</h1>
+                <p className="text-gray-600 text-sm sm:text-base">Subscription: <strong>{subscription}</strong></p>
+                <p className="text-xs text-gray-500">
                   {subscription === 'Free' ? '🚫 Limited access' : '✅ Full access'}
                 </p>
               </div>
@@ -60,47 +69,53 @@ useEffect(() => {
             </button>
           </div>
 
-          {/* Personalized Content Blocks */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-2xl shadow">
-              <h2 className="text-xl font-semibold mb-2">Fantasy Hub</h2>
+          {/* Content Blocks */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Fantasy Hub */}
+            <div className="bg-white p-5 rounded-2xl shadow">
+              <h2 className="text-lg sm:text-xl font-semibold mb-2">Fantasy Hub</h2>
               {favoritePlayers.map(p => (
-                <p key={p} className="text-gray-600">{p}: 12.4 PPR · Waiver value high</p>
+                <p key={p} className="text-gray-600 text-sm">{p}: 12.4 PPR · Waiver value high</p>
               ))}
               <p className="text-sm text-blue-600 mt-2">More fantasy insights →</p>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow">
-              <h2 className="text-xl font-semibold mb-2">Betting Center</h2>
+            {/* Betting Center */}
+            <div className="bg-white p-5 rounded-2xl shadow">
+              <h2 className="text-lg sm:text-xl font-semibold mb-2">Betting Center</h2>
               {favoriteTeams.map(team => (
-                <p key={team} className="text-gray-600">{team} -2.5 vs Opponent · Line shifted</p>
+                <p key={team} className="text-gray-600 text-sm">{team} -2.5 vs Opponent · Line shifted</p>
               ))}
               <p className="text-sm text-blue-600 mt-2">View betting trends →</p>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow">
-              <h2 className="text-xl font-semibold mb-2">News & Analysis</h2>
+            {/* News */}
+            <div className="bg-white p-5 rounded-2xl shadow">
+              <h2 className="text-lg sm:text-xl font-semibold mb-2">News & Analysis</h2>
               {favoriteTeams.map(team => (
-                <p key={team} className="text-gray-600">Breaking: {team} star player injured (Week 7)</p>
+                <p key={team} className="text-gray-600 text-sm">Breaking: {team} star player injured (Week 7)</p>
               ))}
               <p className="text-sm text-blue-600 mt-2">View full news feed →</p>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow">
-              <h2 className="text-xl font-semibold mb-2">Community Forum</h2>
-              <p className="text-gray-600">New comment on &quot;Is Burrow top 3?&quot; thread.</p>
+            {/* Community */}
+            <div className="bg-white p-5 rounded-2xl shadow">
+              <h2 className="text-lg sm:text-xl font-semibold mb-2">Community Forum</h2>
+              <p className="text-gray-600 text-sm">New comment on &quot;Is Burrow top 3?&quot; thread.</p>
               <p className="text-sm text-blue-600 mt-2">View forums →</p>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow">
-              <h2 className="text-xl font-semibold mb-2">Personalized Insights</h2>
-              <p className="text-gray-600">Your team {favoriteTeams[0]} has a +EPA advantage vs opponent.</p>
-              <p className="text-gray-600">{favoritePlayers[0]} projected to exceed 17.3 PPR in Week 8.</p>
+            {/* Insights */}
+            <div className="bg-white p-5 rounded-2xl shadow">
+              <h2 className="text-lg sm:text-xl font-semibold mb-2">Personalized Insights</h2>
+              <p className="text-gray-600 text-sm">Your team {favoriteTeams[0]} has a +EPA advantage vs opponent.</p>
+              <p className="text-gray-600 text-sm">{favoritePlayers[0]} projected to exceed 17.3 PPR in Week 8.</p>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow">
-              <h2 className="text-xl font-semibold mb-2">Activity Feed</h2>
-              <ul className="text-sm text-gray-600 list-disc list-inside">
+            {/* Activity */}
+            <div className="bg-white p-5 rounded-2xl shadow">
+              <h2 className="text-lg sm:text-xl font-semibold mb-2">Activity Feed</h2>
+              <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
                 <li>Viewed player profile: Ja&rsquo;Marr Chase</li>
                 <li>Simulated: Week 6 matchup</li>
                 <li>Saved: Chiefs vs Bills recap</li>
@@ -108,45 +123,45 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Saved Content / Followed Entities */}
+          {/* Saved + Followed */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white p-6 rounded-2xl shadow">
-              <h2 className="text-xl font-semibold mb-2">Saved Content</h2>
+            <div className="bg-white p-5 rounded-2xl shadow">
+              <h2 className="text-lg sm:text-xl font-semibold mb-2">Saved Content</h2>
               <ul className="list-disc list-inside text-sm text-gray-600">
                 <li>Player Comparison: Allen vs Mahomes</li>
                 <li>Article: Fantasy Sleepers Week 10</li>
               </ul>
             </div>
-            <div className="bg-white p-6 rounded-2xl shadow">
-              <h2 className="text-xl font-semibold mb-2">Followed Entities</h2>
-              <p className="text-gray-600">Teams: {favoriteTeams.join(', ')}</p>
-              <p className="text-gray-600">Players: {favoritePlayers.join(', ')}</p>
+            <div className="bg-white p-5 rounded-2xl shadow">
+              <h2 className="text-lg sm:text-xl font-semibold mb-2">Followed Entities</h2>
+              <p className="text-gray-600 text-sm">Teams: {favoriteTeams.join(', ')}</p>
+              <p className="text-gray-600 text-sm">Players: {favoritePlayers.join(', ')}</p>
             </div>
           </div>
 
-          {/* Achievements */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-2xl shadow">
-              <h2 className="text-xl font-semibold mb-2">Points</h2>
-              <p className="text-gray-600">{points} Points</p>
+          {/* Points, Badges, Leaderboard */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="bg-white p-5 rounded-2xl shadow">
+              <h2 className="text-lg sm:text-xl font-semibold mb-2">Points</h2>
+              <p className="text-gray-600 text-sm">{points} Points</p>
             </div>
-            <div className="bg-white p-6 rounded-2xl shadow">
-              <h2 className="text-xl font-semibold mb-2">Badges</h2>
+            <div className="bg-white p-5 rounded-2xl shadow">
+              <h2 className="text-lg sm:text-xl font-semibold mb-2">Badges</h2>
               <div className="flex flex-wrap gap-2">
                 {badges.map(badge => (
                   <span key={badge} className="bg-red-600 text-white text-xs px-2 py-1 rounded">{badge}</span>
                 ))}
               </div>
             </div>
-            <div className="bg-white p-6 rounded-2xl shadow">
-              <h2 className="text-xl font-semibold mb-2">Leaderboard</h2>
-              <p className="text-gray-600">Rank #{leaderboardRank}</p>
+            <div className="bg-white p-5 rounded-2xl shadow">
+              <h2 className="text-lg sm:text-xl font-semibold mb-2">Leaderboard</h2>
+              <p className="text-gray-600 text-sm">Rank #{leaderboardRank}</p>
             </div>
           </div>
 
           {/* Settings Modal */}
           {showSettings && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
               <div className="bg-white rounded-lg shadow p-6 w-full max-w-xl">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-bold">Manage Profile</h2>
@@ -191,7 +206,6 @@ useEffect(() => {
                       className="w-full border p-2 rounded"
                     />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-600">New Password</label>
                     <input name="password" type="password" className="w-full border p-2 rounded" />
@@ -211,6 +225,7 @@ useEffect(() => {
               </div>
             </div>
           )}
+
         </div>
       </main>
       <Footer />
