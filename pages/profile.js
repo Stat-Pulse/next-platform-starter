@@ -111,14 +111,6 @@ export default function ProfilePage() {
                   className="space-y-4"
                 >
                   <div>
-                    <label className="block text-sm font-medium text-gray-600">Username</label>
-                    <input name="username" defaultValue={username} className="w-full border p-2 rounded" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Email</label>
-                    <input name="email" defaultValue={email} type="email" className="w-full border p-2 rounded" />
-                  </div>
-                  <div>
                     <label className="block text-sm font-medium text-gray-600">Upload New Avatar</label>
                     <input
                       type="file"
@@ -138,6 +130,7 @@ export default function ProfilePage() {
                       className="w-full border p-2 rounded"
                     />
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-600">New Password</label>
                     <input name="password" type="password" className="w-full border p-2 rounded" />
