@@ -28,7 +28,7 @@ export default function PlayersPage() {
       <h1 className="text-3xl font-bold mb-4">Find a Player</h1>
       <input
         type="text"
-        placeholder=&quot;Search by name...&quot;</p>
+        placeholder="Search by name..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         className="w-full max-w-md mb-6 p-2 border rounded"
