@@ -17,13 +17,18 @@ export async function getServerSideProps({ params }) {
   const [dbCheck] = await connection.query('SELECT DATABASE() AS db')
   console.log('✅ Connected to DB:', dbCheck[0].db)
 
-  const [playerRows] = await connection.execute(`
+  let playerRows = []
+try {
+  [playerRows] = await connection.execute(`
     SELECT p.*, c.contract_type, c.team_abbr AS contract_team, c.year AS contract_year, c.avg_annual_value
     FROM Players p
-    LEFT JOIN Contracts c ON p.player_id = c.player_id
+    LEFT JOIN Contracts c ON p.player_name = c.player
     WHERE p.player_id = ?
     LIMIT 1
   `, [playerId])
+} catch (e) {
+  console.error("Player fetch failed:", e)
+}
 
   const [gameLogs] = await connection.execute(`
     SELECT * FROM Player_Stats_Game_2024
