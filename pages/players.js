@@ -1,47 +1,30 @@
-const mysql = require('mysql2/promise');
+import { useEffect, useState } from 'react';
 
-exports.handler = async function () {
-  let connection;
+export default function PlayersPage() {
+  const [players, setPlayers] = useState([]);
 
-  try {
-    connection = await mysql.createConnection({
-      host: 'stat-pulse-analytics-db.ci1uue2w2sxp.us-east-1.rds.amazonaws.com',
-      user: 'StatadminPULS3',
-      password: 'wyjGiz-justo6-gesmyh',
-      database: 'nfl_analytics',
-    });
+  useEffect(() => {
+    async function fetchPlayers() {
+      const res = await fetch('/.netlify/functions/getPlayers');
+      const data = await res.json();
+      setPlayers(data);
+    }
+    fetchPlayers();
+  }, []);
 
-    const [rows] = await connection.execute(`
-      SELECT 
-        P.player_id,
-        P.player_name,
-        P.position,
-        P.college,
-        PSG.team_id AS team
-      FROM Players P
-      LEFT JOIN Player_Stats_Game PSG
-        ON P.player_id = PSG.player_id
-      WHERE PSG.game_id = (
-        SELECT MAX(game_id)
-        FROM Player_Stats_Game psg2
-        WHERE psg2.player_id = P.player_id
-      )
-      ORDER BY P.player_name
-    `);
-
-    await connection.end();
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify(rows),
-    };
-  } catch (error) {
-    console.error('❌ DATABASE ERROR:', error);
-    if (connection) await connection.end();
-
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to fetch player data.', details: error.message }),
-    };
-  }
-};
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">All Players</h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {players.map((player) => (
+          <div key={player.player_id} className="border p-4 rounded shadow">
+            <h2 className="font-semibold">{player.player_name}</h2>
+            <p>Position: {player.position}</p>
+            <p>College: {player.college}</p>
+            <p>Team: {player.team}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
