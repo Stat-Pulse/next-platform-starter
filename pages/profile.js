@@ -40,7 +40,19 @@ export default function ProfilePage() {
     )
   }
 
-  const { username, avatar, email, favoriteTeams, favoritePlayers, points, badges, leaderboardRank, subscription = 'Free' } = user
+  const {
+    username,
+    avatar,
+    email,
+    favoriteTeams,
+    favoritePlayers,
+    points,
+    badges,
+    leaderboardRank,
+    subscription = 'Free'
+  } = user
+
+  const isPremium = subscription === 'Premium'
 
   return (
     <>
@@ -48,7 +60,7 @@ export default function ProfilePage() {
       <main className="bg-gray-100 py-8 min-h-screen">
         <div className="container mx-auto px-4 space-y-10">
 
-          {/* Welcome + Avatar */}
+          {/* Welcome Block */}
           <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start gap-6">
             <div className="flex items-center gap-4">
               <img
@@ -62,6 +74,13 @@ export default function ProfilePage() {
                 <p className="text-xs text-gray-500">
                   {subscription === 'Free' ? '🚫 Limited access' : '✅ Full access'}
                 </p>
+                {!isPremium && (
+                  <div className="mt-2">
+                    <button className="bg-yellow-400 text-gray-800 px-4 py-2 rounded hover:bg-yellow-300 text-sm font-semibold">
+                      Upgrade to Premium
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
             <button onClick={() => setShowSettings(true)} className="text-gray-700 hover:text-red-600">
@@ -71,6 +90,7 @@ export default function ProfilePage() {
 
           {/* Content Blocks */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
             {/* Fantasy Hub */}
             <div className="bg-white p-5 rounded-2xl shadow">
               <h2 className="text-lg sm:text-xl font-semibold mb-2">Fantasy Hub</h2>
@@ -80,16 +100,23 @@ export default function ProfilePage() {
               <p className="text-sm text-blue-600 mt-2">More fantasy insights →</p>
             </div>
 
-            {/* Betting Center */}
-            <div className="bg-white p-5 rounded-2xl shadow">
-              <h2 className="text-lg sm:text-xl font-semibold mb-2">Betting Center</h2>
-              {favoriteTeams.map(team => (
-                <p key={team} className="text-gray-600 text-sm">{team} -2.5 vs Opponent · Line shifted</p>
-              ))}
-              <p className="text-sm text-blue-600 mt-2">View betting trends →</p>
+            {/* Betting Center (Gated) */}
+            <div className="relative">
+              <div className={`bg-white p-5 rounded-2xl shadow ${!isPremium ? 'pointer-events-none opacity-50 blur-[1px]' : ''}`}>
+                <h2 className="text-lg sm:text-xl font-semibold mb-2">Betting Center</h2>
+                {favoriteTeams.map(team => (
+                  <p key={team} className="text-gray-600 text-sm">{team} -2.5 vs Opponent · Line shifted</p>
+                ))}
+                <p className="text-sm text-blue-600 mt-2">View betting trends →</p>
+              </div>
+              {!isPremium && (
+                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white text-sm font-semibold rounded-2xl">
+                  🔒 Premium Only
+                </div>
+              )}
             </div>
 
-            {/* News */}
+            {/* News & Analysis */}
             <div className="bg-white p-5 rounded-2xl shadow">
               <h2 className="text-lg sm:text-xl font-semibold mb-2">News & Analysis</h2>
               {favoriteTeams.map(team => (
@@ -105,14 +132,21 @@ export default function ProfilePage() {
               <p className="text-sm text-blue-600 mt-2">View forums →</p>
             </div>
 
-            {/* Insights */}
-            <div className="bg-white p-5 rounded-2xl shadow">
-              <h2 className="text-lg sm:text-xl font-semibold mb-2">Personalized Insights</h2>
-              <p className="text-gray-600 text-sm">Your team {favoriteTeams[0]} has a +EPA advantage vs opponent.</p>
-              <p className="text-gray-600 text-sm">{favoritePlayers[0]} projected to exceed 17.3 PPR in Week 8.</p>
+            {/* Personalized Insights (Gated) */}
+            <div className="relative">
+              <div className={`bg-white p-5 rounded-2xl shadow ${!isPremium ? 'pointer-events-none opacity-50 blur-[1px]' : ''}`}>
+                <h2 className="text-lg sm:text-xl font-semibold mb-2">Personalized Insights</h2>
+                <p className="text-gray-600 text-sm">Your team {favoriteTeams[0]} has a +EPA advantage vs opponent.</p>
+                <p className="text-gray-600 text-sm">{favoritePlayers[0]} projected to exceed 17.3 PPR in Week 8.</p>
+              </div>
+              {!isPremium && (
+                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white text-sm font-semibold rounded-2xl">
+                  🔒 Premium Only
+                </div>
+              )}
             </div>
 
-            {/* Activity */}
+            {/* Activity Feed */}
             <div className="bg-white p-5 rounded-2xl shadow">
               <h2 className="text-lg sm:text-xl font-semibold mb-2">Activity Feed</h2>
               <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
@@ -125,13 +159,24 @@ export default function ProfilePage() {
 
           {/* Saved + Followed */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white p-5 rounded-2xl shadow">
-              <h2 className="text-lg sm:text-xl font-semibold mb-2">Saved Content</h2>
-              <ul className="list-disc list-inside text-sm text-gray-600">
-                <li>Player Comparison: Allen vs Mahomes</li>
-                <li>Article: Fantasy Sleepers Week 10</li>
-              </ul>
+
+            {/* Saved Content (Gated) */}
+            <div className="relative">
+              <div className={`bg-white p-5 rounded-2xl shadow ${!isPremium ? 'pointer-events-none opacity-50 blur-[1px]' : ''}`}>
+                <h2 className="text-lg sm:text-xl font-semibold mb-2">Saved Content</h2>
+                <ul className="list-disc list-inside text-sm text-gray-600">
+                  <li>Player Comparison: Allen vs Mahomes</li>
+                  <li>Article: Fantasy Sleepers Week 10</li>
+                </ul>
+              </div>
+              {!isPremium && (
+                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white text-sm font-semibold rounded-2xl">
+                  🔒 Premium Only
+                </div>
+              )}
             </div>
+
+            {/* Followed */}
             <div className="bg-white p-5 rounded-2xl shadow">
               <h2 className="text-lg sm:text-xl font-semibold mb-2">Followed Entities</h2>
               <p className="text-gray-600 text-sm">Teams: {favoriteTeams.join(', ')}</p>
@@ -218,17 +263,4 @@ export default function ProfilePage() {
                       <option value="delete">Request Account Deletion</option>
                     </select>
                   </div>
-                  <div className="flex justify-end">
-                    <button type="submit" className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Save Changes</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-        </div>
-      </main>
-      <Footer />
-    </>
-  )
-}
+                  <div className="flex justify-end
