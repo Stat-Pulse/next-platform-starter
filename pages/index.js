@@ -50,14 +50,23 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative bg-cover bg-center text-white py-20 px-6" style={{ backgroundImage: "url('/images/featured-game.jpg')" }}>
+      <section
+  className="relative bg-cover bg-center text-white py-20 px-6"
+  style={{
+    backgroundImage: newsItems[0]?.image
+      ? `url(${newsItems[0].image})`
+      : "url('/images/featured-game.jpg')",
+  }}
+>
   <div className="bg-black bg-opacity-60 p-8 rounded-lg max-w-3xl mx-auto text-center">
-    {newsItems.length > 0 ? (
+    {newsItems.length > 0 && newsItems[0]?.title ? (
       <>
         <h1 className="text-4xl font-bold mb-4">{newsItems[0].title}</h1>
-        <p className="mb-6 text-sm italic text-gray-200">Top story via {newsItems[0].source}</p>
+        <p className="mb-6 text-sm italic text-gray-200">
+          Top story via <span className="font-semibold">{newsItems[0].source}</span>
+        </p>
         <a
-          href={newsItems[0].link}
+          href={newsItems[0].link || '#'}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-block bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
@@ -73,7 +82,6 @@ export default function HomePage() {
     )}
   </div>
 </section>
-
 
       <main className="bg-gray-100 py-10">
         <div className="container mx-auto px-6 space-y-12">
