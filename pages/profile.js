@@ -263,4 +263,4 @@ export default function ProfilePage() {
                       <option value="delete">Request Account Deletion</option>
                     </select>
                   </div>
-                  <div className="flex justify-end
+                  <div className="flex justify-end">
