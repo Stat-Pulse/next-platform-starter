@@ -1,5 +1,7 @@
 // components/TeamSidebar.js
 
+import Link from 'next/link';
+
 export default function TeamSidebar({ active = '' }) {
   const links = [
     'Dashboard',
@@ -18,11 +20,13 @@ export default function TeamSidebar({ active = '' }) {
       <ul className="space-y-2">
         {links.map((text) => {
           const fileName = text.toLowerCase().replace(/\s+/g, '-');
+          const href =
+            fileName === 'dashboard' ? '/fantasy' : `/fantasy/${fileName}`;
           const isActive = active === text;
           return (
             <li key={text}>
-              <a
-                href={`/${fileName}.html`}
+              <Link
+                href={href}
                 className={`flex items-center p-3 rounded-md ${
                   isActive
                     ? 'bg-gray-100 text-red-600'
@@ -30,7 +34,7 @@ export default function TeamSidebar({ active = '' }) {
                 }`}
               >
                 {text}
-              </a>
+              </Link>
             </li>
           );
         })}
