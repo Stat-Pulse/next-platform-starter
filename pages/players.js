@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { logActivity } from '../utils/logActivity';
 
 export default function PlayersPage() {
   const [players, setPlayers] = useState([]);
@@ -45,9 +46,13 @@ export default function PlayersPage() {
             >
               <h2 className="text-xl font-semibold">{player.player_name}</h2>
               <p className="text-sm text-gray-600">{player.position} | {player.college}</p>
-              <Link href={`/players/${player.player_id}`} className="text-blue-600 underline text-sm">
-                View Profile
-              </Link>
+              <div
+                 onClick={() => logActivity(`Viewed profile: ${player.player_name}`)}
+               >
+                 <Link href={`/players/${player.player_id}`} className="text-blue-600 underline text-sm">
+                   View Profile
+                 </Link>
+               </div>
             </div>
           ))}
         </div>
