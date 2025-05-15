@@ -7,10 +7,10 @@ export async function getServerSideProps({ params }) {
   const playerId = params.id
 
   const connection = await mysql.createConnection({
-    host: process.env.stat-pulse-analytics-db.ci1uue2w2sxp.us-east-1.rds.amazonaws.com,
-    database: process.env.nfl_analytics,
-    user: process.env.StatadminPULS3,
-    password: process.env.wyjGiz-justo6-gesmyh
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD
   })
   
   const [playerRows] = await connection.execute(`
