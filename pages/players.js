@@ -35,7 +35,7 @@ export default function PlayersPage() {
       />
 
       {filtered.length === 0 && query ? (
-        <p>No players found matching "{query}"</p>
+        <p>No players found matching &quot;{query}&quot;</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {filtered.map((player) => (
