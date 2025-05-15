@@ -5,6 +5,15 @@ import { FaCog } from 'react-icons/fa'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 
+function logActivity(action) {
+  const existing = JSON.parse(localStorage.getItem('activityLog') || '[]');
+  const updated = [
+    { action, timestamp: new Date().toISOString() },
+    ...existing.slice(0, 9) // Keep max 10 entries
+  ];
+  localStorage.setItem('activityLog', JSON.stringify(updated));
+}
+
 export default function ProfilePage() {
   const [user, setUser] = useState(null)
   const [showSettings, setShowSettings] = useState(false)
