@@ -16,7 +16,7 @@ export default function LeagueSchedule() {
 
   useEffect(() => {
     async function fetchData() {
-      const res = await fetch('/api/leagueSchedule');
+      const res = await fetch('/pages/api/leagueSchedule');
       const data = await res.json();
       setScheduleData(data.scheduleData);
       setTeams(data.teams);
