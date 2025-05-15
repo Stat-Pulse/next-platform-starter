@@ -12,13 +12,20 @@ exports.handler = async function () {
     });
 
     const [rows] = await connection.execute(`
-      SELECT DISTINCT
+      SELECT 
         P.player_id,
         P.player_name,
         P.position,
-        P.team,
-        P.age
+        P.age,
+        PSG.team_id AS team
       FROM Players P
+      LEFT JOIN Player_Stats_Game PSG
+        ON P.player_id = PSG.player_id
+      WHERE PSG.game_id = (
+        SELECT MAX(game_id)
+        FROM Player_Stats_Game psg2
+        WHERE psg2.player_id = P.player_id
+      )
       ORDER BY P.player_name
     `);
 
@@ -29,7 +36,7 @@ exports.handler = async function () {
       body: JSON.stringify(rows),
     };
   } catch (error) {
-    console.error('❌ DATABASE ERROR:', error); // This will appear in Netlify logs
+    console.error('❌ DATABASE ERROR:', error);
     if (connection) await connection.end();
 
     return {
