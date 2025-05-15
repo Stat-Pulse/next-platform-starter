@@ -9,6 +9,7 @@ import SearchBar from '../components/SearchBar';
 
 export default function HomePage() {
   const [newsItems, setNewsItems] = useState([]);
+  const [error, setError] = useState(null); // Track fetch errors
 
   const games = [
     { id: 301, home_team: 'KC', away_team: 'BUF', status: 'upcoming', date_time: 'Sunday 8:20 PM ET' },
@@ -30,15 +31,42 @@ export default function HomePage() {
     async function fetchNews() {
       try {
         const res = await fetch('/.netlify/functions/getNFLNews');
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
         const data = await res.json();
-        setNewsItems(data);
+        // Validate data structure
+        if (Array.isArray(data)) {
+          setNewsItems(data);
+        } else {
+          throw new Error('Invalid news data format');
+        }
       } catch (e) {
         console.error('Failed to load news:', e);
+        setError('Failed to load news. Please try again later.');
       }
     }
 
     fetchNews();
   }, []);
+
+  if (error) {
+    return (
+      <>
+        <Header />
+        <header className="py-12 px-6 bg-gray-900 text-white text-center">
+          <h1 className="text-4xl font-bold mb-4">Welcome to StatPulse</h1>
+          <SearchBar data={searchIndex} />
+        </header>
+        <main className="bg-gray-100 py-10">
+          <div className="container mx-auto px-6 text-center">
+            <p className="text-red-600">{error}</p>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
@@ -51,41 +79,42 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section
-  className="relative bg-cover bg-center text-white py-20 px-6"
-  style={{
-    backgroundImage: newsItems[0]?.image
-      ? `url(${newsItems[0].image})`
-      : "url('/images/featured-game.jpg')",
-  }}
->
-  <div className="bg-black bg-opacity-60 p-8 rounded-lg max-w-3xl mx-auto text-center">
-    {newsItems.length > 0 && newsItems[0]?.title ? (
-      <>
-        <h1 className="text-4xl font-bold mb-4">{newsItems[0].title}</h1>
-        <p className="mb-6 text-sm italic text-gray-200">
-          Top story via <span className="font-semibold">{newsItems[0].source}</span>
-        </p>
-        <a
-          href={newsItems[0].link || '#'}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-        >
-          Read Full Article
-        </a>
-      </>
-    ) : (
-      <>
-        <h1 className="text-4xl font-bold mb-4">Clash of the Titans</h1>
-        <p className="mb-6">Loading top NFL headline...</p>
-      </>
-    )}
-  </div>
-</section>
+        className="relative bg-cover bg-center text-white py-20 px-6"
+        style={{
+          backgroundImage:
+            newsItems[0]?.image
+              ? `url(${newsItems[0].image})`
+              : "url('/images/featured-game.jpg')",
+        }}
+      >
+        <div className="bg-black bg-opacity-60 p-8 rounded-lg max-w-3xl mx-auto text-center">
+          {newsItems[0]?.title && newsItems[0]?.link ? (
+            <>
+              <h1 className="text-4xl font-bold mb-4">{newsItems[0].title}</h1>
+              <p className="mb-6 text-sm italic text-gray-200">
+                Top story via{' '}
+                <span className="font-semibold">{newsItems[0].source || 'Unknown Source'}</span>
+              </p>
+              <a
+                href={newsItems[0].link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+              >
+                Read Full Article
+              </a>
+            </>
+          ) : (
+            <>
+              <h1 className="text-4xl font-bold mb-4">Clash of the Titans</h1>
+              <p className="mb-6">Awaiting top NFL headline...</p>
+            </>
+          )}
+        </div>
+      </section>
 
       <main className="bg-gray-100 py-10">
         <div className="container mx-auto px-6 space-y-12">
-
           {/* Personalized Dashboard */}
           <SectionWrapper title="Your Dashboard">
             {/* ... unchanged content */}
@@ -115,7 +144,6 @@ export default function HomePage() {
           </SectionWrapper>
 
           {/* ... Rest of your content (Games, Top Performers, Quick Access) unchanged */}
-          
         </div>
       </main>
 
