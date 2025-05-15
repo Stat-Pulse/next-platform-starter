@@ -110,26 +110,38 @@ export default function ProfilePage() {
                   }}
                   className="space-y-4"
                 >
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Upload New Avatar</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            const updatedProfile = { ...user, avatar: reader.result };
-                            localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
-                            setUser(updatedProfile);
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                      className="w-full border p-2 rounded"
-                    />
-                  </div>
+                 <div>
+                  <label className="block text-sm font-medium text-gray-600">Upload New Avatar</label>
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg, image/webp"
+                    onChange={(e) => {
+                      const file = e.target.files[0]
+                      if (!file) return
+
+                      const validTypes = ['image/jpeg', 'image/png', 'image/webp']
+                      if (!validTypes.includes(file.type)) {
+                        alert('❌ Only JPG, PNG, or WEBP images are allowed.')
+                        return
+                      }
+
+                       if (file.size > 2 * 1024 * 1024) {
+                         alert('❌ File size must be under 2MB.')
+                         return
+                      }
+
+                      const reader = new FileReader()
+                      reader.onloadend = () => {
+                        const updatedProfile = { ...user, avatar: reader.result }
+                        localStorage.setItem('userProfile', JSON.stringify(updatedProfile))
+                        setUser(updatedProfile)
+                      }
+                      reader.readAsDataURL(file)
+                    }}
+                    className="w-full border p-2 rounded"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Max 2MB. JPG, PNG, or WEBP only.</p>
+                </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-600">New Password</label>
