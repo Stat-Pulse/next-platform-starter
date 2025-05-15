@@ -16,7 +16,11 @@ exports.handler = async function () {
         P.player_id,
         P.player_name,
         P.position,
-        TIMESTAMPDIFF(YEAR, P.birth_date, CURDATE()) AS age,
+        P.college,
+        P.draft_team,
+        P.draft_year,
+        P.draft_round,
+        P.draft_pick,
         PSG.team_id AS team
       FROM Players P
       LEFT JOIN Player_Stats_Game PSG
