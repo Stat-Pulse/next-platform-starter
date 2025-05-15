@@ -127,45 +127,47 @@ export default function ProfilePage() {
                   <button onClick={() => setShowSettings(false)} className="text-red-600">✕</button>
                 </div>
                <form
-                 onSubmit={async (e) => {
-  e.preventDefault();
-  const form = new FormData(e.target);
-  const updated = Object.fromEntries(form);
-  const updatedProfile = { ...user, ...updated };
+  onSubmit={async (e) => {
+    e.preventDefault();
+    const form = new FormData(e.target);
+    const updated = Object.fromEntries(form);
+    const updatedProfile = { ...user, ...updated };
 
-  // Convert array fields back to arrays
-  updatedProfile.favoriteTeams = user.favoriteTeams;
-  updatedProfile.favoritePlayers = user.favoritePlayers;
-  updatedProfile.points = user.points;
-  updatedProfile.badges = user.badges;
-  updatedProfile.leaderboardRank = user.leaderboardRank;
-  updatedProfile.subscription = user.subscription;
-  updatedProfile.avatar = user.avatar;
+    // Convert array fields back to arrays
+    updatedProfile.favoriteTeams = user.favoriteTeams;
+    updatedProfile.favoritePlayers = user.favoritePlayers;
+    updatedProfile.points = user.points;
+    updatedProfile.badges = user.badges;
+    updatedProfile.leaderboardRank = user.leaderboardRank;
+    updatedProfile.subscription = user.subscription;
+    updatedProfile.avatar = user.avatar;
 
-  // Save locally
-  localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
-  setUser(updatedProfile);
-  setShowSettings(false);
+    // Save locally
+    localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+    setUser(updatedProfile);
+    setShowSettings(false);
 
-  // Activity Log
-  logActivity(`Updated profile for ${updatedProfile.username}`);
+    // Activity Log
+    logActivity(`Updated profile for ${updatedProfile.username}`);
 
-  // Remote Sync
-  try {
-    const res = await fetch('/.netlify/functions/saveProfile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedProfile),
-    });
+    // Remote Sync
+    try {
+      const res = await fetch('/.netlify/functions/saveProfile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedProfile),
+      });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to save profile remotely');
-    console.log('✅ Synced to DB:', data);
-  } catch (err) {
-    console.error('❌ Remote sync failed:', err.message);
-    alert('Saved locally, but remote sync failed.');
-  }
-}}
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to save profile remotely');
+      console.log('✅ Synced to DB:', data);
+    } catch (err) {
+      console.error('❌ Remote sync failed:', err.message);
+      alert('Saved locally, but remote sync failed.');
+    }
+  }}
+  className="space-y-4"
+>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-600">Upload New Avatar</label>
