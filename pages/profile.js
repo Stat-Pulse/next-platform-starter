@@ -9,10 +9,25 @@ export default function ProfilePage() {
   const [user, setUser] = useState(null)
   const [showSettings, setShowSettings] = useState(false)
 
-  useEffect(() => {
-    const stored = localStorage.getItem('userProfile')
-    setUser(stored ? JSON.parse(stored) : null)
-  }, [])
+useEffect(() => {
+  const stored = localStorage.getItem('userProfile')
+  if (stored) {
+    setUser(JSON.parse(stored))
+  } else {
+    // Temporary fallback user for testing at work
+    setUser({
+      username: "Jacob",
+      avatar: "/images/default-avatar.png",
+      email: "jacob@statpulse.com",
+      favoriteTeams: ["BUF", "KC"],
+      favoritePlayers: ["Josh Allen", "Travis Kelce"],
+      points: 1320,
+      badges: ["Veteran", "Insider"],
+      leaderboardRank: 42,
+      subscription: "Free"
+    })
+  }
+}, [])
 
   if (!user) return null
 
