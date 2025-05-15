@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import TradeTabs from '../components/TradeCenter/TradeTabs';
 import { TradeModal, ReviewTradeModal } from '../components/TradeCenter/TradeModals';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import TeamSidebar from '@/components/TeamSidebar';
 
 export default function TradeCenterPage() {
   const [activeTab, setActiveTab] = useState('newTrade');
