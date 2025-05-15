@@ -9,7 +9,7 @@ function logActivity(action) {
   const existing = JSON.parse(localStorage.getItem('activityLog') || '[]');
   const updated = [
     { action, timestamp: new Date().toISOString() },
-    ...existing.slice(0, 9) // Keep max 10 entries
+    ...existing.slice(0, 9)
   ];
   localStorage.setItem('activityLog', JSON.stringify(updated));
 }
@@ -17,6 +17,7 @@ function logActivity(action) {
 export default function ProfilePage() {
   const [user, setUser] = useState(null)
   const [showSettings, setShowSettings] = useState(false)
+  const [activityLog, setActivityLog] = useState([])
 
   useEffect(() => {
     const stored = localStorage.getItem('userProfile')
@@ -36,6 +37,13 @@ export default function ProfilePage() {
       })
     }
   }, [])
+
+  useEffect(() => {
+    const storedLog = localStorage.getItem('activityLog');
+    if (storedLog) {
+      setActivityLog(JSON.parse(storedLog));
+    }
+  }, [showSettings])
 
   if (!user) {
     return (
@@ -69,7 +77,6 @@ export default function ProfilePage() {
       <main className="bg-gray-100 py-8 min-h-screen">
         <div className="container mx-auto px-4 space-y-10">
 
-          {/* Welcome Block */}
           <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start gap-6">
             <div className="flex items-center gap-4">
               <img
@@ -97,10 +104,21 @@ export default function ProfilePage() {
             </button>
           </div>
 
-          {/* Content Blocks */}
-          {/* ... [Content blocks omitted for brevity — assume they are unchanged] ... */}
+          <div className="bg-white p-5 rounded-2xl shadow">
+            <h2 className="text-lg sm:text-xl font-semibold mb-2">Activity Feed</h2>
+            {activityLog.length === 0 ? (
+              <p className="text-gray-500 text-sm">No activity recorded yet.</p>
+            ) : (
+              <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                {activityLog.map((entry, idx) => (
+                  <li key={idx}>
+                    {entry.action} <span className="text-xs text-gray-400">({new Date(entry.timestamp).toLocaleString()})</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
-          {/* Settings Modal */}
           {showSettings && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
               <div className="bg-white rounded-lg shadow p-6 w-full max-w-xl">
@@ -116,42 +134,43 @@ export default function ProfilePage() {
                     localStorage.setItem('userProfile', JSON.stringify(updatedProfile))
                     setUser(updatedProfile)
                     setShowSettings(false)
+                    logActivity('Updated profile information')
                   }}
                   className="space-y-4"
                 >
-                 <div>
-                  <label className="block text-sm font-medium text-gray-600">Upload New Avatar</label>
-                  <input
-                    type="file"
-                    accept="image/png, image/jpeg, image/webp"
-                    onChange={(e) => {
-                      const file = e.target.files[0]
-                      if (!file) return
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600">Upload New Avatar</label>
+                    <input
+                      type="file"
+                      accept="image/png, image/jpeg, image/webp"
+                      onChange={(e) => {
+                        const file = e.target.files[0]
+                        if (!file) return
 
-                      const validTypes = ['image/jpeg', 'image/png', 'image/webp']
-                      if (!validTypes.includes(file.type)) {
-                        alert('❌ Only JPG, PNG, or WEBP images are allowed.')
-                        return
-                      }
+                        const validTypes = ['image/jpeg', 'image/png', 'image/webp']
+                        if (!validTypes.includes(file.type)) {
+                          alert('❌ Only JPG, PNG, or WEBP images are allowed.')
+                          return
+                        }
 
-                       if (file.size > 2 * 1024 * 1024) {
-                         alert('❌ File size must be under 2MB.')
-                         return
-                      }
+                        if (file.size > 2 * 1024 * 1024) {
+                          alert('❌ File size must be under 2MB.')
+                          return
+                        }
 
-                      const reader = new FileReader()
-                      reader.onloadend = () => {
-                        const updatedProfile = { ...user, avatar: reader.result }
-                        localStorage.setItem('userProfile', JSON.stringify(updatedProfile))
-                        setUser(updatedProfile)
-                      }
-                      reader.readAsDataURL(file)
-                    }}
-                    className="w-full border p-2 rounded"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Max 2MB. JPG, PNG, or WEBP only.</p>
-                </div>
-
+                        const reader = new FileReader()
+                        reader.onloadend = () => {
+                          const updatedProfile = { ...user, avatar: reader.result }
+                          localStorage.setItem('userProfile', JSON.stringify(updatedProfile))
+                          setUser(updatedProfile)
+                          logActivity('Updated avatar')
+                        }
+                        reader.readAsDataURL(file)
+                      }}
+                      className="w-full border p-2 rounded"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Max 2MB. JPG, PNG, or WEBP only.</p>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-600">New Password</label>
                     <input name="password" type="password" className="w-full border p-2 rounded" />
