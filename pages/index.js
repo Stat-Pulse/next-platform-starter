@@ -99,7 +99,7 @@ export default function HomePage() {
                 <ul className="text-gray-600 space-y-1">
                   <li>Tyreek Hill - 175 yds</li>
                   <li>Stefon Diggs - 142 yds</li>
-                  <li>Ja'Marr Chase - 139 yds</li>
+                  <li>Ja&apos;Marr Chase - 139 yds</li>
                 </ul>
               </div>
             </div>
