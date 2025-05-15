@@ -204,79 +204,71 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Settings Modal */}
-          {showSettings && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
-              <div className="bg-white rounded-lg shadow p-6 w-full max-w-xl">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold">Manage Profile</h2>
-                  <button onClick={() => setShowSettings(false)} className="text-red-600">✕</button>
-                </div>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault()
-                    const updated = Object.fromEntries(new FormData(e.target))
-                    const updatedProfile = { ...user, ...updated }
-                    localStorage.setItem('userProfile', JSON.stringify(updatedProfile))
-                    setUser(updatedProfile)
-                    setShowSettings(false)
-                  }}
-                  className="space-y-4"
-                >
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Username</label>
-                    <input name="username" defaultValue={username} className="w-full border p-2 rounded" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Email</label>
-                    <input name="email" defaultValue={email} type="email" className="w-full border p-2 rounded" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Upload New Avatar</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            const updatedProfile = { ...user, avatar: reader.result };
-                            localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
-                            setUser(updatedProfile);
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                      className="w-full border p-2 rounded"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">New Password</label>
-                    <input name="password" type="password" className="w-full border p-2 rounded" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Data Options</label>
-                    <select name="data_action" className="w-full border p-2 rounded">
-                      <option value="none">Select...</option>
-                      <option value="export">Export My Data</option>
-                      <option value="delete">Request Account Deletion</option>
-                    </select>
-                  </div>
-                  <div className="flex justify-end">
-                    <button type="submit" className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Save Changes</button>
-                                   <div className="flex justify-end">
-                    <button type="submit" className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-                      Save Changes
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
+{/* Settings Modal */}
+{showSettings && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+    <div className="bg-white rounded-lg shadow p-6 w-full max-w-xl">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Manage Profile</h2>
+        <button onClick={() => setShowSettings(false)} className="text-red-600">✕</button>
+      </div>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          const updated = Object.fromEntries(new FormData(e.target))
+          const updatedProfile = { ...user, ...updated }
+          localStorage.setItem('userProfile', JSON.stringify(updatedProfile))
+          setUser(updatedProfile)
+          setShowSettings(false)
+        }}
+        className="space-y-4"
+      >
+        <div>
+          <label className="block text-sm font-medium text-gray-600">Username</label>
+          <input name="username" defaultValue={username} className="w-full border p-2 rounded" />
         </div>
-      </main>
-      <Footer />
-    </>
-  )
-}
+        <div>
+          <label className="block text-sm font-medium text-gray-600">Email</label>
+          <input name="email" defaultValue={email} type="email" className="w-full border p-2 rounded" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-600">Upload New Avatar</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                  const updatedProfile = { ...user, avatar: reader.result };
+                  localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+                  setUser(updatedProfile);
+                };
+                reader.readAsDataURL(file);
+              }
+            }}
+            className="w-full border p-2 rounded"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-600">New Password</label>
+          <input name="password" type="password" className="w-full border p-2 rounded" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-600">Data Options</label>
+          <select name="data_action" className="w-full border p-2 rounded">
+            <option value="none">Select...</option>
+            <option value="export">Export My Data</option>
+            <option value="delete">Request Account Deletion</option>
+          </select>
+        </div>
+        <div className="flex justify-end">
+          <button type="submit" className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
