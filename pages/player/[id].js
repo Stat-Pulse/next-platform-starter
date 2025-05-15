@@ -20,7 +20,7 @@ export async function getServerSideProps({ params }) {
   const [playerRows] = await connection.execute(`
     SELECT p.*, c.contract_type, c.team_abbr AS contract_team, c.year AS contract_year, c.avg_annual_value
     FROM Players p
-    LEFT JOIN Contracts c ON p.player_name = c.player_name
+    LEFT JOIN Contracts c ON p.player_id = c.player_id
     WHERE p.player_id = ?
     LIMIT 1
   `, [playerId])
