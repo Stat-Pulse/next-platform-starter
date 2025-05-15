@@ -4,21 +4,15 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 import SectionWrapper from '../components/SectionWrapper'
 import Link from 'next/link'
+import SearchBar from '../components/SearchBar'; 
 
 export default function HomePage() {
   const games = [
     { id: 301, home_team: 'KC', away_team: 'BUF', status: 'upcoming', date_time: 'Sunday 8:20 PM ET' },
     { id: 302, home_team: 'PHI', away_team: 'DAL', status: 'live', date_time: 'Q2 10:15' },
     { id: 303, home_team: 'CIN', away_team: 'CLE', status: 'final', date_time: 'Final Score: 27-17' },
-  ]
+  ];
 
-  return (
-    <>
-      <Header />
-
-  import SearchBar from '../components/SearchBar';
-
-  export default function HomePage() {
   const searchIndex = [
     { label: 'Patrick Mahomes', url: '/players/00-0031234' },
     { label: 'San Francisco 49ers', url: '/teams/SF' },
@@ -31,15 +25,13 @@ export default function HomePage() {
 
   return (
     <>
+      <Header />
+    
       <header className="py-12 px-6 bg-gray-900 text-white text-center">
         <h1 className="text-4xl font-bold mb-4">Welcome to StatPulse</h1>
         <SearchBar data={searchIndex} />
       </header>
-      {
-    </>
-  );
-}
-    
+
       {/* Hero Section */}
       <section className="relative bg-cover bg-center text-white py-20 px-6" style={{ backgroundImage: "url('/images/featured-game.jpg')" }}>
         <div className="bg-black bg-opacity-60 p-8 rounded-lg max-w-3xl mx-auto text-center">
