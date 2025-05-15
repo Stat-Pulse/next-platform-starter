@@ -1,5 +1,8 @@
 // pages/free-agent-listings.js
 import { useEffect, useState } from 'react';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import TeamSidebar from '@/components/TeamSidebar';
 
 export default function FreeAgentListings() {
   const [players, setPlayers] = useState([]);
