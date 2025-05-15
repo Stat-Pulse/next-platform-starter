@@ -51,14 +51,29 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="relative bg-cover bg-center text-white py-20 px-6" style={{ backgroundImage: "url('/images/featured-game.jpg')" }}>
-        <div className="bg-black bg-opacity-60 p-8 rounded-lg max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl font-bold mb-4">Chiefs vs Bills: Clash of the Titans</h1>
-          <p className="mb-6">Sunday Night Football brings fireworks as Mahomes and Allen go head-to-head.</p>
-          <Link href="/games/301" className="inline-block bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
-            View Game Details
-          </Link>
-        </div>
-      </section>
+  <div className="bg-black bg-opacity-60 p-8 rounded-lg max-w-3xl mx-auto text-center">
+    {newsItems.length > 0 ? (
+      <>
+        <h1 className="text-4xl font-bold mb-4">{newsItems[0].title}</h1>
+        <p className="mb-6 text-sm italic text-gray-200">Top story via {newsItems[0].source}</p>
+        <a
+          href={newsItems[0].link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+        >
+          Read Full Article
+        </a>
+      </>
+    ) : (
+      <>
+        <h1 className="text-4xl font-bold mb-4">Clash of the Titans</h1>
+        <p className="mb-6">Loading top NFL headline...</p>
+      </>
+    )}
+  </div>
+</section>
+
 
       <main className="bg-gray-100 py-10">
         <div className="container mx-auto px-6 space-y-12">
