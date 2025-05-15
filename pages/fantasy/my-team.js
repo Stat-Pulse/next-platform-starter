@@ -15,7 +15,7 @@ export default function MyTeamPage() {
   const [playerNews, setPlayerNews] = useState([]);
 
   useEffect(() => {
-    import('../public/data/myTeamData.json').then((data) => {
+    import('../data/myTeamData.json').then((data) => {
       setRoster(data.roster);
       setWeeklyScores(data.weeklyScores);
       setPlayerNews(data.playerNews);
