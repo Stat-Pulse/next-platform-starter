@@ -17,14 +17,22 @@ export default function HomePage() {
     { id: 303, home_team: 'CIN', away_team: 'CLE', status: 'final', date_time: 'Final Score: 27-17' },
   ];
 
-  const searchIndex = [
-    { label: 'Patrick Mahomes', url: '/players/00-0031234' },
-    { label: 'San Francisco 49ers', url: '/teams/SF' },
-    { label: 'QB Leaders 2024', url: '/stats/qb-leaders' },
-    { label: 'Settings', url: '/profile/settings' },
-    { label: 'Subscribe to Premium', url: '/subscribe' },
-    { label: 'Fantasy Compare Tool', url: '/compare' },
-    { label: 'Referee Assignments', url: '/refs' }
+  const [searchIndex, setSearchIndex] = useState([]);
+
+useEffect(() => {
+  async function fetchSearchIndex() {
+    try {
+      const res = await fetch('/.netlify/functions/getSearchIndex');
+      const data = await res.json();
+      setSearchIndex(data);
+    } catch (e) {
+      console.error('Search index load failed:', e);
+    }
+  }
+
+  fetchSearchIndex();
+}, []);
+
   ];
 
   useEffect(() => {
