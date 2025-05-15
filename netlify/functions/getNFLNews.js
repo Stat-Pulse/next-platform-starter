@@ -23,11 +23,11 @@ exports.handler = async () => {
       allItems = [...allItems, ...entries];
     }
 
-    allItems.sort((a, b) => b.pubDate - a.pubDate); // Newest first
+    allItems.sort((a, b) => b.pubDate - a.pubDate);
 
     return {
       statusCode: 200,
-      body: JSON.stringify(allItems.slice(0, 15)), // Limit to top 15
+      body: JSON.stringify(allItems.slice(0, 15)),
     };
   } catch (error) {
     return {
