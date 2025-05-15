@@ -12,11 +12,15 @@ export async function getServerSideProps({ params }) {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD
   })
-  
+
+  // Log DB name (for debugging in Netlify logs)
+  const [dbCheck] = await connection.query('SELECT DATABASE() AS db')
+  console.log('✅ Connected to DB:', dbCheck[0].db)
+
   const [playerRows] = await connection.execute(`
     SELECT p.*, c.contract_type, c.team_abbr AS contract_team, c.year AS contract_year, c.avg_annual_value
     FROM Players p
-    LEFT JOIN Contracts c ON p.player_id = c.player_name
+    LEFT JOIN Contracts c ON p.player_name = c.player
     WHERE p.player_id = ?
     LIMIT 1
   `, [playerId])
@@ -39,7 +43,7 @@ export async function getServerSideProps({ params }) {
     ORDER BY report_date DESC
   `, [playerId])
 
-  connection.end()
+  await connection.end()
 
   return {
     props: {
