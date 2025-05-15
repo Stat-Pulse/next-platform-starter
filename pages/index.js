@@ -33,8 +33,6 @@ useEffect(() => {
   fetchSearchIndex();
 }, []);
 
-  ];
-
   useEffect(() => {
     async function fetchNews() {
       try {
