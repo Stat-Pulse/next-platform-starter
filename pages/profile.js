@@ -126,18 +126,18 @@ export default function ProfilePage() {
                   <h2 className="text-xl font-bold">Manage Profile</h2>
                   <button onClick={() => setShowSettings(false)} className="text-red-600">✕</button>
                 </div>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault()
-                    const updated = Object.fromEntries(new FormData(e.target))
-                    const updatedProfile = { ...user, ...updated }
-                    localStorage.setItem('userProfile', JSON.stringify(updatedProfile))
-                    setUser(updatedProfile)
-                    setShowSettings(false)
-                    logActivity('Updated profile information')
-                  }}
-                  className="space-y-4"
-                >
+               <form
+                 onSubmit={(e) => {
+                  e.preventDefault()
+                  const updated = Object.fromEntries(new FormData(e.target))
+                  const updatedProfile = { ...user, ...updated }
+                  localStorage.setItem('userProfile', JSON.stringify(updatedProfile))
+                  setUser(updatedProfile)
+                  setShowSettings(false)
+                }}
+                className="space-y-4"
+              >
+
                   <div>
                     <label className="block text-sm font-medium text-gray-600">Upload New Avatar</label>
                     <input
