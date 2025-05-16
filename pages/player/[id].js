@@ -90,7 +90,7 @@ export default function PlayerProfile({ player, gameLogs, injuries, depthChart, 
             <h1 className="text-3xl font-bold mb-1">{player.player_name}</h1>
             <p className="text-gray-600">{player.position} | #{player.jersey_number} | {player.team_id}</p>
             <p className="text-sm text-gray-500">{player.college} | Drafted by {player.draft_club} (#{player.draft_number})</p>
-            <p className="text-sm text-gray-500">{player.height}" / {player.weight} lbs | {player.years_exp} years experience</p>
+           <p className="text-sm text-gray-500">{player.height}&quot; / {player.weight} lbs | {player.years_exp} years experience</p>
             {depthChart && <p className="text-xs text-blue-600 mt-1">Depth Chart: {depthChart.depth_position} - Week {depthChart.week}</p>}
           </div>
         </div>
