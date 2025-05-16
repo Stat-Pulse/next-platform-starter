@@ -1,4 +1,4 @@
-// pages/free-agent-listings.js
+// pages/fantasy/åfree-agent-listings.js
 import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
