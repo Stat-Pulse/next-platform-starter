@@ -1,69 +1,176 @@
-// pages/fantasy/index.js
 'use client'
 
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import SectionWrapper from '@/components/SectionWrapper'
-import Link from 'next/link'
 
 export default function FantasyDashboard() {
-  const games = [
-    { id: 301, home_team: 'KC', away_team: 'BUF', status: 'upcoming', date_time: 'Sunday 8:20 PM ET' },
-    { id: 302, home_team: 'PHI', away_team: 'DAL', status: 'live',     date_time: 'Q2 10:15' },
-    { id: 303, home_team: 'CIN', away_team: 'CLE', status: 'final',    date_time: 'Final Score: 27-17' },
-  ]
+  const [teams, setTeams] = useState([])
+  const [recentActivity, setActivity] = useState([])
+  const [waiverWire, setWaiverWire] = useState([])
+  const [transactions, setTransactions] = useState([])
+
+  useEffect(() => {
+    fetch('/data/sampleFantasyData.json')
+      .then(res => res.json())
+      .then(data => {
+        setTeams(data.teams)
+        setActivity(data.recentActivity)
+        setWaiverWire(data.waiverWire)
+        setTransactions(data.transactions)
+      })
+      .catch(err => console.error('Failed to load fantasy data:', err))
+  }, [])
+
+  const userTeam = teams.find(t => t.name === 'Thunder Cats') || {}
 
   return (
     <>
       <Header />
 
-      {/* Fantasy Hero / Dashboard Intro */}
-      <section className="bg-gray-100 py-12 px-6 text-center">
-        <h1 className="text-3xl font-bold mb-2">Welcome to StatPulse Fantasy</h1>
-        <p className="text-gray-700">Manage your team, view matchups, and track league standings all in one place.</p>
-      </section>
+      <main className="container mx-auto px-4 py-8 min-h-screen">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Sidebar */}
+          <aside className="bg-white rounded-lg shadow p-6 space-y-2">
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/fantasy"
+                  className="block p-2 rounded text-red-600 bg-gray-100 font-semibold"
+                >
+                  Dashboard
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/fantasy/my-team"
+                  className="block p-2 rounded hover:text-red-600 hover:bg-gray-100"
+                >
+                  My Team
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/fantasy/current-matchup"
+                  className="block p-2 rounded hover:text-red-600 hover:bg-gray-100"
+                >
+                  Current Matchup
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/fantasy/league-schedule"
+                  className="block p-2 rounded hover:text-red-600 hover:bg-gray-100"
+                >
+                  League Schedule
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/fantasy/player-stats"
+                  className="block p-2 rounded hover:text-red-600 hover:bg-gray-100"
+                >
+                  Player Stats
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/fantasy/free-agent-listings"
+                  className="block p-2 rounded hover:text-red-600 hover:bg-gray-100"
+                >
+                  Free Agents
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/fantasy/trade-center"
+                  className="block p-2 rounded hover:text-red-600 hover:bg-gray-100"
+                >
+                  Trade Center
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/fantasy/draft-review"
+                  className="block p-2 rounded hover:text-red-600 hover:bg-gray-100"
+                >
+                  Draft Review
+                </Link>
+              </li>
+            </ul>
+          </aside>
 
-      <SectionWrapper title="Current Matchup">
-        <Link href="/fantasy/current-matchup">
-          <a className="text-blue-600 hover:underline">View Today’s Matchup →</a>
-        </Link>
-      </SectionWrapper>
+          {/* Main Content */}
+          <div className="md:col-span-3 space-y-6">
+            <h1 className="text-3xl font-bold text-gray-800">Fantasy Dashboard - Week 10</h1>
 
-      <SectionWrapper title="My Team">
-        <Link href="/fantasy/my-team">
-          <a className="text-blue-600 hover:underline">Open Your Roster →</a>
-        </Link>
-      </SectionWrapper>
+            <section className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">Team Summary</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <p className="text-sm font-semibold">Record</p>
+                  <p className="text-sm text-gray-600">{userTeam.record || '--'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">Rank</p>
+                  <p className="text-sm text-gray-600">{userTeam.rank || '--'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">Points Scored</p>
+                  <p className="text-sm text-gray-600">{userTeam.pointsScored || '--'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">Points Against</p>
+                  <p className="text-sm text-gray-600">{userTeam.pointsAgainst || '--'}</p>
+                </div>
+              </div>
+            </section>
 
-      <SectionWrapper title="Player Stats">
-        <Link href="/fantasy/player-stats">
-          <a className="text-blue-600 hover:underline">Explore Player Stats →</a>
-        </Link>
-      </SectionWrapper>
+            <section className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">Recent Activity</h2>
+              <ul className="space-y-1">
+                {recentActivity.map((item, idx) => (
+                  <li key={idx} className="text-sm text-gray-600">
+                    {item.date}: {item.description}
+                  </li>
+                ))}
+              </ul>
+            </section>
 
-      <SectionWrapper title="Trade Center">
-        <Link href="/fantasy/trade-center">
-          <a className="text-blue-600 hover:underline">Go to Trade Center →</a>
-        </Link>
-      </SectionWrapper>
+            <section className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">Waiver Wire Suggestions</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {waiverWire.map((player, idx) => (
+                  <div key={idx} className="p-4 bg-gray-50 rounded-md">
+                    <p className="font-semibold">
+                      {player.name} ({player.position})
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {player.team} - {player.projected} pts
+                    </p>
+                    <p className="text-sm text-gray-500">{player.reason}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
 
-      <SectionWrapper title="League Schedule">
-        <Link href="/fantasy/league-schedule">
-          <a className="text-blue-600 hover:underline">See Full Schedule →</a>
-        </Link>
-      </SectionWrapper>
-
-      <SectionWrapper title="Free Agent Listings">
-        <Link href="/fantasy/free-agent-listings">
-          <a className="text-blue-600 hover:underline">Browse Free Agents →</a>
-        </Link>
-      </SectionWrapper>
-
-      <SectionWrapper title="Draft Review">
-        <Link href="/fantasy/draft-review">
-          <a className="text-blue-600 hover:underline">Review Draft Results →</a>
-        </Link>
-      </SectionWrapper>
+            <section className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">League Transactions</h2>
+              <ul className="space-y-1">
+                {transactions.map((t, idx) => (
+                  <li key={idx} className="text-sm text-gray-600">
+                    {t.date}:&nbsp;
+                    {t.type === 'Trade'
+                      ? `${t.teams[0]} traded ${t.exchanged[t.teams[0]]} to ${t.teams[1]} for ${t.exchanged[t.teams[1]]}`
+                      : `${t.team} ${t.type.toLowerCase()}ed ${t.player}`}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </div>
+        </div>
+      </main>
 
       <Footer />
     </>
