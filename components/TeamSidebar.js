@@ -22,11 +22,13 @@ export default function TeamSidebar({ active = '' }) {
           return (
             <li key={label}>
               <Link href={path} legacyBehavior>
-                <a className={`flex items-center p-3 rounded-md ${
-                  isActive
-                    ? 'bg-gray-100 text-red-600'
-                    : 'text-gray-800 hover:text-red-600 hover:bg-gray-100'
-                }`}>
+                <a
+                  className={`flex items-center p-3 rounded-md ${
+                    isActive
+                      ? 'bg-gray-100 text-red-600'
+                      : 'text-gray-800 hover:text-red-600 hover:bg-gray-100'
+                  }`}
+                >
                   {label}
                 </a>
               </Link>
