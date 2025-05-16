@@ -23,7 +23,7 @@ export async function getServerSideProps({ params }) {
              r.height, r.weight, r.draft_club, r.draft_number, r.rookie_year,
              c.contract_type, c.year AS contract_year, c.team_abbr AS contract_team, c.avg_annual_value
       FROM Players p
-      LEFT JOIN Rosters_2024 r ON p.player_name = r.full_name
+      LEFT JOIN Rosters_2024 r ON p.player_id = r.gsis_id
       LEFT JOIN Contracts c ON p.player_name = c.player_name
       WHERE p.player_id = ?
       LIMIT 1
