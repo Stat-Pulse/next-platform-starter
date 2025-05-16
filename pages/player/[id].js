@@ -9,8 +9,8 @@ export async function getServerSideProps({ params }) {
   // 1) Connect to the database
   try {
     conn = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
+      host:     process.env.DB_HOST,
+      user:     process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
     });
@@ -18,10 +18,11 @@ export async function getServerSideProps({ params }) {
     return { props: { fatalError: `DB connection failed: ${err.message}` } };
   }
 
-  // 2) Fetch the player (with roster join)
+  // 2) Fetch the player with roster data
   let player;
   try {
-    const [playerRows] = await conn.execute(`
+    const [playerRows] = await conn.execute(
+      `
       SELECT
         p.player_id,
         p.player_name,
@@ -40,7 +41,9 @@ export async function getServerSideProps({ params }) {
       LEFT JOIN Rosters_2024 r
         ON p.player_id = r.player_id
       WHERE p.player_id = ?
-    `, [params.id]);
+      `,
+      [params.id]
+    );
 
     if (playerRows.length === 0) {
       await conn.end();
@@ -57,11 +60,18 @@ export async function getServerSideProps({ params }) {
   let gameLogsError = null;
   try {
     const [rows] = await conn.execute(
-      `SELECT game_id, passing_yards, passing_touchdowns,
-              rushing_yards, rushing_touchdowns, fumbles
-       FROM Player_Stats_Game
-       WHERE player_id = ?
-       ORDER BY game_id`,
+      `
+      SELECT
+        game_id,
+        passing_yards,
+        passing_touchdowns,
+        rushing_yards,
+        rushing_touchdowns,
+        fumbles
+      FROM Player_Stats_Game
+      WHERE player_id = ?
+      ORDER BY game_id
+      `,
       [params.id]
     );
     gameLogs = rows;
@@ -74,10 +84,15 @@ export async function getServerSideProps({ params }) {
   let injuriesError = null;
   try {
     const [rows] = await conn.execute(
-      `SELECT report_date, injury_description, status
-       FROM Injuries
-       WHERE player_id = ?
-       ORDER BY report_date DESC`,
+      `
+      SELECT
+        report_date,
+        injury_description,
+        status
+      FROM Injuries
+      WHERE player_id = ?
+      ORDER BY report_date DESC
+      `,
       [params.id]
     );
     injuries = rows;
@@ -100,7 +115,7 @@ export default function PlayerPage({
   injuriesError,
   fatalError,
 }) {
-  // Fatal error (connection or player query)
+  // Fatal error connecting or fetching player
   if (fatalError) {
     return (
       <div style={{ padding: '2rem', color: 'red' }}>
