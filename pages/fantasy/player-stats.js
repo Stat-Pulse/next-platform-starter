@@ -6,10 +6,9 @@ import TeamSidebar from '@/components/TeamSidebar';
 import { useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 
-const PlayerProfile = dynamic(
-  () => import('../components/fantasy/PlayerProfile'),
-  { ssr: false }
-)
+const PlayerProfile = dynamic(() => import('@/components/fantasy/PlayerProfile'), {
+  ssr: false,
+});
 
 export default function PlayerStatsPage() {
   const searchParams = useSearchParams()
