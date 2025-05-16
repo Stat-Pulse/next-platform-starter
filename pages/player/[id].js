@@ -1,4 +1,5 @@
 // pages/player/[id].js
+
 import React from 'react';
 import Head from 'next/head';
 import mysql from 'mysql2/promise';
@@ -13,9 +14,6 @@ export async function getServerSideProps({ params }) {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD
   });
-
-  const [dbCheck] = await connection.query('SELECT DATABASE() AS db');
-  console.log('✅ Connected to DB:', dbCheck[0].db);
 
   const [playerRows] = await connection.execute(`
     SELECT p.player_id, p.player_name, p.position, p.team_id,
@@ -51,6 +49,18 @@ export async function getServerSideProps({ params }) {
     LIMIT 1
   `, [playerId]);
 
+  const [pfrStats] = await connection.execute(`
+    SELECT *
+    FROM PFR_Advanced_Stats_2024
+    WHERE player_id = ?
+  `, [playerId]);
+
+  const [nextGenStats] = await connection.execute(`
+    SELECT *
+    FROM NextGen_Stats_Passing_2024
+    WHERE player_id = ?
+  `, [playerId]);
+
   await connection.end();
 
   return {
@@ -58,12 +68,14 @@ export async function getServerSideProps({ params }) {
       player: playerRows[0] || null,
       gameLogs,
       injuries,
-      depthChart: depth[0] || null
+      depthChart: depth[0] || null,
+      pfrStats: pfrStats[0] || null,
+      nextGenStats: nextGenStats[0] || null
     }
   };
 }
 
-export default function PlayerProfile({ player, gameLogs, injuries, depthChart }) {
+export default function PlayerProfile({ player, gameLogs, injuries, depthChart, pfrStats, nextGenStats }) {
   if (!player) return <div className="p-6">Player not found.</div>;
 
   return (
@@ -100,6 +112,37 @@ export default function PlayerProfile({ player, gameLogs, injuries, depthChart }
             </ul>
           </div>
         </div>
+
+        {pfrStats && (
+          <div className="mt-10">
+            <h2 className="text-xl font-semibold mb-2">Advanced Stats (PFR)</h2>
+            <ul className="text-sm space-y-1">
+              <li>Drops: {pfrStats.passing_drops} ({pfrStats.passing_drop_pct}%)</li>
+              <li>Bad Throws: {pfrStats.passing_bad_throws} ({pfrStats.passing_bad_throw_pct}%)</li>
+              <li>Pressured: {pfrStats.times_pressured} ({pfrStats.times_pressured_pct}%)</li>
+              <li>Blitzed: {pfrStats.times_blitzed}, Sacked: {pfrStats.times_sacked}</li>
+              <li>Hurried: {pfrStats.times_hurried}, Hit: {pfrStats.times_hit}</li>
+            </ul>
+          </div>
+        )}
+
+        {nextGenStats && (
+          <div className="mt-10">
+            <h2 className="text-xl font-semibold mb-2">Next Gen Stats</h2>
+            <ul className="text-sm space-y-1">
+              <li>Avg Time to Throw: {nextGenStats.avg_time_to_throw}s</li>
+              <li>Completed Air Yards: {nextGenStats.avg_completed_air_yards}</li>
+              <li>Intended Air Yards: {nextGenStats.avg_intended_air_yards}</li>
+              <li>Air Yards Diff: {nextGenStats.avg_air_yards_differential}</li>
+              <li>Aggressiveness: {nextGenStats.aggressiveness}%</li>
+              <li>Max Completed Air Distance: {nextGenStats.max_completed_air_distance}</li>
+              <li>To Sticks: {nextGenStats.avg_air_yards_to_sticks}</li>
+              <li>Passer Rating: {nextGenStats.passer_rating}</li>
+              <li>Comp %: {nextGenStats.completion_percentage} (Exp: {nextGenStats.expected_completion_percentage}, CPOE: {nextGenStats.completion_percentage_above_expectation})</li>
+              <li>Avg Air Distance: {nextGenStats.avg_air_distance}, Max Air Distance: {nextGenStats.max_air_distance}</li>
+            </ul>
+          </div>
+        )}
 
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-2">Game Logs (Fantasy Scoring)</h2>
