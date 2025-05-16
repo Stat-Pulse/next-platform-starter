@@ -1,39 +1,34 @@
 // components/TeamSidebar.js
-
 import Link from 'next/link';
 
-export default function TeamSidebar({ active = '' }) {
-  const links = [
-    'Dashboard',
-    'My Team',
-    'Current Matchup',
-    'Live Scoring',
-    'League Schedule',
-    'Player Stats',
-    'Free Agent Listings',
-    'Trade Center',
-    'Draft Review',
-  ];
+const linkMap = {
+  'Dashboard': '/fantasy',
+  'My Team': '/fantasy/my-team',
+  'Current Matchup': '/fantasy/current-matchup',
+  'Live Scoring': '/fantasy/live-scoring',
+  'League Schedule': '/fantasy/league-schedule',
+  'Player Stats': '/fantasy/player-stats',
+  'Free Agent Listings': '/fantasy/free-agent-listings',
+  'Trade Center': '/fantasy/trade-center',
+  'Draft Review': '/fantasy/draft-review',
+};
 
+export default function TeamSidebar({ active = '' }) {
   return (
     <aside className="bg-white rounded-lg shadow p-6">
       <ul className="space-y-2">
-        {links.map((text) => {
-          const fileName = text.toLowerCase().replace(/\s+/g, '-');
-          const href =
-            fileName === 'dashboard' ? '/fantasy' : `/fantasy/${fileName}`;
-          const isActive = active === text;
+        {Object.entries(linkMap).map(([label, path]) => {
+          const isActive = active === label;
           return (
-            <li key={text}>
-              <Link
-                href={href}
-                className={`flex items-center p-3 rounded-md ${
+            <li key={label}>
+              <Link href={path} legacyBehavior>
+                <a className={`flex items-center p-3 rounded-md ${
                   isActive
                     ? 'bg-gray-100 text-red-600'
                     : 'text-gray-800 hover:text-red-600 hover:bg-gray-100'
-                }`}
-              >
-                {text}
+                }`}>
+                  {label}
+                </a>
               </Link>
             </li>
           );
