@@ -1,12 +1,14 @@
 // pages/player/[id].js
 import React from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export async function getServerSideProps({ params }) {
   const mysql = require('mysql2/promise');
   let conn;
 
-  // 1) Connect
+  // Connect to the database
   try {
     conn = await mysql.createConnection({
       host:     process.env.DB_HOST,
@@ -18,7 +20,7 @@ export async function getServerSideProps({ params }) {
     return { props: { fatalError: `DB connection failed: ${err.message}` } };
   }
 
-  // 2) Fetch player + roster data
+  // Fetch player + roster data
   let player;
   try {
     const [rows] = await conn.execute(
@@ -44,212 +46,210 @@ export async function getServerSideProps({ params }) {
       `,
       [params.id]
     );
-    if (rows.length === 0) {
+    if (!rows.length) {
       await conn.end();
       return { notFound: true };
     }
-    
-    // Format the player data to ensure it's serializable
     player = JSON.parse(JSON.stringify(rows[0]));
-    
-    // Convert date to string if present
-    if (player.date_of_birth) {
-      player.date_of_birth = new Date(player.date_of_birth).toISOString().split('T')[0];
-    }
   } catch (err) {
     await conn.end();
     return { props: { fatalError: `Player query failed: ${err.message}` } };
   }
 
-  // 3) Game logs
-  let gameLogs = [], gameLogsError = null;
+  // Recent Game Logs (last 10)
+  let gameLogs = [];
+  let gameLogsError = null;
   try {
     const [gl] = await conn.execute(
       `
       SELECT
         game_id,
+        season,
+        week,
+        fantasy_points_ppr AS fantasyPoints,
         passing_yards,
         passing_touchdowns,
         rushing_yards,
         rushing_touchdowns,
         fumbles
-      FROM Player_Stats_Game
+      FROM Player_Stats_Game_2024
       WHERE player_id = ?
-      ORDER BY game_id
+      ORDER BY season DESC, week DESC
+      LIMIT 10
       `,
       [params.id]
     );
-    // Format game logs to ensure they're serializable
     gameLogs = JSON.parse(JSON.stringify(gl));
   } catch (err) {
     gameLogsError = err.message;
   }
 
-  // 4) Injuries
-  let injuries = [], injuriesError = null;
+  // Career Summary by season
+  let careerSummary = [];
+  let careerError = null;
   try {
-    const [ir] = await conn.execute(
+    const [cs] = await conn.execute(
       `
       SELECT
-        report_date,
-        injury_description,
-        status
-      FROM Injuries
+        season,
+        SUM(fantasy_points_ppr)      AS totalFantasyPoints,
+        SUM(passing_yards)          AS totalPassingYards,
+        SUM(passing_touchdowns)     AS totalPassingTDs,
+        SUM(rushing_yards)          AS totalRushingYards,
+        SUM(rushing_touchdowns)     AS totalRushingTDs,
+        SUM(receiving_yards)        AS totalReceivingYards,
+        SUM(receiving_tds)          AS totalReceivingTDs
+      FROM Player_Stats_Game_2024
       WHERE player_id = ?
-      ORDER BY report_date DESC
+      GROUP BY season
+      ORDER BY season DESC
       `,
       [params.id]
     );
-    // Format injuries to ensure they're serializable
-    injuries = JSON.parse(JSON.stringify(ir));
-    
-    // Convert dates to strings
-    injuries = injuries.map(injury => ({
-      ...injury,
-      report_date: injury.report_date ? new Date(injury.report_date).toISOString().split('T')[0] : null
-    }));
+    careerSummary = JSON.parse(JSON.stringify(cs));
   } catch (err) {
-    injuriesError = err.message;
+    careerError = err.message;
   }
 
+  // Close connection
   await conn.end();
-  
-  // Return serializable data
-  return { 
-    props: { 
-      player, 
-      gameLogs, 
-      gameLogsError, 
-      injuries, 
-      injuriesError 
-    } 
+  return {
+    props: { player, gameLogs, gameLogsError, careerSummary, careerError }
   };
 }
 
-export default function PlayerPage({
-  player,
-  gameLogs,
-  gameLogsError,
-  injuries,
-  injuriesError,
-  fatalError,
-}) {
+export default function PlayerPage({ player, gameLogs, gameLogsError, careerSummary, careerError, fatalError }) {
   if (fatalError) {
     return (
-      <div style={{ padding: '2rem', color: 'red' }}>
+      <div className="p-8 text-red-600">
         <Head><title>Server Error</title></Head>
-        <h1>💥 Fatal Error</h1>
+        <h1 className="text-2xl font-bold">💥 Fatal Error</h1>
         <pre>{fatalError}</pre>
       </div>
     );
   }
 
-  if (!player) {
-    return (
-      <div style={{ padding: '2rem' }}>
-        <Head><title>Player Not Found</title></Head>
-        <h1>🚨 Player not found</h1>
-      </div>
-    );
-  }
-
   return (
-    <div style={{ padding: '2rem' }}>
+    <div className="max-w-4xl mx-auto p-8 space-y-8">
       <Head><title>{player.player_name}</title></Head>
 
-      <h1>
-        {player.player_name}
-        {player.position && ` (${player.position})`}
-      </h1>
+      {/* Header */}
+      <header className="flex items-center space-x-6">
+        {player.headshot_url && (
+          <img src={player.headshot_url} alt="headshot" className="w-24 h-24 rounded-full" />
+        )}
+        <div>
+          <h1 className="text-3xl font-bold">
+            {player.player_name}{player.position && ` (${player.position})`}
+          </h1>
+          <p className="text-gray-600">Team: {player.team_id}</p>
+        </div>
+      </header>
 
+      {/* Profile Details */}
       <section>
-        <h2>Profile Details</h2>
-        <ul>
-          <li><strong>ID:</strong> {player.player_id}</li>
-          <li><strong>Position:</strong> {player.position || '—'}</li>
-          <li><strong>College:</strong> {player.college || '—'}</li>
-          <li><strong>Draft Year:</strong> {player.draft_year ?? '—'}</li>
-          <li><strong>DOB:</strong> {player.date_of_birth || '—'}</li>
-          <li><strong>Height (in):</strong> {player.height_inches ?? '—'}</li>
-          <li><strong>Weight (lb):</strong> {player.weight ?? '—'}</li>
-          <li><strong>Active:</strong> {player.is_active ? 'Yes' : 'No'}</li>
-          <li><strong>Team:</strong> {player.team_id || '—'}</li>
-          <li><strong>Jersey #:</strong> {player.jersey_number ?? '—'}</li>
-          <li><strong>Experience:</strong> {player.years_exp != null ? `${player.years_exp} yr` : '—'}</li>
-          {player.headshot_url && (
-            <li>
-              <strong>Headshot:</strong><br/>
-              <img
-                src={player.headshot_url}
-                alt={`${player.player_name} headshot`}
-                width={100}
-                height={100}
-                style={{ borderRadius: '4px' }}
-              />
-            </li>
-          )}
-        </ul>
+        <h2 className="text-2xl font-semibold mb-4">Profile Details</h2>
+        <div className="grid grid-cols-2 gap-4">
+          <div><strong>ID:</strong> {player.player_id}</div>
+          <div><strong>College:</strong> {player.college || '—'}</div>
+          <div><strong>Draft Year:</strong> {player.draft_year || '—'}</div>
+          <div><strong>DOB:</strong> {player.date_of_birth || '—'}</div>
+          <div><strong>Height:</strong> {player.height_inches ? `${player.height_inches}"` : '—'}</div>
+          <div><strong>Weight:</strong> {player.weight ? `${player.weight} lb` : '—'}</div>
+          <div><strong>Active:</strong> {player.is_active ? 'Yes' : 'No'}</div>
+          <div><strong>Experience:</strong> {player.years_exp != null ? `${player.years_exp} yr` : '—'}</div>
+          <div><strong>Jersey #:</strong> {player.jersey_number || '—'}</div>
+        </div>
       </section>
 
+      {/* Recent Game Logs */}
       <section>
-        <h2>Game Logs</h2>
+        <h2 className="text-2xl font-semibold mb-4">Recent Game Logs</h2>
         {gameLogsError ? (
-          <p style={{ color: 'red' }}>Error loading game logs: {gameLogsError}</p>
-        ) : gameLogs.length > 0 ? (
-          <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+          <p className="text-red-600">Error: {gameLogsError}</p>
+        ) : gameLogs.length === 0 ? (
+          <p>No game logs available.</p>
+        ) : (
+          <table className="w-full border-collapse">
             <thead>
-              <tr style={{ borderBottom: '1px solid #ddd' }}>
-                <th style={{ textAlign: 'left', padding: '8px' }}>Game ID</th>
-                <th style={{ textAlign: 'right', padding: '8px' }}>Pass Yds</th>
-                <th style={{ textAlign: 'right', padding: '8px' }}>Pass TD</th>
-                <th style={{ textAlign: 'right', padding: '8px' }}>Rush Yds</th>
-                <th style={{ textAlign: 'right', padding: '8px' }}>Rush TD</th>
-                <th style={{ textAlign: 'right', padding: '8px' }}>Fumbles</th>
+              <tr>
+                <th className="py-2 text-left">Game</th>
+                <th className="py-2 text-right">Pts</th>
+                <th className="py-2 text-right">Pass Yds</th>
+                <th className="py-2 text-right">Pass TD</th>
+                <th className="py-2 text-right">Rush Yds</th>
+                <th className="py-2 text-right">Rush TD</th>
               </tr>
             </thead>
             <tbody>
-              {gameLogs.map((game, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
-                  <td style={{ padding: '8px' }}>{game.game_id}</td>
-                  <td style={{ textAlign: 'right', padding: '8px' }}>{game.passing_yards ?? '—'}</td>
-                  <td style={{ textAlign: 'right', padding: '8px' }}>{game.passing_touchdowns ?? '—'}</td>
-                  <td style={{ textAlign: 'right', padding: '8px' }}>{game.rushing_yards ?? '—'}</td>
-                  <td style={{ textAlign: 'right', padding: '8px' }}>{game.rushing_touchdowns ?? '—'}</td>
-                  <td style={{ textAlign: 'right', padding: '8px' }}>{game.fumbles ?? '—'}</td>
+              {gameLogs.map((g, i) => (
+                <tr key={i} className="border-t">
+                  <td className="py-2">
+                    <Link href={`/game/${g.game_id}`}>Week {g.week}, {g.season}</Link>
+                  </td>
+                  <td className="py-2 text-right">{g.fantasyPoints}</td>
+                  <td className="py-2 text-right">{g.passing_yards}</td>
+                  <td className="py-2 text-right">{g.passing_touchdowns}</td>
+                  <td className="py-2 text-right">{g.rushing_yards}</td>
+                  <td className="py-2 text-right">{g.rushing_touchdowns}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-        ) : (
-          <p>No game logs available.</p>
         )}
       </section>
 
+      {/* Recent Trends Chart */}
+      {gameLogs.length > 0 && (
+        <section>
+          <h2 className="text-2xl font-semibold mb-4">Recent Fantasy Points Trends</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={gameLogs.reverse()} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="week" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="fantasyPoints" name="Fantasy PPG" stroke="#8884d8" />
+            </LineChart>
+          </ResponsiveContainer>
+        </section>
+      )}
+
+      {/* Career Summary */}
       <section>
-        <h2>Injuries</h2>
-        {injuriesError ? (
-          <p style={{ color: 'red' }}>Error loading injuries: {injuriesError}</p>
-        ) : injuries.length > 0 ? (
-          <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+        <h2 className="text-2xl font-semibold mb-4">Career Summary</h2>
+        {careerError ? (
+          <p className="text-red-600">Error: {careerError}</p>
+        ) : (
+          <table className="w-full border-collapse">
             <thead>
-              <tr style={{ borderBottom: '1px solid #ddd' }}>
-                <th style={{ textAlign: 'left', padding: '8px' }}>Date</th>
-                <th style={{ textAlign: 'left', padding: '8px' }}>Injury</th>
-                <th style={{ textAlign: 'left', padding: '8px' }}>Status</th>
+              <tr>
+                <th className="py-2 text-left">Season</th>
+                <th className="py-2 text-right">Fpts</th>
+                <th className="py-2 text-right">Pass Yds</th>
+                <th className="py-2 text-right">Pass TD</th>
+                <th className="py-2 text-right">Rush Yds</th>
+                <th className="py-2 text-right">Rush TD</th>
+                <th className="py-2 text-right">Rec Yds</th>
+                <th className="py-2 text-right">Rec TD</th>
               </tr>
             </thead>
             <tbody>
-              {injuries.map((injury, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
-                  <td style={{ padding: '8px' }}>{injury.report_date}</td>
-                  <td style={{ padding: '8px' }}>{injury.injury_description || '—'}</td>
-                  <td style={{ padding: '8px' }}>{injury.status || '—'}</td>
+              {careerSummary.map((cs, idx) => (
+                <tr key={idx} className="border-t">
+                  <td className="py-2">{cs.season}</td>
+                  <td className="py-2 text-right">{cs.totalFantasyPoints}</td>
+                  <td className="py-2 text-right">{cs.totalPassingYards}</td>
+                  <td className="py-2 text-right">{cs.totalPassingTDs}</td>
+                  <td className="py-2 text-right">{cs.totalRushingYards}</td>
+                  <td className="py-2 text-right">{cs.totalRushingTDs}</td>
+                  <td className="py-2 text-right">{cs.totalReceivingYards}</td>
+                  <td className="py-2 text-right">{cs.totalReceivingTDs}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-        ) : (
-          <p>No injury records found.</p>
         )}
       </section>
     </div>
