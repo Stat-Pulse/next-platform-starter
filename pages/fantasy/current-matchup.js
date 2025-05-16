@@ -12,16 +12,11 @@ export default function CurrentMatchup() {
   const [opponentTeam, setOpponentTeam] = useState(null);
 
   useEffect(() => {
-    fetch('/data/currentMatchup.json')
-      .then(res => res.json())
-      .then(data => {
-        setTeams(data);
-        const team1 = data.find(t => t.name === 'Thunder Cats');
-        const team2 = data.find(t => t.name === 'Gridiron Gurus');
-        setYourTeam(team1);
-        setOpponentTeam(team2);
-      });
-  }, []);
+  setRoster(myTeamData.roster);
+  setWeeklyScores(myTeamData.weeklyScores);
+  setPlayerNews(myTeamData.playerNews);
+  setTrashTalk(myTeamData.trashTalk);
+}, []);
 
   if (!yourTeam || !opponentTeam) return <div className="p-8">Loading matchup...</div>;
 
