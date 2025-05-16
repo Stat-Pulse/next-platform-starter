@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TeamSidebar from '@/components/TeamSidebar';
+import myTeamData from '@/data/myTeamData.json';
 
 export default function MyTeamPage() {
   const [roster, setRoster] = useState([]);
