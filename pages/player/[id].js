@@ -7,72 +7,94 @@ import Image from 'next/image';
 
 export async function getServerSideProps({ params }) {
   const playerId = params.id;
+  let connection;
 
-  const connection = await mysql.createConnection({
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD
-  });
+  try {
+    connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      database: process.env.DB_NAME,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD
+    });
 
-  const [playerRows] = await connection.execute(`
-    SELECT p.player_id, p.player_name, p.position, p.team_id,
-           r.jersey_number, r.status, r.headshot_url, r.years_exp, r.college,
-           r.height, r.weight, r.draft_club, r.draft_number, r.rookie_year,
-           c.contract_type, c.year AS contract_year, c.team_abbr AS contract_team, c.avg_annual_value
-    FROM Players p
-    LEFT JOIN Rosters_2024 r ON p.player_name = r.full_name
-    LEFT JOIN Contracts c ON p.player_name = c.player_name
-    WHERE p.player_id = ?
-    LIMIT 1
-  `, [playerId]);
+    const [playerRows] = await connection.execute(`
+      SELECT p.player_id, p.player_name, p.position, p.team_id,
+             r.jersey_number, r.status, r.headshot_url, r.years_exp, r.college,
+             r.height, r.weight, r.draft_club, r.draft_number, r.rookie_year,
+             c.contract_type, c.year AS contract_year, c.team_abbr AS contract_team, c.avg_annual_value
+      FROM Players p
+      LEFT JOIN Rosters_2024 r ON p.player_name = r.full_name
+      LEFT JOIN Contracts c ON p.player_name = c.player_name
+      WHERE p.player_id = ?
+      LIMIT 1
+    `, [playerId]);
 
-  const [gameLogs] = await connection.execute(`
-    SELECT game_id, passing_yards, passing_touchdowns, rushing_yards, rushing_touchdowns, fumbles
-    FROM Player_Stats_Game
-    WHERE player_id = ?
-    ORDER BY game_id
-  `, [playerId]);
-
-  const [injuries] = await connection.execute(`
-    SELECT report_date, injury_description, status
-    FROM Injuries
-    WHERE player_id = ?
-    ORDER BY report_date DESC
-  `, [playerId]);
-
-  const [depth] = await connection.execute(`
-    SELECT club_code, week, position, depth_position
-    FROM Depth_Charts_2024
-    WHERE full_name = (SELECT player_name FROM Players WHERE player_id = ?)
-    ORDER BY week DESC
-    LIMIT 1
-  `, [playerId]);
-
-  const [pfrStats] = await connection.execute(`
-    SELECT *
-    FROM PFR_Advanced_Stats_2024
-    WHERE player_id = ?
-  `, [playerId]);
-
-  const [nextGenStats] = await connection.execute(`
-    SELECT *
-    FROM NextGen_Stats_Passing_2024
-    WHERE player_id = ?
-  `, [playerId]);
-
-  await connection.end();
-
-  return {
-    props: {
-      player: playerRows[0] || null,
-      gameLogs,
-      injuries,
-      depthChart: depth[0] || null,
-      pfrStats: pfrStats[0] || null,
-      nextGenStats: nextGenStats[0] || null
+    if (!playerRows.length) {
+      console.log(`❌ No player found for ID: ${playerId}`);
+      return { props: { player: null } };
     }
-  };
+
+    const [gameLogs] = await connection.execute(`
+      SELECT game_id, passing_yards, passing_touchdowns, rushing_yards, rushing_touchdowns, fumbles
+      FROM Player_Stats_Game
+      WHERE player_id = ?
+      ORDER BY game_id
+    `, [playerId]);
+
+    const [injuries] = await connection.execute(`
+      SELECT report_date, injury_description, status
+      FROM Injuries
+      WHERE player_id = ?
+      ORDER BY report_date DESC
+    `, [playerId]);
+
+    const [depth] = await connection.execute(`
+      SELECT club_code, week, position, depth_position
+      FROM Depth_Charts_2024
+      WHERE full_name = (SELECT player_name FROM Players WHERE player_id = ?)
+      ORDER BY week DESC
+      LIMIT 1
+    `, [playerId]);
+
+    const [pfrStats] = await connection.execute(`
+      SELECT *
+      FROM PFR_Advanced_Stats_2024
+      WHERE player_id = ?
+    `, [playerId]);
+
+    const [nextGenStats] = await connection.execute(`
+      SELECT *
+      FROM NextGen_Stats_Passing_2024
+      WHERE player_id = ?
+    `, [playerId]);
+
+    await connection.end();
+
+    return {
+      props: {
+        player: playerRows[0],
+        gameLogs,
+        injuries,
+        depthChart: depth[0] || null,
+        pfrStats: pfrStats[0] || null,
+        nextGenStats: nextGenStats[0] || null
+      }
+    };
+  } catch (error) {
+    console.error('❌ getServerSideProps error:', error);
+    if (connection) await connection.end();
+    return {
+      props: {
+        player: null,
+        gameLogs: [],
+        injuries: [],
+        depthChart: null,
+        pfrStats: null,
+        nextGenStats: null,
+        error: error.message
+      }
+    };
+  }
 }
 
 export default function PlayerProfile({ player, gameLogs, injuries, depthChart, pfrStats, nextGenStats }) {
