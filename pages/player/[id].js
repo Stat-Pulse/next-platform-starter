@@ -6,6 +6,7 @@ export async function getServerSideProps({ params }) {
   const mysql = require('mysql2/promise');
   let conn;
 
+  // 1) Connect to the database
   try {
     conn = await mysql.createConnection({
       host: process.env.DB_HOST,
@@ -17,24 +18,41 @@ export async function getServerSideProps({ params }) {
     return { props: { fatalError: `DB connection failed: ${err.message}` } };
   }
 
-  // 1) Fetch player
+  // 2) Fetch the player (with roster join)
   let player;
   try {
-    const [rows] = await conn.execute(
-      'SELECT player_id, player_name, position FROM Players WHERE player_id = ?',
-      [params.id]
-    );
-    if (!rows.length) {
+    const [playerRows] = await conn.execute(`
+      SELECT
+        p.player_id,
+        p.player_name,
+        p.position,
+        p.college,
+        p.draft_year,
+        p.date_of_birth,
+        p.height_inches,
+        p.weight,
+        p.is_active,
+        p.team_id,
+        r.jersey_number,
+        r.years_exp,
+        r.headshot_url
+      FROM Players p
+      LEFT JOIN Roster r
+        ON p.player_id = r.player_id
+      WHERE p.player_id = ?
+    `, [params.id]);
+
+    if (playerRows.length === 0) {
       await conn.end();
       return { notFound: true };
     }
-    player = rows[0];
+    player = playerRows[0];
   } catch (err) {
     await conn.end();
     return { props: { fatalError: `Player query failed: ${err.message}` } };
   }
 
-  // 2) Fetch gameLogs
+  // 3) Fetch game logs
   let gameLogs = [];
   let gameLogsError = null;
   try {
@@ -51,7 +69,7 @@ export async function getServerSideProps({ params }) {
     gameLogsError = err.message;
   }
 
-  // 3) Fetch injuries
+  // 4) Fetch injuries
   let injuries = [];
   let injuriesError = null;
   try {
@@ -68,6 +86,7 @@ export async function getServerSideProps({ params }) {
   }
 
   await conn.end();
+
   return {
     props: { player, gameLogs, gameLogsError, injuries, injuriesError },
   };
@@ -81,31 +100,72 @@ export default function PlayerPage({
   injuriesError,
   fatalError,
 }) {
+  // Fatal error (connection or player query)
   if (fatalError) {
     return (
       <div style={{ padding: '2rem', color: 'red' }}>
-        <Head><title>Fatal Error</title></Head>
+        <Head><title>Server Error</title></Head>
         <h1>💥 Fatal Error</h1>
         <pre>{fatalError}</pre>
       </div>
     );
   }
 
+  // Player not found
+  if (!player) {
+    return (
+      <div style={{ padding: '2rem' }}>
+        <Head><title>Player Not Found</title></Head>
+        <h1>🚨 Player not found</h1>
+      </div>
+    );
+  }
+
   return (
     <div style={{ padding: '2rem' }}>
-      <Head><title>{player.player_name}</title></Head>
+      <Head>
+        <title>{player.player_name}</title>
+      </Head>
 
       <h1>
         {player.player_name}
         {player.position && ` (${player.position})`}
       </h1>
-      <p><strong>ID:</strong> {player.player_id}</p>
+
+      <section>
+        <h2>Profile Details</h2>
+        <ul>
+          <li><strong>ID:</strong> {player.player_id}</li>
+          <li><strong>Position:</strong> {player.position || '—'}</li>
+          <li><strong>College:</strong> {player.college || '—'}</li>
+          <li><strong>Draft Year:</strong> {player.draft_year ?? '—'}</li>
+          <li><strong>DOB:</strong> {player.date_of_birth || '—'}</li>
+          <li><strong>Height (in):</strong> {player.height_inches ?? '—'}</li>
+          <li><strong>Weight (lb):</strong> {player.weight ?? '—'}</li>
+          <li><strong>Active:</strong> {player.is_active ? 'Yes' : 'No'}</li>
+          <li><strong>Team:</strong> {player.team_id || '—'}</li>
+          <li><strong>Jersey #:</strong> {player.jersey_number ?? '—'}</li>
+          <li><strong>Experience:</strong> {player.years_exp != null ? `${player.years_exp} yr` : '—'}</li>
+          {player.headshot_url && (
+            <li>
+              <strong>Headshot:</strong><br/>
+              <img
+                src={player.headshot_url}
+                alt={`${player.player_name} headshot`}
+                width={100}
+                height={100}
+                style={{ borderRadius: '4px' }}
+              />
+            </li>
+          )}
+        </ul>
+      </section>
 
       <section>
         <h2>Game Logs</h2>
         {gameLogsError ? (
           <p style={{ color: 'red' }}>Error loading game logs: {gameLogsError}</p>
-        ) : gameLogs.length ? (
+        ) : gameLogs.length > 0 ? (
           <pre>{JSON.stringify(gameLogs, null, 2)}</pre>
         ) : (
           <p>No game logs available.</p>
@@ -116,7 +176,7 @@ export default function PlayerPage({
         <h2>Injuries</h2>
         {injuriesError ? (
           <p style={{ color: 'red' }}>Error loading injuries: {injuriesError}</p>
-        ) : injuries.length ? (
+        ) : injuries.length > 0 ? (
           <pre>{JSON.stringify(injuries, null, 2)}</pre>
         ) : (
           <p>No injury records found.</p>
