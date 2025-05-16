@@ -1,4 +1,4 @@
-// pages/draft-review.js
+// pages/fantasy/draft-review.js
 
 import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
