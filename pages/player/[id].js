@@ -18,16 +18,16 @@ export async function getServerSideProps({ params }) {
     });
 
     const [playerRows] = await connection.execute(`
-      SELECT p.player_id, p.player_name, p.position, p.team_id,
-             r.jersey_number, r.status, r.headshot_url, r.years_exp, r.college,
-             r.height, r.weight, r.draft_club, r.draft_number, r.rookie_year,
-             c.contract_type, c.year AS contract_year, c.team_abbr AS contract_team, c.avg_annual_value
-      FROM Players p
-      LEFT JOIN Rosters_2024 r ON p.player_id = r.gsis_id
-      LEFT JOIN Contracts c ON p.player_name = c.player_name
-      WHERE p.player_id = ?
-      LIMIT 1
-    `, [playerId]);
+  SELECT p.player_id, p.player_name, p.position, p.team_id,
+         r.jersey_number, r.status, r.headshot_url, r.years_exp, r.college,
+         r.height, r.weight, r.draft_club, r.draft_number, r.rookie_year,
+         c.contract_type, c.year AS contract_year, c.team_abbr AS contract_team, c.avg_annual_value
+  FROM Players p
+  LEFT JOIN Rosters_2024 r ON p.player_id = r.gsis_id
+  LEFT JOIN Contracts c ON p.player_name = c.player_name
+  WHERE p.player_id = ?
+  LIMIT 1
+`, [playerId]);
 
     if (!playerRows.length) {
       console.log(`❌ No player found for ID: ${playerId}`);
