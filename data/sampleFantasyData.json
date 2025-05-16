@@ -1,6 +1,30 @@
 {
-  "teams": [],
-  "recentActivity": [],
-  "waiverWire": [],
-  "transactions": []
+  "teams": [
+    {
+      "name": "Thunder Cats",
+      "record": "5-5",
+      "rank": 4,
+      "pointsScored": 980,
+      "pointsAgainst": 1020,
+      "games": [
+        { "week": 1, "pointsScored": 110, "result": "W" },
+        { "week": 2, "pointsScored": 95,  "result": "L" },
+        { "week": 3, "pointsScored": 85,  "result": "W" }
+        // …etc for each week
+      ]
+    },
+    {
+      "name": "Iron Wolves",
+      // …other summary fields…
+      "games": [
+        { "week": 1, "pointsScored": 120, "result": "W" },
+        { "week": 2, "pointsScored": 80,  "result": "W" },
+        { "week": 3, "pointsScored": 70,  "result": "L" }
+      ]
+    }
+    // …other teams…
+  ],
+  "recentActivity": [ /* … */ ],
+  "waiverWire": [ /* … */ ],
+  "transactions": [ /* … */ ]
 }
