@@ -1,9 +1,8 @@
 // pages/player/[id].js
 
-import React from 'react';
 import Head from 'next/head';
-import mysql from 'mysql2/promise';
 import Image from 'next/image';
+import mysql from 'mysql2/promise';
 
 export async function getServerSideProps({ params }) {
   const playerId = params.id;
@@ -14,33 +13,39 @@ export async function getServerSideProps({ params }) {
       host: process.env.DB_HOST,
       database: process.env.DB_NAME,
       user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD
+      password: process.env.DB_PASSWORD,
     });
 
+    // Pull bio + team + roster + contract
     const [playerRows] = await connection.execute(`
-  SELECT p.player_id, p.player_name, p.position, p.team_id,
-         r.jersey_number, r.status, r.headshot_url, r.years_exp, r.college,
-         r.height, r.weight, r.draft_club, r.draft_number, r.rookie_year,
-         c.contract_type, c.year AS contract_year, c.team_abbr AS contract_team, c.avg_annual_value
-  FROM Players p
-  LEFT JOIN Rosters_2024 r ON p.player_id = r.gsis_id
-  LEFT JOIN Contracts c ON p.player_name = c.player_name
-  WHERE p.player_id = ?
-  LIMIT 1
-`, [playerId]);
-
-    if (!playerRows.length) {
-      console.log(`❌ No player found for ID: ${playerId}`);
-      return { props: { player: null } };
-    }
-
-    const [gameLogs] = await connection.execute(`
-      SELECT game_id, passing_yards, passing_touchdowns, rushing_yards, rushing_touchdowns, fumbles
-      FROM Player_Stats_Game
-      WHERE player_id = ?
-      ORDER BY game_id
+      SELECT p.player_id, p.player_name, p.position, p.team_id,
+             r.jersey_number, r.status, r.headshot_url, r.years_exp, r.college,
+             r.height, r.weight, r.draft_club, r.draft_number, r.rookie_year,
+             c.contract_type, c.year AS contract_year, c.avg_annual_value
+      FROM Players p
+      LEFT JOIN Rosters r ON p.player_id = r.player_id
+      LEFT JOIN Contracts c ON p.player_id = c.player_id
+      WHERE p.player_id = ?
+      LIMIT 1;
     `, [playerId]);
 
+    if (playerRows.length === 0) {
+      return { notFound: true };
+    }
+
+    const player = playerRows[0];
+
+    // Pull game logs
+    const [gameLogs] = await connection.execute(`
+      SELECT game_id, week, passing_yards, passing_touchdowns,
+             rushing_yards, rushing_touchdowns, receiving_yards, receiving_touchdowns,
+             fumbles
+      FROM Player_Stats_Game
+      WHERE player_id = ?
+      ORDER BY week ASC
+    `, [playerId]);
+
+    // Pull injury history
     const [injuries] = await connection.execute(`
       SELECT report_date, injury_description, status
       FROM Injuries
@@ -48,160 +53,100 @@ export async function getServerSideProps({ params }) {
       ORDER BY report_date DESC
     `, [playerId]);
 
-    const [depth] = await connection.execute(`
-      SELECT club_code, week, position, depth_position
-      FROM Depth_Charts_2024
-      WHERE full_name = (SELECT player_name FROM Players WHERE player_id = ?)
-      ORDER BY week DESC
-      LIMIT 1
-    `, [playerId]);
-
-    const [pfrStats] = await connection.execute(`
-      SELECT *
-      FROM PFR_Advanced_Stats_2024
-      WHERE player_id = ?
-    `, [playerId]);
-
-    const [nextGenStats] = await connection.execute(`
-      SELECT *
-      FROM NextGen_Stats_Passing_2024
-      WHERE player_id = ?
-    `, [playerId]);
-
     await connection.end();
 
     return {
       props: {
-        player: playerRows[0],
+        player,
         gameLogs,
         injuries,
-        depthChart: depth[0] || null,
-        pfrStats: pfrStats[0] || null,
-        nextGenStats: nextGenStats[0] || null
-      }
+      },
     };
-  } catch (error) {
-    console.error('❌ getServerSideProps error:', error);
-    if (connection) await connection.end();
-    return {
-      props: {
-        player: null,
-        gameLogs: [],
-        injuries: [],
-        depthChart: null,
-        pfrStats: null,
-        nextGenStats: null,
-        error: error.message
-      }
-    };
+  } catch (err) {
+    console.error('❌ Error fetching player data:', err);
+    return { notFound: true };
   }
 }
 
-export default function PlayerProfile({ player, gameLogs, injuries, depthChart, pfrStats, nextGenStats }) {
-  if (!player) return <div className="p-6">Player not found.</div>;
-
+export default function PlayerProfilePage({ player, gameLogs, injuries }) {
   return (
     <>
-      <Head><title>{player.player_name} - StatPulse</title></Head>
-      <div className="p-6 max-w-6xl mx-auto">
-        <div className="flex flex-col md:flex-row items-start gap-6 mb-6">
+      <Head>
+        <title>{player.player_name} | StatPulse</title>
+      </Head>
+
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="flex items-center space-x-4">
           {player.headshot_url && (
-            <Image src={player.headshot_url} alt={player.player_name} width={150} height={150} className="rounded-xl shadow-md" />
+            <Image src={player.headshot_url} alt={player.player_name} width={100} height={100} className="rounded-full" />
           )}
           <div>
-            <h1 className="text-3xl font-bold mb-1">{player.player_name}</h1>
-            <p className="text-gray-600">{player.position} | #{player.jersey_number} | {player.team_id}</p>
-            <p className="text-sm text-gray-500">{player.college} | Drafted by {player.draft_club} (#{player.draft_number})</p>
-           <p className="text-sm text-gray-500">{player.height}&quot; / {player.weight} lbs | {player.years_exp} years experience</p>
-            {depthChart && <p className="text-xs text-blue-600 mt-1">Depth Chart: {depthChart.depth_position} - Week {depthChart.week}</p>}
+            <h1 className="text-3xl font-bold">{player.player_name}</h1>
+            <p className="text-gray-600">{player.position} | #{player.jersey_number} | Team ID: {player.team_id}</p>
+            <p className="text-gray-500">College: {player.college} | Drafted: {player.draft_club} #{player.draft_number} ({player.rookie_year})</p>
+            <p className="text-gray-400">Years Pro: {player.years_exp} | Height: {player.height} | Weight: {player.weight} lbs</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Contract Info</h2>
-            {player.contract_type ? (
-              <p>{player.contract_type} contract with {player.contract_team} ({player.contract_year}) - ${player.avg_annual_value?.toLocaleString()} AAV</p>
-            ) : <p className="text-gray-500">No contract data available.</p>}
-          </div>
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Injury History</h2>
-            <ul className="text-sm space-y-1">
-              {injuries.map((inj, i) => (
-                <li key={i}>{inj.report_date}: {inj.injury_description || "Undisclosed"} ({inj.status})</li>
-              ))}
-              {injuries.length === 0 && <li className="text-gray-500">No recent injuries</li>}
-            </ul>
-          </div>
-        </div>
+        <hr className="my-6" />
 
-        {pfrStats && (
-          <div className="mt-10">
-            <h2 className="text-xl font-semibold mb-2">Advanced Stats (PFR)</h2>
-            <ul className="text-sm space-y-1">
-              <li>Drops: {pfrStats.passing_drops} ({pfrStats.passing_drop_pct}%)</li>
-              <li>Bad Throws: {pfrStats.passing_bad_throws} ({pfrStats.passing_bad_throw_pct}%)</li>
-              <li>Pressured: {pfrStats.times_pressured} ({pfrStats.times_pressured_pct}%)</li>
-              <li>Blitzed: {pfrStats.times_blitzed}, Sacked: {pfrStats.times_sacked}</li>
-              <li>Hurried: {pfrStats.times_hurried}, Hit: {pfrStats.times_hit}</li>
-            </ul>
-          </div>
-        )}
-
-        {nextGenStats && (
-          <div className="mt-10">
-            <h2 className="text-xl font-semibold mb-2">Next Gen Stats</h2>
-            <ul className="text-sm space-y-1">
-              <li>Avg Time to Throw: {nextGenStats.avg_time_to_throw}s</li>
-              <li>Completed Air Yards: {nextGenStats.avg_completed_air_yards}</li>
-              <li>Intended Air Yards: {nextGenStats.avg_intended_air_yards}</li>
-              <li>Air Yards Diff: {nextGenStats.avg_air_yards_differential}</li>
-              <li>Aggressiveness: {nextGenStats.aggressiveness}%</li>
-              <li>Max Completed Air Distance: {nextGenStats.max_completed_air_distance}</li>
-              <li>To Sticks: {nextGenStats.avg_air_yards_to_sticks}</li>
-              <li>Passer Rating: {nextGenStats.passer_rating}</li>
-              <li>Comp %: {nextGenStats.completion_percentage} (Exp: {nextGenStats.expected_completion_percentage}, CPOE: {nextGenStats.completion_percentage_above_expectation})</li>
-              <li>Avg Air Distance: {nextGenStats.avg_air_distance}, Max Air Distance: {nextGenStats.max_air_distance}</li>
-            </ul>
-          </div>
-        )}
-
-        <div className="mt-10">
-          <h2 className="text-xl font-semibold mb-2">Game Logs (Fantasy Scoring)</h2>
-          {gameLogs.length > 0 ? (
-            <table className="w-full text-sm border border-gray-300">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="p-2">Game</th>
-                  <th className="p-2">Pass Yds</th>
-                  <th className="p-2">Pass TDs</th>
-                  <th className="p-2">Rush Yds</th>
-                  <th className="p-2">Rush TDs</th>
-                  <th className="p-2">Fumbles</th>
-                  <th className="p-2">Fantasy PPR</th>
+        <section>
+          <h2 className="text-xl font-semibold mb-2">2024 Season Game Logs</h2>
+          <table className="w-full text-sm border">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="p-2 border">Week</th>
+                <th className="p-2 border">Pass Yds</th>
+                <th className="p-2 border">Pass TDs</th>
+                <th className="p-2 border">Rush Yds</th>
+                <th className="p-2 border">Rush TDs</th>
+                <th className="p-2 border">Rec Yds</th>
+                <th className="p-2 border">Rec TDs</th>
+                <th className="p-2 border">Fumbles</th>
+              </tr>
+            </thead>
+            <tbody>
+              {gameLogs.map((g, i) => (
+                <tr key={i} className="text-center">
+                  <td className="p-2 border">{g.week}</td>
+                  <td className="p-2 border">{g.passing_yards}</td>
+                  <td className="p-2 border">{g.passing_touchdowns}</td>
+                  <td className="p-2 border">{g.rushing_yards}</td>
+                  <td className="p-2 border">{g.rushing_touchdowns}</td>
+                  <td className="p-2 border">{g.receiving_yards}</td>
+                  <td className="p-2 border">{g.receiving_touchdowns}</td>
+                  <td className="p-2 border">{g.fumbles}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {gameLogs.map((g, i) => {
-                  const fantasy = (g.passing_touchdowns * 4 + g.passing_yards / 25 + g.rushing_touchdowns * 6 + g.rushing_yards / 10 + g.fumbles * -2).toFixed(2);
-                  return (
-                    <tr key={i} className="border-t">
-                      <td className="p-2 text-center">{g.game_id}</td>
-                      <td className="p-2 text-center">{g.passing_yards}</td>
-                      <td className="p-2 text-center">{g.passing_touchdowns}</td>
-                      <td className="p-2 text-center">{g.rushing_yards}</td>
-                      <td className="p-2 text-center">{g.rushing_touchdowns}</td>
-                      <td className="p-2 text-center">{g.fumbles}</td>
-                      <td className="p-2 text-center font-semibold">{fantasy}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+              ))}
+            </tbody>
+          </table>
+        </section>
+
+        <section className="mt-8">
+          <h2 className="text-xl font-semibold mb-2">Contract Info</h2>
+          {player.contract_type ? (
+            <p>
+              {player.contract_type} - {player.contract_year} - ${player.avg_annual_value?.toLocaleString()} avg/year
+            </p>
           ) : (
-            <p className="text-sm text-gray-500">No games recorded this season.</p>
+            <p>No contract info available.</p>
           )}
-        </div>
+        </section>
+
+        <section className="mt-8">
+          <h2 className="text-xl font-semibold mb-2">Injury History</h2>
+          {injuries.length > 0 ? (
+            <ul className="list-disc ml-6">
+              {injuries.map((injury, i) => (
+                <li key={i}>
+                  {injury.report_date}: {injury.injury_description} ({injury.status})
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No reported injuries.</p>
+          )}
+        </section>
       </div>
     </>
   );
