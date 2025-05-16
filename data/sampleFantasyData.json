@@ -1,30 +1,45 @@
 {
   "teams": [
     {
-      "name": "Thunder Cats",
-      "record": "5-5",
+      "name": "Hold My Purse",
+      "record": "2-2",
       "rank": 4,
-      "pointsScored": 980,
-      "pointsAgainst": 1020,
+      "pointsScored": 456,
+      "pointsAgainst": 520,
       "games": [
         { "week": 1, "pointsScored": 110, "result": "W" },
         { "week": 2, "pointsScored": 95,  "result": "L" },
-        { "week": 3, "pointsScored": 85,  "result": "W" }
-        // …etc for each week
+        { "week": 3, "pointsScored": 85,  "result": "L" },
+        { "week": 4, "pointsScored": 121,  "result": "W" }
       ]
     },
     {
-      "name": "Iron Wolves",
-      // …other summary fields…
+      "name": "Dez CAUGHT it",
+      "record": "3-1",
+      "rank": 2,
+      "pointsScored": 480,
+      "pointsAgainst": 427,
       "games": [
         { "week": 1, "pointsScored": 120, "result": "W" },
         { "week": 2, "pointsScored": 80,  "result": "W" },
-        { "week": 3, "pointsScored": 70,  "result": "L" }
+        { "week": 3, "pointsScored": 70,  "result": "L" },
+        {"week": 1, "pointsScored": 139, "result": "W" }
       ]
-    }
-    // …other teams…
+    },
+     },
+    {
+      "name": "CeeDeeZ peaNUTZ",
+      "record": "4-0",
+      "rank": 1,
+      "pointsScored": 589,
+      "pointsAgainst": 482,
+      "games": [
+        { "week": 1, "pointsScored": 162, "result": "W" },
+        { "week": 2, "pointsScored": 135,  "result": "W" },
+        { "week": 3, "pointsScored": 148,  "result": "W" },
+        {"week": 1, "pointsScored": 144, "result": "W" }
   ],
-  "recentActivity": [ /* … */ ],
-  "waiverWire": [ /* … */ ],
-  "transactions": [ /* … */ ]
+  "recentActivity": [],
+  "waiverWire": [],
+  "transactions": []
 }
