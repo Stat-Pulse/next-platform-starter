@@ -1,4 +1,4 @@
-// pages/my-team.js
+// pages/fantasy/my-team.js
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -16,7 +16,7 @@ export default function MyTeamPage() {
   const [playerNews, setPlayerNews] = useState([]);
 
   useEffect(() => {
-    import('../data/myTeamData.json').then((data) => {
+    import myTeamData from '@/data/myTeamData.json'.then((data) => {
       setRoster(data.roster);
       setWeeklyScores(data.weeklyScores);
       setPlayerNews(data.playerNews);
