@@ -1,4 +1,4 @@
-// pages/league-schedule.js
+// pages/fantasy/league-schedule.js
 import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
