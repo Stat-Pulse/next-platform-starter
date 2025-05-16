@@ -6,7 +6,7 @@ export async function getServerSideProps({ params }) {
   const mysql = require('mysql2/promise');
   let conn;
 
-  // 1) Connect to the database
+  // 1) Connect
   try {
     conn = await mysql.createConnection({
       host:     process.env.DB_HOST,
@@ -18,10 +18,10 @@ export async function getServerSideProps({ params }) {
     return { props: { fatalError: `DB connection failed: ${err.message}` } };
   }
 
-  // 2) Fetch the player with roster data
+  // 2) Fetch player + roster data
   let player;
   try {
-    const [playerRows] = await conn.execute(
+    const [rows] = await conn.execute(
       `
       SELECT
         p.player_id,
@@ -39,27 +39,25 @@ export async function getServerSideProps({ params }) {
         r.headshot_url
       FROM Players p
       LEFT JOIN Rosters_2024 r
-        ON p.player_id = r.player_id
+        ON p.player_id = r.gsis_id
       WHERE p.player_id = ?
       `,
       [params.id]
     );
-
-    if (playerRows.length === 0) {
+    if (rows.length === 0) {
       await conn.end();
       return { notFound: true };
     }
-    player = playerRows[0];
+    player = rows[0];
   } catch (err) {
     await conn.end();
     return { props: { fatalError: `Player query failed: ${err.message}` } };
   }
 
-  // 3) Fetch game logs
-  let gameLogs = [];
-  let gameLogsError = null;
+  // 3) Game logs
+  let gameLogs = [], gameLogsError = null;
   try {
-    const [rows] = await conn.execute(
+    const [gl] = await conn.execute(
       `
       SELECT
         game_id,
@@ -74,16 +72,15 @@ export async function getServerSideProps({ params }) {
       `,
       [params.id]
     );
-    gameLogs = rows;
+    gameLogs = gl;
   } catch (err) {
     gameLogsError = err.message;
   }
 
-  // 4) Fetch injuries
-  let injuries = [];
-  let injuriesError = null;
+  // 4) Injuries
+  let injuries = [], injuriesError = null;
   try {
-    const [rows] = await conn.execute(
+    const [ir] = await conn.execute(
       `
       SELECT
         report_date,
@@ -95,16 +92,13 @@ export async function getServerSideProps({ params }) {
       `,
       [params.id]
     );
-    injuries = rows;
+    injuries = ir;
   } catch (err) {
     injuriesError = err.message;
   }
 
   await conn.end();
-
-  return {
-    props: { player, gameLogs, gameLogsError, injuries, injuriesError },
-  };
+  return { props: { player, gameLogs, gameLogsError, injuries, injuriesError } };
 }
 
 export default function PlayerPage({
@@ -115,7 +109,6 @@ export default function PlayerPage({
   injuriesError,
   fatalError,
 }) {
-  // Fatal error connecting or fetching player
   if (fatalError) {
     return (
       <div style={{ padding: '2rem', color: 'red' }}>
@@ -126,7 +119,6 @@ export default function PlayerPage({
     );
   }
 
-  // Player not found
   if (!player) {
     return (
       <div style={{ padding: '2rem' }}>
@@ -138,9 +130,7 @@ export default function PlayerPage({
 
   return (
     <div style={{ padding: '2rem' }}>
-      <Head>
-        <title>{player.player_name}</title>
-      </Head>
+      <Head><title>{player.player_name}</title></Head>
 
       <h1>
         {player.player_name}
