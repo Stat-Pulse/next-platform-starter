@@ -16,13 +16,11 @@ export default function MyTeamPage() {
   const [playerNews, setPlayerNews] = useState([]);
 
   useEffect(() => {
-    import myTeamData from '@/data/myTeamData.json'.then((data) => {
-      setRoster(data.roster);
-      setWeeklyScores(data.weeklyScores);
-      setPlayerNews(data.playerNews);
-      setTrashTalk(data.trashTalk);
-    });
-  }, []);
+  setRoster(myTeamData.roster);
+  setWeeklyScores(myTeamData.weeklyScores);
+  setPlayerNews(myTeamData.playerNews);
+  setTrashTalk(myTeamData.trashTalk);
+}, []);
 
   const handlePostTrashTalk = () => {
     if (trashInput.trim()) {
