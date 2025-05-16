@@ -48,7 +48,14 @@ export async function getServerSideProps({ params }) {
       await conn.end();
       return { notFound: true };
     }
-    player = rows[0];
+    
+    // Format the player data to ensure it's serializable
+    player = JSON.parse(JSON.stringify(rows[0]));
+    
+    // Convert date to string if present
+    if (player.date_of_birth) {
+      player.date_of_birth = new Date(player.date_of_birth).toISOString().split('T')[0];
+    }
   } catch (err) {
     await conn.end();
     return { props: { fatalError: `Player query failed: ${err.message}` } };
@@ -72,7 +79,8 @@ export async function getServerSideProps({ params }) {
       `,
       [params.id]
     );
-    gameLogs = gl;
+    // Format game logs to ensure they're serializable
+    gameLogs = JSON.parse(JSON.stringify(gl));
   } catch (err) {
     gameLogsError = err.message;
   }
@@ -92,13 +100,30 @@ export async function getServerSideProps({ params }) {
       `,
       [params.id]
     );
-    injuries = ir;
+    // Format injuries to ensure they're serializable
+    injuries = JSON.parse(JSON.stringify(ir));
+    
+    // Convert dates to strings
+    injuries = injuries.map(injury => ({
+      ...injury,
+      report_date: injury.report_date ? new Date(injury.report_date).toISOString().split('T')[0] : null
+    }));
   } catch (err) {
     injuriesError = err.message;
   }
 
   await conn.end();
-  return { props: { player, gameLogs, gameLogsError, injuries, injuriesError } };
+  
+  // Return serializable data
+  return { 
+    props: { 
+      player, 
+      gameLogs, 
+      gameLogsError, 
+      injuries, 
+      injuriesError 
+    } 
+  };
 }
 
 export default function PlayerPage({
@@ -171,7 +196,30 @@ export default function PlayerPage({
         {gameLogsError ? (
           <p style={{ color: 'red' }}>Error loading game logs: {gameLogsError}</p>
         ) : gameLogs.length > 0 ? (
-          <pre>{JSON.stringify(gameLogs, null, 2)}</pre>
+          <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid #ddd' }}>
+                <th style={{ textAlign: 'left', padding: '8px' }}>Game ID</th>
+                <th style={{ textAlign: 'right', padding: '8px' }}>Pass Yds</th>
+                <th style={{ textAlign: 'right', padding: '8px' }}>Pass TD</th>
+                <th style={{ textAlign: 'right', padding: '8px' }}>Rush Yds</th>
+                <th style={{ textAlign: 'right', padding: '8px' }}>Rush TD</th>
+                <th style={{ textAlign: 'right', padding: '8px' }}>Fumbles</th>
+              </tr>
+            </thead>
+            <tbody>
+              {gameLogs.map((game, i) => (
+                <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
+                  <td style={{ padding: '8px' }}>{game.game_id}</td>
+                  <td style={{ textAlign: 'right', padding: '8px' }}>{game.passing_yards ?? '—'}</td>
+                  <td style={{ textAlign: 'right', padding: '8px' }}>{game.passing_touchdowns ?? '—'}</td>
+                  <td style={{ textAlign: 'right', padding: '8px' }}>{game.rushing_yards ?? '—'}</td>
+                  <td style={{ textAlign: 'right', padding: '8px' }}>{game.rushing_touchdowns ?? '—'}</td>
+                  <td style={{ textAlign: 'right', padding: '8px' }}>{game.fumbles ?? '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         ) : (
           <p>No game logs available.</p>
         )}
@@ -182,7 +230,24 @@ export default function PlayerPage({
         {injuriesError ? (
           <p style={{ color: 'red' }}>Error loading injuries: {injuriesError}</p>
         ) : injuries.length > 0 ? (
-          <pre>{JSON.stringify(injuries, null, 2)}</pre>
+          <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid #ddd' }}>
+                <th style={{ textAlign: 'left', padding: '8px' }}>Date</th>
+                <th style={{ textAlign: 'left', padding: '8px' }}>Injury</th>
+                <th style={{ textAlign: 'left', padding: '8px' }}>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {injuries.map((injury, i) => (
+                <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
+                  <td style={{ padding: '8px' }}>{injury.report_date}</td>
+                  <td style={{ padding: '8px' }}>{injury.injury_description || '—'}</td>
+                  <td style={{ padding: '8px' }}>{injury.status || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         ) : (
           <p>No injury records found.</p>
         )}
