@@ -37,7 +37,7 @@ export async function getServerSideProps({ params }) {
         r.years_exp,
         r.headshot_url
       FROM Players p
-      LEFT JOIN Roster r
+      LEFT JOIN Rosters_2024 r
         ON p.player_id = r.player_id
       WHERE p.player_id = ?
     `, [params.id]);
