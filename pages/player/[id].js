@@ -16,8 +16,6 @@ import {
 export async function getServerSideProps({ params }) {
   const mysql = require('mysql2/promise');
   let conn;
-
-  // 1) Connect
   try {
     conn = await mysql.createConnection({
       host: process.env.DB_HOST,
@@ -29,30 +27,26 @@ export async function getServerSideProps({ params }) {
     return { props: { fatalError: `DB connection failed: ${err.message}` } };
   }
 
-  // 2) Fetch player & roster
   let player;
   try {
     const [rows] = await conn.execute(
-      `
-      SELECT
-        p.player_id,
-        p.player_name,
-        p.position,
-        p.college,
-        p.draft_year,
-        p.date_of_birth,
-        p.height_inches,
-        p.weight,
-        p.is_active,
-        p.team_id,
-        r.jersey_number,
-        r.years_exp,
-        r.headshot_url
-      FROM Players p
-      LEFT JOIN Rosters_2024 r
-        ON p.player_id = r.gsis_id
-      WHERE p.player_id = ?
-      `,
+      `SELECT
+         p.player_id,
+         p.player_name,
+         p.position,
+         p.college,
+         p.draft_year,
+         p.date_of_birth,
+         p.height_inches,
+         p.weight,
+         p.is_active,
+         p.team_id,
+         r.jersey_number,
+         r.years_exp,
+         r.headshot_url
+       FROM Players p
+       LEFT JOIN Rosters_2024 r ON p.player_id = r.gsis_id
+       WHERE p.player_id = ?`,
       [params.id]
     );
     if (!rows.length) {
@@ -65,38 +59,29 @@ export async function getServerSideProps({ params }) {
     return { props: { fatalError: `Player query failed: ${err.message}` } };
   }
 
-  // 3) Recent Game Logs (last 10)
-  let gameLogs = [];
-  let gameLogsError = null;
+  let gameLogs = [], gameLogsError = null;
   try {
     const [gl] = await conn.execute(
-      `
-      SELECT
-        ps.game_id,
-        g.season,
-        g.week,
-        (
-          ps.receptions
-          + ps.receiving_yards/10
-          + ps.receiving_touchdowns*6
-          + ps.rushing_yards/10
-          + ps.rushing_touchdowns*6
-          + ps.passing_yards/25
-          + ps.passing_touchdowns*4
-          - ps.passing_interceptions*2
-          - ps.fumbles*2
-        ) AS fantasyPoints,
-        ps.passing_yards,
-        ps.passing_touchdowns,
-        ps.rushing_yards,
-        ps.rushing_touchdowns,
-        ps.fumbles
-      FROM Player_Stats_Game ps
-      JOIN Games g ON ps.game_id = g.game_id
-      WHERE ps.player_id = ?
-      ORDER BY g.season DESC, g.week DESC
-      LIMIT 10
-      `,
+      `SELECT
+         ps.game_id,
+         g.season,
+         g.week,
+         (
+           ps.receptions + ps.receiving_yards/10 + ps.receiving_touchdowns*6
+           + ps.rushing_yards/10 + ps.rushing_touchdowns*6
+           + ps.passing_yards/25 + ps.passing_touchdowns*4
+           - ps.passing_interceptions*2 - ps.fumbles*2
+         ) AS fantasyPoints,
+         ps.passing_yards,
+         ps.passing_touchdowns,
+         ps.rushing_yards,
+         ps.rushing_touchdowns,
+         ps.fumbles
+       FROM Player_Stats_Game ps
+       JOIN Games g ON ps.game_id = g.game_id
+       WHERE ps.player_id = ?
+       ORDER BY g.season DESC, g.week DESC
+       LIMIT 10`,
       [params.id]
     );
     gameLogs = JSON.parse(JSON.stringify(gl));
@@ -104,37 +89,28 @@ export async function getServerSideProps({ params }) {
     gameLogsError = err.message;
   }
 
-  // 4) Career Summary
-  let careerSummary = [];
-  let careerError = null;
+  let careerSummary = [], careerError = null;
   try {
     const [cs] = await conn.execute(
-      `
-      SELECT
-        g.season,
-        SUM(
-          ps.receptions
-          + ps.receiving_yards/10
-          + ps.receiving_touchdowns*6
-          + ps.rushing_yards/10
-          + ps.rushing_touchdowns*6
-          + ps.passing_yards/25
-          + ps.passing_touchdowns*4
-          - ps.passing_interceptions*2
-          - ps.fumbles*2
-        ) AS totalFantasyPoints,
-        SUM(ps.passing_yards)       AS totalPassingYards,
-        SUM(ps.passing_touchdowns)  AS totalPassingTDs,
-        SUM(ps.rushing_yards)       AS totalRushingYards,
-        SUM(ps.rushing_touchdowns)  AS totalRushingTDs,
-        SUM(ps.receiving_yards)     AS totalReceivingYards,
-        SUM(ps.receiving_touchdowns)AS totalReceivingTDs
-      FROM Player_Stats_Game ps
-      JOIN Games g ON ps.game_id = g.game_id
-      WHERE ps.player_id = ?
-      GROUP BY g.season
-      ORDER BY g.season DESC
-      `,
+      `SELECT
+         g.season,
+         SUM(
+           ps.receptions + ps.receiving_yards/10 + ps.receiving_touchdowns*6
+           + ps.rushing_yards/10 + ps.rushing_touchdowns*6
+           + ps.passing_yards/25 + ps.passing_touchdowns*4
+           - ps.passing_interceptions*2 - ps.fumbles*2
+         ) AS totalFantasyPoints,
+         SUM(ps.passing_yards) AS totalPassingYards,
+         SUM(ps.passing_touchdowns) AS totalPassingTDs,
+         SUM(ps.rushing_yards) AS totalRushingYards,
+         SUM(ps.rushing_touchdowns) AS totalRushingTDs,
+         SUM(ps.receiving_yards) AS totalReceivingYards,
+         SUM(ps.receiving_touchdowns) AS totalReceivingTDs
+       FROM Player_Stats_Game ps
+       JOIN Games g ON ps.game_id = g.game_id
+       WHERE ps.player_id = ?
+       GROUP BY g.season
+       ORDER BY g.season DESC`,
       [params.id]
     );
     careerSummary = JSON.parse(JSON.stringify(cs));
@@ -168,7 +144,6 @@ export default function PlayerPage({
     <div className="max-w-4xl mx-auto p-8 space-y-8">
       <Head><title>{player.player_name}</title></Head>
 
-      {/* Header */}
       <header className="flex items-center space-x-6">
         {player.headshot_url && (
           <img
@@ -185,7 +160,6 @@ export default function PlayerPage({
         </div>
       </header>
 
-      {/* Profile Details */}
       <section>
         <h2 className="text-2xl font-semibold mb-4">Profile Details</h2>
         <div className="grid grid-cols-2 gap-4">
@@ -201,7 +175,6 @@ export default function PlayerPage({
         </div>
       </section>
 
-      {/* Recent Game Logs */}
       <section>
         <h2 className="text-2xl font-semibold mb-4">Recent Game Logs</h2>
         {gameLogsError ? (
@@ -238,7 +211,6 @@ export default function PlayerPage({
         )}
       </section>
 
-      {/* Recent Trends Chart */}
       {gameLogs.length > 0 && (
         <section>
           <h2 className="text-2xl font-semibold mb-4">Recent Fantasy Points Trends</h2>
@@ -255,7 +227,6 @@ export default function PlayerPage({
         </section>
       )}
 
-      {/* Career Summary */}
       <section>
         <h2 className="text-2xl font-semibold mb-4">Career Summary</h2>
         {careerError ? (
@@ -271,4 +242,4 @@ export default function PlayerPage({
                 <th className="py-2 text-right">Rush Yds</th>
                 <th className="py-2 text-right">Rush TD</th>
                 <th className="py-2 text-right">Rec Yds</th>
-                <th className="py-2 text-right">Rec TD\```
+                <th className
