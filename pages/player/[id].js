@@ -203,4 +203,4 @@ export default function PlayerPage({
 
       {/* Recent Game Logs */}
       <section>
-        <h2 className="text-2xl font-semibold mb-4">Recent Game Logs</n```
+        <h2 className="text-2xl font-semibold mb-4">Recent Game Logs</h2>
