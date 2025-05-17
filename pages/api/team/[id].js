@@ -1,12 +1,20 @@
 // File: pages/api/team/[id].js
 import mysql from 'mysql2/promise';
+import teams from '../../../data/teams'; // so we can map slug -> team_id
 
 export default async function handler(req, res) {
-  const { id } = req.query;
+  const { id } = req.query; // this is the slug, like 'chiefs'
 
-  if (!id || typeof id !== 'string') {
-    return res.status(400).json({ error: 'Missing or invalid team ID' });
+  // Find matching team from teams.js
+  const teamMeta = teams.find(t => t.slug === id);
+  if (!teamMeta) {
+    return res.status(400).json({ error: 'Invalid team slug' });
   }
+
+  const teamId = teamMeta.name
+    .match(/\b[A-Z]/g)
+    ?.join('')
+    .toUpperCase() || id.toUpperCase(); // fallback to slug uppercase if needed
 
   let connection;
   try {
@@ -17,16 +25,16 @@ export default async function handler(req, res) {
       database: process.env.DB_NAME,
     });
 
-    // 1. Team Info (Teams + branding)
+    // 1. Team Info
     const [teamRows] = await connection.execute(
-      `SELECT t.team_id, t.team_name, t.city, t.state, t.stadium_name, t.stadium_capacity, t.about, t.coach,
-              b.team_color, b.team_color2, b.team_logo_wikipedia, b.team_logo_espn
+      `SELECT t.team_name, t.team_abbr, t.division, t.conference,
+              b.team_color, b.team_color2, b.team_logo_espn, b.team_logo_wikipedia
        FROM Teams t
        LEFT JOIN Teams_2024 b ON t.team_id = b.team_abbr
        WHERE t.team_id = ?`,
-      [id]
+      [teamId]
     );
-    if (!teamRows || teamRows.length === 0) {
+    if (!teamRows.length) {
       await connection.end();
       return res.status(404).json({ error: 'Team not found' });
     }
@@ -34,10 +42,12 @@ export default async function handler(req, res) {
 
     // 2. Roster
     const [roster] = await connection.execute(
-      `SELECT player_id, player_name, position, jersey_number, height_inches, weight, college, draft_year, years_exp
+      `SELECT gsis_id AS id, full_name AS name, position, headshot_url, years_exp
        FROM Rosters_2024
-       WHERE team = ?`,
-      [id]
+       WHERE team = ? AND week = (
+         SELECT MAX(week) FROM Rosters_2024 WHERE team = ?
+       )`,
+      [teamId, teamId]
     );
 
     // 3. Depth Chart
@@ -45,10 +55,10 @@ export default async function handler(req, res) {
       `SELECT position, full_name, depth_team
        FROM Depth_Charts_2024
        WHERE club_code = ?
-       ORDER BY week DESC`,
-      [id]
+       AND week = (SELECT MAX(week) FROM Depth_Charts_2024 WHERE club_code = ?)
+       ORDER BY depth_team ASC`,
+      [teamId, teamId]
     );
-
     const depthChart = {};
     for (const row of depthRows) {
       if (!depthChart[row.position]) depthChart[row.position] = [];
@@ -56,56 +66,79 @@ export default async function handler(req, res) {
     }
 
     // 4. Schedule
-    const [games] = await connection.execute(
-      `SELECT week, date, opponent_id, home_away, score, result
+    const [schedule] = await connection.execute(
+      `SELECT game_id, week, game_date AS date,
+              home_team_id, away_team_id, home_score, away_score, is_final
        FROM Games
-       WHERE team_id = ?
-       ORDER BY week ASC`,
-      [id]
+       WHERE home_team_id = ? OR away_team_id = ?
+       ORDER BY game_date ASC`,
+      [teamId, teamId]
     );
 
-    // 5. Team Stats
+    const formattedGames = schedule.map(g => {
+      const isHome = g.home_team_id === teamId;
+      const opponent = isHome ? g.away_team_id : g.home_team_id;
+      const score = g.is_final ? `${g.home_score} - ${g.away_score}` : 'TBD';
+      const result = g.is_final
+        ? (isHome && g.home_score > g.away_score) || (!isHome && g.away_score > g.home_score)
+          ? 'W' : 'L'
+        : '';
+      return {
+        gameId: g.game_id,
+        week: g.week,
+        date: g.date,
+        opponent,
+        homeAway: isHome ? 'H' : 'A',
+        score,
+        result
+      };
+    });
+
+    // 5. Team Stats / Defense
     const [statsRows] = await connection.execute(
-      `SELECT SUM(CAST(SUBSTRING_INDEX(score, '-', 1) AS UNSIGNED)) AS total_points
-       FROM Games
-       WHERE team_id = ? AND score IS NOT NULL`,
-      [id]
+      `SELECT * FROM Team_Defense_Stats_2024 WHERE team_id = ?`,
+      [teamId]
     );
+    const stats = statsRows[0] || {};
 
     await connection.end();
 
     return res.status(200).json({
-      id: team.team_id,
+      id: teamId,
       name: team.team_name,
-      location: `${team.city}, ${team.state}`,
-      stadium: {
-        name: team.stadium_name,
-        capacity: team.stadium_capacity,
-      },
-      about: team.about || 'No description available.',
-      coach: team.coach || 'N/A',
+      abbreviation: team.team_abbr,
+      division: team.division,
+      conference: team.conference,
       branding: {
-        primary: team.team_color,
-        secondary: team.team_color2,
-        logo: team.team_logo_espn || team.team_logo_wikipedia,
+        colorPrimary: team.team_color,
+        colorSecondary: team.team_color2,
+        logo: team.team_logo_espn || team.team_logo_wikipedia
       },
       roster,
       depthChart,
-      schedule: games,
+      schedule: formattedGames,
       stats: {
-        totalPoints: statsRows[0].total_points || 0,
-      },
-      socialMedia: {
-        x: `https://x.com/${team.team_id}`,
-        instagram: `https://instagram.com/${team.team_id}`,
+        gamesPlayed: stats.games_played,
+        pointsAllowed: stats.points_allowed,
+        totalYardsAllowed: stats.total_yards_allowed,
+        passYardsAllowed: stats.pass_yards_allowed,
+        rushYardsAllowed: stats.rush_yards_allowed,
+        turnovers: stats.turnovers,
+        interceptions: stats.interceptions,
+        sacks: stats.sacks,
+        redZonePct: stats.red_zone_pct,
+        thirdDownPct: stats.third_down_pct,
+        epaPerPlayAllowed: stats.epa_per_play_allowed,
+        dvoaRank: stats.dvoa_rank
       },
       recentNews: [
-        { title: `${team.team_name} prepares for next game`, date: new Date().toISOString().split('T')[0] },
+        { title: `${team.team_name} preparing for upcoming matchup`, date: new Date().toISOString().split('T')[0] }
       ]
     });
+
   } catch (err) {
-    console.error('❌ Team API error:', err);
+    console.error('Team API error:', err);
     if (connection) await connection.end();
-    return res.status(500).json({ error: 'Failed to fetch team data' });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }
