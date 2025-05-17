@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function TeamPage() {
   const router = useRouter();
@@ -33,34 +34,39 @@ export default function TeamPage() {
 
   const {
     name,
-    logo,
-    city,
-    stadium,
-    about,
-    coach,
+    abbreviation,
+    division,
+    conference,
+    branding,
     roster,
     depthChart,
-    seasonGames,
+    schedule,
     stats,
     recentNews,
-    socialMedia,
   } = teamData;
 
   return (
     <>
       <Head><title>{name} - StatPulse</title></Head>
       <div className="max-w-6xl mx-auto p-6">
-        {/* Header Section */}
+        {/* Header */}
         <div className="flex items-center gap-6 mb-8">
-          <Image src={logo} alt={name} width={100} height={100} className="rounded shadow" />
+          {branding.logo && (
+            <Image
+              src={branding.logo}
+              alt={name}
+              width={100}
+              height={100}
+              className="rounded shadow"
+            />
+          )}
           <div>
             <h1 className="text-3xl font-bold">{name}</h1>
-            <p className="text-gray-600">{city} | {stadium.name} ({stadium.capacity} seats)</p>
-            <p className="text-sm text-gray-500">Head Coach: {coach}</p>
+            <p className="text-gray-600">{conference} - {division}</p>
           </div>
         </div>
 
-        {/* News Section */}
+        {/* News */}
         <div className="mb-10">
           <h2 className="text-xl font-semibold mb-2">Latest News</h2>
           <div className="space-y-2">
@@ -73,16 +79,18 @@ export default function TeamPage() {
           </div>
         </div>
 
-        {/* Upcoming/Recent Game Section */}
+        {/* Upcoming/Recent Games */}
         <div className="mb-10">
           <h2 className="text-xl font-semibold mb-2">Recent & Upcoming Games</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {seasonGames.slice(0, 2).map((game, i) => (
-              <div key={i} className="p-4 border rounded bg-gray-50">
-                <p className="font-semibold">Week {game.week}: vs {game.opponent}</p>
-                <p className="text-sm">{game.date} | {game.homeAway === 'H' ? 'Home' : 'Away'}</p>
-                <p className="text-sm">{game.score} ({game.result})</p>
-              </div>
+            {schedule.slice(0, 2).map((game, i) => (
+              <Link href={`/game/${game.gameId}`} key={i}>
+                <div className="p-4 border rounded bg-gray-50 hover:bg-white cursor-pointer">
+                  <p className="font-semibold">Week {game.week}: vs {game.opponent}</p>
+                  <p className="text-sm">{game.date} | {game.homeAway === 'H' ? 'Home' : 'Away'}</p>
+                  <p className="text-sm">{game.score} {game.result && `(${game.result})`}</p>
+                </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -90,7 +98,7 @@ export default function TeamPage() {
         {/* Full Schedule */}
         <div className="mb-10">
           <h2 className="text-xl font-semibold mb-2">Full Schedule</h2>
-          <table className="w-full text-sm table-auto border-collapse">
+          <table className="w-full text-sm border-collapse">
             <thead>
               <tr className="bg-gray-100">
                 <th className="border p-2">Week</th>
@@ -102,8 +110,8 @@ export default function TeamPage() {
               </tr>
             </thead>
             <tbody>
-              {seasonGames.map((game, i) => (
-                <tr key={i}>
+              {schedule.map((game, i) => (
+                <tr key={i} className="hover:bg-gray-50">
                   <td className="border p-2 text-center">{game.week}</td>
                   <td className="border p-2 text-center">{game.opponent}</td>
                   <td className="border p-2 text-center">{game.date}</td>
@@ -116,23 +124,30 @@ export default function TeamPage() {
           </table>
         </div>
 
-        {/* Roster Section */}
+        {/* Roster */}
         <div className="mb-10">
           <h2 className="text-xl font-semibold mb-2">Roster</h2>
-          <table className="w-full text-sm table-auto border-collapse">
+          <table className="w-full text-sm border-collapse">
             <thead>
               <tr className="bg-gray-100">
                 <th className="border p-2">Name</th>
                 <th className="border p-2">Position</th>
-                <th className="border p-2">Active</th>
+                <th className="border p-2">Experience</th>
               </tr>
             </thead>
             <tbody>
               {roster.map((p, i) => (
-                <tr key={i}>
-                  <td className="border p-2 text-blue-600 hover:underline cursor-pointer" onClick={() => router.push(`/player/${p.id}`)}>{p.name}</td>
+                <tr key={i} className="hover:bg-gray-50">
+                  <td className="border p-2">
+                    <Link href={`/player/${p.id}`} className="flex items-center space-x-2 text-blue-600 hover:underline">
+                      {p.headshot_url && (
+                        <img src={p.headshot_url} alt="headshot" className="w-6 h-6 rounded-full" />
+                      )}
+                      <span>{p.name}</span>
+                    </Link>
+                  </td>
                   <td className="border p-2 text-center">{p.position}</td>
-                  <td className="border p-2 text-center">{p.isActive ? 'Yes' : 'No'}</td>
+                  <td className="border p-2 text-center">{p.years_exp} yr</td>
                 </tr>
               ))}
             </tbody>
@@ -141,8 +156,19 @@ export default function TeamPage() {
 
         {/* Stats */}
         <div className="mb-10">
-          <h2 className="text-xl font-semibold mb-2">Team Stats</h2>
-          <p>Total Points Scored: <span className="font-semibold">{stats.totalPoints}</span></p>
+          <h2 className="text-xl font-semibold mb-2">Team Analytics</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>Points Allowed: <strong>{stats.pointsAllowed}</strong></div>
+            <div>Yards Allowed: <strong>{stats.totalYardsAllowed}</strong></div>
+            <div>Passing Yards Allowed: <strong>{stats.passYardsAllowed}</strong></div>
+            <div>Rushing Yards Allowed: <strong>{stats.rushYardsAllowed}</strong></div>
+            <div>Sacks: <strong>{stats.sacks}</strong></div>
+            <div>Turnovers: <strong>{stats.turnovers}</strong></div>
+            <div>Red Zone % Allowed: <strong>{stats.redZonePct}%</strong></div>
+            <div>3rd Down % Allowed: <strong>{stats.thirdDownPct}%</strong></div>
+            <div>EPA/Play Allowed: <strong>{stats.epaPerPlayAllowed}</strong></div>
+            <div>DVOA Rank: <strong>{stats.dvoaRank}</strong></div>
+          </div>
         </div>
       </div>
     </>
