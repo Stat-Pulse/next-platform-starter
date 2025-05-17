@@ -72,7 +72,7 @@ export async function getServerSideProps({ params }) {
         rushing_yards,
         rushing_touchdowns,
         fumbles
-      FROM Player_Stats_Game_2024
+      FROM Player_Stats_Game
       WHERE player_id = ?
       ORDER BY season DESC, week DESC
       LIMIT 10
@@ -99,7 +99,7 @@ export async function getServerSideProps({ params }) {
         SUM(rushing_touchdowns)     AS totalRushingTDs,
         SUM(receiving_yards)        AS totalReceivingYards,
         SUM(receiving_tds)          AS totalReceivingTDs
-      FROM Player_Stats_Game_2024
+      FROM Player_Stats_Game
       WHERE player_id = ?
       GROUP BY season
       ORDER BY season DESC
