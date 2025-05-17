@@ -27,12 +27,55 @@ export async function getServerSideProps({ params }) {
     return { props: { fatalError: `DB connection failed: ${err.message}` } };
   }
 
+  // Fetch player data
   let player;
   try {
     const [rows] = await conn.execute(
-      `SELECT
+      `
+      SELECT
+        p.player_id,
+        p.player_name,
+        p.position,
+        p.college,
+        p.draft_year,
+        p.date_of_birth,
+        p.height_inches,
+        p.weight,
+        p.is_active,
+        p.team_id,
+        r.jersey_number,
+        r.years_exp,
+        r.headshot_url
+      FROM Players p
+      LEFT JOIN Rosters_2024 r
+        ON p.player_id = r.gsis_id
+      WHERE p.player_id = ?
+      `,
+      [params.id]
+    );
+    if (rows.length === 0) {
+      await conn.end();
+      return { notFound: true };
+    }
+    player = JSON.parse(JSON.stringify(rows[0]));
+    
+    // Convert date to string if present
+    if (player.date_of_birth) {
+      player.date_of_birth = new Date(player.date_of_birth).toISOString().split('T')[0];
+    }
+  } catch (err) {
+    await conn.end();
+    return { props: { fatalError: `Player query failed: ${err.message}` } };
+  }
+
+  // Fetch game logs
+  let gameLogs = [], gameLogsError = null;
+  try {
+    const [gl] = await conn.execute(
+      `
+      SELECT
         ps.game_id,
-        g.season_id   AS season,
+        g.season_id AS season,
         g.week,
         (
           ps.receptions + ps.receiving_yards/10 + ps.receiving_touchdowns*6
@@ -46,10 +89,11 @@ export async function getServerSideProps({ params }) {
         ps.rushing_touchdowns,
         ps.fumbles
       FROM Player_Stats_Game ps
-JOIN Games g ON ps.game_id = g.game_id
-WHERE ps.player_id = ?
-ORDER BY g.season_id DESC, g.week DESC
-LIMIT 10`,`,
+      JOIN Games g ON ps.game_id = g.game_id
+      WHERE ps.player_id = ?
+      ORDER BY g.season_id DESC, g.week DESC
+      LIMIT 10
+      `,
       [params.id]
     );
     gameLogs = JSON.parse(JSON.stringify(gl));
@@ -57,28 +101,31 @@ LIMIT 10`,`,
     gameLogsError = err.message;
   }
 
+  // Fetch career summary
   let careerSummary = [], careerError = null;
   try {
     const [cs] = await conn.execute(
-      `SELECT
-         g.season,
-         SUM(
-           ps.receptions + ps.receiving_yards/10 + ps.receiving_touchdowns*6
-           + ps.rushing_yards/10 + ps.rushing_touchdowns*6
-           + ps.passing_yards/25 + ps.passing_touchdowns*4
-           - ps.passing_interceptions*2 - ps.fumbles*2
-         ) AS totalFantasyPoints,
-         SUM(ps.passing_yards) AS totalPassingYards,
-         SUM(ps.passing_touchdowns) AS totalPassingTDs,
-         SUM(ps.rushing_yards) AS totalRushingYards,
-         SUM(ps.rushing_touchdowns) AS totalRushingTDs,
-         SUM(ps.receiving_yards) AS totalReceivingYards,
-         SUM(ps.receiving_touchdowns) AS totalReceivingTDs
-       FROM Player_Stats_Game ps
-       JOIN Games g ON ps.game_id = g.game_id
-       WHERE ps.player_id = ?
-       GROUP BY g.season_id
-       ORDER BY g.season_id DESC` DESC`,
+      `
+      SELECT
+        g.season_id AS season,
+        SUM(
+          ps.receptions + ps.receiving_yards/10 + ps.receiving_touchdowns*6
+          + ps.rushing_yards/10 + ps.rushing_touchdowns*6
+          + ps.passing_yards/25 + ps.passing_touchdowns*4
+          - ps.passing_interceptions*2 - ps.fumbles*2
+        ) AS totalFantasyPoints,
+        SUM(ps.passing_yards) AS totalPassingYards,
+        SUM(ps.passing_touchdowns) AS totalPassingTDs,
+        SUM(ps.rushing_yards) AS totalRushingYards,
+        SUM(ps.rushing_touchdowns) AS totalRushingTDs,
+        SUM(ps.receiving_yards) AS totalReceivingYards,
+        SUM(ps.receiving_touchdowns) AS totalReceivingTDs
+      FROM Player_Stats_Game ps
+      JOIN Games g ON ps.game_id = g.game_id
+      WHERE ps.player_id = ?
+      GROUP BY g.season_id
+      ORDER BY g.season_id DESC
+      `,
       [params.id]
     );
     careerSummary = JSON.parse(JSON.stringify(cs));
@@ -104,6 +151,15 @@ export default function PlayerPage({
         <Head><title>Server Error</title></Head>
         <h1 className="text-2xl font-bold">💥 Fatal Error</h1>
         <pre>{fatalError}</pre>
+      </div>
+    );
+  }
+
+  if (!player) {
+    return (
+      <div className="p-8">
+        <Head><title>Player Not Found</title></Head>
+        <h1 className="text-2xl font-bold">🚨 Player not found</h1>
       </div>
     );
   }
@@ -199,6 +255,8 @@ export default function PlayerPage({
         <h2 className="text-2xl font-semibold mb-4">Career Summary</h2>
         {careerError ? (
           <p className="text-red-600">Error: {careerError}</p>
+        ) : careerSummary.length === 0 ? (
+          <p>No career summary available.</p>
         ) : (
           <table className="w-full border-collapse">
             <thead>
