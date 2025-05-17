@@ -83,7 +83,7 @@ export async function getServerSideProps({ params }) {
           + ps.rushing_touchdowns*6
           + ps.passing_yards/25
           + ps.passing_touchdowns*4
-          - ps.interceptions*2
+          - ps.passing_interceptions*2
           - ps.fumbles*2
         ) AS fantasyPoints,
         ps.passing_yards,
@@ -120,15 +120,15 @@ export async function getServerSideProps({ params }) {
           + ps.rushing_touchdowns*6
           + ps.passing_yards/25
           + ps.passing_touchdowns*4
-          - ps.interceptions*2
+          - ps.passing_interceptions*2
           - ps.fumbles*2
         ) AS totalFantasyPoints,
-        SUM(ps.passing_yards)    AS totalPassingYards,
-        SUM(ps.passing_touchdowns) AS totalPassingTDs,
-        SUM(ps.rushing_yards)    AS totalRushingYards,
-        SUM(ps.rushing_touchdowns) AS totalRushingTDs,
-        SUM(ps.receiving_yards)  AS totalReceivingYards,
-        SUM(ps.receiving_touchdowns) AS totalReceivingTDs
+        SUM(ps.passing_yards)       AS totalPassingYards,
+        SUM(ps.passing_touchdowns)  AS totalPassingTDs,
+        SUM(ps.rushing_yards)       AS totalRushingYards,
+        SUM(ps.rushing_touchdowns)  AS totalRushingTDs,
+        SUM(ps.receiving_yards)     AS totalReceivingYards,
+        SUM(ps.receiving_touchdowns)AS totalReceivingTDs
       FROM Player_Stats_Game ps
       JOIN Games g ON ps.game_id = g.game_id
       WHERE ps.player_id = ?
@@ -204,3 +204,71 @@ export default function PlayerPage({
       {/* Recent Game Logs */}
       <section>
         <h2 className="text-2xl font-semibold mb-4">Recent Game Logs</h2>
+        {gameLogsError ? (
+          <p className="text-red-600">Error: {gameLogsError}</p>
+        ) : gameLogs.length === 0 ? (
+          <p>No game logs available.</p>
+        ) : (
+          <table className="w-full border-collapse">
+            <thead>
+              <tr>
+                <th className="py-2 text-left">Game</th>
+                <th className="py-2 text-right">Pts</th>
+                <th className="py-2 text-right">Pass Yds</th>
+                <th className="py-2 text-right">Pass TD</th>
+                <th className="py-2 text-right">Rush Yds</th>
+                <th className="py-2 text-right">Rush TD</th>
+              </tr>
+            </thead>
+            <tbody>
+              {gameLogs.map((g, idx) => (
+                <tr key={idx} className="border-t">
+                  <td className="py-2">
+                    <Link href={`/game/${g.game_id}`}>Week {g.week}, {g.season}</Link>
+                  </td>
+                  <td className="py-2 text-right">{g.fantasyPoints}</td>
+                  <td className="py-2 text-right">{g.passing_yards}</td>
+                  <td className="py-2 text-right">{g.passing_touchdowns}</td>
+                  <td className="py-2 text-right">{g.rushing_yards}</td>
+                  <td className="py-2 text-right">{g.rushing_touchdowns}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+
+      {/* Recent Trends Chart */}
+      {gameLogs.length > 0 && (
+        <section>
+          <h2 className="text-2xl font-semibold mb-4">Recent Fantasy Points Trends</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={[...gameLogs].reverse()} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="week" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="fantasyPoints" name="Fantasy PPG" />
+            </LineChart>
+          </ResponsiveContainer>
+        </section>
+      )}
+
+      {/* Career Summary */}
+      <section>
+        <h2 className="text-2xl font-semibold mb-4">Career Summary</h2>
+        {careerError ? (
+          <p className="text-red-600">Error: {careerError}</p>
+        ) : (
+          <table className="w-full border-collapse">
+            <thead>
+              <tr>
+                <th className="py-2 text-left">Season</th>
+                <th className="py-2 text-right">Fpts</th>
+                <th className="py-2 text-right">Pass Yds</th>
+                <th className="py-2 text-right">Pass TD</th>
+                <th className="py-2 text-right">Rush Yds</th>
+                <th className="py-2 text-right">Rush TD</th>
+                <th className="py-2 text-right">Rec Yds</th>
+                <th className="py-2 text-right">Rec TD\```
