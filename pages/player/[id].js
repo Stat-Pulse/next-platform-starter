@@ -31,57 +31,25 @@ export async function getServerSideProps({ params }) {
   try {
     const [rows] = await conn.execute(
       `SELECT
-         p.player_id,
-         p.player_name,
-         p.position,
-         p.college,
-         p.draft_year,
-         p.date_of_birth,
-         p.height_inches,
-         p.weight,
-         p.is_active,
-         p.team_id,
-         r.jersey_number,
-         r.years_exp,
-         r.headshot_url
-       FROM Players p
-       LEFT JOIN Rosters_2024 r ON p.player_id = r.gsis_id
-       WHERE p.player_id = ?`,
-      [params.id]
-    );
-    if (!rows.length) {
-      await conn.end();
-      return { notFound: true };
-    }
-    player = JSON.parse(JSON.stringify(rows[0]));
-  } catch (err) {
-    await conn.end();
-    return { props: { fatalError: `Player query failed: ${err.message}` } };
-  }
-
-  let gameLogs = [], gameLogsError = null;
-  try {
-    const [gl] = await conn.execute(
-      `SELECT
-         ps.game_id,
-         g.season,
-         g.week,
-         (
-           ps.receptions + ps.receiving_yards/10 + ps.receiving_touchdowns*6
-           + ps.rushing_yards/10 + ps.rushing_touchdowns*6
-           + ps.passing_yards/25 + ps.passing_touchdowns*4
-           - ps.passing_interceptions*2 - ps.fumbles*2
-         ) AS fantasyPoints,
-         ps.passing_yards,
-         ps.passing_touchdowns,
-         ps.rushing_yards,
-         ps.rushing_touchdowns,
-         ps.fumbles
-       FROM Player_Stats_Game ps
-       JOIN Games g ON ps.game_id = g.game_id
-       WHERE ps.player_id = ?
-       ORDER BY g.season DESC, g.week DESC
-       LIMIT 10`,
+        ps.game_id,
+        g.season_id   AS season,
+        g.week,
+        (
+          ps.receptions + ps.receiving_yards/10 + ps.receiving_touchdowns*6
+          + ps.rushing_yards/10 + ps.rushing_touchdowns*6
+          + ps.passing_yards/25 + ps.passing_touchdowns*4
+          - ps.passing_interceptions*2 - ps.fumbles*2
+        ) AS fantasyPoints,
+        ps.passing_yards,
+        ps.passing_touchdowns,
+        ps.rushing_yards,
+        ps.rushing_touchdowns,
+        ps.fumbles
+      FROM Player_Stats_Game ps
+JOIN Games g ON ps.game_id = g.game_id
+WHERE ps.player_id = ?
+ORDER BY g.season_id DESC, g.week DESC
+LIMIT 10`,`,
       [params.id]
     );
     gameLogs = JSON.parse(JSON.stringify(gl));
@@ -109,8 +77,8 @@ export async function getServerSideProps({ params }) {
        FROM Player_Stats_Game ps
        JOIN Games g ON ps.game_id = g.game_id
        WHERE ps.player_id = ?
-       GROUP BY g.season
-       ORDER BY g.season DESC`,
+       GROUP BY g.season_id
+       ORDER BY g.season_id DESC` DESC`,
       [params.id]
     );
     careerSummary = JSON.parse(JSON.stringify(cs));
