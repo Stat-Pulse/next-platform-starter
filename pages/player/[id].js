@@ -178,7 +178,7 @@ export default function PlayerPage({
       <section>
         <h2 className="text-2xl font-semibold mb-4">Recent Game Logs</h2>
         {gameLogsError ? (
-          <p className className="text-red-600">Error: {gameLogsError}</p>
+          <p className="text-red-600">Error: {gameLogsError}</p>
         ) : gameLogs.length === 0 ? (
           <p>No game logs available.</p>
         ) : (
@@ -202,8 +202,8 @@ export default function PlayerPage({
                   <td className="py-2 text-right">{g.fantasyPoints}</td>
                   <td className="py-2 text-right">{g.passing_yards}</td>
                   <td className="py-2 text-right">{g.passing_touchdowns}</td>
-                  <td className className="py-2 text-right">{g.rushing_yards}</td>
-                  <td className className="py-2 text-right">{g.rushing_touchdowns}</td>
+                  <td className="py-2 text-right">{g.rushing_yards}</td>
+                  <td className="py-2 text-right">{g.rushing_touchdowns}</td>
                 </tr>
               ))}
             </tbody>
@@ -252,9 +252,9 @@ export default function PlayerPage({
                   <td className="py-2 text-right">{cs.totalFantasyPoints}</td>
                   <td className="py-2 text-right">{cs.totalPassingYards}</td>
                   <td className="py-2 text-right">{cs.totalPassingTDs}</td>
-                  <td className className="py-2 text-right">{cs.totalRushingYards}</td>
-                  <td className className="py-2 text-right">{cs.totalRushingTDs}</td>
-                  <td className className="py-2 text-right">{cs.totalReceivingYards}</td>
+                  <td className="py-2 text-right">{cs.totalRushingYards}</td>
+                  <td className="py-2 text-right">{cs.totalRushingTDs}</td>
+                  <td className="py-2 text-right">{cs.totalReceivingYards}</td>
                   <td className="py-2 text-right">{cs.totalReceivingTDs}</td>
                 </tr>
               ))}
