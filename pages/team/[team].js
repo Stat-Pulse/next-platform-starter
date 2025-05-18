@@ -11,20 +11,20 @@ export default function TeamPage() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (!id) return
-    fetch(`/api/team/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) throw new Error(data.error)
-        setTeamData(data)
-        setLoading(false)
-      })
-      .catch((err) => {
-        console.error(err)
-        setError(err.message)
-        setLoading(false)
-      })
-  }, [id])
+  if (!router.isReady || !id) return
+  fetch(`/api/team/${id}`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.error) throw new Error(data.error)
+      setTeamData(data)
+      setLoading(false)
+    })
+    .catch((err) => {
+      console.error(err)
+      setError(err.message)
+      setLoading(false)
+    })
+}, [router.isReady, id])
 
   if (loading) return <div className="p-6 text-center">Loading team data...</div>
   if (error || !teamData) return <div className="p-6 text-center text-red-500">Error: {error}</div>
