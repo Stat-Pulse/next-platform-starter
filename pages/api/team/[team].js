@@ -1,64 +1,28 @@
+// pages/api/team/[team].js
 import mysql from 'mysql2/promise';
 import teams from '../../../data/teams';
 
 export default async function handler(req, res) {
   const { team } = req.query;
-  console.log("🔥 API HIT:", team);
-
   if (!team || typeof team !== 'string') {
-    console.log("❌ Invalid team param:", team);
     return res.status(400).json({ error: 'Missing or invalid team ID' });
   }
 
-  const teamMeta = teams.find(t => t.slug === team);
-  if (!teamMeta) {
-    console.log("❌ Team slug not found in teams.js:", team);
-    return res.status(404).json({ error: 'Team slug not found' });
-  }
-
-  // Lookup slug → abbreviation
   const slugToAbbreviation = {
-    'bills': 'BUF',
-    'dolphins': 'MIA',
-    'patriots': 'NE',
-    'jets': 'NYJ',
-    'ravens': 'BAL',
-    'bengals': 'CIN',
-    'browns': 'CLE',
-    'steelers': 'PIT',
-    'texans': 'HOU',
-    'colts': 'IND',
-    'jaguars': 'JAX',
-    'titans': 'TEN',
-    'broncos': 'DEN',
-    'chiefs': 'KC',
-    'raiders': 'LV',
-    'chargers': 'LAC',
-    'cowboys': 'DAL',
-    'giants': 'NYG',
-    'eagles': 'PHI',
-    'commanders': 'WSH',
-    'bears': 'CHI',
-    'lions': 'DET',
-    'packers': 'GB',
-    'vikings': 'MIN',
-    'falcons': 'ATL',
-    'panthers': 'CAR',
-    'saints': 'NO',
-    'buccaneers': 'TB',
-    'cardinals': 'ARI',
-    'rams': 'LAR',
-    '49ers': 'SF',
-    'seahawks': 'SEA',
+    bills: 'BUF', dolphins: 'MIA', patriots: 'NE', jets: 'NYJ',
+    ravens: 'BAL', bengals: 'CIN', browns: 'CLE', steelers: 'PIT',
+    texans: 'HOU', colts: 'IND', jaguars: 'JAX', titans: 'TEN',
+    broncos: 'DEN', chiefs: 'KC', raiders: 'LV', chargers: 'LAC',
+    cowboys: 'DAL', giants: 'NYG', eagles: 'PHI', commanders: 'WSH',
+    bears: 'CHI', lions: 'DET', packers: 'GB', vikings: 'MIN',
+    falcons: 'ATL', panthers: 'CAR', saints: 'NO', buccaneers: 'TB',
+    cardinals: 'ARI', rams: 'LAR', '49ers': 'SF', seahawks: 'SEA',
   };
 
-  const teamId = slugToAbbreviation[team];
+  const teamId = slugToAbbreviation[team.toLowerCase()];
   if (!teamId) {
-    console.log("❌ No abbreviation found for slug:", team);
-    return res.status(404).json({ error: 'Team ID could not be resolved' });
+    return res.status(404).json({ error: 'Team slug could not be resolved' });
   }
-
-  console.log("✅ Resolved teamId:", teamId);
 
   let connection;
   try {
@@ -77,33 +41,26 @@ export default async function handler(req, res) {
        WHERE t.team_id = ?`,
       [teamId]
     );
-
     if (!teamRows.length) {
       await connection.end();
       return res.status(404).json({ error: 'Team not found' });
     }
-
     const teamRow = teamRows[0];
 
     const [roster] = await connection.execute(
       `SELECT gsis_id AS id, full_name AS name, position, headshot_url, years_exp
        FROM Rosters_2024
-       WHERE team = ? AND week = (
-         SELECT MAX(week) FROM Rosters_2024 WHERE team = ?
-       )`,
+       WHERE team = ? AND week = (SELECT MAX(week) FROM Rosters_2024 WHERE team = ?)`,
       [teamId, teamId]
     );
 
     const [depthRows] = await connection.execute(
       `SELECT position, full_name, depth_team
        FROM Depth_Charts_2024
-       WHERE club_code = ? AND week = (
-         SELECT MAX(week) FROM Depth_Charts_2024 WHERE club_code = ?
-       )
+       WHERE club_code = ? AND week = (SELECT MAX(week) FROM Depth_Charts_2024 WHERE club_code = ?)
        ORDER BY depth_team ASC`,
       [teamId, teamId]
     );
-
     const depthChart = {};
     for (const row of depthRows) {
       if (!depthChart[row.position]) depthChart[row.position] = [];
@@ -142,7 +99,6 @@ export default async function handler(req, res) {
       `SELECT * FROM Team_Defense_Stats_2024 WHERE team_id = ?`,
       [teamId]
     );
-
     const stats = statsRows[0] || {};
 
     await connection.end();
@@ -153,32 +109,20 @@ export default async function handler(req, res) {
       abbreviation: teamRow.team_abbr,
       division: teamRow.division,
       conference: teamRow.conference,
-    <Image 
-      src={branding?.logo || '/images/team-placeholder.png'} 
-      alt={name} 
-      width={120} 
-      height={120} 
-      className="rounded shadow"
-    />
+      branding: {
+        colorPrimary: teamRow.team_color,
+        colorSecondary: teamRow.team_color2,
+        logo: teamRow.team_logo_espn || teamRow.team_logo_wikipedia
+      },
       roster,
       depthChart,
       schedule: formattedGames,
-      stats: {
-        gamesPlayed: stats.games_played,
-        pointsAllowed: stats.points_allowed,
-        totalYardsAllowed: stats.total_yards_allowed,
-        passYardsAllowed: stats.pass_yards_allowed,
-        rushYardsAllowed: stats.rush_yards_allowed,
-        turnovers: stats.turnovers,
-        interceptions: stats.interceptions,
-        sacks: stats.sacks,
-        redZonePct: stats.red_zone_pct,
-        thirdDownPct: stats.third_down_pct,
-        epaPerPlayAllowed: stats.epa_per_play_allowed,
-        dvoaRank: stats.dvoa_rank
-      },
+      stats,
       recentNews: [
-        { title: `${teamRow.team_name} preparing for upcoming matchup`, date: new Date().toISOString().split('T')[0] }
+        {
+          title: `${teamRow.team_name} preparing for upcoming matchup`,
+          date: new Date().toISOString().split('T')[0]
+        }
       ]
     });
 
