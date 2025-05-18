@@ -30,16 +30,16 @@ export default function TeamPage() {
   if (error || !teamData) return <div className="p-6 text-center text-red-500">Error: {error}</div>
 
   const {
-    name,
-    roster,
-    depthChart,
-    schedule,
-    stats,
-    branding,
-    recentNews,
-    division,
-    conference
-  } = teamData;
+  name,
+  roster,
+  depthChart,
+  schedule,
+  stats,
+  branding,
+  recentNews,
+  division,
+  conference
+} = teamData;
 
   return (
     <>
@@ -89,7 +89,38 @@ export default function TeamPage() {
             </div>
           )}
         </div>
-
+      {/* Full Schedule */}
+<div className="mb-10">
+  <h2 className="text-xl font-semibold mb-2" style={{ color: branding?.colorPrimary }}>Game Schedule</h2>
+  {schedule.length === 0 ? (
+    <p className="text-gray-500 italic">No schedule available.</p>
+  ) : (
+    <table className="w-full text-sm table-auto border-collapse">
+      <thead>
+        <tr className="bg-gray-100">
+          <th className="border p-2">Week</th>
+          <th className="border p-2">Opponent</th>
+          <th className="border p-2">Date</th>
+          <th className="border p-2">Home/Away</th>
+          <th className="border p-2">Score</th>
+          <th className="border p-2">Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        {schedule.map((game, i) => (
+          <tr key={i}>
+            <td className="border p-2 text-center">{game.week}</td>
+            <td className="border p-2 text-center">{game.opponent}</td>
+            <td className="border p-2 text-center">{new Date(game.date).toLocaleDateString()}</td>
+            <td className="border p-2 text-center">{game.homeAway}</td>
+            <td className="border p-2 text-center">{game.score}</td>
+            <td className="border p-2 text-center">{game.result}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )}
+</div>
         {/* Placeholder: Injuries */}
         <div className="mb-10">
           <h2 className="text-xl font-semibold mb-2 text-red-600">Injuries</h2>
