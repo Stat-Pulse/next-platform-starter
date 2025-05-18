@@ -3,7 +3,24 @@ import mysql from 'mysql2/promise';
 import teams from '../../../data/teams'; // so we can map slug -> team_id
 
 export default async function handler(req, res) {
-  const { id } = req.query; // this is the slug, like 'chiefs'
+  const { id } = req.query;
+  console.log("🔥 API HIT: /api/team/", id);
+
+  if (!id || typeof id !== 'string') {
+    console.log("❌ Invalid or missing ID:", id);
+    return res.status(400).json({ error: 'Missing or invalid team ID' });
+  }
+
+  const teams = await import('../../../data/teams.js').then(mod => mod.default);
+  const teamMeta = teams.find(t => t.slug === id);
+
+  if (!teamMeta) {
+    console.log("❌ Slug not found in teams.js:", id);
+    return res.status(404).json({ error: 'Team slug not found' });
+  }
+
+  const teamId = teamMeta.name.match(/\b[A-Z]/g)?.join('').toUpperCase() || id.toUpperCase();
+  console.log("✅ Resolved teamId:", teamId);
 
   // Find matching team from teams.js
   const teamMeta = teams.find(t => t.slug === id);
