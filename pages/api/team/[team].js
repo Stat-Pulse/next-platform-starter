@@ -153,11 +153,13 @@ export default async function handler(req, res) {
       abbreviation: teamRow.team_abbr,
       division: teamRow.division,
       conference: teamRow.conference,
-      branding: {
-        colorPrimary: teamRow.team_color,
-        colorSecondary: teamRow.team_color2,
-        logo: teamRow.team_logo_espn || teamRow.team_logo_wikipedia
-      },
+    <Image 
+      src={branding?.logo || '/images/team-placeholder.png'} 
+      alt={name} 
+      width={120} 
+      height={120} 
+      className="rounded shadow"
+    />
       roster,
       depthChart,
       schedule: formattedGames,
