@@ -31,15 +31,15 @@ export default function TeamPage() {
 
   const {
     name,
-    division,
-    conference,
-    branding,
     roster,
     depthChart,
     schedule,
     stats,
+    branding,
     recentNews,
-  } = teamData
+    division,
+    conference
+  } = teamData;
 
   return (
     <>
