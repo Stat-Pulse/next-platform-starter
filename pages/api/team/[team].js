@@ -1,23 +1,22 @@
-// pages/api/team/[id].js
 import mysql from 'mysql2/promise';
 import teams from '../../../data/teams';
 
 export default async function handler(req, res) {
   const { team } = req.query;
-  console.log("🔥 API HIT:", id);
+  console.log("🔥 API HIT:", team);
 
-  if (!id || typeof id !== 'string') {
-    console.log("❌ Invalid ID:", id);
+  if (!team || typeof team !== 'string') {
+    console.log("❌ Invalid team param:", team);
     return res.status(400).json({ error: 'Missing or invalid team ID' });
   }
 
-  const teamMeta = teams.find(t => t.slug === id);
+  const teamMeta = teams.find(t => t.slug === team);
   if (!teamMeta) {
-    console.log("❌ Team slug not found in teams.js:", id);
+    console.log("❌ Team slug not found in teams.js:", team);
     return res.status(404).json({ error: 'Team slug not found' });
   }
 
-  // We'll use a fixed abbreviation lookup for now:
+  // Lookup slug → abbreviation
   const slugToAbbreviation = {
     'bills': 'BUF',
     'dolphins': 'MIA',
@@ -53,9 +52,9 @@ export default async function handler(req, res) {
     'seahawks': 'SEA',
   };
 
-  const teamId = slugToAbbreviation[id];
+  const teamId = slugToAbbreviation[team];
   if (!teamId) {
-    console.log("❌ No abbreviation found for slug:", id);
+    console.log("❌ No abbreviation found for slug:", team);
     return res.status(404).json({ error: 'Team ID could not be resolved' });
   }
 
@@ -84,7 +83,7 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'Team not found' });
     }
 
-    const team = teamRows[0];
+    const teamRow = teamRows[0];
 
     const [roster] = await connection.execute(
       `SELECT gsis_id AS id, full_name AS name, position, headshot_url, years_exp
@@ -150,14 +149,14 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       id: teamId,
-      name: team.team_name,
-      abbreviation: team.team_abbr,
-      division: team.division,
-      conference: team.conference,
+      name: teamRow.team_name,
+      abbreviation: teamRow.team_abbr,
+      division: teamRow.division,
+      conference: teamRow.conference,
       branding: {
-        colorPrimary: team.team_color,
-        colorSecondary: team.team_color2,
-        logo: team.team_logo_espn || team.team_logo_wikipedia
+        colorPrimary: teamRow.team_color,
+        colorSecondary: teamRow.team_color2,
+        logo: teamRow.team_logo_espn || teamRow.team_logo_wikipedia
       },
       roster,
       depthChart,
@@ -177,7 +176,7 @@ export default async function handler(req, res) {
         dvoaRank: stats.dvoa_rank
       },
       recentNews: [
-        { title: `${team.team_name} preparing for upcoming matchup`, date: new Date().toISOString().split('T')[0] }
+        { title: `${teamRow.team_name} preparing for upcoming matchup`, date: new Date().toISOString().split('T')[0] }
       ]
     });
 
