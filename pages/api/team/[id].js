@@ -1,37 +1,24 @@
-// File: pages/api/team/[id].js
+// pages/api/team/[id].js
 import mysql from 'mysql2/promise';
-import teams from '../../../data/teams'; // so we can map slug -> team_id
+import teams from '../../../data/teams';
 
 export default async function handler(req, res) {
   const { id } = req.query;
-  console.log("🔥 API HIT: /api/team/", id);
+  console.log("🔥 API HIT:", id);
 
   if (!id || typeof id !== 'string') {
-    console.log("❌ Invalid or missing ID:", id);
+    console.log("❌ Invalid ID:", id);
     return res.status(400).json({ error: 'Missing or invalid team ID' });
   }
 
-  const teams = await import('../../../data/teams.js').then(mod => mod.default);
   const teamMeta = teams.find(t => t.slug === id);
-
   if (!teamMeta) {
-    console.log("❌ Slug not found in teams.js:", id);
+    console.log("❌ Team slug not found in teams.js:", id);
     return res.status(404).json({ error: 'Team slug not found' });
   }
 
   const teamId = teamMeta.name.match(/\b[A-Z]/g)?.join('').toUpperCase() || id.toUpperCase();
   console.log("✅ Resolved teamId:", teamId);
-
-  // Find matching team from teams.js
-  const teamMeta = teams.find(t => t.slug === id);
-  if (!teamMeta) {
-    return res.status(400).json({ error: 'Invalid team slug' });
-  }
-
-  const teamId = teamMeta.name
-    .match(/\b[A-Z]/g)
-    ?.join('')
-    .toUpperCase() || id.toUpperCase(); // fallback to slug uppercase if needed
 
   let connection;
   try {
@@ -42,7 +29,6 @@ export default async function handler(req, res) {
       database: process.env.DB_NAME,
     });
 
-    // 1. Team Info
     const [teamRows] = await connection.execute(
       `SELECT t.team_name, t.team_abbr, t.division, t.conference,
               b.team_color, b.team_color2, b.team_logo_espn, b.team_logo_wikipedia
@@ -51,13 +37,14 @@ export default async function handler(req, res) {
        WHERE t.team_id = ?`,
       [teamId]
     );
+
     if (!teamRows.length) {
       await connection.end();
       return res.status(404).json({ error: 'Team not found' });
     }
+
     const team = teamRows[0];
 
-    // 2. Roster
     const [roster] = await connection.execute(
       `SELECT gsis_id AS id, full_name AS name, position, headshot_url, years_exp
        FROM Rosters_2024
@@ -67,22 +54,22 @@ export default async function handler(req, res) {
       [teamId, teamId]
     );
 
-    // 3. Depth Chart
     const [depthRows] = await connection.execute(
       `SELECT position, full_name, depth_team
        FROM Depth_Charts_2024
-       WHERE club_code = ?
-       AND week = (SELECT MAX(week) FROM Depth_Charts_2024 WHERE club_code = ?)
+       WHERE club_code = ? AND week = (
+         SELECT MAX(week) FROM Depth_Charts_2024 WHERE club_code = ?
+       )
        ORDER BY depth_team ASC`,
       [teamId, teamId]
     );
+
     const depthChart = {};
     for (const row of depthRows) {
       if (!depthChart[row.position]) depthChart[row.position] = [];
       depthChart[row.position].push({ name: row.full_name, depth: row.depth_team });
     }
 
-    // 4. Schedule
     const [schedule] = await connection.execute(
       `SELECT game_id, week, game_date AS date,
               home_team_id, away_team_id, home_score, away_score, is_final
@@ -111,11 +98,11 @@ export default async function handler(req, res) {
       };
     });
 
-    // 5. Team Stats / Defense
     const [statsRows] = await connection.execute(
       `SELECT * FROM Team_Defense_Stats_2024 WHERE team_id = ?`,
       [teamId]
     );
+
     const stats = statsRows[0] || {};
 
     await connection.end();
@@ -154,7 +141,7 @@ export default async function handler(req, res) {
     });
 
   } catch (err) {
-    console.error('Team API error:', err);
+    console.error('❌ API error:', err);
     if (connection) await connection.end();
     return res.status(500).json({ error: 'Internal server error' });
   }
