@@ -17,7 +17,48 @@ export default async function handler(req, res) {
     return res.status(404).json({ error: 'Team slug not found' });
   }
 
-  const teamId = teamMeta.name.match(/\b[A-Z]/g)?.join('').toUpperCase() || id.toUpperCase();
+  // We'll use a fixed abbreviation lookup for now:
+  const slugToAbbreviation = {
+    'bills': 'BUF',
+    'dolphins': 'MIA',
+    'patriots': 'NE',
+    'jets': 'NYJ',
+    'ravens': 'BAL',
+    'bengals': 'CIN',
+    'browns': 'CLE',
+    'steelers': 'PIT',
+    'texans': 'HOU',
+    'colts': 'IND',
+    'jaguars': 'JAX',
+    'titans': 'TEN',
+    'broncos': 'DEN',
+    'chiefs': 'KC',
+    'raiders': 'LV',
+    'chargers': 'LAC',
+    'cowboys': 'DAL',
+    'giants': 'NYG',
+    'eagles': 'PHI',
+    'commanders': 'WSH',
+    'bears': 'CHI',
+    'lions': 'DET',
+    'packers': 'GB',
+    'vikings': 'MIN',
+    'falcons': 'ATL',
+    'panthers': 'CAR',
+    'saints': 'NO',
+    'buccaneers': 'TB',
+    'cardinals': 'ARI',
+    'rams': 'LAR',
+    '49ers': 'SF',
+    'seahawks': 'SEA',
+  };
+
+  const teamId = slugToAbbreviation[id];
+  if (!teamId) {
+    console.log("❌ No abbreviation found for slug:", id);
+    return res.status(404).json({ error: 'Team ID could not be resolved' });
+  }
+
   console.log("✅ Resolved teamId:", teamId);
 
   let connection;
