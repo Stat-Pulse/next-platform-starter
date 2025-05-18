@@ -3,7 +3,7 @@ import mysql from 'mysql2/promise';
 import teams from '../../../data/teams';
 
 export default async function handler(req, res) {
-  const { id } = req.query;
+  const { team } = req.query;
   console.log("🔥 API HIT:", id);
 
   if (!id || typeof id !== 'string') {
