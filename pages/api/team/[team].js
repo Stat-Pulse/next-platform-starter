@@ -88,7 +88,7 @@ export default async function handler(req, res) {
         gameId: g.game_id,
         week: g.week,
         date: g.date,
-        opponent,
+        opponent: opponent || 'TBD',
         homeAway: isHome ? 'H' : 'A',
         score,
         result
@@ -99,7 +99,21 @@ export default async function handler(req, res) {
       `SELECT * FROM Team_Defense_Stats_2024 WHERE team_id = ?`,
       [teamId]
     );
-    const stats = statsRows[0] || {};
+    const statsRow = statsRows[0] || {};
+    const stats = {
+      gamesPlayed: statsRow.games_played || 0,
+      pointsAllowed: statsRow.points_allowed || 0,
+      totalYardsAllowed: statsRow.total_yards_allowed || 0,
+      passYardsAllowed: statsRow.pass_yards_allowed || 0,
+      rushYardsAllowed: statsRow.rush_yards_allowed || 0,
+      turnovers: statsRow.turnovers || 0,
+      interceptions: statsRow.interceptions || 0,
+      sacks: statsRow.sacks || 0,
+      redZonePct: statsRow.red_zone_pct || 0,
+      thirdDownPct: statsRow.third_down_pct || 0,
+      epaPerPlayAllowed: statsRow.epa_per_play_allowed || 0,
+      dvoaRank: statsRow.dvoa_rank || null
+    };
 
     await connection.end();
 
