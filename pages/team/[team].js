@@ -1,351 +1,209 @@
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-import Head from 'next/head';
-import Image from 'next/image';
-import DebugPanel from '../../components/DebugPanel';
+import mysql from 'mysql2/promise';
+import teams from '../../../data/teams';
 
-// Team name mapping
-const teamNames = {
-  "ARI": "Arizona Cardinals",
-  "ATL": "Atlanta Falcons",
-  "BAL": "Baltimore Ravens",
-  "BUF": "Buffalo Bills",
-  "CAR": "Carolina Panthers",
-  "CHI": "Chicago Bears",
-  "CIN": "Cincinnati Bengals",
-  "CLE": "Cleveland Browns",
-  "DAL": "Dallas Cowboys",
-  "DEN": "Denver Broncos",
-  "DET": "Detroit Lions",
-  "GB": "Green Bay Packers",
-  "HOU": "Houston Texans",
-  "IND": "Indianapolis Colts",
-  "JAX": "Jacksonville Jaguars",
-  "KC": "Kansas City Chiefs",
-  "LV": "Las Vegas Raiders",
-  "LAC": "Los Angeles Chargers",
-  "LAR": "Los Angeles Rams",
-  "MIA": "Miami Dolphins",
-  "MIN": "Minnesota Vikings",
-  "NE": "New England Patriots",
-  "NO": "New Orleans Saints",
-  "NYG": "New York Giants",
-  "NYJ": "New York Jets",
-  "PHI": "Philadelphia Eagles",
-  "PIT": "Pittsburgh Steelers",
-  "SEA": "Seattle Seahawks",
-  "SF": "San Francisco 49ers",
-  // Add more teams here
-};
+export default async function handler(req, res) {
+  const { team } = req.query;
+  console.log("🔥 API HIT: Team slug:", team);
 
-export default function TeamPage() {
-  const router = useRouter();
-  const { team } = router.query;
-  
-  const [teamData, setTeamData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [debug, setDebug] = useState(false);
-  
-  // Fetch team data
-  useEffect(() => {
-    if (!team) return;
-    
-    const fetchTeamData = async () => {
-      try {
-        // Replace with your actual API endpoint
-        const response = await fetch(`/api/teams/${team}`);
-        const data = await response.json();
-        setTeamData(data);
-      } catch (error) {
-        console.error("Error fetching team data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchTeamData();
-  }, [team]);
-  
-  // Debug mode toggle with keyboard shortcut
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
-        setDebug(prev => !prev);
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-  
-  // Helper functions
-  const formatDate = (dateString) => {
-    if (!dateString) return "TBA";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  };
-  
-  const getOpponentName = (opponentCode) => {
-    return teamNames[opponentCode] || opponentCode;
-  };
-  
-  const calculateRecord = () => {
-    if (!teamData?.schedule) return "0-0";
-    
-    const wins = teamData.schedule.filter(game => game.result === "W").length;
-    const losses = teamData.schedule.filter(game => game.result === "L").length;
-    
-    return `${wins}-${losses}`;
-  };
-  
-  // If loading or no team data
-  if (loading || !teamData) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
+  // Validate team slug
+  if (!team || typeof team !== 'string') {
+    console.log("❌ Invalid team param:", team);
+    return res.status(400).json({ error: 'Missing or invalid team slug' });
   }
-  
-  // Destructure data for easier access
-  const { 
-    name, 
-    conference, 
-    division, 
-    branding, 
-    schedule, 
-    roster, 
-    stats, 
-    depthChart,
-    recentNews 
-  } = teamData;
 
-  return (
-    <>
-      <Head>
-        <title>{name} - StatPulse</title>
-        <meta name="description" content={`Latest stats and information for the ${name}`} />
-      </Head>
+  // Check team metadata
+  const teamMeta = teams.find(t => t.slug === team.toLowerCase());
+  if (!teamMeta) {
+    console.log("❌ Team slug not found in teams.js:", team);
+    return res.status(404).json({ error: 'Team slug not found' });
+  }
 
-      <div className="max-w-6xl mx-auto p-6">
-        {/* Header with Team Info */}
-        <div
-          className="flex items-center gap-6 mb-8 border-b pb-4 rounded-lg"
-          style={{ borderColor: branding?.colorPrimary || '#ccc' }}
-        >
-          {branding?.logo && (
-            <div className="flex-shrink-0">
-              <Image
-                src={branding.logo || '/placeholder.png'}
-                alt={name}
-                width={120}
-                height={120}
-                className="rounded shadow"
-              />
-            </div>
-          )}
+  // Map slug to abbreviation
+  const slugToAbbreviation = {
+    bills: 'BUF', dolphins: 'MIA', patriots: 'NE', jets: 'NYJ',
+    ravens: 'BAL', bengals: 'CIN', browns: 'CLE', steelers: 'PIT',
+    texans: 'HOU', colts: 'IND', jaguars: 'JAX', titans: 'TEN',
+    broncos: 'DEN', chiefs: 'KC', raiders: 'LV', chargers: 'LAC',
+    cowboys: 'DAL', giants: 'NYG', eagles: 'PHI', commanders: 'WSH',
+    bears: 'CHI', lions: 'DET', packers: 'GB', vikings: 'MIN',
+    falcons: 'ATL', panthers: 'CAR', saints: 'NO', buccaneers: 'TB',
+    cardinals: 'ARI', rams: 'LAR', '49ers': 'SF', seahawks: 'SEA'
+  };
 
-          <div className="flex-grow">
-            <h1 className="text-3xl font-bold" style={{ color: branding?.colorPrimary }}>
-              {name}
-            </h1>
-            <p className="text-gray-600">{conference} | {division} Division</p>
-            <p className="text-lg font-semibold mt-1">
-              Record: {calculateRecord()}
-            </p>
-          </div>
-        </div>
+  const teamId = slugToAbbreviation[team.toLowerCase()];
+  if (!teamId) {
+    console.log("❌ No abbreviation found for slug:", team);
+    return res.status(404).json({ error: 'Team ID could not be resolved' });
+  }
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Left Column */}
-          <div className="md:col-span-2 space-y-8">
-            {/* Latest News */}
-            <div className="bg-white rounded-lg shadow p-4">
-              <h2 className="text-xl font-semibold mb-4" style={{ color: branding?.colorPrimary }}>
-                Latest News
-              </h2>
+  console.log("✅ Resolved teamId:", teamId);
 
-              {recentNews && recentNews.length > 0 ? (
-                <div className="space-y-3">
-                  {recentNews.map((news, i) => (
-                    <div key={i} className="border-l-4 pl-3 py-2" style={{ borderColor: branding?.colorSecondary || '#ccc' }}>
-                      <p className="font-semibold">{news.title}</p>
-                      <p className="text-xs text-gray-500">{formatDate(news.date)}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 italic">No recent news available.</p>
-              )}
-            </div>
+  let connection;
+  try {
+    // Connect to MySQL (use nfl_analytics if renamed, otherwise stat_pulse_analytics_db)
+    connection = await mysql.createConnection({
+      host: process.env.DB_HOST || 'stat-pulse-analytics-db.ci1uue2w2sxp.us-east-1.rds.amazonaws.com',
+      user: process.env.DB_USER || 'StatadminPULS3',
+      password: process.env.DB_PASSWORD, // Ensure this is set in environment
+      database: process.env.DB_NAME || 'nfl_analytics' // Adjust to nfl_analytics if renamed
+    });
 
-            {/* Full Schedule */}
-            <div className="bg-white rounded-lg shadow p-4">
-              <h2 className="text-xl font-semibold mb-4" style={{ color: branding?.colorPrimary }}>
-                Game Schedule
-              </h2>
+    // Fetch team details
+    const [teamRows] = await connection.execute(
+      `SELECT t.team_name, t.team_abbr, t.division, t.conference,
+              COALESCE(b.team_color, '#000000') AS team_color,
+              COALESCE(b.team_color2, '#FFFFFF') AS team_color2,
+              COALESCE(b.team_logo_espn, b.team_logo_wikipedia, '') AS team_logo
+       FROM Teams t
+       LEFT JOIN Teams_2024 b ON t.team_id = b.team_abbr
+       WHERE t.team_id = ?`,
+      [teamId]
+    );
 
-              {schedule && schedule.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm table-auto border-collapse">
-                    <thead>
-                      <tr className="bg-gray-100">
-                        <th className="border p-2">Week</th>
-                        <th className="border p-2">Opponent</th>
-                        <th className="border p-2">Date</th>
-                        <th className="border p-2">H/A</th>
-                        <th className="border p-2">Score</th>
-                        <th className="border p-2">Result</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {schedule.map((game, i) => (
-                        <tr key={i} className={game.result === "W" ? "bg-green-50" : game.result === "L" ? "bg-red-50" : ""}>
-                          <td className="border p-2 text-center">{game.week}</td>
-                          <td className="border p-2">{getOpponentName(game.opponent)}</td>
-                          <td className="border p-2">{formatDate(game.date)}</td>
-                          <td className="border p-2 text-center">{game.homeAway}</td>
-                          <td className="border p-2 text-center font-mono">{game.score || "TBD"}</td>
-                          <td className="border p-2 text-center font-semibold"
-                              style={{
-                                color: game.result === "W" ? "green" :
-                                       game.result === "L" ? "red" : "inherit"
-                              }}>
-                            {game.result || "-"}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <p className="text-gray-500 italic">No schedule available.</p>
-              )}
-            </div>
+    if (!teamRows.length) {
+      console.log("❌ Team not found in database:", teamId);
+      await connection.end();
+      return res.status(404).json({ error: 'Team not found in database' });
+    }
 
-            {/* Stats */}
-            <div className="bg-white rounded-lg shadow p-4">
-              <h2 className="text-xl font-semibold mb-4" style={{ color: branding?.colorPrimary }}>
-                Team Stats (2024)
-              </h2>
+    const teamRow = teamRows[0];
 
-              {Object.keys(stats || {}).length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                  <div className="p-3 bg-gray-50 rounded">
-                    <div className="text-xs text-gray-500">Points Allowed</div>
-                    <div className="text-xl font-bold">{stats.pointsAllowed || "-"}</div>
-                  </div>
-                  <div className="p-3 bg-gray-50 rounded">
-                    <div className="text-xs text-gray-500">Total Yards</div>
-                    <div className="text-xl font-bold">{stats.totalYardsAllowed || "-"}</div>
-                  </div>
-                  <div className="p-3 bg-gray-50 rounded">
-                    <div className="text-xs text-gray-500">Pass Yards</div>
-                    <div className="text-xl font-bold">{stats.passYardsAllowed || "-"}</div>
-                  </div>
-                  <div className="p-3 bg-gray-50 rounded">
-                    <div className="text-xs text-gray-500">Rush Yards</div>
-                    <div className="text-xl font-bold">{stats.rushYardsAllowed || "-"}</div>
-                  </div>
-                  <div className="p-3 bg-gray-50 rounded">
-                    <div className="text-xs text-gray-500">Sacks</div>
-                    <div className="text-xl font-bold">{stats.sacks || "-"}</div>
-                  </div>
-                  <div className="p-3 bg-gray-50 rounded">
-                    <div className="text-xs text-gray-500">Turnovers</div>
-                    <div className="text-xl font-bold">{stats.turnovers || "-"}</div>
-                  </div>
-                  <div className="p-3 bg-gray-50 rounded">
-                    <div className="text-xs text-gray-500">Red Zone %</div>
-                    <div className="text-xl font-bold">{stats.redZonePct || "-"}</div>
-                  </div>
-                  <div className="p-3 bg-gray-50 rounded">
-                    <div className="text-xs text-gray-500">3rd Down %</div>
-                    <div className="text-xl font-bold">{stats.thirdDownPct || "-"}</div>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-gray-500 italic">No stats available for this season.</p>
-              )}
-            </div>
-          </div>
+    // Fetch roster
+    const [roster] = await connection.execute(
+      `SELECT gsis_id AS id, full_name AS name, position, COALESCE(headshot_url, '') AS headshot_url, years_exp
+       FROM Rosters_2024
+       WHERE team = ? AND week = (
+         SELECT MAX(week) FROM Rosters_2024 WHERE team = ?
+       )`,
+      [teamId, teamId]
+    );
 
-          {/* Right Column */}
-          <div className="space-y-8">
-            {/* Depth Chart */}
-            <div className="bg-white rounded-lg shadow p-4">
-              <h2 className="text-xl font-semibold mb-4" style={{ color: branding?.colorPrimary }}>
-                Depth Chart
-              </h2>
+    // Fetch depth chart
+    const [depthRows] = await connection.execute(
+      `SELECT position, full_name, depth_team
+       FROM Depth_Charts_2024
+       WHERE club_code = ? AND week = (
+         SELECT MAX(week) FROM Depth_Charts_2024 WHERE club_code = ?
+       )
+       ORDER BY depth_team ASC`,
+      [teamId, teamId]
+    );
 
-              {depthChart && Object.keys(depthChart).length > 0 ? (
-                <div className="space-y-4">
-                  {Object.entries(depthChart).map(([position, players]) => (
-                    <div key={position} className="border-b pb-2">
-                      <h3 className="text-lg font-bold">{position}</h3>
-                      <ol className="ml-4 space-y-1">
-                        {players.map((p, i) => (
-                          <li key={i} className="flex justify-between">
-                            <span className="font-medium">{p.name}</span>
-                            <span className="text-xs bg-gray-100 px-2 py-1 rounded">
-                              Depth: {p.depth}
-                            </span>
-                          </li>
-                        ))}
-                      </ol>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 italic">Depth chart not available.</p>
-              )}
-            </div>
+    const depthChart = {};
+    for (const row of depthRows) {
+      if (!depthChart[row.position]) depthChart[row.position] = [];
+      depthChart[row.position].push({ name: row.full_name, depth: row.depth_team });
+    }
 
-            {/* Roster */}
-            <div className="bg-white rounded-lg shadow p-4">
-              <h2 className="text-xl font-semibold mb-4" style={{ color: branding?.colorPrimary }}>
-                Team Roster
-              </h2>
+    // Fetch schedule
+    const [schedule] = await connection.execute(
+      `SELECT game_id, week, game_date AS date,
+              home_team_id, away_team_id, home_score, away_score, is_final
+       FROM Games
+       WHERE home_team_id = ? OR away_team_id = ?
+       ORDER BY game_date ASC`,
+      [teamId, teamId]
+    );
 
-              {roster && roster.length > 0 ? (
-                <div className="space-y-2">
-                  {roster.map((player, i) => (
-                    <div key={player.id || i} className="flex justify-between items-center border-b pb-2">
-                      <div>
-                        <div className="font-medium">{player.name}</div>
-                        <div className="text-xs text-gray-500">
-                          {player.years_exp > 0 ? `${player.years_exp} years exp` : "Rookie"}
-                        </div>
-                      </div>
-                      <div className="bg-gray-100 px-3 py-1 rounded text-sm font-bold">
-                        {player.position}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 italic">Roster information not available.</p>
-              )}
-            </div>
+    const formattedGames = schedule.map(g => {
+      const isHome = g.home_team_id === teamId;
+      const opponent = isHome ? g.away_team_id : g.home_team_id;
+      const score = g.is_final ? `${g.home_score} - ${g.away_score}` : 'TBD';
+      let result = '';
+      if (g.is_final) {
+        if (g.home_score === g.away_score) {
+          result = 'T'; // Handle ties
+        } else if ((isHome && g.home_score > g.away_score) || (!isHome && g.away_score > g.home_score)) {
+          result = 'W';
+        } else {
+          result = 'L';
+        }
+      }
+      return {
+        gameId: g.game_id,
+        week: g.week,
+        date: new Date(g.date).toISOString(),
+        opponent: opponent || 'Unknown', // Fallback for invalid opponent
+        homeAway: isHome ? 'H' : 'A',
+        score,
+        result
+      };
+    });
 
-            {/* Coming Soon Sections */}
-            <div className="bg-white rounded-lg shadow p-4">
-              <h2 className="text-xl font-semibold mb-2 text-red-600">Injuries</h2>
-              <p className="text-gray-500 italic">Injury data coming soon...</p>
-            </div>
+    // Fetch stats
+    const [statsRows] = await connection.execute(
+      `SELECT games_played, points_allowed, total_yards_allowed, pass_yards_allowed,
+              rush_yards_allowed, turnovers, interceptions, sacks, red_zone_pct,
+              third_down_pct, epa_per_play_allowed, dvoa_rank
+       FROM Team_Defense_Stats_2024
+       WHERE team_id = ?`,
+      [teamId]
+    );
 
-            <div className="bg-white rounded-lg shadow p-4">
-              <h2 className="text-xl font-semibold mb-2" style={{ color: branding?.colorSecondary }}>
-                Recent Transactions
-              </h2>
-              <p className="text-gray-500 italic">Transaction log coming soon...</p>
-            </div>
-          </div>
-        </div>
-      </div>
+    const stats = statsRows[0] || {
+      gamesPlayed: 0, pointsAllowed: 0, totalYardsAllowed: 0, passYardsAllowed: 0,
+      rushYardsAllowed: 0, turnovers: 0, interceptions: 0, sacks: 0, redZonePct: 0,
+      thirdDownPct: 0, epaPerPlayAllowed: 0, dvoaRank: null
+    };
 
-      {/* Debug panel */}
-      <DebugPanel visible={debug} />
-    </>
-  );
+    await connection.end();
+
+    // Build response
+    const response = {
+      id: teamId,
+      name: teamRow.team_name || teamMeta.name,
+      abbreviation: teamRow.team_abbr || teamId,
+      division: teamRow.division || teamMeta.division,
+      conference: teamRow.conference || teamMeta.conference,
+      branding: {
+        colorPrimary: teamRow.team_color,
+        colorSecondary: teamRow.team_color2,
+        logo: teamRow.team_logo
+      },
+      roster: roster.map(player => ({
+        id: player.id,
+        name: player.name,
+        position: player.position,
+        headshot_url: player.headshot_url || null,
+        years_exp: player.years_exp
+      })),
+      depthChart,
+      schedule: formattedGames,
+      stats: {
+        gamesPlayed: stats.games_played,
+        pointsAllowed: stats.points_allowed,
+        totalYardsAllowed: stats.total_yards_allowed,
+        passYardsAllowed: stats.pass_yards_allowed,
+        rushYardsAllowed: stats.rush_yards_allowed,
+        turnovers: stats.turnovers,
+        interceptions: stats.interceptions,
+        sacks: stats.sacks,
+        redZonePct: stats.red_zone_pct,
+        thirdDownPct: stats.third_down_pct,
+        epaPerPlayAllowed: stats.epa_per_play_allowed,
+        dvoaRank: stats.dvoa_rank
+      },
+      recentNews: [
+        {
+          title: `${teamRow.team_name || teamMeta.name} preparing for upcoming matchup`,
+          date: new Date().toISOString().split('T')[0]
+        }
+      ]
+    };
+
+    console.log("✅ API response prepared for team:", teamId);
+    return res.status(200).json(response);
+
+  } catch (err) {
+    console.error('❌ API error:', {
+      message: err.message,
+      stack: err.stack,
+      teamId
+    });
+    if (connection) await connection.end();
+    return res.status(500).json({
+      error: 'Internal server error',
+      details: err.message
+    });
+  }
 }
