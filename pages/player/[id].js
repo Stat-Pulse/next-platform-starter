@@ -18,25 +18,29 @@ export async function getServerSideProps({ params }) {
     });
 
     // Get bio + roster data from Rosters_2024
-    const [playerRows] = await connection.execute(`
-      SELECT 
-        R.gsis_id AS player_id,
-        R.full_name AS player_name,
-        R.position,
-        R.team,
-        R.jersey_number,
-        R.status,
-        R.headshot_url,
-        R.years_exp,
-        R.college,
-        R.draft_club,
-        R.draft_number,
-        R.rookie_year
-      FROM Rosters_2024 R
-      WHERE R.gsis_id = ?
-      LIMIT 1
-    `, [playerId]);
+const [playerRows] = await connection.execute(`
+  SELECT 
+    R.gsis_id AS player_id,
+    R.full_name AS player_name,
+    R.position,
+    R.team,
+    R.jersey_number,
+    R.status,
+    R.headshot_url,
+    R.years_exp,
+    R.college,
+    R.draft_club,
+    R.draft_number,
+    R.rookie_year
+  FROM Rosters_2024 R
+  WHERE R.gsis_id = ?
+  LIMIT 1
+`, [playerId]);
 
+// ✅ Put logs here (after the query runs)
+console.log('Incoming playerId:', playerId);
+console.log('Query result:', playerRows);
+    
     // Get career stats by season
     const [careerStats] = await connection.execute(`
       SELECT
