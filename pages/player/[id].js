@@ -1,14 +1,11 @@
 // pages/player/[id].js
 
-import React from 'react';
-import mysql from 'mysql2/promise';
-
 export async function getServerSideProps({ params }) {
+  const mysql = require('mysql2/promise');
   const playerId = params.id;
-  let connection;
 
   try {
-    connection = await mysql.createConnection({
+    const connection = await mysql.createConnection({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
@@ -50,42 +47,32 @@ export async function getServerSideProps({ params }) {
 
     await connection.end();
 
-    if (playerRows.length === 0) {
-      return { notFound: true };
-    }
-
     return {
       props: {
-        player: playerRows[0],
-        careerStats,
+        debug: {
+          player: playerRows[0] || null,
+          careerStats,
+        }
       }
     };
-
   } catch (error) {
     return {
       props: {
-        error: error.message || 'Unknown error occurred',
+        debug: {
+          error: error.message
+        }
       }
     };
   }
 }
 
-export default function DebugPlayerPage({ player, careerStats, error }) {
+export default function Debug({ debug }) {
   return (
     <main style={{ padding: '2rem', fontFamily: 'monospace' }}>
-      <h1 style={{ color: 'red' }}>🧪 DEBUG MODE</h1>
-
-      {error && (
-        <pre style={{ background: '#fee', padding: '1rem', border: '1px solid red' }}>
-          Error: {error}
-        </pre>
-      )}
-
-      <h2>Player</h2>
-      <pre>{JSON.stringify(player, null, 2)}</pre>
-
-      <h2>Career Stats</h2>
-      <pre>{JSON.stringify(careerStats, null, 2)}</pre>
+      <h1 style={{ color: 'red', fontSize: '1.5rem' }}>🧪 DEBUG MODE</h1>
+      <pre style={{ background: '#f5f5f5', padding: '1rem', border: '1px solid #ddd', overflowX: 'auto' }}>
+        {JSON.stringify(debug, null, 2)}
+      </pre>
     </main>
   );
 }
