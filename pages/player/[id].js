@@ -1,4 +1,4 @@
-// File: pages/player/[id].js
+// pages/player/[id].js
 
 import React from 'react';
 import Head from 'next/head';
@@ -17,7 +17,8 @@ export async function getServerSideProps({ params }) {
       database: process.env.DB_NAME,
     });
 
-    const [rows] = await connection.execute(`
+    // Get bio + roster data
+    const [playerRows] = await connection.execute(`
       SELECT 
         P.player_id,
         P.player_name,
@@ -37,36 +38,49 @@ export async function getServerSideProps({ params }) {
       LIMIT 1
     `, [playerId]);
 
+    // Get career stats by season
+    const [careerStats] = await connection.execute(`
+      SELECT
+        season_override AS season,
+        SUM(passing_yards) AS passing_yards,
+        SUM(rushing_yards) AS rushing_yards,
+        SUM(receiving_yards) AS receiving_yards,
+        SUM(passing_tds + rushing_tds + receiving_tds) AS total_tds,
+        SUM(fantasy_points_ppr) AS fantasy_points_ppr
+      FROM Player_Stats_Game_All
+      WHERE player_id = ?
+      GROUP BY season_override
+      ORDER BY season_override DESC
+    `, [playerId]);
+
     await connection.end();
 
-    if (rows.length === 0) {
-      return {
-        notFound: true
-      };
+    if (playerRows.length === 0) {
+      return { notFound: true };
     }
 
     return {
       props: {
-        player: rows[0]
+        player: playerRows[0],
+        careerStats,
       }
     };
 
   } catch (error) {
     console.error('Error loading player profile:', error);
-    return {
-      notFound: true
-    };
+    return { notFound: true };
   }
 }
 
-export default function PlayerProfile({ player }) {
+export default function PlayerProfile({ player, careerStats }) {
   return (
     <>
       <Head>
         <title>{player.player_name} | StatPulse</title>
       </Head>
 
-      <main className="max-w-4xl mx-auto p-6">
+      <main className="max-w-4xl mx-auto p-6 space-y-8">
+        {/* Player Bio */}
         <div className="bg-white shadow-lg rounded-lg p-6 flex gap-6">
           {player.headshot_url && (
             <Image
@@ -87,6 +101,35 @@ export default function PlayerProfile({ player }) {
             <p className="text-sm">College: {player.college}</p>
             <p className="text-sm">Drafted by {player.draft_club} — Pick #{player.draft_number} in {player.rookie_year}</p>
           </div>
+        </div>
+
+        {/* Career Stats Table */}
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4">Career Stats by Season</h2>
+          <table className="w-full text-sm border">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-2 text-left">Season</th>
+                <th className="p-2 text-right">Pass Yards</th>
+                <th className="p-2 text-right">Rush Yards</th>
+                <th className="p-2 text-right">Recv Yards</th>
+                <th className="p-2 text-right">Total TDs</th>
+                <th className="p-2 text-right">PPR Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              {careerStats.map((season) => (
+                <tr key={season.season} className="border-t">
+                  <td className="p-2">{season.season}</td>
+                  <td className="p-2 text-right">{season.passing_yards}</td>
+                  <td className="p-2 text-right">{season.rushing_yards}</td>
+                  <td className="p-2 text-right">{season.receiving_yards}</td>
+                  <td className="p-2 text-right">{season.total_tds}</td>
+                  <td className="p-2 text-right">{season.fantasy_points_ppr?.toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </main>
     </>
