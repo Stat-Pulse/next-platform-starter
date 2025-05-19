@@ -1,8 +1,6 @@
 // pages/player/[id].js
 
 import React from 'react';
-import Head from 'next/head';
-import Image from 'next/image';
 import mysql from 'mysql2/promise';
 
 export async function getServerSideProps({ params }) {
@@ -10,8 +8,6 @@ export async function getServerSideProps({ params }) {
   let connection;
 
   try {
-    console.log('⚠️ playerId requested:', playerId);
-
     connection = await mysql.createConnection({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
@@ -38,26 +34,19 @@ export async function getServerSideProps({ params }) {
       LIMIT 1
     `, [playerId]);
 
-const [careerStats] = await connection.execute(`
-  SELECT
-    season_override AS season,
-    SUM(passing_yards) AS passing_yards,
-    SUM(rushing_yards) AS rushing_yards,
-    SUM(receiving_yards) AS receiving_yards,
-    SUM(passing_tds + rushing_tds + receiving_tds) AS total_tds,
-    SUM(fantasy_points_ppr) AS fantasy_points_ppr
-  FROM Player_Stats_Game_All
-  WHERE player_id = ?
-  GROUP BY season_override
-  ORDER BY season_override DESC
-`, [playerId]);
-
-console.log('📦 playerRows result:', playerRows);
-console.log('📊 careerStats result:', careerStats);
-console.log('🧪 Final props:', {
-  player: playerRows[0],
-  careerStats,
-});
+    const [careerStats] = await connection.execute(`
+      SELECT
+        season_override AS season,
+        SUM(passing_yards) AS passing_yards,
+        SUM(rushing_yards) AS rushing_yards,
+        SUM(receiving_yards) AS receiving_yards,
+        SUM(passing_tds + rushing_tds + receiving_tds) AS total_tds,
+        SUM(fantasy_points_ppr) AS fantasy_points_ppr
+      FROM Player_Stats_Game_All
+      WHERE player_id = ?
+      GROUP BY season_override
+      ORDER BY season_override DESC
+    `, [playerId]);
 
     await connection.end();
 
@@ -73,79 +62,30 @@ console.log('🧪 Final props:', {
     };
 
   } catch (error) {
-    console.error('Error loading player profile:', error);
-    return { notFound: true };
+    return {
+      props: {
+        error: error.message || 'Unknown error occurred',
+      }
+    };
   }
 }
 
-export default function PlayerProfile({ player, careerStats, error }) {
+export default function DebugPlayerPage({ player, careerStats, error }) {
   return (
-    <>
-      <Head>
-        <title>{player?.player_name || 'Player Profile'} | StatPulse</title>
-      </Head>
+    <main style={{ padding: '2rem', fontFamily: 'monospace' }}>
+      <h1 style={{ color: 'red' }}>🧪 DEBUG MODE</h1>
 
-      <main className="p-6 max-w-4xl mx-auto space-y-8">
-  {/* ✅ Debug Output */}
-  <div>
-    <h2 className="text-xl font-bold text-red-600 mb-2">Debug Output</h2>
-    <pre className="text-sm bg-gray-100 p-4 rounded border overflow-x-auto whitespace-pre-wrap">
-      {JSON.stringify({ player, careerStats, error }, null, 2)}
-    </pre>
-  </div>
+      {error && (
+        <pre style={{ background: '#fee', padding: '1rem', border: '1px solid red' }}>
+          Error: {error}
+        </pre>
+      )}
 
-  {/* ✅ Player Bio */}
-  <div className="bg-white shadow-lg rounded-lg p-6 flex gap-6">
-    {player.headshot_url && (
-      <Image
-        src={player.headshot_url}
-        alt={player.player_name}
-        width={160}
-        height={160}
-        className="rounded-xl"
-      />
-    )}
+      <h2>Player</h2>
+      <pre>{JSON.stringify(player, null, 2)}</pre>
 
-    <div>
-      <h1 className="text-3xl font-bold">{player.player_name}</h1>
-      <p className="text-gray-600">{player.position} | {player.team}</p>
-      <p className="mt-2 text-sm">Jersey #{player.jersey_number}</p>
-      <p className="text-sm">Status: {player.status}</p>
-      <p className="text-sm">Experience: {player.years_exp} years</p>
-      <p className="text-sm">College: {player.college}</p>
-      <p className="text-sm">Drafted by {player.draft_club} — Pick #{player.draft_number} in {player.rookie_year}</p>
-    </div>
-  </div>
-
-        {/* Career Stats Table */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Career Stats by Season</h2>
-          <table className="w-full text-sm border">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="p-2 text-left">Season</th>
-                <th className="p-2 text-right">Pass Yards</th>
-                <th className="p-2 text-right">Rush Yards</th>
-                <th className="p-2 text-right">Recv Yards</th>
-                <th className="p-2 text-right">Total TDs</th>
-                <th className="p-2 text-right">PPR Points</th>
-              </tr>
-            </thead>
-            <tbody>
-              {careerStats.map((season) => (
-                <tr key={season.season} className="border-t">
-                  <td className="p-2">{season.season}</td>
-                  <td className="p-2 text-right">{season.passing_yards}</td>
-                  <td className="p-2 text-right">{season.rushing_yards}</td>
-                  <td className="p-2 text-right">{season.receiving_yards}</td>
-                  <td className="p-2 text-right">{season.total_tds}</td>
-                  <td className="p-2 text-right">{season.fantasy_points_ppr?.toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </main>
-    </>
+      <h2>Career Stats</h2>
+      <pre>{JSON.stringify(careerStats, null, 2)}</pre>
+    </main>
   );
 }
