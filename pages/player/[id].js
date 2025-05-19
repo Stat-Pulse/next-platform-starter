@@ -38,21 +38,26 @@ export async function getServerSideProps({ params }) {
       LIMIT 1
     `, [playerId]);
 
-    console.log('📦 playerRows result:', playerRows);
+const [careerStats] = await connection.execute(`
+  SELECT
+    season_override AS season,
+    SUM(passing_yards) AS passing_yards,
+    SUM(rushing_yards) AS rushing_yards,
+    SUM(receiving_yards) AS receiving_yards,
+    SUM(passing_tds + rushing_tds + receiving_tds) AS total_tds,
+    SUM(fantasy_points_ppr) AS fantasy_points_ppr
+  FROM Player_Stats_Game_All
+  WHERE player_id = ?
+  GROUP BY season_override
+  ORDER BY season_override DESC
+`, [playerId]);
 
-    const [careerStats] = await connection.execute(`
-      SELECT
-        season_override AS season,
-        SUM(passing_yards) AS passing_yards,
-        SUM(rushing_yards) AS rushing_yards,
-        SUM(receiving_yards) AS receiving_yards,
-        SUM(passing_tds + rushing_tds + receiving_tds) AS total_tds,
-        SUM(fantasy_points_ppr) AS fantasy_points_ppr
-      FROM Player_Stats_Game_All
-      WHERE player_id = ?
-      GROUP BY season_override
-      ORDER BY season_override DESC
-    `, [playerId]);
+console.log('📦 playerRows result:', playerRows);
+console.log('📊 careerStats result:', careerStats);
+console.log('🧪 Final props:', {
+  player: playerRows[0],
+  careerStats,
+});
 
     await connection.end();
 
