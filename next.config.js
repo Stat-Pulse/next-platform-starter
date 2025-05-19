@@ -4,8 +4,13 @@ module.exports = {
   reactStrictMode: true,
   output: 'standalone', // Enables SSR routing support for Netlify
   experimental: {
-    serverActions: {
-      enabled: false, // Disable server actions
+    serverActions: { enabled: false, }, // Disable server actions
+      images: {
+        domains: ['espn.com', 'wikipedia.org', 'localhost'],
+        remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
     },
   },
   webpack: (config) => {
