@@ -1,6 +1,8 @@
-// netlify/edge-functions/rewrite.js
-import { NextResponse } from 'next/server'
-
-export default async function middleware(request) {
-  return NextResponse.rewrite(request.nextUrl)
+export default async function handler(request) {
+  return new Response(null, {
+    status: 200,
+    headers: {
+      'x-middleware-rewrite': request.url,
+    },
+  });
 }
