@@ -4,11 +4,15 @@ import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 
-const TEAM_MAP = {
-  KC: 'Kansas City Chiefs',
-  BAL: 'Baltimore Ravens',
-  SF: 'San Francisco 49ers',
-  // ...extend as needed
+const TEAM_NAME_MAP = {
+  ARI: "Arizona Cardinals", ATL: "Atlanta Falcons", BAL: "Baltimore Ravens", BUF: "Buffalo Bills",
+  CAR: "Carolina Panthers", CHI: "Chicago Bears", CIN: "Cincinnati Bengals", CLE: "Cleveland Browns",
+  DAL: "Dallas Cowboys", DEN: "Denver Broncos", DET: "Detroit Lions", GB: "Green Bay Packers",
+  HOU: "Houston Texans", IND: "Indianapolis Colts", JAX: "Jacksonville Jaguars", KC: "Kansas City Chiefs",
+  LAC: "Los Angeles Chargers", LAR: "Los Angeles Rams", LV: "Las Vegas Raiders", MIA: "Miami Dolphins",
+  MIN: "Minnesota Vikings", NE: "New England Patriots", NO: "New Orleans Saints", NYG: "New York Giants",
+  NYJ: "New York Jets", PHI: "Philadelphia Eagles", PIT: "Pittsburgh Steelers", SEA: "Seattle Seahawks",
+  SF: "San Francisco 49ers", TB: "Tampa Bay Buccaneers", TEN: "Tennessee Titans", WAS: "Washington Commanders"
 };
 
 export default function TeamPage() {
@@ -93,7 +97,7 @@ export default function TeamPage() {
               {schedule.map((g, i) => (
                 <tr key={i}>
                   <td className="border p-2 text-center">{g.week}</td>
-                  <td className="border p-2 text-center">{TEAM_MAP[g.opponent] || g.opponent}</td>
+                  <td className="border p-2 text-center">{TEAM_NAME_MAP[g.opponent] || g.opponent}</td>
                   <td className="border p-2 text-center">{formatDate(g.date)}</td>
                   <td className="border p-2 text-center">{g.homeAway}</td>
                   <td className="border p-2 text-center">{g.score}</td>
