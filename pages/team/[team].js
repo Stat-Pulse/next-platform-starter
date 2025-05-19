@@ -13,6 +13,17 @@ const TEAM_NAME_MAP = {
   SF: "San Francisco 49ers", TB: "Tampa Bay Buccaneers", TEN: "Tennessee Titans", WAS: "Washington Commanders"
 };
 
+const slugToAbbreviation = {
+  bills: 'BUF', dolphins: 'MIA', patriots: 'NE', jets: 'NYJ',
+  ravens: 'BAL', bengals: 'CIN', browns: 'CLE', steelers: 'PIT',
+  texans: 'HOU', colts: 'IND', jaguars: 'JAX', titans: 'TEN',
+  broncos: 'DEN', chiefs: 'KC', raiders: 'LV', chargers: 'LAC',
+  cowboys: 'DAL', giants: 'NYG', eagles: 'PHI', commanders: 'WSH',
+  bears: 'CHI', lions: 'DET', packers: 'GB', vikings: 'MIN',
+  falcons: 'ATL', panthers: 'CAR', saints: 'NO', buccaneers: 'TB',
+  cardinals: 'ARI', rams: 'LAR', '49ers': 'SF', seahawks: 'SEA'
+};
+
 export default function TeamPage({ teamData, error }) {
   if (error || !teamData) {
     return <div className="p-6 text-center text-red-500">Error: {error || 'No team data'}</div>;
@@ -58,78 +69,94 @@ export default function TeamPage({ teamData, error }) {
 
         <section className="mb-10">
           <h2 className="text-xl font-semibold mb-2" style={{ color: branding.colorPrimary }}>Game Schedule</h2>
-          <table className="w-full text-sm table-auto border-collapse">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border p-2">Week</th>
-                <th className="border p-2">Opponent</th>
-                <th className="border p-2">Date</th>
-                <th className="border p-2">Home/Away</th>
-                <th className="border p-2">Score</th>
-                <th className="border p-2">Result</th>
-              </tr>
-            </thead>
-            <tbody>
-              {schedule.map((g, i) => (
-                <tr key={i}>
-                  <td className="border p-2 text-center">{g.week}</td>
-                  <td className="border p-2 text-center">{TEAM_NAME_MAP[g.opponent] || g.opponent}</td>
-                  <td className="border p-2 text-center">{formatDate(g.date)}</td>
-                  <td className="border p-2 text-center">{g.homeAway}</td>
-                  <td className="border p-2 text-center">{g.score}</td>
-                  <td className="border p-2 text-center">{g.result}</td>
+          {schedule.length === 0 ? (
+            <p className="text-gray-600">No games found for this team.</p>
+          ) : (
+            <table className="w-full text-sm table-auto border-collapse">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border p-2">Week</th>
+                  <th className="border p-2">Opponent</th>
+                  <th className="border p-2">Date</th>
+                  <th className="border p-2">Home/Away</th>
+                  <th className="border p-2">Score</th>
+                  <th className="border p-2">Result</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {schedule.map((g, i) => (
+                  <tr key={i}>
+                    <td className="border p-2 text-center">{g.week}</td>
+                    <td className="border p-2 text-center">{TEAM_NAME_MAP[g.opponent] || g.opponent}</td>
+                    <td className="border p-2 text-center">{formatDate(g.date)}</td>
+                    <td className="border p-2 text-center">{g.homeAway}</td>
+                    <td className="border p-2 text-center">{g.score}</td>
+                    <td className="border p-2 text-center">{g.result}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </section>
 
         <section className="mb-10">
           <h2 className="text-xl font-semibold mb-2" style={{ color: branding.colorPrimary }}>Depth Chart</h2>
-          {Object.entries(depthChart).map(([pos, players]) => (
-            <div key={pos} className="mb-3">
-              <h3 className="text-lg font-bold">{pos}</h3>
-              <ul className="ml-4 list-disc text-sm">
-                {players.map((p, i) => (
-                  <li key={i}>{p.name} <span className="text-gray-400">(Depth: {p.depth})</span></li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {Object.keys(depthChart).length === 0 ? (
+            <p className="text-gray-600">No depth chart data available.</p>
+          ) : (
+            Object.entries(depthChart).map(([pos, players]) => (
+              <div key={pos} className="mb-3">
+                <h3 className="text-lg font-bold">{pos}</h3>
+                <ul className="ml-4 list-disc text-sm">
+                  {players.map((p, i) => (
+                    <li key={i}>{p.name} <span className="text-gray-400">(Depth: {p.depth})</span></li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          )}
         </section>
 
         <section className="mb-10">
           <h2 className="text-xl font-semibold mb-2">Roster</h2>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="p-2 text-left">Name</th>
-                <th className="p-2 text-right">Position</th>
-              </tr>
-            </thead>
-            <tbody>
-              {roster.map((player, i) => (
-                <tr key={i} className="border-t">
-                  <td className="p-2 text-left">{player.name}</td>
-                  <td className="p-2 text-right">{player.position}</td>
+          {roster.length === 0 ? (
+            <p className="text-gray-600">No roster data available.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="p-2 text-left">Name</th>
+                  <th className="p-2 text-right">Position</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {roster.map((player, i) => (
+                  <tr key={i} className="border-t">
+                    <td className="p-2 text-left">{player.name}</td>
+                    <td className="p-2 text-right">{player.position}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </section>
 
         <section className="mb-10">
           <h2 className="text-xl font-semibold mb-2">Defensive Stats (2024)</h2>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div><strong>Points Allowed:</strong> {stats.pointsAllowed || '-'}</div>
-            <div><strong>Total Yards Allowed:</strong> {stats.totalYardsAllowed || '-'}</div>
-            <div><strong>Pass Yards Allowed:</strong> {stats.passYardsAllowed || '-'}</div>
-            <div><strong>Rush Yards Allowed:</strong> {stats.rushYardsAllowed || '-'}</div>
-            <div><strong>Sacks:</strong> {stats.sacks || '-'}</div>
-            <div><strong>Turnovers:</strong> {stats.turnovers || '-'}</div>
-            <div><strong>Red Zone %:</strong> {stats.redZonePct || '-'}</div>
-            <div><strong>3rd Down %:</strong> {stats.thirdDownPct || '-'}</div>
-          </div>
+          {Object.keys(stats).length === 0 ? (
+            <p className="text-gray-600">No defensive stats available.</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div><strong>Points Allowed:</strong> {stats.pointsAllowed || '-'}</div>
+              <div><strong>Total Yards Allowed:</strong> {stats.totalYardsAllowed || '-'}</div>
+              <div><strong>Pass Yards Allowed:</strong> {stats.passYardsAllowed || '-'}</div>
+              <div><strong>Rush Yards Allowed:</strong> {stats.rushYardsAllowed || '-'}</div>
+              <div><strong>Sacks:</strong> {stats.sacks || '-'}</div>
+              <div><strong>Turnovers:</strong> {stats.turnovers || '-'}</div>
+              <div><strong>Red Zone %:</strong> {stats.redZonePct || '-'}</div>
+              <div><strong>3rd Down %:</strong> {stats.thirdDownPct || '-'}</div>
+            </div>
+          )}
         </section>
       </div>
     </>
@@ -137,11 +164,14 @@ export default function TeamPage({ teamData, error }) {
 }
 
 export async function getServerSideProps({ params }) {
-  const { team } = params;
+  let { team } = params;
   if (!team) {
     console.error('TeamPage: Missing team parameter', { time: new Date().toISOString() });
     return { props: { error: 'Missing team parameter' } };
   }
+
+  // Map slug to abbreviation if needed
+  team = slugToAbbreviation[team.toLowerCase()] || team.toUpperCase();
 
   let connection;
   try {
@@ -198,6 +228,7 @@ export async function getServerSideProps({ params }) {
        ORDER BY game_date ASC`,
       [team, team]
     );
+    console.error('TeamPage: Schedule query result', { team, scheduleLength: schedule.length });
 
     const formattedGames = schedule.map(g => {
       const isHome = g.home_team_id === team;
@@ -222,6 +253,7 @@ export async function getServerSideProps({ params }) {
       `SELECT * FROM Team_Defense_Stats_2024 WHERE team_id = ?`,
       [team]
     );
+    console.error('TeamPage: Stats query result', { team, statsRowsLength: statsRows.length });
     const statsRow = statsRows[0] || {};
     const stats = {
       gamesPlayed: statsRow.games_played || 0,
