@@ -11,22 +11,28 @@ exports.handler = async function () {
       database: 'stat_pulse_analytics_db',
     });
 
-    await connection.ping(); // 🔍 Simple connectivity test
+    const [rows] = await connection.execute(`
+      SELECT player_id, player_name, position
+      FROM Players
+      ORDER BY player_name
+      LIMIT 10
+    `);
+
     await connection.end();
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: '✅ Connected successfully to the DB' }),
+      body: JSON.stringify(rows),
     };
 
   } catch (error) {
-    console.error('❌ Connection error:', error);
+    console.error('Query error:', error);
 
     if (connection) await connection.end();
 
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: '❌ DB connection failed', details: error.message }),
+      body: JSON.stringify({ error: 'Query failed', details: error.message }),
     };
   }
 };
