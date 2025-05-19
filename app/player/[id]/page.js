@@ -11,33 +11,36 @@ export default async function PlayerPage({ params }) {
     }
   };
 
+  logMessage('Starting execution', { playerId: params?.id });
+  const playerId = params?.id;
+  if (!playerId) {
+    logMessage('Missing playerId', {});
+    return <div>Missing player ID</div>;
+  }
+
+  let connection;
+  let debug = { stage: 'initial' };
+
   try {
-    logMessage('Starting execution', { playerId: params?.id });
-    const playerId = params?.id;
-    if (!playerId) {
-      logMessage('Missing playerId', {});
-      return <div>Missing player ID</div>;
-    }
-
-    let connection;
-    let debug = {};
-
-    logMessage('Environment variables', {
+    logMessage('Checking environment variables', {
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       database: process.env.DB_NAME,
       password: process.env.DB_PASSWORD ? '[REDACTED]' : 'MISSING',
     });
 
-    logMessage('Connecting to DB...');
+    logMessage('Attempting DB connection...');
     connection = await mysql.createConnection({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
+      connectTimeout: 5000, // 5s timeout
     });
-    logMessage('DB connected');
+    logMessage('DB connected', { success: true });
+    debug.stage = 'connected';
 
+    logMessage('Executing player query...');
     const [playerRows] = await connection.execute(
       `SELECT R.gsis_id AS player_id, R.full_name AS player_name
        FROM Rosters_2024 R
@@ -46,7 +49,10 @@ export default async function PlayerPage({ params }) {
       [playerId]
     );
     logMessage('Player query executed', { rows: playerRows.length });
+    debug.stage = 'player_queried';
+    debug.player = playerRows[0] || null;
 
+    logMessage('Executing career stats query...');
     const [careerStats] = await connection.execute(
       `SELECT season_override AS season, SUM(passing_yards) AS passing_yards
        FROM Player_Stats_Game_All
@@ -56,28 +62,17 @@ export default async function PlayerPage({ params }) {
       [playerId]
     );
     logMessage('Career stats query executed', { rows: careerStats.length });
+    debug.stage = 'stats_queried';
+    debug.careerStats = careerStats;
 
-    debug = {
-      player: playerRows[0] || null,
-      careerStats,
-    };
-
-    logMessage('Rendering', debug);
-    return (
-      <main style={{ padding: '2rem' }}>
-        <h1 style={{ fontWeight: 'bold', color: 'darkred' }}>🧪 DEBUG</h1>
-        <pre style={{ background: '#eee', padding: '1rem' }}>
-          {JSON.stringify(debug, null, 2)}
-        </pre>
-      </main>
-    );
   } catch (error) {
-    logMessage('Error', { message: error.message, stack: error.stack });
+    logMessage('Error', { stage: debug.stage, message: error.message, code: error.code, stack: error.stack });
+    debug.error = { stage: debug.stage, message: error.message, code: error.code, stack: error.stack };
     return (
       <main style={{ padding: '2rem' }}>
         <h1 style={{ fontWeight: 'bold', color: 'red' }}>Error</h1>
         <pre style={{ background: '#eee', padding: '1rem' }}>
-          {JSON.stringify({ error: error.message, stack: error.stack }, null, 2)}
+          {JSON.stringify(debug, null, 2)}
         </pre>
       </main>
     );
@@ -91,4 +86,14 @@ export default async function PlayerPage({ params }) {
       }
     }
   }
+
+  logMessage('Rendering', debug);
+  return (
+    <main style={{ padding: '2rem' }}>
+      <h1 style={{ fontWeight: 'bold', color: 'darkred' }}>🧪 DEBUG</h1>
+      <pre style={{ background: '#eee', padding: '1rem' }}>
+        {JSON.stringify(debug, null, 2)}
+      </pre>
+    </main>
+  );
 }
