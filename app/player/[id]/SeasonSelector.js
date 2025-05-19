@@ -33,7 +33,7 @@ export default function SeasonSelector({ gameLogs }) {
         </thead>
         <tbody>
           {filteredLogs.map(log => (
-            <tr key={log.game_id}>
+            <tr key={log.log_id}>
               <td>{log.week}</td>
               <td>{log.opponent}</td>
               <td>{log.passing_yards}</td>
