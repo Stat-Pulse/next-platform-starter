@@ -1,10 +1,6 @@
-const rewrite = async (request, context) => {
-    const path = context.geo?.country?.code === 'AU' ? '/edge/australia' : '/edge/not-australia';
-    return new URL(path, request.url);
-};
+// netlify/edge-functions/rewrite.js
+import { NextResponse } from 'next/server'
 
-export const config = {
-    path: '/edge'
-};
-
-export default rewrite;
+export default async function middleware(request) {
+  return NextResponse.rewrite(request.nextUrl)
+}
