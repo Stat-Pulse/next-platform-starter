@@ -1,7 +1,6 @@
 // app/player/[id]/page.js
 import mysql from 'mysql2/promise';
-import dynamic from 'next/dynamic';
-const SeasonSelector = dynamic(() => import('./SeasonSelector'), { ssr: false });
+import SeasonSelector from './SeasonSelector'; // ✅ simple import
 
 export default async function PlayerPage({ params }) {
   const playerId = params?.id;
