@@ -10,7 +10,7 @@ exports.handler = async function () {
       host: 'stat-pulse-analytics-db.ci1uue2w2sxp.us-east-1.rds.amazonaws.com',
       user: 'StatadminPULS3',
       password: 'wyjGiz-justo6-gesmyh',
-      database: 'nfl_analytics',
+      database: 'stat_pulse_analytics_db', // ✅ Corrected DB name
     });
 
     const [rows] = await connection.execute(`
