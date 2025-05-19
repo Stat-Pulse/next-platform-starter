@@ -7,15 +7,11 @@ import mysql from 'mysql2/promise';
 
 export async function getServerSideProps({ params }) {
   const playerId = params.id;
-
-  // TEMP: Log ID and trigger test error if not a known case
-  if (!playerId.startsWith('00-00')) {
-    throw new Error(`Player ID malformed: ${playerId}`);
-  }
-
-  console.log('Incoming playerId:', playerId);
+  let connection;
 
   try {
+    console.log('⚠️ playerId requested:', playerId);
+
     connection = await mysql.createConnection({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
@@ -23,31 +19,27 @@ export async function getServerSideProps({ params }) {
       database: process.env.DB_NAME,
     });
 
-    // Get bio + roster data from Rosters_2024
-const [playerRows] = await connection.execute(`
-  SELECT 
-    R.gsis_id AS player_id,
-    R.full_name AS player_name,
-    R.position,
-    R.team,
-    R.jersey_number,
-    R.status,
-    R.headshot_url,
-    R.years_exp,
-    R.college,
-    R.draft_club,
-    R.draft_number,
-    R.rookie_year
-  FROM Rosters_2024 R
-  WHERE R.gsis_id = ?
-  LIMIT 1
-`, [playerId]);
+    const [playerRows] = await connection.execute(`
+      SELECT 
+        R.gsis_id AS player_id,
+        R.full_name AS player_name,
+        R.position,
+        R.team,
+        R.jersey_number,
+        R.status,
+        R.headshot_url,
+        R.years_exp,
+        R.college,
+        R.draft_club,
+        R.draft_number,
+        R.rookie_year
+      FROM Rosters_2024 R
+      WHERE R.gsis_id = ?
+      LIMIT 1
+    `, [playerId]);
 
-// ✅ Put logs here (after the query runs)
-console.log('Incoming playerId:', playerId);
-console.log('Query result:', playerRows);
-    
-    // Get career stats by season
+    console.log('📦 playerRows result:', playerRows);
+
     const [careerStats] = await connection.execute(`
       SELECT
         season_override AS season,
@@ -81,7 +73,15 @@ console.log('Query result:', playerRows);
   }
 }
 
-export default function PlayerProfile({ player, careerStats }) {
+export default function PlayerProfile({ player, careerStats, error }) {
+  if (error) {
+    return <div className="p-6 text-red-500 font-semibold">Error: {error}</div>;
+  }
+
+  if (!player) {
+    return <div className="p-6 text-gray-500 font-medium">No player data found.</div>;
+  }
+
   return (
     <>
       <Head>
