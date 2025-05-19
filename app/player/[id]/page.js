@@ -52,7 +52,7 @@ export default async function PlayerPage({ params }) {
 
     const [gameLogs] = await connection.execute(
       `SELECT
-        game_id,
+        CONCAT(player_id, '_', season_override, '_', week) AS log_id,
         season_override AS season,
         week,
         opponent,
@@ -66,7 +66,7 @@ export default async function PlayerPage({ params }) {
       WHERE player_id = ?
       ORDER BY season_override DESC, week ASC`,
       [playerId]
-    );
+     );
 
     await connection.end();
 
