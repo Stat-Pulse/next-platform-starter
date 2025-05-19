@@ -17,12 +17,12 @@ export async function getServerSideProps({ params }) {
       database: process.env.DB_NAME,
     });
 
-    // Get bio + roster data
+    // Get bio + roster data from Rosters_2024
     const [playerRows] = await connection.execute(`
       SELECT 
-        P.player_id,
-        P.player_name,
-        P.position,
+        R.gsis_id AS player_id,
+        R.full_name AS player_name,
+        R.position,
         R.team,
         R.jersey_number,
         R.status,
@@ -32,9 +32,8 @@ export async function getServerSideProps({ params }) {
         R.draft_club,
         R.draft_number,
         R.rookie_year
-      FROM Players P
-      LEFT JOIN Rosters_2024 R ON P.player_id = R.gsis_id
-      WHERE P.player_id = ?
+      FROM Rosters_2024 R
+      WHERE R.gsis_id = ?
       LIMIT 1
     `, [playerId]);
 
