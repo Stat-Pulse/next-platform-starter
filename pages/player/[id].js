@@ -79,47 +79,43 @@ console.log('🧪 Final props:', {
 }
 
 export default function PlayerProfile({ player, careerStats, error }) {
-  console.log('👀 player:', player);
-  console.log('📊 careerStats:', careerStats);
-  console.log('🚨 error:', error);
-
-  if (error) {
-    return <div className="p-6 text-red-500 font-semibold">Error: {error}</div>;
-  }
-
-  if (!player) {
-    return <div className="p-6 text-gray-500 font-medium">No player data found.</div>;
-  }
-
   return (
     <>
       <Head>
-        <title>{player.player_name} | StatPulse</title>
+        <title>{player?.player_name || 'Player Profile'} | StatPulse</title>
       </Head>
 
-      <main className="max-w-4xl mx-auto p-6 space-y-8">
-        {/* Player Bio */}
-        <div className="bg-white shadow-lg rounded-lg p-6 flex gap-6">
-          {player.headshot_url && (
-            <Image
-              src={player.headshot_url}
-              alt={player.player_name}
-              width={160}
-              height={160}
-              className="rounded-xl"
-            />
-          )}
+      <main className="p-6 max-w-4xl mx-auto space-y-8">
+  {/* ✅ Debug Output */}
+  <div>
+    <h2 className="text-xl font-bold text-red-600 mb-2">Debug Output</h2>
+    <pre className="text-sm bg-gray-100 p-4 rounded border overflow-x-auto whitespace-pre-wrap">
+      {JSON.stringify({ player, careerStats, error }, null, 2)}
+    </pre>
+  </div>
 
-          <div>
-            <h1 className="text-3xl font-bold">{player.player_name}</h1>
-            <p className="text-gray-600">{player.position} | {player.team}</p>
-            <p className="mt-2 text-sm">Jersey #{player.jersey_number}</p>
-            <p className="text-sm">Status: {player.status}</p>
-            <p className="text-sm">Experience: {player.years_exp} years</p>
-            <p className="text-sm">College: {player.college}</p>
-            <p className="text-sm">Drafted by {player.draft_club} — Pick #{player.draft_number} in {player.rookie_year}</p>
-          </div>
-        </div>
+  {/* ✅ Player Bio */}
+  <div className="bg-white shadow-lg rounded-lg p-6 flex gap-6">
+    {player.headshot_url && (
+      <Image
+        src={player.headshot_url}
+        alt={player.player_name}
+        width={160}
+        height={160}
+        className="rounded-xl"
+      />
+    )}
+
+    <div>
+      <h1 className="text-3xl font-bold">{player.player_name}</h1>
+      <p className="text-gray-600">{player.position} | {player.team}</p>
+      <p className="mt-2 text-sm">Jersey #{player.jersey_number}</p>
+      <p className="text-sm">Status: {player.status}</p>
+      <p className="text-sm">Experience: {player.years_exp} years</p>
+      <p className="text-sm">College: {player.college}</p>
+      <p className="text-sm">Drafted by {player.draft_club} — Pick #{player.draft_number} in {player.rookie_year}</p>
+    </div>
+  </div>
 
         {/* Career Stats Table */}
         <div className="bg-white shadow rounded-lg p-6">
