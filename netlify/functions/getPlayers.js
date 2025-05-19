@@ -1,3 +1,5 @@
+// File: netlify/functions/getPlayers.js
+
 const mysql = require('mysql2/promise');
 
 exports.handler = async function () {
@@ -16,8 +18,12 @@ exports.handler = async function () {
         P.player_id,
         P.player_name,
         P.position,
-        P.college
+        R.team_id,
+        R.jersey_number,
+        R.status,
+        R.headshot_url
       FROM Players P
+      LEFT JOIN Rosters_2024 R ON P.player_id = R.player_id
       ORDER BY P.player_name
     `);
 
@@ -27,13 +33,15 @@ exports.handler = async function () {
       statusCode: 200,
       body: JSON.stringify(rows),
     };
+
   } catch (error) {
-    console.error('❌ DATABASE ERROR:', error);
+    console.error('Database query error:', error);
+
     if (connection) await connection.end();
 
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to fetch player data.', details: error.message }),
+      body: JSON.stringify({ error: 'Failed to fetch players' }),
     };
   }
 };
