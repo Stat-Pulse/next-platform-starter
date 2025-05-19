@@ -7,7 +7,13 @@ import mysql from 'mysql2/promise';
 
 export async function getServerSideProps({ params }) {
   const playerId = params.id;
-  let connection;
+
+  // TEMP: Log ID and trigger test error if not a known case
+  if (!playerId.startsWith('00-00')) {
+    throw new Error(`Player ID malformed: ${playerId}`);
+  }
+
+  console.log('Incoming playerId:', playerId);
 
   try {
     connection = await mysql.createConnection({
