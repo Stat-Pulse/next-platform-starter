@@ -37,7 +37,7 @@ export default async function handler(req, res) {
       `SELECT t.team_name, t.team_abbr, t.division, t.conference,
               b.team_color, b.team_color2, b.team_logo_espn, b.team_logo_wikipedia
        FROM Teams t
-       LEFT JOIN Teams_2024 b ON t.team_id = b.team_abbr
+       LEFT JOIN Teams_2024 b ON t.team_abbr = b.team_abbr
        WHERE t.team_id = ?`,
       [teamId]
     );
