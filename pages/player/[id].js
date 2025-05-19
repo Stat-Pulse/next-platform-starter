@@ -74,6 +74,10 @@ export async function getServerSideProps({ params }) {
 }
 
 export default function PlayerProfile({ player, careerStats, error }) {
+  console.log('👀 player:', player);
+  console.log('📊 careerStats:', careerStats);
+  console.log('🚨 error:', error);
+
   if (error) {
     return <div className="p-6 text-red-500 font-semibold">Error: {error}</div>;
   }
