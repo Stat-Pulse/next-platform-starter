@@ -1,7 +1,6 @@
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
+import mysql from 'mysql2/promise';
 
 const TEAM_NAME_MAP = {
   ARI: "Arizona Cardinals", ATL: "Atlanta Falcons", BAL: "Baltimore Ravens", BUF: "Buffalo Bills",
@@ -14,38 +13,10 @@ const TEAM_NAME_MAP = {
   SF: "San Francisco 49ers", TB: "Tampa Bay Buccaneers", TEN: "Tennessee Titans", WAS: "Washington Commanders"
 };
 
-export default function TeamPage() {
-  const router = useRouter();
-  const { team } = router.query;
-  const [teamData, setTeamData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (!router.isReady || !team) return;
-
-    console.error('TeamPage: Fetching data', { team, time: new Date().toISOString() });
-
-    fetch(`/api/team/${team}`)
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
-        return res.json();
-      })
-      .then(data => {
-        if (data.error) throw new Error(data.error);
-        console.error('TeamPage: Data fetched', { team, data });
-        setTeamData(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('TeamPage: Fetch error', { team, message: err.message });
-        setError(err.message);
-        setLoading(false);
-      });
-  }, [router.isReady, team]);
-
-  if (loading) return <div className="p-6 text-center">Loading team data...</div>;
-  if (error || !teamData) return <div className="p-6 text-center text-red-500">Error: {error || 'No team data'}</div>;
+export default function TeamPage({ teamData, error }) {
+  if (error || !teamData) {
+    return <div className="p-6 text-center text-red-500">Error: {error || 'No team data'}</div>;
+  }
 
   const {
     name = 'Unknown Team',
@@ -77,9 +48,6 @@ export default function TeamPage() {
       </Head>
       <div className="max-w-6xl mx-auto p-6">
         <div className="flex items-center gap-6 mb-8 border-b pb-4" style={{ borderColor: branding.colorPrimary }}>
-          <Image src={branding.logo} alt={name} width={100} height={100} className="rounded shadow" />
-          <div>
-            <parer" border-b pb-4" style={{ borderColor: branding.colorPrimary }}>
           <Image src={branding.logo} alt={name} width={100} height={100} className="rounded shadow" />
           <div>
             <h1 className="text-3xl font-bold" style={{ color: branding.colorPrimary }}>{name}</h1>
@@ -166,4 +134,53 @@ export default function TeamPage() {
       </div>
     </>
   );
+}
+
+export async function getServerSideProps({ params }) {
+  const { team } = params;
+  if (!team) {
+    return { props: { error: 'Missing team parameter' } };
+  }
+
+  try {
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      connectTimeout: 5000,
+    });
+
+    console.error('TeamPage: Querying team', { team, time: new Date().toISOString() });
+
+    // Example query (adjust based on your schema)
+    const [rows] = await connection.execute(
+      `SELECT * FROM Teams WHERE team_code = ? LIMIT 1`,
+      [team]
+    );
+
+    await connection.end();
+
+    if (!rows.length) {
+      return { props: { error: 'Team not found' } };
+    }
+
+    // Mock data structure (adjust to match schema)
+    const teamData = {
+      name: rows[0].name || 'Unknown Team',
+      branding: { logo: '/placeholder.png', colorPrimary: '#000' },
+      conference: rows[0].conference || 'Unknown',
+      division: rows[0].division || 'Unknown',
+      roster: [], // Query roster if needed
+      depthChart: {},
+      schedule: [],
+      stats: {},
+      recentNews: [],
+    };
+
+    return { props: { teamData } };
+  } catch (error) {
+    console.error('TeamPage: Server error', { team, message: error.message });
+    return { props: { error: error.message } };
+  }
 }
