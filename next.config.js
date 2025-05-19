@@ -5,7 +5,7 @@ module.exports = {
   output: 'standalone', // Enables SSR routing support for Netlify
   experimental: {
     serverActions: {
-      enabled: false, // Disable server actions if not needed
+      enabled: false, // Disable server actions
     },
   },
   webpack: (config) => {
