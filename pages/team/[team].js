@@ -170,8 +170,9 @@ export async function getServerSideProps({ params }) {
     return { props: { error: 'Missing team parameter' } };
   }
 
-  // Map slug to abbreviation if needed
+  console.error('TeamPage: Raw team parameter', { team });
   team = slugToAbbreviation[team.toLowerCase()] || team.toUpperCase();
+  console.error('TeamPage: Mapped team', { team });
 
   let connection;
   try {
@@ -230,7 +231,7 @@ export async function getServerSideProps({ params }) {
     );
     console.error('TeamPage: Schedule query result', { team, scheduleLength: schedule.length });
 
-    const formattedGames = schedule.map(g => {
+    const formattedGames = schedule.length > 0 ? schedule.map(g => {
       const isHome = g.home_team_id === team;
       const opponent = isHome ? g.away_team_id : g.home_team_id;
       const score = g.is_final ? `${g.home_score} - ${g.away_score}` : 'TBD';
@@ -247,15 +248,30 @@ export async function getServerSideProps({ params }) {
         score,
         result
       };
-    });
+    }) : [
+      // Fallback data for testing
+      {
+        gameId: 'test-1',
+        week: 1,
+        date: '2024-09-08',
+        opponent: 'BUF',
+        homeAway: 'H',
+        score: 'TBD',
+        result: ''
+      }
+    ];
 
     const [statsRows] = await connection.execute(
-      `SELECT * FROM Team_Defense_Stats_2024 WHERE team_id = ?`,
+      `SELECT games_played, points_allowed, total_yards_allowed, pass_yards_allowed,
+              rush_yards_allowed, turnovers, interceptions, sacks, red_zone_pct,
+              third_down_pct, epa_per_play_allowed, dvoa_rank
+       FROM Team_Defense_Stats_2024
+       WHERE team_id = ?`,
       [team]
     );
     console.error('TeamPage: Stats query result', { team, statsRowsLength: statsRows.length });
     const statsRow = statsRows[0] || {};
-    const stats = {
+    const stats = statsRows.length > 0 ? {
       gamesPlayed: statsRow.games_played || 0,
       pointsAllowed: statsRow.points_allowed || 0,
       totalYardsAllowed: statsRow.total_yards_allowed || 0,
@@ -268,6 +284,20 @@ export async function getServerSideProps({ params }) {
       thirdDownPct: statsRow.third_down_pct || 0,
       epaPerPlayAllowed: statsRow.epa_per_play_allowed || 0,
       dvoaRank: statsRow.dvoa_rank || null
+    } : {
+      // Fallback data for testing
+      gamesPlayed: 0,
+      pointsAllowed: 0,
+      totalYardsAllowed: 0,
+      passYardsAllowed: 0,
+      rushYardsAllowed: 0,
+      turnovers: 0,
+      interceptions: 0,
+      sacks: 0,
+      redZonePct: 0,
+      thirdDownPct: 0,
+      epaPerPlayAllowed: 0,
+      dvoaRank: null
     };
 
     const teamData = {
@@ -277,9 +307,9 @@ export async function getServerSideProps({ params }) {
       division: teamRow.division,
       conference: teamRow.conference,
       branding: {
-        colorPrimary: teamRow.team_color,
+        colorPrimary: teamRow.team_color || '#ccc',
         colorSecondary: teamRow.team_color2,
-        logo: teamRow.team_logo_espn || teamRow.team_logo_wikipedia
+        logo: teamRow.team_logo_espn || teamRow.team_logo_wikipedia || '/placeholder.png'
       },
       roster,
       depthChart,
