@@ -9,3 +9,7 @@
 [[edge_functions]]
   path = "/player/*"
   function = "rewrite"
+
+[functions]
+  node_bundler = "esbuild"
+  included_files = ["!node_modules/**", "/tmp/*.log"]
