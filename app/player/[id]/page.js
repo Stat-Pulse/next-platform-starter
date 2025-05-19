@@ -1,46 +1,21 @@
 import mysql from 'mysql2/promise';
-import fs from 'fs/promises';
 
 export default async function PlayerPage({ params }) {
-  const logMessage = (message, data) => {
-    console.error(`PlayerPage: ${message}`, data);
-    try {
-      fs.appendFile('/tmp/player.log', `${new Date().toISOString()} ${message} ${JSON.stringify(data)}\n`);
-    } catch (e) {
-      console.error('PlayerPage: File log error', { message: e.message });
-    }
-  };
-
-  logMessage('Starting execution', { playerId: params?.id });
   const playerId = params?.id;
   if (!playerId) {
-    logMessage('Missing playerId', {});
     return <div>Missing player ID</div>;
   }
 
   let connection;
-  let debug = { stage: 'initial' };
-
   try {
-    logMessage('Checking environment variables', {
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      database: process.env.DB_NAME,
-      password: process.env.DB_PASSWORD ? '[REDACTED]' : 'MISSING',
-    });
-
-    logMessage('Attempting DB connection...');
     connection = await mysql.createConnection({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      connectTimeout: 5000, // 5s timeout
+      connectTimeout: 5000,
     });
-    logMessage('DB connected', { success: true });
-    debug.stage = 'connected';
 
-    logMessage('Executing player query...');
     const [playerRows] = await connection.execute(
       `SELECT R.gsis_id AS player_id, R.full_name AS player_name
        FROM Rosters_2024 R
@@ -48,11 +23,7 @@ export default async function PlayerPage({ params }) {
        LIMIT 1`,
       [playerId]
     );
-    logMessage('Player query executed', { rows: playerRows.length });
-    debug.stage = 'player_queried';
-    debug.player = playerRows[0] || null;
 
-    logMessage('Executing career stats query...');
     const [careerStats] = await connection.execute(
       `SELECT season_override AS season, SUM(passing_yards) AS passing_yards
        FROM Player_Stats_Game_All
@@ -61,39 +32,29 @@ export default async function PlayerPage({ params }) {
        ORDER BY season_override DESC`,
       [playerId]
     );
-    logMessage('Career stats query executed', { rows: careerStats.length });
-    debug.stage = 'stats_queried';
-    debug.careerStats = careerStats;
 
-  } catch (error) {
-    logMessage('Error', { stage: debug.stage, message: error.message, code: error.code, stack: error.stack });
-    debug.error = { stage: debug.stage, message: error.message, code: error.code, stack: error.stack };
+    const player = playerRows[0] || null;
     return (
       <main style={{ padding: '2rem' }}>
-        <h1 style={{ fontWeight: 'bold', color: 'red' }}>Error</h1>
-        <pre style={{ background: '#eee', padding: '1rem' }}>
-          {JSON.stringify(debug, null, 2)}
-        </pre>
+        <h1>{player?.player_name || 'Player Not Found'}</h1>
+        <h2>Career Stats</h2>
+        <ul>
+          {careerStats.map((stat) => (
+            <li key={stat.season}>
+              {stat.season}: {stat.passing_yards} passing yards
+            </li>
+          ))}
+        </ul>
+      </main>
+    );
+  } catch (error) {
+    return (
+      <main style={{ padding: '2rem' }}>
+        <h1>Error</h1>
+        <p>{error.message}</p>
       </main>
     );
   } finally {
-    if (connection) {
-      try {
-        await connection.end();
-        logMessage('DB connection closed');
-      } catch (endError) {
-        logMessage('Connection close error', { message: endError.message, stack: endError.stack });
-      }
-    }
+    if (connection) await connection.end();
   }
-
-  logMessage('Rendering', debug);
-  return (
-    <main style={{ padding: '2rem' }}>
-      <h1 style={{ fontWeight: 'bold', color: 'darkred' }}>🧪 DEBUG</h1>
-      <pre style={{ background: '#eee', padding: '1rem' }}>
-        {JSON.stringify(debug, null, 2)}
-      </pre>
-    </main>
-  );
 }
