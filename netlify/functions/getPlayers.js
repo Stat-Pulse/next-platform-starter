@@ -16,14 +16,20 @@ exports.handler = async function () {
         P.player_id,
         P.player_name,
         P.position,
-        COALESCE(R.team_id, 'N/A') AS team_id,
-        COALESCE(R.jersey_number, 'N/A') AS jersey_number,
-        COALESCE(R.status, 'Unknown') AS status,
-        COALESCE(R.headshot_url, '') AS headshot_url
+        R.team,
+        R.jersey_number,
+        R.status,
+        R.headshot_url,
+        R.years_exp,
+        R.college,
+        R.draft_club,
+        R.draft_number,
+        R.rookie_year
       FROM Players P
-      LEFT JOIN Rosters_2024 R ON P.player_id = R.player_id
+      LEFT JOIN Rosters_2024 R
+        ON P.player_id = R.gsis_id
       ORDER BY P.player_name
-      LIMIT 50
+      LIMIT 100
     `);
 
     await connection.end();
