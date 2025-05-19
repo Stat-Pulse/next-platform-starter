@@ -38,7 +38,7 @@ export default async function handler(req, res) {
               b.team_color, b.team_color2, b.team_logo_espn, b.team_logo_wikipedia
        FROM Teams t
        LEFT JOIN Teams_2024 b ON t.team_abbr = b.team_abbr
-       WHERE t.team_id = ?`,
+       WHERE t.team_abbr = ?`,
       [teamId]
     );
     if (!teamRows.length) {
