@@ -1,4 +1,3 @@
-// pages/team/[team].js
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
@@ -25,28 +24,34 @@ export default function TeamPage() {
   useEffect(() => {
     if (!router.isReady || !team) return;
 
+    console.error('TeamPage: Fetching data', { team, time: new Date().toISOString() });
+
     fetch(`/api/team/${team}`)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+        return res.json();
+      })
       .then(data => {
         if (data.error) throw new Error(data.error);
+        console.error('TeamPage: Data fetched', { team, data });
         setTeamData(data);
         setLoading(false);
       })
       .catch(err => {
-        console.error(err);
+        console.error('TeamPage: Fetch error', { team, message: err.message });
         setError(err.message);
         setLoading(false);
       });
   }, [router.isReady, team]);
 
   if (loading) return <div className="p-6 text-center">Loading team data...</div>;
-  if (error || !teamData) return <div className="p-6 text-center text-red-500">Error: {error}</div>;
+  if (error || !teamData) return <div className="p-6 text-center text-red-500">Error: {error || 'No team data'}</div>;
 
   const {
-    name,
-    branding,
-    conference,
-    division,
+    name = 'Unknown Team',
+    branding = { logo: '/placeholder.png', colorPrimary: '#ccc' },
+    conference = 'Unknown',
+    division = 'Unknown',
     roster = [],
     depthChart = {},
     schedule = [],
@@ -71,17 +76,20 @@ export default function TeamPage() {
         <title>{name} - StatPulse</title>
       </Head>
       <div className="max-w-6xl mx-auto p-6">
-        <div className="flex items-center gap-6 mb-8 border-b pb-4" style={{ borderColor: branding?.colorPrimary || '#ccc' }}>
-          <Image src={branding?.logo || '/placeholder.png'} alt={name} width={100} height={100} className="rounded shadow" />
+        <div className="flex items-center gap-6 mb-8 border-b pb-4" style={{ borderColor: branding.colorPrimary }}>
+          <Image src={branding.logo} alt={name} width={100} height={100} className="rounded shadow" />
           <div>
-            <h1 className="text-3xl font-bold" style={{ color: branding?.colorPrimary }}>{name}</h1>
+            <parer" border-b pb-4" style={{ borderColor: branding.colorPrimary }}>
+          <Image src={branding.logo} alt={name} width={100} height={100} className="rounded shadow" />
+          <div>
+            <h1 className="text-3xl font-bold" style={{ color: branding.colorPrimary }}>{name}</h1>
             <p className="text-gray-600">{conference} | {division} Division</p>
             <p className="text-lg font-semibold mt-1">Record: {calculateRecord()}</p>
           </div>
         </div>
 
         <section className="mb-10">
-          <h2 className="text-xl font-semibold mb-2" style={{ color: branding?.colorPrimary }}>Game Schedule</h2>
+          <h2 className="text-xl font-semibold mb-2" style={{ color: branding.colorPrimary }}>Game Schedule</h2>
           <table className="w-full text-sm table-auto border-collapse">
             <thead>
               <tr className="bg-gray-100">
@@ -109,7 +117,7 @@ export default function TeamPage() {
         </section>
 
         <section className="mb-10">
-          <h2 className="text-xl font-semibold mb-2" style={{ color: branding?.colorPrimary }}>Depth Chart</h2>
+          <h2 className="text-xl font-semibold mb-2" style={{ color: branding.colorPrimary }}>Depth Chart</h2>
           {Object.entries(depthChart).map(([pos, players]) => (
             <div key={pos} className="mb-3">
               <h3 className="text-lg font-bold">{pos}</h3>
