@@ -12,10 +12,18 @@ exports.handler = async function () {
     });
 
     const [rows] = await connection.execute(`
-      SELECT player_id, player_name, position
-      FROM Players
-      ORDER BY player_name
-      LIMIT 10
+      SELECT 
+        P.player_id,
+        P.player_name,
+        P.position,
+        COALESCE(R.team_id, 'N/A') AS team_id,
+        COALESCE(R.jersey_number, 'N/A') AS jersey_number,
+        COALESCE(R.status, 'Unknown') AS status,
+        COALESCE(R.headshot_url, '') AS headshot_url
+      FROM Players P
+      LEFT JOIN Rosters_2024 R ON P.player_id = R.player_id
+      ORDER BY P.player_name
+      LIMIT 50
     `);
 
     await connection.end();
@@ -26,13 +34,13 @@ exports.handler = async function () {
     };
 
   } catch (error) {
-    console.error('Query error:', error);
+    console.error('LEFT JOIN error:', error);
 
     if (connection) await connection.end();
 
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Query failed', details: error.message }),
+      body: JSON.stringify({ error: 'LEFT JOIN failed', details: error.message }),
     };
   }
 };
