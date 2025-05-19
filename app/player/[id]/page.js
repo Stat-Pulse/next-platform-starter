@@ -1,6 +1,7 @@
 // app/player/[id]/page.js
 import mysql from 'mysql2/promise';
-import SeasonSelector from './SeasonSelector';
+import dynamic from 'next/dynamic';
+const SeasonSelector = dynamic(() => import('./SeasonSelector'), { ssr: false });
 
 export default async function PlayerPage({ params }) {
   const playerId = params?.id;
@@ -52,21 +53,21 @@ export default async function PlayerPage({ params }) {
 
     const [gameLogs] = await connection.execute(
       `SELECT
-        CONCAT(player_id, '_', season_override, '_', week) AS log_id,
-        season_override AS season,
+        season,
         week,
-        opponent,
+        opponent_team_id,
         passing_yards,
         rushing_yards,
         receiving_yards,
         passing_tds,
         rushing_tds,
-        receiving_tds
-      FROM Player_Stats_Game_All
+        receiving_tds,
+        fantasy_points_ppr
+      FROM Player_Stats_Game_2024
       WHERE player_id = ?
-      ORDER BY season_override DESC, week ASC`,
+      ORDER BY season DESC, week ASC`,
       [playerId]
-     );
+    );
 
     await connection.end();
 
