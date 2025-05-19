@@ -1,9 +1,10 @@
 // app/player/[id]/page.js
 import mysql from 'mysql2/promise';
 
-export async function getServerSideProps({ params }) {
+export default async function PlayerPage({ params }) {
   const playerId = params.id;
   let connection;
+  let debug = {};
 
   try {
     connection = await mysql.createConnection({
@@ -34,26 +35,14 @@ export async function getServerSideProps({ params }) {
 
     await connection.end();
 
-    return {
-      props: {
-        debug: {
-          player: playerRows[0],
-          careerStats,
-        }
-      }
+    debug = {
+      player: playerRows[0] || null,
+      careerStats,
     };
   } catch (error) {
-    return {
-      props: {
-        debug: {
-          error: error.message,
-        }
-      }
-    };
+    debug = { error: error.message };
   }
-}
 
-export default function Page({ debug }) {
   return (
     <main style={{ padding: '2rem' }}>
       <h1 style={{ fontWeight: 'bold', color: 'darkred' }}>🧪 DEBUG</h1>
