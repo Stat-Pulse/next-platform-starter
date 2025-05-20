@@ -13,7 +13,6 @@ export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
     );
   }
 
-  // Calculate Total TDs for game logs
   const gameLogsWithTotalTDs = gameLogs.map((log) => ({
     ...log,
     total_tds: (log.passing_tds || 0) + (log.rushing_tds || 0) + (log.receiving_tds || 0),
@@ -21,7 +20,7 @@ export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
 
   return (
     <main className="container mx-auto p-4">
-      <header className="mb-8">
+      <header className="mb-8 flex flex-col items-center">
         <h1 className="text-3xl font-bold text-gray-800">{player.player_name}</h1>
         <p className="text-gray-600">
           {player.position} | {player.team} | #{player.jersey_number}
@@ -30,14 +29,16 @@ export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
           <img
             src={player.headshot_url}
             alt={player.player_name}
-            className="w-32 h-32 rounded-full mt-4"
+            className="w-24 h-24 rounded-full mt-4 object-cover" // Reduced size to 96px x 96px, added object-cover
           />
         )}
-        <p className="mt-2 text-gray-600">College: {player.college || 'N/A'}</p>
-        <p className="text-gray-600">
-          Drafted: {player.draft_club || 'Undrafted'} #{player.draft_number || 'N/A'} (
-          {player.rookie_year || 'N/A'})
-        </p>
+        <div className="mt-2 text-center">
+          <p className="text-gray-600">College: {player.college || 'N/A'}</p>
+          <p className="text-gray-600">
+            Drafted: {player.draft_club || 'Undrafted'} #{player.draft_number || 'N/A'} (
+            {player.rookie_year || 'N/A'})
+          </p>
+        </div>
       </header>
 
       <section className="mb-8">
