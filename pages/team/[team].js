@@ -17,12 +17,15 @@ const slugToAbbreviation = {
 };
 
 export default function TeamPage({ teamData, error }) {
+  // Move useState to the top level, unconditionally
+  const [activeTab, setActiveTab] = useState('home');
+
+  // Handle error case after hooks
   if (error || !teamData) {
     return <div className="p-6 text-center text-red-500">Error: {error || 'No team data'}</div>;
   }
 
   const { name, abbreviation, branding, record, schedule } = teamData;
-  const [activeTab, setActiveTab] = useState('home');
 
   const formatDate = (date) => {
     const parsedDate = new Date(date);
