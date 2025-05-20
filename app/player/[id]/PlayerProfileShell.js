@@ -21,31 +21,29 @@ export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
   return (
     <main className="container mx-auto p-6">
       {/* Header Section */}
-      <header className="flex items-center border-b pb-4 mb-6">
-        <div className="flex items-center">
-          {player.headshot_url && (
-            <img
-              src={player.headshot_url}
-              alt={player.player_name}
-              className="w-16 h-16 rounded-full mr-4 object-cover border-2 border-gray-300"
-              style={{ maxWidth: '100%', height: 'auto' }}
-            />
-          )}
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900">{player.player_name}</h1>
-            <p className="text-lg text-gray-600">
-              {player.position} | {player.team} | #{player.jersey_number}
-            </p>
-          </div>
+      <header className="flex items-center mb-6 border-b pb-4">
+        {player.headshot_url && (
+          <img
+            src={player.headshot_url}
+            alt={player.player_name}
+            className="w-16 h-16 rounded-full mr-4 object-cover border-2 border-gray-300"
+            style={{ maxWidth: '100%', height: 'auto' }}
+          />
+        )}
+        <div>
+          <h1 className="text-4xl font-bold text-gray-900">{player.player_name}</h1>
+          <p className="text-lg text-gray-600">
+            {player.position} | {player.team} | #{player.jersey_number}
+          </p>
         </div>
       </header>
 
-      {/* Main Content with Sidebar */}
-      <div className="flex flex-col md:flex-row gap-6">
+      {/* Main Content and Sidebar */}
+      <div className="flex flex-col lg:flex-row gap-6">
         {/* Main Content */}
         <div className="flex-1">
           {/* Career Stats */}
-          <section className="mb-8">
+          <section className="mb-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Career Stats</h2>
             {careerStats.length > 0 ? (
               <div className="overflow-x-auto border rounded-md shadow-sm">
@@ -80,19 +78,19 @@ export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
           </section>
 
           {/* Receiving Metrics */}
-          <section className="mb-8">
+          <section className="mb-6">
             <ReceivingMetricsTable playerId={player.player_id} />
           </section>
 
           {/* Game Logs */}
-          <section className="mb-8">
+          <section className="mb-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Game Logs</h2>
             <SeasonSelector gameLogs={gameLogsWithTotalTDs} />
           </section>
         </div>
 
         {/* Sidebar */}
-        <aside className="md:w-1/3">
+        <aside className="lg:w-1/3">
           <div className="border rounded-md p-4 shadow-sm bg-white">
             <h3 className="text-xl font-bold text-gray-900 mb-3">Player Info</h3>
             <p className="text-sm text-gray-600 mb-1"><span className="font-semibold">College:</span> {player.college || 'N/A'}</p>
