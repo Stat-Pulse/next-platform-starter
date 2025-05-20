@@ -8,6 +8,8 @@ export default async function handler(req, res) {
   }
 
   try {
+    console.log('📡 Fetching receiving metrics for player:', id);
+
     const connection = await mysql.createConnection({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
@@ -20,7 +22,7 @@ export default async function handler(req, res) {
       `
       SELECT
         PSG.season,
-        PSG.season_type,
+        -- PSG.season_type, -- removed because this column doesn’t exist
         SUM(PSG.targets) AS targets,
         SUM(PSG.receptions) AS receptions,
         SUM(PSG.receiving_yards) AS receiving_yards,
@@ -46,13 +48,14 @@ export default async function handler(req, res) {
         AND PSG.season = NGSR.season
 
       WHERE PSG.player_id = ?
-      GROUP BY PSG.season, PSG.season_type
-      ORDER BY PSG.season DESC, PSG.season_type DESC
+      GROUP BY PSG.season
+      ORDER BY PSG.season DESC
       `,
       [id]
     );
 
     await connection.end();
+    console.log('✅ Rows fetched:', rows.length);
     return res.status(200).json({ data: rows });
   } catch (error) {
     console.error('🔥 Error in receiving API:', error);
