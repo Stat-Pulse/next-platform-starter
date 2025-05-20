@@ -5,31 +5,19 @@ import { useState } from 'react';
 import mysql from 'mysql2/promise';
 
 const TEAM_NAME_MAP = {
-  ARI: "Arizona Cardinals", ATL: "Atlanta Falcons", BAL: "Baltimore Ravens", BUF: "Buffalo Bills",
-  CAR: "Carolina Panthers", CHI: "Chicago Bears", CIN: "Cincinnati Bengals", CLE: "Cleveland Browns",
-  DAL: "Dallas Cowboys", DEN: "Denver Broncos", DET: "Detroit Lions", GB: "Green Bay Packers",
-  HOU: "Houston Texans", IND: "Indianapolis Colts", JAX: "Jacksonville Jaguars", KC: "Kansas City Chiefs",
-  LAC: "Los Angeles Chargers", LAR: "Los Angeles Rams", LV: "Las Vegas Raiders", MIA: "Miami Dolphins",
-  MIN: "Minnesota Vikings", NE: "New England Patriots", NO: "New Orleans Saints", NYG: "New York Giants",
-  NYJ: "New York Jets", PHI: "Philadelphia Eagles", PIT: "Pittsburgh Steelers", SEA: "Seattle Seahawks",
-  SF: "San Francisco 49ers", TB: "Tampa Bay Buccaneers", TEN: "Tennessee Titans", WAS: "Washington Commanders"
+  ARI: "Arizona Cardinals",
+  BUF: "Buffalo Bills",
+  // Add other mappings as needed
 };
 
 const slugToAbbreviation = {
-  bills: 'BUF', dolphins: 'MIA', patriots: 'NE', jets: 'NYJ',
-  ravens: 'BAL', bengals: 'CIN', browns: 'CLE', steelers: 'PIT',
-  texans: 'HOU', colts: 'IND', jaguars: 'JAX', titans: 'TEN',
-  broncos: 'DEN', chiefs: 'KC', raiders: 'LV', chargers: 'LAC',
-  cowboys: 'DAL', giants: 'NYG', eagles: 'PHI', commanders: 'WSH',
-  bears: 'CHI', lions: 'DET', packers: 'GB', vikings: 'MIN',
-  falcons: 'ATL', panthers: 'CAR', saints: 'NO', buccaneers: 'TB',
-  cardinals: 'ARI', rams: 'LAR', '49ers': 'SF', seahawks: 'SEA'
+  cardinals: 'ARI',
+  bills: 'BUF',
+  // Add other team mappings as needed
 };
 
 export default function TeamPage({ teamData, error }) {
-  if (error || !teamData) {
-    return <div className="p-6 text-center text-red-500">Error: {error || 'No team data'}</div>;
-  }
+  const [activeTab, setActiveTab] = useState('home');
 
   if (error || !teamData) {
     return <div className="p-6 text-center text-red-500">Error: {error || 'No team data'}</div>;
@@ -44,7 +32,7 @@ export default function TeamPage({ teamData, error }) {
       : parsedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   };
 
-  // Mocked Data (to be replaced with real data later)
+  // Mocked Data (used as fallback if database fails)
   const mockNews = {
     headline: `${name} Prepares for Crucial Matchup`,
     date: '2025-05-18',
@@ -305,6 +293,13 @@ export async function getServerSideProps({ params }) {
       connectTimeout: 5000,
     });
 
+    // Debug: Log the connection parameters
+    console.log('Connecting to DB with:', {
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      database: process.env.DB_NAME,
+    });
+
     const [teamRows] = await connection.execute(
       `SELECT t.team_name, t.team_abbr, t.division, t.conference,
               b.team_color AS colorPrimary, b.team_color2 AS colorSecondary, b.team_logo_espn AS logo
@@ -315,7 +310,7 @@ export async function getServerSideProps({ params }) {
     );
 
     if (!teamRows.length) {
-      return { props: { error: 'Team not found' } };
+      throw new Error(`No team found for team_abbr: ${team}`);
     }
 
     const teamRow = teamRows[0];
@@ -369,8 +364,8 @@ export async function getServerSideProps({ params }) {
       },
     };
   } catch (error) {
-    console.error('TeamPage: Server error', { team, message: error.message });
-    return { props: { error: error.message } };
+    console.error('TeamPage: Server error', { team, message: error.message, stack: error.stack });
+    return { props: { error: `Server error: ${error.message}` } };
   } finally {
     if (connection) await connection.end();
   }
