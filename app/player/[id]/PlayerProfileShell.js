@@ -19,7 +19,7 @@ export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
   }));
 
   return (
-    <main className="container max-w-5xl mx-auto py-8">
+    <main className="container mx-auto py-8">
       {/* Header Section */}
       <header className="flex items-center bg-gray-50 p-4 rounded-md shadow mb-8">
         {player.headshot_url && (
@@ -93,8 +93,6 @@ export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
           <section>
             <ReceivingMetricsTable playerId={player.player_id} />
           </section>
-
-          {/* (Game Logs handled above in SeasonSelector) */}
         </div>
 
         {/* — Sidebar — */}
