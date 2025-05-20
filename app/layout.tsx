@@ -1,4 +1,5 @@
-import './globals.css';
+// app/layout.tsx
+import '../styles/globals.css';    // ← fixed path
 
 export const metadata = {
   title: 'StatPulse Analytics',
@@ -12,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className="bg-white text-gray-900">
         {children}
       </body>
     </html>
