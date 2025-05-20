@@ -13,6 +13,12 @@ export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
     );
   }
 
+  // Calculate Total TDs for game logs
+  const gameLogsWithTotalTDs = gameLogs.map((log) => ({
+    ...log,
+    total_tds: (log.passing_tds || 0) + (log.rushing_tds || 0) + (log.receiving_tds || 0),
+  }));
+
   return (
     <main className="container mx-auto p-4">
       <header className="mb-8">
@@ -68,11 +74,11 @@ export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
         )}
       </section>
 
-      <ReceivingMetricsTable playerId={player.player_id} /> {/* Use player_id from page.js */}
+      <ReceivingMetricsTable playerId={player.player_id} />
 
       <section className="mb-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Game Logs</h2>
-        <SeasonSelector gameLogs={gameLogs} />
+        <SeasonSelector gameLogs={gameLogsWithTotalTDs} />
       </section>
     </main>
   );
