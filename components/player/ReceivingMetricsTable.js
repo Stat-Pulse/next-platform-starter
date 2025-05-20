@@ -1,64 +1,47 @@
 'use client';
-
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function ReceivingMetricsTable({ playerId }) {
   const [stats, setStats] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [expanded, setExpanded] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    async function fetchReceivingMetrics() {
       try {
-        const res = await fetch(`/api/player/${playerId}/receiving`);
-        const json = await res.json();
-        setStats(json.data || []);
-      } catch (err) {
-        console.error('Error fetching receiving stats:', err);
+        console.log('Fetching receiving metrics for playerId:', playerId);
+        const response = await fetch(`/api/player/${playerId}/receiving`);
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const result = await response.json();
+        console.log('API response:', result);
+        if (result.data) {
+          setStats(result.data);
+        } else {
+          console.error('No data in response:', result);
+          setStats([]);
+        }
+      } catch (error) {
+        console.error('Fetch error:', error);
+        setError(error.message);
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchStats();
+    }
+    fetchReceivingMetrics();
   }, [playerId]);
 
   if (loading) return <p className="text-sm text-gray-500">Loading receiving metrics...</p>;
+  if (error) return <p className="text-sm text-red-500">Error loading receiving metrics: {error}</p>;
   if (!stats.length) return <p className="text-sm text-gray-500">No receiving data available.</p>;
 
-  const grouped = stats.reduce((acc, row) => {
-    const type = row.season_type;
-    if (!acc[type]) acc[type] = [];
-    acc[type].push(row);
-    return acc;
-  }, {});
-
-  const getTotalRow = (rows) => ({
-    season: 'Career',
-    targets: rows.reduce((s, r) => s + (r.targets || 0), 0),
-    receptions: rows.reduce((s, r) => s + (r.receptions || 0), 0),
-    receiving_yards: rows.reduce((s, r) => s + (r.receiving_yards || 0), 0),
-    receiving_tds: rows.reduce((s, r) => s + (r.receiving_tds || 0), 0),
-    receiving_fumbles: rows.reduce((s, r) => s + (r.receiving_fumbles || 0), 0),
-    receiving_first_downs: rows.reduce((s, r) => s + (r.receiving_first_downs || 0), 0),
-    avg_cushion: null,
-    avg_separation: null,
-    avg_intended_air_yards: null,
-    receiving_air_yards: rows.reduce((s, r) => s + (r.receiving_air_yards || 0), 0),
-    air_yards_share: null,
-    avg_expected_yac: null,
-    receiving_yac: rows.reduce((s, r) => s + (r.receiving_yac || 0), 0),
-    avg_yac_above_expectation: null,
-    receiving_epa: rows.reduce((s, r) => s + (r.receiving_epa || 0), 0),
-    target_share: null,
-    wopr: rows.reduce((s, r) => s + (r.wopr || 0), 0),
-  });
-
-  const renderTable = (rows, label) => (
-    <div className="mt-6">
-      <h3 className="text-lg font-semibold mb-2">{label}</h3>
+  return (
+    <section className="mb-8">
+      <h2 className="text-2xl font-bold text-gray-800 mb-4">Receiving Metrics</h2>
       <div className="overflow-x-auto border rounded-md">
-        <table className="min-w-full text-xs">
+        <table className="min-w-full text-sm">
           <thead className="bg-gray-100 text-left">
             <tr>
               <th className="p-2">Season</th>
@@ -68,62 +51,39 @@ export default function ReceivingMetricsTable({ playerId }) {
               <th className="p-2">TD</th>
               <th className="p-2">FUM</th>
               <th className="p-2">FD</th>
-              <th className="p-2">Cush</th>
-              <th className="p-2">Sep</th>
-              <th className="p-2">IAY</th>
-              <th className="p-2">AirYds</th>
-              <th className="p-2">%Air</th>
+              <th className="p-2">Avg Cushion</th>
+              <th className="p-2">Avg Separation</th>
+              <th className="p-2">Avg Intended Air Yards</th>
+              <th className="p-2">Receiving Air Yards</th>
+              <th className="p-2">Percent Share Air Yards</th>
               <th className="p-2">xYAC</th>
               <th className="p-2">YAC</th>
               <th className="p-2">+YAC</th>
-              <th className="p-2">EPA</th>
-              <th className="p-2">Tgt%</th>
-              <th className="p-2">WOPR</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((r, i) => (
-              <tr key={`${r.season}-${i}`} className="border-t">
-                <td className="p-2">{r.season}</td>
-                <td className="p-2">{r.targets ?? '-'}</td>
-                <td className="p-2">{r.receptions ?? '-'}</td>
-                <td className="p-2">{r.receiving_yards ?? '-'}</td>
-                <td className="p-2">{r.receiving_tds ?? '-'}</td>
-                <td className="p-2">{r.receiving_fumbles ?? '-'}</td>
-                <td className="p-2">{r.receiving_first_downs ?? '-'}</td>
-                <td className="p-2">{Number(r.avg_cushion)?.toFixed(1) || '-'}</td>
-                <td className="p-2">{Number(r.avg_separation)?.toFixed(1) || '-'}</td>
-                <td className="p-2">{Number(r.avg_intended_air_yards)?.toFixed(1) || '-'}</td>
-                <td className="p-2">{r.receiving_air_yards ?? '-'}</td>
-                <td className="p-2">{Number(r.air_yards_share)?.toFixed(2) || '-'}</td>
-                <td className="p-2">{Number(r.avg_expected_yac)?.toFixed(1) || '-'}</td>
-                <td className="p-2">{r.receiving_yac ?? '-'}</td>
-                <td className="p-2">{Number(r.avg_yac_above_expectation)?.toFixed(1) || '-'}</td>
-                <td className="p-2">{Number(r.receiving_epa)?.toFixed(2) || '-'}</td>
-                <td className="p-2">{Number(r.target_share)?.toFixed(2) || '-'}</td>
-                <td className="p-2">{Number(r.wopr)?.toFixed(2) || '-'}</td>
+            {stats.map((row, index) => (
+              <tr key={index} className="border-t">
+                <td className="p-2">{row.season}</td>
+                <td className="p-2">{row.TGTS}</td>
+                <td className="p-2">{row.REC}</td>
+                <td className="p-2">{row.YDS}</td>
+                <td className="p-2">{row.TD}</td>
+                <td className="p-2">{row.FUM}</td>
+                <td className="p-2">{row.FD}</td>
+                <td className="p-2">{row.avg_cushion ? row.avg_cushion.toFixed(1) : '-'}</td>
+                <td className="p-2">{row.avg_separation ? row.avg_separation.toFixed(1) : '-'}</td>
+                <td className="p-2">{row.avg_intended_air_yards ? row.avg_intended_air_yards.toFixed(1) : '-'}</td>
+                <td className="p-2">{row.receiving_air_yards || '-'}</td>
+                <td className="p-2">{row.percent_share_air_yards ? row.percent_share_air_yards.toFixed(2) : '-'}</td>
+                <td className="p-2">{row.xYAC ? row.xYAC.toFixed(1) : '-'}</td>
+                <td className="p-2">{row.YAC ? row.YAC.toFixed(1) : '-'}</td>
+                <td className="p-2">{row.plus_yac ? row.plus_yac.toFixed(1) : '-'}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </div>
-  );
-
-  return (
-    <section className="mt-12">
-      <h2 className="text-2xl font-bold mb-4">📈 Receiving Metrics</h2>
-      {grouped['REG'] && renderTable(grouped['REG'], 'Regular Season')}
-      {expanded && grouped['POST'] && renderTable(grouped['POST'], 'Postseason')}
-      {expanded && renderTable([getTotalRow(stats)], 'Career Total')}
-      {Object.keys(grouped).includes('POST') && (
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="mt-4 text-blue-600 underline text-sm"
-        >
-          {expanded ? 'Hide Postseason & Career' : 'Show Postseason & Career'}
-        </button>
-      )}
     </section>
   );
 }
