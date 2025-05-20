@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const teamMap = {
   1: 'ARI', 2: 'ATL', 3: 'BAL', 4: 'BUF', 5: 'CAR', 6: 'CHI', 7: 'CIN', 8: 'CLE',
@@ -12,39 +12,41 @@ const teamMap = {
 export default function SeasonSelector({ gameLogs }) {
   const seasons = [...new Set(gameLogs.map((log) => log.season))].sort((a, b) => b - a);
   const [selectedSeason, setSelectedSeason] = useState(seasons[0] || '');
+  const chartRef = useRef(null);
 
   const filteredLogs = gameLogs.filter((log) => log.season === selectedSeason);
 
-  // Temporary: Comment out chart until react-chartjs-2 is integrated
-  /*
-  const chartData = {
-    type: 'line',
-    data: {
-      labels: filteredLogs.map((log) => `Week ${log.week}`),
-      datasets: [
-        {
-          label: 'Receiving Yards',
-          data: filteredLogs.map((log) => log.receiving_yards || 0),
-          borderColor: '#4CAF50',
-          backgroundColor: 'rgba(76, 175, 80, 0.2)',
-          fill: true,
-          tension: 0.3,
+  useEffect(() => {
+    if (chartRef.current && typeof window.Chart !== 'undefined') {
+      const ctx = chartRef.current.getContext('2d');
+      if (window.myChart) window.myChart.destroy();
+      window.myChart = new window.Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: filteredLogs.map((log) => `Week ${log.week}`),
+          datasets: [{
+            label: 'Receiving Yards',
+            data: filteredLogs.map((log) => log.receiving_yards || 0),
+            borderColor: '#4CAF50',
+            backgroundColor: 'rgba(76, 175, 80, 0.2)',
+            fill: true,
+            tension: 0.3,
+          }],
         },
-      ],
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { position: 'top' },
-        title: { display: true, text: `Receiving Yards by Week (${selectedSeason})` },
-      },
-      scales: {
-        x: { title: { display: true, text: 'Week' } },
-        y: { title: { display: true, text: 'Receiving Yards' }, beginAtZero: true },
-      },
-    },
-  };
-  */
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'top' },
+            title: { display: true, text: `Receiving Yards by Week (${selectedSeason})` },
+          },
+          scales: {
+            x: { title: { display: true, text: 'Week' } },
+            y: { title: { display: true, text: 'Receiving Yards' }, beginAtZero: true },
+          },
+        },
+      });
+    }
+  }, [selectedSeason, filteredLogs]);
 
   return (
     <div>
@@ -67,13 +69,9 @@ export default function SeasonSelector({ gameLogs }) {
       </div>
       {filteredLogs.length > 0 ? (
         <>
-          {/* Temporary: Remove chart code block until integrated
           <div className="mb-8">
-            ```chartjs
-            ${JSON.stringify(chartData, null, 2)}
-            ```
+            <canvas ref={chartRef} style={{ maxWidth: '100%', height: 'auto' }}></canvas>
           </div>
-          */}
           <div className="overflow-x-auto border rounded-md">
             <table className="min-w-full text-sm">
               <thead className="bg-gray-100 text-left">
@@ -109,3 +107,9 @@ export default function SeasonSelector({ gameLogs }) {
     </div>
   );
 }
+
+// Load Chart.js via CDN (add this to your page or layout)
+const script = document.createElement('script');
+script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+script.async = true;
+document.body.appendChild(script);
