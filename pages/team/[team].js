@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import mysql from 'mysql2/promise';
+import SearchBar from '@/components/SearchBar';
 
 const TEAM_NAME_MAP = {
   ARI: "Arizona Cardinals",
