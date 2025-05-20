@@ -88,16 +88,16 @@ export default function SeasonSelector({ gameLogs }) {
               <tbody>
                 {filteredLogs.map((log, index) => (
                   <tr key={index} className="border-t">
-                    <td className="p-2">{log.week}</td>
-                    <td className="p-2">{teamMap[log.opponent_team_id] || 'N/A'}</td>
-                    <td className="p-2">{log.passing_yards || 0}</td>
-                    <td className="p-2">{log.rushing_yards || 0}</td>
-                    <td className="p-2">{log.receiving_yards || 0}</td>
-                    <td className="p-2">{log.total_tds || 0}</td>
-                    <td className="p-2">{log.fantasy_points_ppr ? log.fantasy_points_ppr.toFixed(1) : '-'}</td>
-                  </tr>
-                ))}
-              </tbody>
+                  <td className="p-2">{log.week}</td>
+                  <td className="p-2">{teamMap[log.opponent_team_id] || 'N/A'}</td>
+                  <td className="p-2 text-center">{log.passing_yards || 0}</td>
+                  <td className="p-2 text-center">{log.rushing_yards || 0}</td>
+                  <td className="p-2 text-center">{log.receiving_yards || 0}</td>
+                  <td className="p-2 text-center">{log.total_tds || 0}</td>
+                  <td className="p-2 text-center">{log.fantasy_points_ppr ? log.fantasy_points_ppr.toFixed(1) : '-'}</td>
+                </tr>
+              ))}
+            </tbody>
             </table>
           </div>
         </>
