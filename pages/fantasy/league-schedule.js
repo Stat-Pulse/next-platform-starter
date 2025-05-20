@@ -1,5 +1,4 @@
-// pages/fantasy/league-schedule.js
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TeamSidebar from '@/components/TeamSidebar';
@@ -29,17 +28,13 @@ export default function LeagueSchedule() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    renderStandings();
-    calculateNotables();
-  }, [teams, currentSeason, scheduleData]);
-
-  const renderStandings = () => {
+  // Memoize renderStandings and calculateNotables using useCallback
+  const renderStandings = useCallback(() => {
     const sorted = [...teams].sort((a, b) => a.rank - b.rank);
     setStandings(sorted);
-  };
+  }, [teams]); // Depends on teams
 
-  const calculateNotables = () => {
+  const calculateNotables = useCallback(() => {
     const data = scheduleData[currentSeason] || [];
     let high = { team: '', score: 0, week: 0 };
     let highLoss = { team: '', score: 0, week: 0 };
@@ -59,7 +54,12 @@ export default function LeagueSchedule() {
     });
 
     setNotables({ high, highLoss, lowWin });
-  };
+  }, [scheduleData, currentSeason]); // Depends on scheduleData and currentSeason
+
+  useEffect(() => {
+    renderStandings();
+    calculateNotables();
+  }, [teams, currentSeason, scheduleData, renderStandings, calculateNotables]); // Add the functions as dependencies
 
   const getDifficultyColor = (rank) => {
     if (rank <= 3) return 'bg-red-100 text-red-800';
