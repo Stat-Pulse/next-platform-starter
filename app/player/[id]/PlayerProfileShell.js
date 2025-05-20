@@ -3,7 +3,7 @@ import SeasonSelector from './SeasonSelector';
 import ReceivingMetricsTable from '@/components/player/ReceivingMetricsTable';
 
 export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
-  console.log('PlayerProfileShell props:', { player, careerStats, gameLogs }); // Debug log
+  console.log('PlayerProfileShell props:', { player, careerStats, gameLogs });
   if (!player) {
     return (
       <main className="container mx-auto p-4">
