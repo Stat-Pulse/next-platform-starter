@@ -20,7 +20,7 @@ export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
 
   return (
     <main className="container mx-auto p-4">
-      <header className="mb-8 flex flex-col items-center">
+      <header className="mb-8 flex flex-col items-center text-center">
         <h1 className="text-3xl font-bold text-gray-800">{player.player_name}</h1>
         <p className="text-gray-600">
           {player.position} | {player.team} | #{player.jersey_number}
@@ -29,10 +29,11 @@ export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
           <img
             src={player.headshot_url}
             alt={player.player_name}
-            className="w-24 h-24 rounded-full mt-4 object-cover" // Reduced size to 96px x 96px, added object-cover
+            className="w-20 h-20 rounded-full mt-4 object-cover border-2 border-gray-300" // Reduced to 80px x 80px, added border
+            style={{ maxWidth: '100%', height: 'auto' }} // Ensure it doesn't exceed container
           />
         )}
-        <div className="mt-2 text-center">
+        <div className="mt-2">
           <p className="text-gray-600">College: {player.college || 'N/A'}</p>
           <p className="text-gray-600">
             Drafted: {player.draft_club || 'Undrafted'} #{player.draft_number || 'N/A'} (
