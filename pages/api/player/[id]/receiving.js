@@ -18,36 +18,30 @@ export default async function handler(req, res) {
 
     const [rows] = await connection.execute(
       `
-      SELECT
-        PSG.season,
-        SUM(PSG.targets) AS targets,
-        SUM(PSG.receptions) AS receptions,
-        SUM(PSG.receiving_yards) AS receiving_yards,
-        SUM(PSG.receiving_tds) AS receiving_tds,
-        SUM(PSG.receiving_fumbles) AS receiving_fumbles,
-        SUM(PSG.receiving_first_downs) AS receiving_first_downs,
-        SUM(PSG.receiving_air_yards) AS receiving_air_yards,
-        SUM(PSG.receiving_yards_after_catch) AS receiving_yac,
-        SUM(PSG.receiving_epa) AS receiving_epa,
-        SUM(PSG.wopr) AS wopr,
-
-        AVG(NGSR.avg_cushion) AS avg_cushion,
-        AVG(NGSR.avg_separation) AS avg_separation,
-        AVG(NGSR.avg_intended_air_yards) AS avg_intended_air_yards,
-        AVG(NGSR.percent_share_of_intended_air_yards) AS air_yards_share,
-        AVG(NGSR.avg_expected_yac) AS avg_expected_yac,
-        AVG(NGSR.avg_yac_above_expectation) AS avg_yac_above_expectation,
-        AVG(NGSR.target_share) AS target_share
-
-      FROM Player_Stats_Game_2024 PSG
-      LEFT JOIN NextGen_Stats_Receiving_2024 NGSR
-        ON PSG.player_id = NGSR.player_gsis_id
-        AND PSG.season = NGSR.season
-
-      WHERE PSG.player_id = ?
-      GROUP BY PSG.season
-      ORDER BY PSG.season DESC
-      `,
+      SELECT 
+    PSG.season,
+    SUM(PSG.targets) AS TGTS,
+    SUM(PSG.receptions) AS REC,
+    SUM(PSG.receiving_yards) AS YDS,
+    SUM(PSG.receiving_tds) AS TD,
+    SUM(PSG.fumbles) AS FUM,
+    SUM(PSG.first_downs) AS FD,
+    AVG(NGS.avg_cushion) AS avg_cushion,
+    AVG(NGS.avg_separation) AS avg_separation,
+    AVG(NGS.avg_intended_air_yards) AS avg_intended_air_yards,
+    SUM(NGS.receiving_air_yards) AS receiving_air_yards,
+    AVG(NGS.percent_share_air_yards) AS '%AirYds',
+    SUM(NGS.expected_yac) AS xYAC,
+    SUM(NGS.yards_after_catch) AS YAC,
+    SUM(NGS.yards_after_catch - NGS.expected_yac) AS '+YAC',
+    SUM(NGS.epa) AS EPA,
+    AVG(NGS.target_share) AS target_share,
+    AVG(NGS.wopr) AS WOPR
+FROM Player_Stats_Game_2024 PSG
+LEFT JOIN NextGen_Stats_Receiving_2024 NGS
+    ON PSG.gsis_id = NGS.gsis_id AND PSG.game_id = NGS.game_id
+WHERE PSG.gsis_id = ?
+GROUP BY PSG.season;
       [id]
     );
 
