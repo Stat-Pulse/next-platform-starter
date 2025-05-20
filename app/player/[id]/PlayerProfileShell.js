@@ -27,7 +27,7 @@ export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
             src={player.headshot_url}
             alt={player.player_name}
             className="w-16 h-16 rounded-full mr-4 object-cover border-2 border-gray-300"
-            style={{ maxWidth: '80px', maxHeight: '80px', width: '80px', height: '80px' }}
+            style={{ maxWidth: '64px', maxHeight: '64px', width: '64px', height: '64px' }}
             onError={(e) => console.log('Headshot load error:', e)}
           />
         )}
@@ -40,14 +40,14 @@ export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
       </header>
 
       {/* Main Content and Sidebar */}
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-6" data-test="sidebar-layout">
         {/* Main Content */}
         <div className="flex-1">
           {/* Career Stats */}
           <section className="mb-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Career Stats</h2>
             {careerStats.length > 0 ? (
-              <div className="overflow-x-auto border rounded-md shadow-sm">
+              <div className="overflow-x-auto border rounded-md shadow-sm" data-test="table-styled">
                 <table className="min-w-full text-sm">
                   <thead className="bg-gray-50 text-left text-gray-700">
                     <tr>
