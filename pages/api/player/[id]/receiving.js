@@ -49,9 +49,7 @@ export default async function handler(req, res) {
         AVG(NGS.percent_share_of_intended_air_yards) AS percent_share_air_yards,
         SUM(NGS.avg_expected_yac) AS xYAC,
         SUM(NGS.avg_yac) AS YAC,
-        SUM(NGS.avg_yac_above_expectation) AS plus_yac,
-        AVG(NGS.target_share) AS target_share,
-        AVG(NGS.wopr) AS WOPR
+        SUM(NGS.avg_yac_above_expectation) AS plus_yac
       FROM Player_Stats_Game_2024 PSG
       LEFT JOIN NextGen_Stats_Receiving_2024 NGS
         ON PSG.player_id = NGS.player_gsis_id AND PSG.season = NGS.season AND PSG.week = NGS.week
