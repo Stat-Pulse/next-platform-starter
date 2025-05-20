@@ -7,9 +7,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing player ID' });
   }
 
-  let connection;
   try {
-    connection = await mysql.createConnection({
+    const connection = await mysql.createConnection({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
@@ -21,6 +20,7 @@ export default async function handler(req, res) {
       `
       SELECT
         PSG.season,
+        PSG.season_type,
         SUM(PSG.targets) AS targets,
         SUM(PSG.receptions) AS receptions,
         SUM(PSG.receiving_yards) AS receiving_yards,
@@ -46,8 +46,8 @@ export default async function handler(req, res) {
         AND PSG.season = NGSR.season
 
       WHERE PSG.player_id = ?
-      GROUP BY PSG.season
-      ORDER BY PSG.season DESC
+      GROUP BY PSG.season, PSG.season_type
+      ORDER BY PSG.season DESC, PSG.season_type DESC
       `,
       [id]
     );
@@ -56,6 +56,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ data: rows });
   } catch (error) {
     console.error('🔥 SQL Error:', error.message);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    console.error(error); // Full stack trace
+    return res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 }
