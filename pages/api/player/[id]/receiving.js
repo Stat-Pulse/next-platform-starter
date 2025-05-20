@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log('Connecting to MySQL database for player_gsis_id:', id);
+    console.log('Connecting to MySQL database for player_id:', id);
     const connectionConfig = {
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
@@ -31,15 +31,15 @@ export default async function handler(req, res) {
 
     const connection = await mysql.createConnection(connectionConfig);
 
-    console.log('Executing query for player_gsis_id:', id);
+    console.log('Executing query for player_id:', id);
     const [rows] = await connection.execute(
       `
       SELECT 
         PSG.season,
         SUM(PSG.targets) AS TGTS,
         SUM(PSG.receptions) AS REC,
-        SUM(PSG.yards) AS YDS,
-        SUM(PSG.rec_touchdowns) AS TD,
+        SUM(PSG.receiving_yards) AS YDS, -- Changed from 'yards' to 'receiving_yards'
+        SUM(PSG.receiving_tds) AS TD, -- Changed from 'rec_touchdowns' to 'receiving_tds'
         SUM(PSG.fumbles) AS FUM,
         SUM(PSG.first_downs) AS FD,
         AVG(NGS.avg_cushion) AS avg_cushion,
@@ -55,8 +55,8 @@ export default async function handler(req, res) {
         AVG(NGS.wopr) AS WOPR
       FROM Player_Stats_Game_2024 PSG
       LEFT JOIN NextGen_Stats_Receiving_2024 NGS
-        ON PSG.player_gsis_id = NGS.player_gsis_id AND PSG.game_id = NGS.game_id
-      WHERE PSG.player_gsis_id = ?
+        ON PSG.player_id = NGS.player_gsis_id AND PSG.season = NGS.season AND PSG.week = NGS.week
+      WHERE PSG.player_id = ?
       GROUP BY PSG.season
       `,
       [id]
@@ -66,7 +66,7 @@ export default async function handler(req, res) {
     await connection.end();
 
     if (!rows.length) {
-      console.log('No stats found for player_gsis_id:', id);
+      console.log('No stats found for player_id:', id);
       return res.status(200).json({ data: [], message: 'No receiving stats found for this player' });
     }
 
