@@ -1,97 +1,27 @@
-'use client';
-import SeasonSelector from './SeasonSelector';
-import ReceivingMetricsTable from '@/components/player/ReceivingMetricsTable';
-
-export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
-  console.log('PlayerProfileShell props:', { player, careerStats, gameLogs });
-  if (!player) {
-    return (
-      <main className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold text-gray-800">Player Not Found</h1>
-        <p className="text-gray-600">No player data available for this ID.</p>
-      </main>
-    );
-  }
-
-  const gameLogsWithTotalTDs = gameLogs.map((log) => ({
-    ...log,
-    total_tds: (log.passing_tds || 0) + (log.rushing_tds || 0) + (log.receiving_tds || 0),
-  }));
-
-  return (
-    <main className="container mx-auto p-6">
-      {/* Header Section with Bio */}
-      <header className="mb-6">
-        <div className="flex items-center border-b pb-4">
-          {player.headshot_url && (
-            <img
-              src={player.headshot_url}
-              alt={player.player_name}
-              className="w-16 h-16 rounded-full mr-4 object-cover border-2 border-gray-300"
-              style={{ maxWidth: '64px', maxHeight: '64px', width: '64px', height: '64px' }}
-              onError={(e) => console.log('Headshot load error:', e)}
-            />
-          )}
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900">{player.player_name}</h1>
-            <p className="text-lg text-gray-600">
-              {player.position} | {player.team} | #{player.jersey_number}
-            </p>
-            <div className="mt-2 text-gray-600 text-sm">
-              <p><span className="font-semibold">College:</span> {player.college || 'N/A'}</p>
-              <p><span className="font-semibold">Drafted:</span> {player.draft_club || 'Undrafted'} #{player.draft_number || 'N/A'} ({player.rookie_year || 'N/A'})</p>
-              <p><span className="font-semibold">Experience:</span> {player.years_exp || 'N/A'} years</p>
-              <p><span className="font-semibold">Status:</span> {player.status || 'N/A'}</p>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Career Stats */}
-      <section className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Career Stats</h2>
-        {careerStats.length > 0 ? (
-          <div className="overflow-x-auto border rounded-md shadow-sm" data-test="table-styled">
-            <table className="min-w-full text-sm">
-              <thead className="bg-gray-50 text-left text-gray-700">
-                <tr>
-                  <th className="p-3 font-semibold">Season</th>
-                  <th className="p-3 font-semibold text-center">Pass Yards</th>
-                  <th className="p-3 font-semibold text-center">Rush Yards</th>
-                  <th className="p-3 font-semibold text-center">Recv Yards</th>
-                  <th className="p-3 font-semibold text-center">PPR Points</th>
-                </tr>
-              </thead>
-              <tbody>
-                {careerStats.map((row, index) => (
-                  <tr key={row.season} className={`border-t ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                    <td className="p-3">{row.season}</td>
-                    <td className="p-3 text-center">{row.passing_yards ?? '-'}</td>
-                    <td className="p-3 text-center">{row.rushing_yards ?? '-'}</td>
-                    <td className="p-3 text-center">{row.receiving_yards ?? '-'}</td>
-                    <td className="p-3 text-center">
-                      {row.fantasy_points_ppr ? Number(row.fantasy_points_ppr).toFixed(2) : '-'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="text-sm text-gray-500">No career stats available.</p>
-        )}
-      </section>
-
-      {/* Receiving Metrics */}
-      <section className="mb-6">
-        <ReceivingMetricsTable playerId={player.player_id} />
-      </section>
-
-      {/* Game Logs */}
-      <section className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Game Logs</h2>
-        <SeasonSelector gameLogs={gameLogsWithTotalTDs} />
-      </section>
-    </main>
-  );
+// tailwind.config.js 
+module.exports = {
+  content: [
+    './app/**/*.{js,jsx,ts,tsx}',
+    './pages/**/*.{js,jsx,ts,tsx}',
+    './components/**/*.{js,jsx,ts,tsx}',
+  ],
+  theme: {
+    extend: {
+      // center your containers at ~1200px wide with 2rem padding
+      container: {
+        center: true,
+        padding: '2rem',
+      },
+      // your red/black brand colors
+      colors: {
+        primary: '#E30613',      // StatPulse red
+        neutralAccent: '#F3F4F6', // light gray for cards/backgrounds
+      },
+      // tighten up your letter-spacing for uppercase headers
+      letterSpacing: {
+        widest: '.1em',
+      },
+    }
+  },
+  plugins: [],
 }
