@@ -3,25 +3,34 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import mysql from 'mysql2/promise';
-import SearchBar from '@/components/SearchBar';
 
 const TEAM_NAME_MAP = {
-  ARI: "Arizona Cardinals",
-  BUF: "Buffalo Bills",
-  // Add other mappings as needed
+  ARI: "Arizona Cardinals", ATL: "Atlanta Falcons", BAL: "Baltimore Ravens", BUF: "Buffalo Bills",
+  CAR: "Carolina Panthers", CHI: "Chicago Bears", CIN: "Cincinnati Bengals", CLE: "Cleveland Browns",
+  DAL: "Dallas Cowboys", DEN: "Denver Broncos", DET: "Detroit Lions", GB: "Green Bay Packers",
+  HOU: "Houston Texans", IND: "Indianapolis Colts", JAX: "Jacksonville Jaguars", KC: "Kansas City Chiefs",
+  LAC: "Los Angeles Chargers", LAR: "Los Angeles Rams", LV: "Las Vegas Raiders", MIA: "Miami Dolphins",
+  MIN: "Minnesota Vikings", NE: "New England Patriots", NO: "New Orleans Saints", NYG: "New York Giants",
+  NYJ: "New York Jets", PHI: "Philadelphia Eagles", PIT: "Pittsburgh Steelers", SEA: "Seattle Seahawks",
+  SF: "San Francisco 49ers", TB: "Tampa Bay Buccaneers", TEN: "Tennessee Titans", WAS: "Washington Commanders"
 };
 
 const slugToAbbreviation = {
-  cardinals: 'ARI',
-  bills: 'BUF',
-  // Add other team mappings as needed
+  bills: 'BUF', dolphins: 'MIA', patriots: 'NE', jets: 'NYJ',
+  ravens: 'BAL', bengals: 'CIN', browns: 'CLE', steelers: 'PIT',
+  texans: 'HOU', colts: 'IND', jaguars: 'JAX', titans: 'TEN',
+  broncos: 'DEN', chiefs: 'KC', raiders: 'LV', chargers: 'LAC',
+  cowboys: 'DAL', giants: 'NYG', eagles: 'PHI', commanders: 'WSH',
+  bears: 'CHI', lions: 'DET', packers: 'GB', vikings: 'MIN',
+  falcons: 'ATL', panthers: 'CAR', saints: 'NO', buccaneers: 'TB',
+  cardinals: 'ARI', rams: 'LAR', '49ers': 'SF', seahawks: 'SEA'
 };
 
 export default function TeamPage({ teamData, error }) {
-  // Move useState to the top level, unconditionally
-  const [activeTab, setActiveTab] = useState('home');
+  if (error || !teamData) {
+    return <div className="p-6 text-center text-red-500">Error: {error || 'No team data'}</div>;
+  }
 
-  // Handle error case after hooks
   if (error || !teamData) {
     return <div className="p-6 text-center text-red-500">Error: {error || 'No team data'}</div>;
   }
@@ -124,7 +133,7 @@ export default function TeamPage({ teamData, error }) {
               <li
                 key={tab}
                 className={`px-4 py-2 cursor-pointer transition-all duration-200 rounded-t-md ${
-                  activeTab === tab ? 'bg-blue-700 text-white' : 'hover:bg-gray-700 hover:text-white'
+                  activeTab === tab ? 'bg-red-600 text-white' : 'hover:bg-gray-700 hover:text-white'
                 }`}
                 onClick={() => setActiveTab(tab)}
               >
@@ -180,7 +189,7 @@ export default function TeamPage({ teamData, error }) {
                     </div>
                     <button
                       onClick={() => setActiveTab('schedule')}
-                      className="mt-4 sm:mt-0 px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800 transition-all"
+                      className="mt-4 sm:mt-0 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-all"
                     >
                       View Full Schedule
                     </button>
@@ -239,7 +248,7 @@ export default function TeamPage({ teamData, error }) {
                   </div>
                   <button
                     onClick={() => setActiveTab('injuries')}
-                    className="mt-4 sm:mt-0 px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800 transition-all"
+                    className="mt-4 sm:mt-0 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-all"
                   >
                     View All Injuries
                   </button>
@@ -311,7 +320,6 @@ export async function getServerSideProps({ params }) {
 
     const teamRow = teamRows[0];
 
-    // Fetch recent game for record and Recent Result section
     const [gameRows] = await connection.execute(
       `SELECT game_id, week, game_date AS date,
               home_team_id, away_team_id, home_score, away_score, is_final
