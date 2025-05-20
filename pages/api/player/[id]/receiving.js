@@ -7,8 +7,9 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing player ID' });
   }
 
+  let connection;
   try {
-    const connection = await mysql.createConnection({
+    connection = await mysql.createConnection({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
@@ -54,7 +55,7 @@ export default async function handler(req, res) {
     await connection.end();
     return res.status(200).json({ data: rows });
   } catch (error) {
-    console.error('🔥 Error in receiving API:', error);
+    console.error('🔥 SQL Error:', error.message);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
