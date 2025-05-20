@@ -1,27 +1,19 @@
 import Head from 'next/head';
 import Image from 'next/image';
+import Link from 'next/link';
+import { useState } from 'react';
 import mysql from 'mysql2/promise';
 
 const TEAM_NAME_MAP = {
-  ARI: "Arizona Cardinals", ATL: "Atlanta Falcons", BAL: "Baltimore Ravens", BUF: "Buffalo Bills",
-  CAR: "Carolina Panthers", CHI: "Chicago Bears", CIN: "Cincinnati Bengals", CLE: "Cleveland Browns",
-  DAL: "Dallas Cowboys", DEN: "Denver Broncos", DET: "Detroit Lions", GB: "Green Bay Packers",
-  HOU: "Houston Texans", IND: "Indianapolis Colts", JAX: "Jacksonville Jaguars", KC: "Kansas City Chiefs",
-  LAC: "Los Angeles Chargers", LAR: "Los Angeles Rams", LV: "Las Vegas Raiders", MIA: "Miami Dolphins",
-  MIN: "Minnesota Vikings", NE: "New England Patriots", NO: "New Orleans Saints", NYG: "New York Giants",
-  NYJ: "New York Jets", PHI: "Philadelphia Eagles", PIT: "Pittsburgh Steelers", SEA: "Seattle Seahawks",
-  SF: "San Francisco 49ers", TB: "Tampa Bay Buccaneers", TEN: "Tennessee Titans", WAS: "Washington Commanders"
+  ARI: "Arizona Cardinals",
+  BUF: "Buffalo Bills",
+  // Add other mappings as needed
 };
 
 const slugToAbbreviation = {
-  bills: 'BUF', dolphins: 'MIA', patriots: 'NE', jets: 'NYJ',
-  ravens: 'BAL', bengals: 'CIN', browns: 'CLE', steelers: 'PIT',
-  texans: 'HOU', colts: 'IND', jaguars: 'JAX', titans: 'TEN',
-  broncos: 'DEN', chiefs: 'KC', raiders: 'LV', chargers: 'LAC',
-  cowboys: 'DAL', giants: 'NYG', eagles: 'PHI', commanders: 'WSH',
-  bears: 'CHI', lions: 'DET', packers: 'GB', vikings: 'MIN',
-  falcons: 'ATL', panthers: 'CAR', saints: 'NO', buccaneers: 'TB',
-  cardinals: 'ARI', rams: 'LAR', '49ers': 'SF', seahawks: 'SEA'
+  cardinals: 'ARI',
+  bills: 'BUF',
+  // Add other team mappings as needed
 };
 
 export default function TeamPage({ teamData, error }) {
@@ -29,135 +21,254 @@ export default function TeamPage({ teamData, error }) {
     return <div className="p-6 text-center text-red-500">Error: {error || 'No team data'}</div>;
   }
 
-  const {
-    name = 'Unknown Team',
-    branding = { logo: '/placeholder.png', colorPrimary: '#ccc' },
-    conference = 'Unknown',
-    division = 'Unknown',
-    roster = [],
-    depthChart = {},
-    schedule = [],
-    stats = {},
-    recentNews = []
-  } = teamData;
+  const { name, abbreviation, branding, record, schedule } = teamData;
+  const [activeTab, setActiveTab] = useState('home');
 
-  const formatDate = date => new Date(date).toLocaleDateString('en-US', {
-    weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
-  });
-
-  const calculateRecord = () => {
-    const wins = schedule.filter(g => g.result === 'W').length;
-    const losses = schedule.filter(g => g.result === 'L').length;
-    const ties = schedule.filter(g => g.result === 'T').length;
-    return ties > 0 ? `${wins}-${losses}-${ties}` : `${wins}-${losses}`;
+  const formatDate = (date) => {
+    const parsedDate = new Date(date);
+    return isNaN(parsedDate.getTime())
+      ? 'TBD'
+      : parsedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   };
+
+  // Mocked Data (to be replaced with real data later)
+  const mockNews = {
+    headline: `${name} Prepares for Crucial Matchup`,
+    date: '2025-05-18',
+    summary: 'The team is focusing on improving their defense ahead of their next game against a tough opponent.',
+  };
+
+  const mockStats = {
+    pointsPerGame: { value: 24.5, rank: 12 },
+    yardsPerGame: { value: 350.2, rank: 15 },
+    turnoverMargin: { value: +3, rank: 8 },
+    sacks: { value: 42, rank: 5 },
+  };
+
+  const mockPlayerHighlights = [
+    {
+      id: 'offense-1',
+      name: 'John Doe',
+      position: 'QB',
+      category: 'Offense',
+      stats: 'Threw for 300 yards and 3 TDs in Week 17',
+    },
+    {
+      id: 'defense-1',
+      name: 'Jane Smith',
+      position: 'LB',
+      category: 'Defense',
+      stats: 'Recorded 2 sacks and an interception in Week 17',
+    },
+    {
+      id: 'special-1',
+      name: 'Mike Johnson',
+      position: 'K',
+      category: 'Special Teams',
+      stats: 'Kicked a game-winning 50-yard FG in Week 17',
+    },
+  ];
+
+  const mockInjury = {
+    player: 'James Wilson',
+    position: 'WR',
+    injury: 'Hamstring',
+    status: 'Out for Week 18',
+    date: '2025-05-15',
+  };
+
+  const mockPowerRanking = {
+    rank: 5,
+    movement: 2, // Positive means moved up
+  };
+
+  const mockBlurb = `${name} are coming off a strong performance, showing resilience on defense while their offense continues to find its rhythm. With key players stepping up, they’re poised for a playoff push.`;
+
+  // Determine Recent Result (using the schedule passed from getServerSideProps)
+  const recentGame = schedule.length > 0 ? schedule[0] : null;
 
   return (
     <>
       <Head>
         <title>{name} - StatPulse</title>
       </Head>
-      <div className="max-w-6xl mx-auto p-6">
-        <div className="flex items-center gap-6 mb-8 border-b pb-4" style={{ borderColor: branding.colorPrimary }}>
-          <Image src={branding.logo} alt={name} width={100} height={100} className="rounded shadow" />
+      <div className="min-h-screen bg-gray-100">
+        {/* Consistent Header */}
+        <header
+          className="bg-white shadow p-4 flex flex-col sm:flex-row items-center gap-6"
+          style={{ borderBottom: `4px solid ${branding.colorPrimary || '#ccc'}` }}
+        >
+          <Image
+            src={branding.logo || '/placeholder.png'}
+            alt={`${name} logo`}
+            width={100}
+            height={100}
+            className="rounded"
+          />
           <div>
-            <h1 className="text-3xl font-bold" style={{ color: branding.colorPrimary }}>{name}</h1>
-            <p className="text-gray-600">{conference} | {division} Division</p>
-            <p className="text-lg font-semibold mt-1">Record: {calculateRecord()}</p>
+            <h1 className="text-2xl font-bold" style={{ color: branding.colorPrimary || '#000' }}>
+              {name}
+            </h1>
+            <p className="text-gray-600">Record: {record}</p>
           </div>
-        </div>
+        </header>
 
-        <section className="mb-10">
-          <h2 className="text-xl font-semibold mb-2" style={{ color: branding.colorPrimary }}>Game Schedule</h2>
-          {schedule.length === 0 ? (
-            <p className="text-gray-600">No games found for this team.</p>
-          ) : (
-            <table className="w-full text-sm table-auto border-collapse">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="border p-2">Week</th>
-                  <th className="border p-2">Opponent</th>
-                  <th className="border p-2">Date</th>
-                  <th className="border p-2">Home/Away</th>
-                  <th className="border p-2">Score</th>
-                  <th className="border p-2">Result</th>
-                </tr>
-              </thead>
-              <tbody>
-                {schedule.map((g, i) => (
-                  <tr key={i}>
-                    <td className="border p-2 text-center">{g.week}</td>
-                    <td className="border p-2 text-center">{TEAM_NAME_MAP[g.opponent] || g.opponent}</td>
-                    <td className="border p-2 text-center">{formatDate(g.date)}</td>
-                    <td className="border p-2 text-center">{g.homeAway}</td>
-                    <td className="border p-2 text-center">{g.score}</td>
-                    <td className="border p-2 text-center">{g.result}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </section>
+        {/* Tab Navigation */}
+        <nav className="bg-gray-800 text-gray-300 p-2">
+          <ul className="flex flex-wrap space-x-2 sm:space-x-4">
+            {['home', 'depth-chart', 'schedule', 'injuries', 'transactions'].map((tab) => (
+              <li
+                key={tab}
+                className={`px-4 py-2 cursor-pointer transition-all duration-200 rounded-t-md ${
+                  activeTab === tab ? 'bg-blue-700 text-white' : 'hover:bg-gray-700 hover:text-white'
+                }`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab === 'home' ? 'Home' : tab.charAt(0).toUpperCase() + tab.slice(1).replace('-', ' ')}
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-        <section className="mb-10">
-          <h2 className="text-xl font-semibold mb-2" style={{ color: branding.colorPrimary }}>Depth Chart</h2>
-          {Object.keys(depthChart).length === 0 ? (
-            <p className="text-gray-600">No depth chart data available.</p>
-          ) : (
-            Object.entries(depthChart).map(([pos, players]) => (
-              <div key={pos} className="mb-3">
-                <h3 className="text-lg font-bold">{pos}</h3>
-                <ul className="ml-4 list-disc text-sm">
-                  {players.map((p, i) => (
-                    <li key={i}>{p.name} <span className="text-gray-400">(Depth: {p.depth})</span></li>
+        {/* Main Content Area */}
+        <main className="p-6 max-w-6xl mx-auto">
+          {activeTab === 'home' && (
+            <div className="space-y-8">
+              {/* Team Bio, Location, Stadium, Win-Loss Records */}
+              <section className="bg-white p-4 rounded shadow">
+                <h2 className="text-xl font-semibold mb-4">Team Overview</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <p><strong>Bio:</strong> N/A</p>
+                    <p><strong>Location:</strong> N/A</p>
+                    <p><strong>Stadium:</strong> N/A</p>
+                    <p><strong>Overall Win-Loss:</strong> N/A</p>
+                  </div>
+                  <div>
+                    <p><strong>Regular Season Win-Loss:</strong> N/A</p>
+                    <p><strong>Postseason Win-Loss:</strong> N/A</p>
+                    <p><strong>Conference Championships:</strong> N/A</p>
+                    <p><strong>Super Bowl Appearances/Wins:</strong> N/A</p>
+                  </div>
+                </div>
+              </section>
+
+              {/* Featured News/Top Story */}
+              <section className="bg-white p-4 rounded shadow">
+                <h2 className="text-xl font-semibold mb-4">Featured News</h2>
+                <div className="border-l-4 pl-4" style={{ borderColor: branding.colorPrimary || '#ccc' }}>
+                  <h3 className="text-lg font-bold">{mockNews.headline}</h3>
+                  <p className="text-sm text-gray-500">{mockNews.date}</p>
+                  <p className="mt-2 text-gray-700">{mockNews.summary}</p>
+                </div>
+              </section>
+
+              {/* Recent Result */}
+              <section className="bg-white p-4 rounded shadow">
+                <h2 className="text-xl font-semibold mb-4">Recent Result</h2>
+                {recentGame ? (
+                  <div className="flex flex-col sm:flex-row justify-between items-center">
+                    <div>
+                      <p><strong>Opponent:</strong> {TEAM_NAME_MAP[recentGame.opponent] || recentGame.opponent}</p>
+                      <p><strong>Date:</strong> {formatDate(recentGame.date)}</p>
+                      <p><strong>Score:</strong> {recentGame.score}</p>
+                      <p><strong>Result:</strong> {recentGame.result}</p>
+                    </div>
+                    <button
+                      onClick={() => setActiveTab('schedule')}
+                      className="mt-4 sm:mt-0 px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800 transition-all"
+                    >
+                      View Full Schedule
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-gray-700">No recent games available.</p>
+                )}
+              </section>
+
+              {/* Key Team Stats Highlights */}
+              <section className="bg-white p-4 rounded shadow">
+                <h2 className="text-xl font-semibold mb-4">Key Team Stats</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="p-2 border rounded">
+                    <p><strong>Points Per Game:</strong> {mockStats.pointsPerGame.value}</p>
+                    <p className="text-sm text-gray-500">Rank: {mockStats.pointsPerGame.rank}</p>
+                  </div>
+                  <div className="p-2 border rounded">
+                    <p><strong>Yards Per Game:</strong> {mockStats.yardsPerGame.value}</p>
+                    <p className="text-sm text-gray-500">Rank: {mockStats.yardsPerGame.rank}</p>
+                  </div>
+                  <div className="p-2 border rounded">
+                    <p><strong>Turnover Margin:</strong> {mockStats.turnoverMargin.value}</p>
+                    <p className="text-sm text-gray-500">Rank: {mockStats.turnoverMargin.rank}</p>
+                  </div>
+                  <div className="p-2 border rounded">
+                    <p><strong>Sacks:</strong> {mockStats.sacks.value}</p>
+                    <p className="text-sm text-gray-500">Rank: {mockStats.sacks.rank}</p>
+                  </div>
+                </div>
+              </section>
+
+              {/* Recent Player Highlights */}
+              <section className="bg-white p-4 rounded shadow">
+                <h2 className="text-xl font-semibold mb-4">Recent Player Highlights</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {mockPlayerHighlights.map((player) => (
+                    <Link key={player.id} href={`/player/${player.id}`}>
+                      <div className="p-2 border rounded hover:bg-gray-50 transition-all">
+                        <p><strong>{player.name}</strong> ({player.position}, {player.category})</p>
+                        <p className="text-sm text-gray-700">{player.stats}</p>
+                      </div>
+                    </Link>
                   ))}
-                </ul>
-              </div>
-            ))
-          )}
-        </section>
+                </div>
+              </section>
 
-        <section className="mb-10">
-          <h2 className="text-xl font-semibold mb-2">Roster</h2>
-          {roster.length === 0 ? (
-            <p className="text-gray-600">No roster data available.</p>
-          ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="p-2 text-left">Name</th>
-                  <th className="p-2 text-right">Position</th>
-                </tr>
-              </thead>
-              <tbody>
-                {roster.map((player, i) => (
-                  <tr key={i} className="border-t">
-                    <td className="p-2 text-left">{player.name}</td>
-                    <td className="p-2 text-right">{player.position}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </section>
+              {/* Injury Snapshot */}
+              <section className="bg-white p-4 rounded shadow">
+                <h2 className="text-xl font-semibold mb-4">Injury Snapshot</h2>
+                <div className="flex flex-col sm:flex-row justify-between items-center">
+                  <div>
+                    <p><strong>{mockInjury.player}</strong> ({mockInjury.position})</p>
+                    <p className="text-gray-700">{mockInjury.injury} - {mockInjury.status}</p>
+                    <p className="text-sm text-gray-500">{mockInjury.date}</p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('injuries')}
+                    className="mt-4 sm:mt-0 px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800 transition-all"
+                  >
+                    View All Injuries
+                  </button>
+                </div>
+              </section>
 
-        <section className="mb-10">
-          <h2 className="text-xl font-semibold mb-2">Defensive Stats (2024)</h2>
-          {Object.keys(stats).length === 0 ? (
-            <p className="text-gray-600">No defensive stats available.</p>
-          ) : (
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div><strong>Points Allowed:</strong> {stats.pointsAllowed || '-'}</div>
-              <div><strong>Total Yards Allowed:</strong> {stats.totalYardsAllowed || '-'}</div>
-              <div><strong>Pass Yards Allowed:</strong> {stats.passYardsAllowed || '-'}</div>
-              <div><strong>Rush Yards Allowed:</strong> {stats.rushYardsAllowed || '-'}</div>
-              <div><strong>Sacks:</strong> {stats.sacks || '-'}</div>
-              <div><strong>Turnovers:</strong> {stats.turnovers || '-'}</div>
-              <div><strong>Red Zone %:</strong> {stats.redZonePct || '-'}</div>
-              <div><strong>3rd Down %:</strong> {stats.thirdDownPct || '-'}</div>
+              {/* Power Ranking */}
+              <section className="bg-white p-4 rounded shadow">
+                <h2 className="text-xl font-semibold mb-4">Power Ranking</h2>
+                <p>
+                  <strong>Rank:</strong> #{mockPowerRanking.rank}{' '}
+                  <span className={`text-sm ${mockPowerRanking.movement > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    ({mockPowerRanking.movement > 0 ? '+' : ''}{mockPowerRanking.movement} from last week)
+                  </span>
+                </p>
+              </section>
+
+              {/* Brief Team Overview/Blurb */}
+              <section className="bg-white p-4 rounded shadow">
+                <h2 className="text-xl font-semibold mb-4">Team Summary</h2>
+                <p className="text-gray-700">{mockBlurb}</p>
+              </section>
             </div>
           )}
-        </section>
+
+          {/* Placeholder for Other Tabs */}
+          {activeTab !== 'home' && (
+            <div className="bg-white p-4 rounded shadow">
+              <h2 className="text-xl font-semibold mb-4">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace('-', ' ')}</h2>
+              <p className="text-gray-700">Content for the {activeTab.replace('-', ' ')} tab coming soon.</p>
+            </div>
+          )}
+        </main>
       </div>
     </>
   );
@@ -166,13 +277,10 @@ export default function TeamPage({ teamData, error }) {
 export async function getServerSideProps({ params }) {
   let { team } = params;
   if (!team) {
-    console.error('TeamPage: Missing team parameter', { time: new Date().toISOString() });
     return { props: { error: 'Missing team parameter' } };
   }
 
-  console.error('TeamPage: Raw team parameter', { team });
   team = slugToAbbreviation[team.toLowerCase()] || team.toUpperCase();
-  console.error('TeamPage: Mapped team', { team });
 
   let connection;
   try {
@@ -184,11 +292,9 @@ export async function getServerSideProps({ params }) {
       connectTimeout: 5000,
     });
 
-    console.error('TeamPage: Querying team', { team, time: new Date().toISOString() });
-
     const [teamRows] = await connection.execute(
       `SELECT t.team_name, t.team_abbr, t.division, t.conference,
-              b.team_color, b.team_color2, b.team_logo_espn, b.team_logo_wikipedia
+              b.team_color AS colorPrimary, b.team_color2 AS colorSecondary, b.team_logo_espn AS logo
        FROM Teams t
        LEFT JOIN Teams_2024 b ON t.team_abbr = b.team_abbr
        WHERE t.team_abbr = ?`,
@@ -196,42 +302,23 @@ export async function getServerSideProps({ params }) {
     );
 
     if (!teamRows.length) {
-      console.error('TeamPage: Team not found', { team });
       return { props: { error: 'Team not found' } };
     }
+
     const teamRow = teamRows[0];
 
-    const [roster] = await connection.execute(
-      `SELECT gsis_id AS id, full_name AS name, position, headshot_url, years_exp
-       FROM Rosters_2024
-       WHERE team = ? AND week = (SELECT MAX(week) FROM Rosters_2024 WHERE team = ?)`,
-      [team, team]
-    );
-
-    const [depthRows] = await connection.execute(
-      `SELECT position, full_name, depth_team
-       FROM Depth_Charts_2024
-       WHERE club_code = ? AND week = (SELECT MAX(week) FROM Depth_Charts_2024 WHERE club_code = ?)
-       ORDER BY depth_team ASC`,
-      [team, team]
-    );
-    const depthChart = {};
-    for (const row of depthRows) {
-      if (!depthChart[row.position]) depthChart[row.position] = [];
-      depthChart[row.position].push({ name: row.full_name, depth: row.depth_team });
-    }
-
-    const [schedule] = await connection.execute(
+    // Fetch recent game for record and Recent Result section
+    const [gameRows] = await connection.execute(
       `SELECT game_id, week, game_date AS date,
               home_team_id, away_team_id, home_score, away_score, is_final
        FROM Games
-       WHERE home_team_id = ? OR away_team_id = ?
-       ORDER BY game_date ASC`,
+       WHERE (home_team_id = ? OR away_team_id = ?) AND is_final = 1
+       ORDER BY game_date DESC
+       LIMIT 1`,
       [team, team]
     );
-    console.error('TeamPage: Schedule query result', { team, scheduleLength: schedule.length });
 
-    const formattedGames = schedule.length > 0 ? schedule.map(g => {
+    const schedule = gameRows.length > 0 ? gameRows.map((g) => {
       const isHome = g.home_team_id === team;
       const opponent = isHome ? g.away_team_id : g.home_team_id;
       const score = g.is_final ? `${g.home_score} - ${g.away_score}` : 'TBD';
@@ -246,86 +333,31 @@ export async function getServerSideProps({ params }) {
         opponent: opponent || 'TBD',
         homeAway: isHome ? 'H' : 'A',
         score,
-        result
+        result,
       };
-    }) : [
-      // Fallback data for testing
-      {
-        gameId: 'test-1',
-        week: 1,
-        date: '2024-09-08',
-        opponent: 'BUF',
-        homeAway: 'H',
-        score: 'TBD',
-        result: ''
-      }
-    ];
+    }) : [];
 
-    const [statsRows] = await connection.execute(
-      `SELECT games_played, points_allowed, total_yards_allowed, pass_yards_allowed,
-              rush_yards_allowed, turnovers, interceptions, sacks, red_zone_pct,
-              third_down_pct, epa_per_play_allowed, dvoa_rank
-       FROM Team_Defense_Stats_2024
-       WHERE team_id = ?`,
-      [team]
-    );
-    console.error('TeamPage: Stats query result', { team, statsRowsLength: statsRows.length });
-    const statsRow = statsRows[0] || {};
-    const stats = statsRows.length > 0 ? {
-      gamesPlayed: statsRow.games_played || 0,
-      pointsAllowed: statsRow.points_allowed || 0,
-      totalYardsAllowed: statsRow.total_yards_allowed || 0,
-      passYardsAllowed: statsRow.pass_yards_allowed || 0,
-      rushYardsAllowed: statsRow.rush_yards_allowed || 0,
-      turnovers: statsRow.turnovers || 0,
-      interceptions: statsRow.interceptions || 0,
-      sacks: statsRow.sacks || 0,
-      redZonePct: statsRow.red_zone_pct || 0,
-      thirdDownPct: statsRow.third_down_pct || 0,
-      epaPerPlayAllowed: statsRow.epa_per_play_allowed || 0,
-      dvoaRank: statsRow.dvoa_rank || null
-    } : {
-      // Fallback data for testing
-      gamesPlayed: 0,
-      pointsAllowed: 0,
-      totalYardsAllowed: 0,
-      passYardsAllowed: 0,
-      rushYardsAllowed: 0,
-      turnovers: 0,
-      interceptions: 0,
-      sacks: 0,
-      redZonePct: 0,
-      thirdDownPct: 0,
-      epaPerPlayAllowed: 0,
-      dvoaRank: null
-    };
+    const record = schedule.length > 0
+      ? `${schedule.filter(g => g.result === 'W').length}-${schedule.filter(g => g.result === 'L').length}`
+      : '0-0';
 
-    const teamData = {
-      id: team,
-      name: teamRow.team_name,
-      abbreviation: teamRow.team_abbr,
-      division: teamRow.division,
-      conference: teamRow.conference,
-      branding: {
-        colorPrimary: teamRow.team_color || '#ccc',
-        colorSecondary: teamRow.team_color2,
-        logo: teamRow.team_logo_espn || teamRow.team_logo_wikipedia || '/placeholder.png'
+    return {
+      props: {
+        teamData: {
+          name: teamRow.team_name || 'Unknown Team',
+          abbreviation: teamRow.team_abbr,
+          branding: {
+            logo: teamRow.logo || '/placeholder.png',
+            colorPrimary: teamRow.colorPrimary || '#ccc',
+            colorSecondary: teamRow.colorSecondary || '#000',
+          },
+          record,
+          schedule,
+        },
       },
-      roster,
-      depthChart,
-      schedule: formattedGames,
-      stats,
-      recentNews: [
-        {
-          title: `${teamRow.team_name} preparing for upcoming matchup`,
-          date: new Date().toISOString().split('T')[0]
-        }
-      ]
     };
-
-    return { props: { teamData } };
   } catch (error) {
-    console.error('TeamPage: Server error', { team, message: error.message, stack: error.stack });
+    console.error('TeamPage: Server error', { team, message: error.message });
     return { props: { error: error.message } };
   } finally {
     if (connection) await connection.end();
