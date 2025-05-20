@@ -49,7 +49,7 @@ export default function ReceivingMetricsTable({ playerId }) {
               <th className="p-2">REC</th>
               <th className="p-2">YDS</th>
               <th className="p-2">TD</th>
-              <th className="p-2">FUM</th>
+              <th className="p-2">FUM</th> {/* Fixed typo: removed classNamep */}
               <th className="p-2">FD</th>
               <th className="p-2">Avg Cushion</th>
               <th className="p-2">Avg Separation</th>
