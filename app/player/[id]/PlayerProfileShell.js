@@ -3,6 +3,7 @@ import SeasonSelector from './SeasonSelector';
 import ReceivingMetricsTable from '@/components/player/ReceivingMetricsTable';
 
 export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
+  console.log('PlayerProfileShell props:', { player, careerStats, gameLogs }); // Debug log
   if (!player) {
     return (
       <main className="container mx-auto p-4">
@@ -67,7 +68,7 @@ export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
         )}
       </section>
 
-      <ReceivingMetricsTable playerId={player.gsis_id} />
+      <ReceivingMetricsTable playerId={player.player_id} /> {/* Use player_id from page.js */}
 
       <section className="mb-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Game Logs</h2>
