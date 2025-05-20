@@ -10,64 +10,82 @@ const teamMap = {
 };
 
 export default function SeasonSelector({ gameLogs }) {
-  const seasons = [...new Set(gameLogs.map((log) => log.season))].sort((a, b) => b - a);
+  const seasons = [...new Set(gameLogs.map((log) => log.season))]
+    .sort((a, b) => b - a);
   const [selectedSeason, setSelectedSeason] = useState(seasons[0] || '');
 
   const filteredLogs = gameLogs.filter((log) => log.season === selectedSeason);
 
   return (
     <div>
-      <div className="mb-4">
-        <label htmlFor="season-select" className="mr-2 text-gray-700">
-          Select Season:
-        </label>
-        <select
-          id="season-select"
-          value={selectedSeason}
-          onChange={(e) => setSelectedSeason(Number(e.target.value))}
-          className="border rounded p-1"
-        >
-          {seasons.map((season) => (
-            <option key={season} value={season}>
-              {season}
-            </option>
-          ))}
-        </select>
+      {/* Tabs */}
+      <div className="mb-6 overflow-x-auto">
+        <div className="inline-flex space-x-4">
+          {seasons.map((season) => {
+            const isActive = season === selectedSeason;
+            return (
+              <button
+                key={season}
+                onClick={() => setSelectedSeason(season)}
+                className={`
+                  px-4 py-2 text-sm font-medium whitespace-nowrap
+                  ${
+                    isActive
+                      ? 'border-b-2 border-primary text-primary'
+                      : 'text-gray-600 hover:text-primary'
+                  }
+                  transition
+                `}
+              >
+                {season}
+              </button>
+            );
+          })}
+        </div>
       </div>
+
+      {/* Table */}
       {filteredLogs.length > 0 ? (
-        <>
-          {/* Chart removed temporarily to debug error */}
-          <div className="overflow-x-auto border rounded-md shadow-sm">
-            <table className="min-w-full text-sm">
-              <thead className="bg-gray-50 text-left text-gray-700">
-                <tr>
-                  <th className="p-3 font-semibold">Week</th>
-                  <th className="p-3 font-semibold">Opponent</th>
-                  <th className="p-3 font-semibold text-center">Pass Yards</th>
-                  <th className="p-3 font-semibold text-center">Rush Yards</th>
-                  <th className="p-3 font-semibold text-center">Recv Yards</th>
-                  <th className="p-3 font-semibold text-center">Total TDs</th>
-                  <th className="p-3 font-semibold text-center">PPR Points</th>
+        <div className="overflow-x-auto border rounded-md shadow-sm">
+          <table className="min-w-full text-sm divide-y divide-gray-200">
+            <thead className="bg-gray-100 uppercase text-xs tracking-widest text-gray-700">
+              <tr>
+                <th className="p-3 text-left">Week</th>
+                <th className="p-3 text-left">Opponent</th>
+                <th className="p-3 text-center">Pass Yards</th>
+                <th className="p-3 text-center">Rush Yards</th>
+                <th className="p-3 text-center">Recv Yards</th>
+                <th className="p-3 text-center">Total TDs</th>
+                <th className="p-3 text-center">PPR Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredLogs.map((log, idx) => (
+                <tr
+                  key={idx}
+                  className={`
+                    ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
+                    hover:bg-gray-100 transition
+                  `}
+                >
+                  <td className="p-3">{log.week}</td>
+                  <td className="p-3">{teamMap[log.opponent_team_id] || 'N/A'}</td>
+                  <td className="p-3 text-center">{log.passing_yards || 0}</td>
+                  <td className="p-3 text-center">{log.rushing_yards || 0}</td>
+                  <td className="p-3 text-center">{log.receiving_yards || 0}</td>
+                  <td className="p-3 text-center">{log.total_tds || 0}</td>
+                  <td className="p-3 text-center">
+                    {log.fantasy_points_ppr
+                      ? log.fantasy_points_ppr.toFixed(1)
+                      : '-'}
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {filteredLogs.map((log, index) => (
-                  <tr key={index} className={`border-t ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                    <td className="p-3">{log.week}</td>
-                    <td className="p-3">{teamMap[log.opponent_team_id] || 'N/A'}</td>
-                    <td className="p-3 text-center">{log.passing_yards || 0}</td>
-                    <td className="p-3 text-center">{log.rushing_yards || 0}</td>
-                    <td className="p-3 text-center">{log.receiving_yards || 0}</td>
-                    <td className="p-3 text-center">{log.total_tds || 0}</td>
-                    <td className="p-3 text-center">{log.fantasy_points_ppr ? log.fantasy_points_ppr.toFixed(1) : '-'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
-        <p className="text-sm text-gray-500">No game logs available for this season.</p>
+        <p className="text-gray-500">No game logs available for this season.</p>
       )}
     </div>
   );
