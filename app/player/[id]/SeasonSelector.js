@@ -15,6 +15,8 @@ export default function SeasonSelector({ gameLogs }) {
 
   const filteredLogs = gameLogs.filter((log) => log.season === selectedSeason);
 
+  // Temporary: Comment out chart until react-chartjs-2 is integrated
+  /*
   const chartData = {
     type: 'line',
     data: {
@@ -42,6 +44,7 @@ export default function SeasonSelector({ gameLogs }) {
       },
     },
   };
+  */
 
   return (
     <div>
@@ -64,11 +67,13 @@ export default function SeasonSelector({ gameLogs }) {
       </div>
       {filteredLogs.length > 0 ? (
         <>
+          {/* Temporary: Remove chart code block until integrated
           <div className="mb-8">
             ```chartjs
             ${JSON.stringify(chartData, null, 2)}
             ```
           </div>
+          */}
           <div className="overflow-x-auto border rounded-md">
             <table className="min-w-full text-sm">
               <thead className="bg-gray-100 text-left">
