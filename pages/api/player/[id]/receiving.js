@@ -38,10 +38,10 @@ export default async function handler(req, res) {
         PSG.season,
         SUM(PSG.targets) AS TGTS,
         SUM(PSG.receptions) AS REC,
-        SUM(PSG.receiving_yards) AS YDS, -- Changed from 'yards' to 'receiving_yards'
-        SUM(PSG.receiving_tds) AS TD, -- Changed from 'rec_touchdowns' to 'receiving_tds'
-        SUM(PSG.fumbles) AS FUM,
-        SUM(PSG.first_downs) AS FD,
+        SUM(PSG.receiving_yards) AS YDS,
+        SUM(PSG.receiving_tds) AS TD,
+        SUM(PSG.receiving_fumbles) AS FUM, -- Changed from 'fumbles' to 'receiving_fumbles'
+        SUM(PSG.receiving_first_downs) AS FD, -- Changed from 'first_downs' to 'receiving_first_downs'
         AVG(NGS.avg_cushion) AS avg_cushion,
         AVG(NGS.avg_separation) AS avg_separation,
         AVG(NGS.avg_intended_air_yards) AS avg_intended_air_yards,
