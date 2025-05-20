@@ -27,7 +27,7 @@ export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
             src={player.headshot_url}
             alt={player.player_name}
             className="w-16 h-16 rounded-full mr-4 object-cover border-2 border-gray-300"
-            style={{ maxWidth: '64px', maxHeight: '64px', width: '64px', height: '64px' }}
+            style={{ maxWidth: '64px', maxHeight: '80px', width: '80px', height: '80px' }}
             onError={(e) => console.log('Headshot load error:', e)}
           />
         )}
