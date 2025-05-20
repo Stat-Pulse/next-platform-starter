@@ -19,87 +19,82 @@ export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
   }));
 
   return (
-    <main className="container mx-auto p-6">
+    <main className="container mx-auto p-4">
       {/* Header Section */}
-      <header className="flex items-center mb-6 border-b pb-4">
-        {player.headshot_url && (
-          <img
-            src={player.headshot_url}
-            alt={player.player_name}
-            className="w-16 h-16 rounded-full mr-4 object-cover border-2 border-gray-300"
-            style={{ maxWidth: '100%', height: 'auto' }}
-          />
-        )}
-        <div>
-          <h1 className="text-4xl font-bold text-gray-900">{player.player_name}</h1>
-          <p className="text-lg text-gray-600">
-            {player.position} | {player.team} | #{player.jersey_number}
+      <header className="mb-6">
+        <div className="flex items-center">
+          {player.headshot_url && (
+            <img
+              src={player.headshot_url}
+              alt={player.player_name}
+              className="w-16 h-16 rounded-full mr-4 object-cover border-2 border-gray-300"
+              style={{ maxWidth: '100%', height: 'auto' }}
+            />
+          )}
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">{player.player_name}</h1>
+            <p className="text-gray-600">
+              {player.position} | {player.team} | #{player.jersey_number}
+            </p>
+          </div>
+        </div>
+        {/* Bio Section (Moved Up) */}
+        <div className="mt-4 text-gray-600">
+          <p>College: {player.college || 'N/A'}</p>
+          <p>
+            Drafted: {player.draft_club || 'Undrafted'} #{player.draft_number || 'N/A'} (
+            {player.rookie_year || 'N/A'})
           </p>
+          <p>Experience: {player.years_exp || 'N/A'} years</p>
+          <p>Status: {player.status || 'N/A'}</p>
         </div>
       </header>
 
-      {/* Main Content and Sidebar */}
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Main Content */}
-        <div className="flex-1">
-          {/* Career Stats */}
-          <section className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Career Stats</h2>
-            {careerStats.length > 0 ? (
-              <div className="overflow-x-auto border rounded-md shadow-sm">
-                <table className="min-w-full text-sm">
-                  <thead className="bg-gray-50 text-left text-gray-700">
-                    <tr>
-                      <th className="p-3 font-semibold">Season</th>
-                      <th className="p-3 font-semibold text-center">Pass Yards</th>
-                      <th className="p-3 font-semibold text-center">Rush Yards</th>
-                      <th className="p-3 font-semibold text-center">Recv Yards</th>
-                      <th className="p-3 font-semibold text-center">PPR Points</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {careerStats.map((row, index) => (
-                      <tr key={row.season} className={`border-t ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                        <td className="p-3">{row.season}</td>
-                        <td className="p-3 text-center">{row.passing_yards ?? '-'}</td>
-                        <td className="p-3 text-center">{row.rushing_yards ?? '-'}</td>
-                        <td className="p-3 text-center">{row.receiving_yards ?? '-'}</td>
-                        <td className="p-3 text-center">
-                          {row.fantasy_points_ppr ? Number(row.fantasy_points_ppr).toFixed(2) : '-'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500">No career stats available.</p>
-            )}
-          </section>
-
-          {/* Receiving Metrics */}
-          <section className="mb-6">
-            <ReceivingMetricsTable playerId={player.player_id} />
-          </section>
-
-          {/* Game Logs */}
-          <section className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Game Logs</h2>
-            <SeasonSelector gameLogs={gameLogsWithTotalTDs} />
-          </section>
-        </div>
-
-        {/* Sidebar */}
-        <aside className="lg:w-1/3">
-          <div className="border rounded-md p-4 shadow-sm bg-white">
-            <h3 className="text-xl font-bold text-gray-900 mb-3">Player Info</h3>
-            <p className="text-sm text-gray-600 mb-1"><span className="font-semibold">College:</span> {player.college || 'N/A'}</p>
-            <p className="text-sm text-gray-600 mb-1"><span className="font-semibold">Drafted:</span> {player.draft_club || 'Undrafted'} #{player.draft_number || 'N/A'} ({player.rookie_year || 'N/A'})</p>
-            <p className="text-sm text-gray-600 mb-1"><span className="font-semibold">Experience:</span> {player.years_exp || 'N/A'} years</p>
-            <p className="text-sm text-gray-600"><span className="font-semibold">Status:</span> {player.status || 'N/A'}</p>
+      {/* Career Stats */}
+      <section className="mb-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Career Stats</h2>
+        {careerStats.length > 0 ? (
+          <div className="overflow-x-auto border rounded-md">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-100 text-left">
+                <tr>
+                  <th className="p-2">Season</th>
+                  <th className="p-2 text-center">Pass Yards</th>
+                  <th className="p-2 text-center">Rush Yards</th>
+                  <th className="p-2 text-center">Recv Yards</th>
+                  <th className="p-2 text-center">PPR Points</th>
+                </tr>
+              </thead>
+              <tbody>
+                {careerStats.map((row) => (
+                  <tr key={row.season} className="border-t">
+                    <td className="p-2">{row.season}</td>
+                    <td className="p-2 text-center">{row.passing_yards ?? '-'}</td>
+                    <td className="p-2 text-center">{row.rushing_yards ?? '-'}</td>
+                    <td className="p-2 text-center">{row.receiving_yards ?? '-'}</td>
+                    <td className="p-2 text-center">
+                      {row.fantasy_points_ppr ? Number(row.fantasy_points_ppr).toFixed(2) : '-'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </aside>
-      </div>
+        ) : (
+          <p className="text-sm text-gray-500">No career stats available.</p>
+        )}
+      </section>
+
+      {/* Receiving Metrics */}
+      <section className="mb-6">
+        <ReceivingMetricsTable playerId={player.player_id} />
+      </section>
+
+      {/* Game Logs */}
+      <section className="mb-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Game Logs</h2>
+        <SeasonSelector gameLogs={gameLogsWithTotalTDs} />
+      </section>
     </main>
   );
 }
