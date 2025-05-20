@@ -28,7 +28,8 @@ export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
               src={player.headshot_url}
               alt={player.player_name}
               className="w-16 h-16 rounded-full mr-4 object-cover border-2 border-gray-300"
-              style={{ maxWidth: '100%', height: 'auto' }}
+              style={{ maxWidth: '64px', maxHeight: '64px', width: '64px', height: '64px' }} // Explicitly enforce 64px
+              onError={(e) => console.log('Headshot load error:', e)} // Debug image loading
             />
           )}
           <div>
@@ -38,7 +39,7 @@ export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
             </p>
           </div>
         </div>
-        {/* Bio Section (Moved Up) */}
+        {/* Bio Section */}
         <div className="mt-4 text-gray-600">
           <p>College: {player.college || 'N/A'}</p>
           <p>
