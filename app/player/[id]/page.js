@@ -1,4 +1,3 @@
-// app/player/[id]/page.js
 import mysql from 'mysql2/promise';
 import PlayerProfileShell from './PlayerProfileShell';
 
@@ -8,13 +7,17 @@ export default async function PlayerPage({ params }) {
 
   let connection;
   try {
-    connection = await mysql.createConnection({
+    const connectionConfig = {
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      connectTimeout: 5000,
-    });
+      database: process.env.DB_NAME || 'nfl_analytics',
+      connectTimeout: 15000,
+    };
+    if (process.env.DB_SSL_CA) {
+      connectionConfig.ssl = { ca: process.env.DB_SSL_CA, rejectUnauthorized: true };
+    }
+    connection = await mysql.createConnection(connectionConfig);
 
     const [playerRows] = await connection.execute(
       `SELECT 
@@ -51,19 +54,20 @@ export default async function PlayerPage({ params }) {
     );
 
     const [gameLogs] = await connection.execute(
-      `SELECT
+      `SELECT 
         season,
         week,
         opponent_team_id,
-        passing_yards,
-        rushing_yards,
-        receiving_yards,
-        passing_tds,
-        rushing_tds,
-        receiving_tds,
-        fantasy_points_ppr
+        SUM(passing_yards) AS passing_yards,
+        SUM(rushing_yards) AS rushing_yards,
+        SUM(receiving_yards) AS receiving_yards,
+        SUM(passing_tds) AS passing_tds,
+        SUM(rushing_tds) AS rushing_tds,
+        SUM(receiving_tds) AS receiving_tds,
+        SUM(fantasy_points_ppr) AS fantasy_points_ppr
       FROM Player_Stats_Game_2024
       WHERE player_id = ?
+      GROUP BY season, week, opponent_team_id
       ORDER BY season DESC, week ASC`,
       [playerId]
     );
@@ -71,6 +75,8 @@ export default async function PlayerPage({ params }) {
     await connection.end();
 
     const player = playerRows[0] || null;
+
+    console.log('PlayerPage data:', { player, careerStats, gameLogs });
 
     return (
       <PlayerProfileShell
@@ -80,6 +86,12 @@ export default async function PlayerPage({ params }) {
       />
     );
   } catch (error) {
+    console.error('🔥 PlayerPage Error:', {
+      message: error.message,
+      code: error.code,
+      sqlMessage: error.sqlMessage,
+      stack: error.stack,
+    });
     return (
       <main style={{ padding: '2rem' }}>
         <h1>Error</h1>
