@@ -7,12 +7,14 @@ import mysql from 'mysql2/promise';
 const TEAM_NAME_MAP = {
   ARI: "Arizona Cardinals",
   BUF: "Buffalo Bills",
+  KC: "Kansas City Chiefs", // Added for Chiefs
   // Add other mappings as needed
 };
 
 const slugToAbbreviation = {
   cardinals: 'ARI',
   bills: 'BUF',
+  chiefs: 'KC', // Added for Chiefs
   // Add other team mappings as needed
 };
 
@@ -32,7 +34,7 @@ export default function TeamPage({ teamData, error }) {
       : parsedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   };
 
-  // Mocked Data (used as fallback if database fails)
+  // Mocked Data (used as fallback for sections not yet pulling from DB)
   const mockNews = {
     headline: `${name} Prepares for Crucial Matchup`,
     date: '2025-05-18',
@@ -281,7 +283,8 @@ export async function getServerSideProps({ params }) {
     return { props: { error: 'Missing team parameter' } };
   }
 
-  team = slugToAbbreviation[team.toLowerCase()] || team.toUpperCase();
+  // Convert team slug to uppercase abbreviation
+  team = (slugToAbbreviation[team.toLowerCase()] || team.toUpperCase());
 
   let connection;
   try {
