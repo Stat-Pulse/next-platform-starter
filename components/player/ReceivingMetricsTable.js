@@ -39,46 +39,46 @@ export default function ReceivingMetricsTable({ playerId }) {
 
   return (
     <section className="mb-8">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Receiving Metrics</h2>
-      <div className="overflow-x-auto border rounded-md">
+      <h2 className="text-2xl font-bold text-gray-900 mb-4">Receiving Metrics</h2>
+      <div className="overflow-x-auto border rounded-md shadow-sm">
         <table className="min-w-full text-sm">
-          <thead className="bg-gray-100 text-left">
+          <thead className="bg-gray-50 text-left text-gray-700">
             <tr>
-              <th className="p-2">Season</th>
-              <th className="p-2">TGTS</th>
-              <th className="p-2">REC</th>
-              <th className="p-2">YDS</th>
-              <th className="p-2">TD</th>
-              <th className="p-2">FUM</th> {/* Fixed typo: removed classNamep */}
-              <th className="p-2">FD</th>
-              <th className="p-2">Avg Cushion</th>
-              <th className="p-2">Avg Separation</th>
-              <th className="p-2">Avg Intended Air Yards</th>
-              <th className="p-2">Receiving Air Yards</th>
-              <th className="p-2">Percent Share Air Yards</th>
-              <th className="p-2">xYAC</th>
-              <th className="p-2">YAC</th>
-              <th className="p-2">+YAC</th>
+              <th className="p-3 font-semibold">Season</th>
+              <th className="p-3 font-semibold text-center">TGTS</th>
+              <th className="p-3 font-semibold text-center">REC</th>
+              <th className="p-3 font-semibold text-center">YDS</th>
+              <th className="p-3 font-semibold text-center">TD</th>
+              <th className="p-3 font-semibold text-center">FUM</th>
+              <th className="p-3 font-semibold text-center">FD</th>
+              <th className="p-3 font-semibold text-center">Avg Cushion</th>
+              <th className="p-3 font-semibold text-center">Avg Separation</th>
+              <th className="p-3 font-semibold text-center">Avg Intended Air Yards</th>
+              <th className="p-3 font-semibold text-center">Receiving Air Yards</th>
+              <th className="p-3 font-semibold text-center">Percent Share Air Yards</th>
+              <th className="p-3 font-semibold text-center">xYAC</th>
+              <th className="p-3 font-semibold text-center">YAC</th>
+              <th className="p-3 font-semibold text-center">+YAC</th>
             </tr>
           </thead>
           <tbody>
             {stats.map((row, index) => (
-              <tr key={index} className="border-t">
-                <td className="p-2">{row.season}</td>
-                <td className="p-2">{row.TGTS}</td>
-                <td className="p-2">{row.REC}</td>
-                <td className="p-2">{row.YDS}</td>
-                <td className="p-2">{row.TD}</td>
-                <td className="p-2">{row.FUM}</td>
-                <td className="p-2">{row.FD}</td>
-                <td className="p-2">{row.avg_cushion ? row.avg_cushion.toFixed(1) : '-'}</td>
-                <td className="p-2">{row.avg_separation ? row.avg_separation.toFixed(1) : '-'}</td>
-                <td className="p-2">{row.avg_intended_air_yards ? row.avg_intended_air_yards.toFixed(1) : '-'}</td>
-                <td className="p-2">{row.receiving_air_yards || '-'}</td>
-                <td className="p-2">{row.percent_share_air_yards ? row.percent_share_air_yards.toFixed(2) : '-'}</td>
-                <td className="p-2">{row.xYAC ? row.xYAC.toFixed(1) : '-'}</td>
-                <td className="p-2">{row.YAC ? row.YAC.toFixed(1) : '-'}</td>
-                <td className="p-2">{row.plus_yac ? row.plus_yac.toFixed(1) : '-'}</td>
+              <tr key={index} className={`border-t ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                <td className="p-3">{row.season}</td>
+                <td className="p-3 text-center">{row.TGTS}</td>
+                <td className="p-3 text-center">{row.REC}</td>
+                <td className="p-3 text-center">{row.YDS}</td>
+                <td className="p-3 text-center">{row.TD}</td>
+                <td className="p-3 text-center">{row.FUM}</td>
+                <td className="p-3 text-center">{row.FD}</td>
+                <td className="p-3 text-center">{row.avg_cushion ? row.avg_cushion.toFixed(1) : '-'}</td>
+                <td className="p-3 text-center">{row.avg_separation ? row.avg_separation.toFixed(1) : '-'}</td>
+                <td className="p-3 text-center">{row.avg_intended_air_yards ? row.avg_intended_air_yards.toFixed(1) : '-'}</td>
+                <td className="p-3 text-center">{row.receiving_air_yards || '-'}</td>
+                <td className="p-3 text-center">{row.percent_share_air_yards ? row.percent_share_air_yards.toFixed(2) : '-'}</td>
+                <td className="p-3 text-center">{row.xYAC ? row.xYAC.toFixed(1) : '-'}</td>
+                <td className="p-3 text-center">{row.YAC ? row.YAC.toFixed(1) : '-'}</td>
+                <td className="p-3 text-center">{row.plus_yac ? row.plus_yac.toFixed(1) : '-'}</td>
               </tr>
             ))}
           </tbody>
