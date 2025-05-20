@@ -1,11 +1,8 @@
 'use client';
-import { useEffect, useState } from 'react';
-import ReceivingMetricsTable from '@/components/player/ReceivingMetricsTable';
 import SeasonSelector from './SeasonSelector';
+import ReceivingMetricsTable from '@/components/player/ReceivingMetricsTable';
 
 export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
-  const [playerId, setPlayerId] = useState(player.player_id);
-
   return (
     <main style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
       <h1>{player?.player_name || 'Player Not Found'}</h1>
@@ -41,9 +38,11 @@ export default function PlayerProfileShell({ player, careerStats, gameLogs }) {
         <p>No career stats available.</p>
       )}
 
-      <SeasonSelector gameLogs={gameLogs} />
+      {/* Receiving Metrics Section */}
+      <ReceivingMetricsTable playerId={player.player_id} />
 
-      <ReceivingMetricsTable playerId={playerId} />
+      {/* Weekly Game Logs Section */}
+      <SeasonSelector gameLogs={gameLogs} />
     </main>
   );
 }
