@@ -50,7 +50,7 @@ export default async function handler(req, res) {
         SUM(NGS.avg_expected_yac) AS xYAC,
         SUM(NGS.avg_yac) AS YAC,
         SUM(NGS.avg_yac_above_expectation) AS plus_yac,
-        SUM(NGS.epa) AS EPA,
+        SUM(NGS.receiving_epa) AS EPA, 
         AVG(NGS.target_share) AS target_share,
         AVG(NGS.wopr) AS WOPR
       FROM Player_Stats_Game_2024 PSG
