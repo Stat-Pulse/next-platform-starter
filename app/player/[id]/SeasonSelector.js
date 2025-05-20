@@ -1,10 +1,39 @@
 'use client';
+import { useState } from 'react';
 
 export default function SeasonSelector({ gameLogs }) {
   const seasons = [...new Set(gameLogs.map((log) => log.season))].sort((a, b) => b - a);
   const [selectedSeason, setSelectedSeason] = useState(seasons[0] || '');
 
   const filteredLogs = gameLogs.filter((log) => log.season === selectedSeason);
+
+  const chartData = {
+    type: 'line',
+    data: {
+      labels: filteredLogs.map((log) => `Week ${log.week}`),
+      datasets: [
+        {
+          label: 'Receiving Yards',
+          data: filteredLogs.map((log) => log.receiving_yards || 0),
+          borderColor: '#4CAF50',
+          backgroundColor: 'rgba(76, 175, 80, 0.2)',
+          fill: true,
+          tension: 0.3,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top' },
+        title: { display: true, text: `Receiving Yards by Week (${selectedSeason})` },
+      },
+      scales: {
+        x: { title: { display: true, text: 'Week' } },
+        y: { title: { display: true, text: 'Receiving Yards' }, beginAtZero: true },
+      },
+    },
+  };
 
   return (
     <div>
@@ -26,34 +55,41 @@ export default function SeasonSelector({ gameLogs }) {
         </select>
       </div>
       {filteredLogs.length > 0 ? (
-        <div className="overflow-x-auto border rounded-md">
-          <table className="min-w-full text-sm">
-            <thead className="bg-gray-100 text-left">
-              <tr>
-                <th className="p-2">Week</th>
-                <th className="p-2">Opponent</th>
-                <th className="p-2">Pass Yards</th>
-                <th className="p-2">Rush Yards</th>
-                <th className="p-2">Recv Yards</th>
-                <th className="p-2">Total TDs</th>
-                <th className="p-2">PPR Points</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredLogs.map((log, index) => (
-                <tr key={index} className="border-t">
-                  <td className="p-2">{log.week}</td>
-                  <td className="p-2">{log.opponent_team_id}</td>
-                  <td className="p-2">{log.passing_yards || 0}</td>
-                  <td className="p-2">{log.rushing_yards || 0}</td>
-                  <td className="p-2">{log.receiving_yards || 0}</td>
-                  <td className="p-2">{log.total_tds || 0}</td>
-                  <td className="p-2">{log.fantasy_points_ppr ? log.fantasy_points_ppr.toFixed(1) : '-'}</td>
+        <>
+          <div className="mb-8">
+            ```chartjs
+            ${JSON.stringify(chartData, null, 2)}
+            ```
+          </div>
+          <div className="overflow-x-auto border rounded-md">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-100 text-left">
+                <tr>
+                  <th className="p-2">Week</th>
+                  <th className="p-2">Opponent</th>
+                  <th className="p-2">Pass Yards</th>
+                  <th className="p-2">Rush Yards</th>
+                  <th className="p-2">Recv Yards</th>
+                  <th className="p-2">Total TDs</th>
+                  <th className="p-2">PPR Points</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {filteredLogs.map((log, index) => (
+                  <tr key={index} className="border-t">
+                    <td className="p-2">{log.week}</td>
+                    <td className="p-2">{log.opponent_team_id}</td>
+                    <td className="p-2">{log.passing_yards || 0}</td>
+                    <td className="p-2">{log.rushing_yards || 0}</td>
+                    <td className="p-2">{log.receiving_yards || 0}</td>
+                    <td className="p-2">{log.total_tds || 0}</td>
+                    <td className="p-2">{log.fantasy_points_ppr ? log.fantasy_points_ppr.toFixed(1) : '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       ) : (
         <p className="text-sm text-gray-500">No game logs available for this season.</p>
       )}
