@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Fuse from 'fuse.js';
 
@@ -19,11 +19,12 @@ export default function SearchBar({ data }) {
   const inputRef = useRef(null);
   const router = useRouter();
 
-  const fuse = new Fuse(data, {
+  // Memoize fuse to prevent re-creation on every render
+  const fuse = useMemo(() => new Fuse(data, {
     keys: ['label'],
     threshold: 0.3, // Lower = more strict
     minMatchCharLength: 2,
-  });
+  }), [data]);
 
   useEffect(() => {
     if (query.trim().length > 0) {
@@ -33,7 +34,7 @@ export default function SearchBar({ data }) {
     } else {
       setResults([]);
     }
-  }, [query]);
+  }, [query, fuse]); // Add fuse as a dependency
 
   const handleKeyDown = (e) => {
     if (e.key === 'ArrowDown') {
