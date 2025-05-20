@@ -1,6 +1,14 @@
 'use client';
 import { useState } from 'react';
 
+const teamMap = {
+  1: 'ARI', 2: 'ATL', 3: 'BAL', 4: 'BUF', 5: 'CAR', 6: 'CHI', 7: 'CIN', 8: 'CLE',
+  9: 'DAL', 10: 'DEN', 11: 'DET', 12: 'GB', 13: 'HOU', 14: 'IND', 15: 'JAX',
+  16: 'KC', 17: 'LV', 18: 'LAC', 19: 'LAR', 20: 'MIA', 21: 'MIN', 22: 'NE',
+  23: 'NO', 24: 'NYG', 25: 'NYJ', 26: 'PHI', 27: 'PIT', 28: 'SF', 29: 'SEA',
+  30: 'TB', 31: 'TEN', 32: 'WAS'
+};
+
 export default function SeasonSelector({ gameLogs }) {
   const seasons = [...new Set(gameLogs.map((log) => log.season))].sort((a, b) => b - a);
   const [selectedSeason, setSelectedSeason] = useState(seasons[0] || '');
@@ -78,7 +86,7 @@ export default function SeasonSelector({ gameLogs }) {
                 {filteredLogs.map((log, index) => (
                   <tr key={index} className="border-t">
                     <td className="p-2">{log.week}</td>
-                    <td className="p-2">{log.opponent_team_id}</td>
+                    <td className="p-2">{teamMap[log.opponent_team_id] || 'N/A'}</td>
                     <td className="p-2">{log.passing_yards || 0}</td>
                     <td className="p-2">{log.rushing_yards || 0}</td>
                     <td className="p-2">{log.receiving_yards || 0}</td>
