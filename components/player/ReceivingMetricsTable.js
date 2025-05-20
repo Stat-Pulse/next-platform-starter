@@ -38,7 +38,7 @@ export default function ReceivingMetricsTable({ playerId }) {
   if (!stats.length) return <p className="text-sm text-gray-500">No receiving data available.</p>;
 
   return (
-    <section className="mb-8">
+    <section className="mb-6">
       <h2 className="text-2xl font-bold text-gray-900 mb-4">Receiving Metrics</h2>
       <div className="overflow-x-auto border rounded-md shadow-sm">
         <table className="min-w-full text-sm">
