@@ -13,11 +13,24 @@ export default function SeasonSelector({ gameLogs }) {
   const seasons = [...new Set(gameLogs.map((log) => log.season))].sort((a, b) => b - a);
   const [selectedSeason, setSelectedSeason] = useState(seasons[0] || '');
   const chartRef = useRef(null);
+  const [chartLoaded, setChartLoaded] = useState(false);
+
+  // Check if Chart.js is loaded
+  useEffect(() => {
+    const checkChartJs = () => {
+      if (window.Chart) {
+        setChartLoaded(true);
+      } else {
+        setTimeout(checkChartJs, 100);
+      }
+    };
+    checkChartJs();
+  }, []);
 
   const filteredLogs = gameLogs.filter((log) => log.season === selectedSeason);
 
   useEffect(() => {
-    if (chartRef.current && typeof window.Chart !== 'undefined') {
+    if (chartLoaded && chartRef.current && typeof window.Chart !== 'undefined') {
       const ctx = chartRef.current.getContext('2d');
       if (window.myChart) window.myChart.destroy();
       window.myChart = new window.Chart(ctx, {
@@ -46,7 +59,7 @@ export default function SeasonSelector({ gameLogs }) {
         },
       });
     }
-  }, [selectedSeason, filteredLogs]);
+  }, [selectedSeason, filteredLogs, chartLoaded]);
 
   return (
     <div>
@@ -70,7 +83,11 @@ export default function SeasonSelector({ gameLogs }) {
       {filteredLogs.length > 0 ? (
         <>
           <div className="mb-8">
-            <canvas ref={chartRef} style={{ maxWidth: '100%', height: 'auto' }}></canvas>
+            {chartLoaded ? (
+              <canvas ref={chartRef} style={{ maxWidth: '100%', height: 'auto' }}></canvas>
+            ) : (
+              <p className="text-sm text-gray-500">Loading chart...</p>
+            )}
           </div>
           <div className="overflow-x-auto border rounded-md">
             <table className="min-w-full text-sm">
@@ -78,26 +95,26 @@ export default function SeasonSelector({ gameLogs }) {
                 <tr>
                   <th className="p-2">Week</th>
                   <th className="p-2">Opponent</th>
-                  <th className="p-2">Pass Yards</th>
-                  <th className="p-2">Rush Yards</th>
-                  <th className="p-2">Recv Yards</th>
-                  <th className="p-2">Total TDs</th>
-                  <th className="p-2">PPR Points</th>
+                  <th className="p-2 text-center">Pass Yards</th>
+                  <th className="p-2 text-center">Rush Yards</th>
+                  <th className="p-2 text-center">Recv Yards</th>
+                  <th className="p-2 text-center">Total TDs</th>
+                  <th className="p-2 text-center">PPR Points</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredLogs.map((log, index) => (
                   <tr key={index} className="border-t">
-                  <td className="p-2">{log.week}</td>
-                  <td className="p-2">{teamMap[log.opponent_team_id] || 'N/A'}</td>
-                  <td className="p-2 text-center">{log.passing_yards || 0}</td>
-                  <td className="p-2 text-center">{log.rushing_yards || 0}</td>
-                  <td className="p-2 text-center">{log.receiving_yards || 0}</td>
-                  <td className="p-2 text-center">{log.total_tds || 0}</td>
-                  <td className="p-2 text-center">{log.fantasy_points_ppr ? log.fantasy_points_ppr.toFixed(1) : '-'}</td>
-                </tr>
-              ))}
-            </tbody>
+                    <td className="p-2">{log.week}</td>
+                    <td className="p-2">{teamMap[log.opponent_team_id] || 'N/A'}</td>
+                    <td className="p-2 text-center">{log.passing_yards || 0}</td>
+                    <td className="p-2 text-center">{log.rushing_yards || 0}</td>
+                    <td className="p-2 text-center">{log.receiving_yards || 0}</td>
+                    <td className="p-2 text-center">{log.total_tds || 0}</td>
+                    <td className="p-2 text-center">{log.fantasy_points_ppr ? log.fantasy_points_ppr.toFixed(1) : '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
             </table>
           </div>
         </>
@@ -107,9 +124,3 @@ export default function SeasonSelector({ gameLogs }) {
     </div>
   );
 }
-
-// Load Chart.js via CDN (add this to your page or layout)
-const script = document.createElement('script');
-script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
-script.async = true;
-document.body.appendChild(script);
