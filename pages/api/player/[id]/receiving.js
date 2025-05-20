@@ -20,7 +20,6 @@ export default async function handler(req, res) {
       `
       SELECT
         PSG.season,
-        PSG.season_type,
         SUM(PSG.targets) AS targets,
         SUM(PSG.receptions) AS receptions,
         SUM(PSG.receiving_yards) AS receiving_yards,
@@ -46,8 +45,8 @@ export default async function handler(req, res) {
         AND PSG.season = NGSR.season
 
       WHERE PSG.player_id = ?
-      GROUP BY PSG.season, PSG.season_type
-      ORDER BY PSG.season DESC, PSG.season_type DESC
+      GROUP BY PSG.season
+      ORDER BY PSG.season DESC
       `,
       [id]
     );
