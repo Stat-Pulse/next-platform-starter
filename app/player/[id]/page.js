@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import SeasonSelector from './SeasonSelector';
 
 // Dynamic client-side component
-const ReceivingMetricsTable = dynamic(() => import('./ReceivingMetricsTable'), { ssr: false });
+const ReceivingMetricsTable = dynamic(() => import('@/components/player/ReceivingMetricsTable'), { ssr: false });
 
 export default async function PlayerPage({ params }) {
   const playerId = params?.id;
