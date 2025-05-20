@@ -40,8 +40,8 @@ export default async function handler(req, res) {
         SUM(PSG.receptions) AS REC,
         SUM(PSG.receiving_yards) AS YDS,
         SUM(PSG.receiving_tds) AS TD,
-        SUM(PSG.receiving_fumbles) AS FUM, -- Changed from 'fumbles' to 'receiving_fumbles'
-        SUM(PSG.receiving_first_downs) AS FD, -- Changed from 'first_downs' to 'receiving_first_downs'
+        SUM(PSG.receiving_fumbles) AS FUM,
+        SUM(PSG.receiving_first_downs) AS FD,
         AVG(NGS.avg_cushion) AS avg_cushion,
         AVG(NGS.avg_separation) AS avg_separation,
         AVG(NGS.avg_intended_air_yards) AS avg_intended_air_yards,
@@ -50,7 +50,6 @@ export default async function handler(req, res) {
         SUM(NGS.avg_expected_yac) AS xYAC,
         SUM(NGS.avg_yac) AS YAC,
         SUM(NGS.avg_yac_above_expectation) AS plus_yac,
-        SUM(NGS.receiving_epa) AS EPA, 
         AVG(NGS.target_share) AS target_share,
         AVG(NGS.wopr) AS WOPR
       FROM Player_Stats_Game_2024 PSG
