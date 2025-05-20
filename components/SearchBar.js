@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Fuse from 'fuse.js';
 
 const badgeColors = {
-  Player: 'bg-blue-100 text-blue-800',
+  Player: 'bg-red-100 text-red-800', // Changed from blue to red
   Team: 'bg-green-100 text-green-800',
   Referee: 'bg-purple-100 text-purple-800',
   Stats: 'bg-yellow-100 text-yellow-800',
@@ -19,10 +19,9 @@ export default function SearchBar({ data }) {
   const inputRef = useRef(null);
   const router = useRouter();
 
-  // Memoize fuse to prevent re-creation on every render
   const fuse = useMemo(() => new Fuse(data, {
     keys: ['label'],
-    threshold: 0.3, // Lower = more strict
+    threshold: 0.3,
     minMatchCharLength: 2,
   }), [data]);
 
@@ -34,7 +33,7 @@ export default function SearchBar({ data }) {
     } else {
       setResults([]);
     }
-  }, [query, fuse]); // Add fuse as a dependency
+  }, [query, fuse]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'ArrowDown') {
@@ -67,7 +66,7 @@ export default function SearchBar({ data }) {
         onKeyDown={handleKeyDown}
         ref={inputRef}
         placeholder="Search players, teams, stats, refs..."
-        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-600" // Changed to red-600
       />
       {results.length > 0 && (
         <ul className="absolute z-50 bg-white border border-gray-300 rounded shadow mt-2 w-full max-h-72 overflow-auto">
@@ -75,7 +74,7 @@ export default function SearchBar({ data }) {
             <li
               key={item.label + i}
               className={`px-4 py-2 cursor-pointer flex justify-between items-center ${
-                i === activeIndex ? 'bg-blue-100' : 'hover:bg-gray-100'
+                i === activeIndex ? 'bg-red-100' : 'hover:bg-gray-100' // Changed to red-100
               }`}
               onClick={() => handleClick(item)}
             >
