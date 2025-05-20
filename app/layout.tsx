@@ -14,7 +14,6 @@ export default function RootLayout({
     <html lang="en">
       <body>
         {children}
-        <script src="https://cdn.jsdelivr.net/npm/chart.js" async></script>
       </body>
     </html>
   );
