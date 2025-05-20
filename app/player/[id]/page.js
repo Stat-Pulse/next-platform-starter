@@ -1,6 +1,10 @@
 // app/player/[id]/page.js
 import mysql from 'mysql2/promise';
-import SeasonSelector from './SeasonSelector'; // ✅ simple import
+import dynamic from 'next/dynamic';
+import SeasonSelector from './SeasonSelector';
+
+// Dynamic client-side component
+const ReceivingMetricsTable = dynamic(() => import('./ReceivingMetricsTable'), { ssr: false });
 
 export default async function PlayerPage({ params }) {
   const playerId = params?.id;
@@ -107,7 +111,10 @@ export default async function PlayerPage({ params }) {
           <p>No career stats available.</p>
         )}
 
-        {/* Pass game logs to SeasonSelector component */}
+        {/* ✅ Receiving Metrics Section */}
+        <ReceivingMetricsTable playerId={playerId} />
+
+        {/* ✅ Weekly Game Logs Section */}
         <SeasonSelector gameLogs={gameLogs} />
       </main>
     );
