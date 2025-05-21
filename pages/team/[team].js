@@ -1,5 +1,3 @@
-// pages/team/[team].js
-
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -43,9 +41,37 @@ const slugToAbbreviation = {
 
 const TEAM_NAME_MAP = {
   ARI: "Arizona Cardinals",
+  ATL: "Atlanta Falcons",
+  BAL: "Baltimore Ravens",
   BUF: "Buffalo Bills",
+  CAR: "Carolina Panthers",
+  CHI: "Chicago Bears",
+  CIN: "Cincinnati Bengals",
+  CLE: "Cleveland Browns",
+  DAL: "Dallas Cowboys",
+  DEN: "Denver Broncos",
+  DET: "Detroit Lions",
+  GB: "Green Bay Packers",
+  HOU: "Houston Texans",
+  IND: "Indianapolis Colts",
+  JAX: "Jacksonville Jaguars",
   KC: "Kansas City Chiefs",
-  // Add others as needed
+  LV: "Las Vegas Raiders",
+  LAC: "Los Angeles Chargers",
+  LAR: "Los Angeles Rams",
+  MIA: "Miami Dolphins",
+  MIN: "Minnesota Vikings",
+  NE: "New England Patriots",
+  NO: "New Orleans Saints",
+  NYG: "New York Giants",
+  NYJ: "New York Jets",
+  PHI: "Philadelphia Eagles",
+  PIT: "Pittsburgh Steelers",
+  SF: "San Francisco 49ers",
+  SEA: "Seattle Seahawks",
+  TB: "Tampa Bay Buccaneers",
+  TEN: "Tennessee Titans",
+  WAS: "Washington Commanders",
 };
 
 export default function TeamPage({ teamData, injuries = [], error }) {
@@ -58,7 +84,7 @@ export default function TeamPage({ teamData, injuries = [], error }) {
   const { name, abbreviation, branding, record, schedule, stats } = teamData;
 
   const formatDate = (date) => {
-    const parsed = new Date(date);
+    const parsed = new Date(date + 'T00:00:00Z'); // Force UTC
     return isNaN(parsed) ? 'TBD' : parsed.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   };
 
@@ -101,10 +127,29 @@ export default function TeamPage({ teamData, injuries = [], error }) {
                 {recentGame ? (
                   <div className="flex flex-col sm:flex-row justify-between items-center">
                     <div>
-                      <p><strong>Opponent:</strong> {TEAM_NAME_MAP[recentGame.opponent] || recentGame.opponent}</p>
+                      <p>
+                        <strong>Opponent:</strong> {TEAM_NAME_MAP[recentGame.opponent] || recentGame.opponent}
+                        {recentGame.homeAway === 'H' ? ' (Home)' : ' (Away)'}
+                      </p>
                       <p><strong>Date:</strong> {formatDate(recentGame.date)}</p>
-                      <p><strong>Score:</strong> {recentGame.score}</p>
-                      <p><strong>Result:</strong> {recentGame.result}</p>
+                      <p>
+                        <strong>Score:</strong>{' '}
+                        {recentGame.homeAway === 'H' ? (
+                          <>
+                            {name.split(' ').pop()} {recentGame.score.split(' - ')[0]} - {TEAM_NAME_MAP[recentGame.opponent] || recentGame.opponent} {recentGame.score.split(' - ')[1]}
+                          </>
+                        ) : (
+                          <>
+                            {TEAM_NAME_MAP[recentGame.opponent] || recentGame.opponent} {recentGame.score.split(' - ')[0]} - {name.split(' ').pop()} {recentGame.score.split(' - ')[1]}
+                          </>
+                        )}
+                      </p>
+                      <p>
+                        <strong>Result:</strong>{' '}
+                        <span className={recentGame.result === 'W' ? 'text-green-600' : 'text-red-600'}>
+                          {recentGame.result === 'W' ? 'Win' : 'Loss'}
+                        </span>
+                      </p>
                     </div>
                     <button onClick={() => setActiveTab('schedule')} className="mt-4 sm:mt-0 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
                       View Full Schedule
@@ -116,18 +161,23 @@ export default function TeamPage({ teamData, injuries = [], error }) {
               </section>
 
               {/* Key Stats */}
-              {stats && (
+              {stats ? (
                 <section className="bg-white p-4 rounded shadow">
                   <h2 className="text-xl font-semibold mb-4">Key Team Stats</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div><strong>Points Allowed:</strong> {stats.points_allowed}</div>
-                    <div><strong>Yards Allowed:</strong> {stats.total_yards_allowed}</div>
-                    <div><strong>Sacks:</strong> {stats.sacks}</div>
-                    <div><strong>Turnovers:</strong> {stats.turnovers}</div>
+                    <div><strong>Points Allowed:</strong> {stats.points_allowed || 'N/A'}</div>
+                    <div><strong>Yards Allowed:</strong> {stats.total_yards_allowed || 'N/A'}</div>
+                    <div><strong>Sacks:</strong> {stats.sacks || 'N/A'}</div>
+                    <div><strong>Turnovers:</strong> {stats.turnovers || 'N/A'}</div>
                     <div><strong>Red Zone %:</strong> {stats.red_zone_pct ? `${(stats.red_zone_pct * 100).toFixed(1)}%` : 'N/A'}</div>
                     <div><strong>3rd Down %:</strong> {stats.third_down_pct ? `${(stats.third_down_pct * 100).toFixed(1)}%` : 'N/A'}</div>
-                    <div><strong>DVOA Rank:</strong> {stats.dvoa_rank}</div>
+                    <div><strong>DVOA Rank:</strong> {stats.dvoa_rank || 'N/A'}</div>
                   </div>
+                </section>
+              ) : (
+                <section className="bg-white p-4 rounded shadow">
+                  <h2 className="text-xl font-semibold mb-4">Key Team Stats</h2>
+                  <p>No stats available for this team.</p>
                 </section>
               )}
 
@@ -145,7 +195,6 @@ export default function TeamPage({ teamData, injuries = [], error }) {
             </div>
           )}
 
-          {/* Placeholder for other tabs */}
           {activeTab !== 'home' && (
             <div className="bg-white p-4 rounded shadow">
               <h2 className="text-xl font-semibold mb-4">{activeTab.replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase())}</h2>
@@ -186,9 +235,10 @@ export async function getServerSideProps({ params }) {
       `SELECT game_id, week, game_date AS date,
               home_team_id, away_team_id, home_score, away_score, is_final
        FROM Games
-       WHERE (home_team_id = ? OR away_team_id = ?) AND is_final = 1
-       ORDER BY game_date DESC
-       LIMIT 1`,
+       WHERE (home_team_id = ? OR away_team_id = ?)
+         AND is_final = 1
+         AND season_id = 2024
+       ORDER BY game_date DESC`,
       [team, team]
     );
 
@@ -200,7 +250,11 @@ export async function getServerSideProps({ params }) {
       return { gameId: g.game_id, week: g.week, date: g.date, opponent, homeAway: isHome ? 'H' : 'A', score, result };
     });
 
-    const record = `${schedule.filter(g => g.result === 'W').length}-${schedule.filter(g => g.result === 'L').length}`;
+    const wins = schedule.filter(g => g.result === 'W').length;
+    const losses = schedule.filter(g => g.result === 'L').length;
+    const record = `${wins}-${losses}`;
+
+    const recentGame = schedule.length > 0 ? schedule[0] : null;
 
     const [[stats = null]] = await connection.execute(
       `SELECT points_allowed, total_yards_allowed, sacks, turnovers, red_zone_pct, third_down_pct, dvoa_rank
@@ -231,7 +285,7 @@ export async function getServerSideProps({ params }) {
             colorSecondary: teamRow.colorSecondary || '#000',
           },
           record,
-          schedule,
+          schedule: [recentGame],
           stats,
         },
         injuries,
