@@ -1,6 +1,6 @@
 // app/layout.tsx
 
-import '../styles/globals.css'; 
+import './app.css';              // ✅ new forced location
 
 export const metadata = {
   title: 'StatPulse Analytics',
