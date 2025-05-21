@@ -131,7 +131,7 @@ export default function TeamPage({ teamData, injuries = [], error }) {
                 </section>
               )}
 
-              {/* Injuries Snapshot */}
+              {/* Injury Snapshot */}
               <section className="bg-white p-4 rounded shadow">
                 <h2 className="text-xl font-semibold mb-4">Injury Snapshot</h2>
                 {injuries.length > 0 ? injuries.map((inj, i) => (
@@ -210,8 +210,7 @@ export async function getServerSideProps({ params }) {
     );
 
     const [injuries] = await connection.execute(
-      `SELECT i.player_id, i.injury_description, i.status, i.report_date,
-              p.player_name
+      `SELECT i.player_id, i.injury_description, i.status, i.report_date, p.player_name
        FROM Injuries i
        JOIN Players p ON i.player_id = p.player_id
        JOIN Rosters_2024 r ON p.player_name = r.full_name
