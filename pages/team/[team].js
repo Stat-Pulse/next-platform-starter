@@ -213,7 +213,7 @@ export async function getServerSideProps({ params }) {
       `SELECT i.player_id, i.injury_description, i.status, i.report_date
        FROM Injuries i
        WHERE i.player_id IN (
-         SELECT player_id FROM Rosters_2024 WHERE team_id = ?
+         SELECT player_id FROM Rosters_2024 WHERE team = ?
        )
        ORDER BY i.report_date DESC
        LIMIT 5`,
