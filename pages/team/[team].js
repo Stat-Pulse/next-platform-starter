@@ -209,7 +209,7 @@ export async function getServerSideProps({ params }) {
       [team]
     );
 
-    cconst [injuries] = await connection.execute(
+    const [injuries] = await connection.execute(
       `SELECT i.player_id, i.injury_description, i.status, i.report_date, p.player_name
        FROM Injuries i
        JOIN Players p ON i.player_id = p.player_id
