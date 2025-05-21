@@ -10,7 +10,9 @@ export default function ReceivingMetricsTable({ playerId }) {
     async function fetchReceivingMetrics() {
       try {
         console.log('Fetching receiving metrics for playerId:', playerId);
-        const response = await fetch(`/api/player/${playerId}/receiving`);
+        // Dynamically determine the base URL
+        const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://statpulseanalytics.netlify.app';
+        const response = await fetch(`${baseUrl}/api/player/${playerId}/receiving`);
         console.log('Response status:', response.status);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
