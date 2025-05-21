@@ -1,102 +1,62 @@
-import mysql from 'mysql2/promise';
-import PlayerProfileShell from './PlayerProfileShell';
+// app/player/[id]/page.js
 
-export default async function PlayerPage({ params }) {
-  const playerId = params?.id;
-  if (!playerId) return <div>Missing player ID</div>;
+import Image from 'next/image'
 
-  let connection;
-  try {
-    const connectionConfig = {
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME || 'nfl_analytics',
-      connectTimeout: 15000,
-    };
-    if (process.env.DB_SSL_CA) {
-      connectionConfig.ssl = { ca: process.env.DB_SSL_CA, rejectUnauthorized: true };
-    }
-    connection = await mysql.createConnection(connectionConfig);
+export default function PlayerPage({ params }) {
+  const playerId = params.id;
 
-    const [playerRows] = await connection.execute(
-      `SELECT 
-        R.gsis_id AS player_id,
-        R.full_name AS player_name,
-        R.position,
-        R.team,
-        R.jersey_number,
-        R.status,
-        R.headshot_url,
-        R.years_exp,
-        R.college,
-        R.draft_club,
-        R.draft_number,
-        R.rookie_year
-       FROM Rosters_2024 R
-       WHERE R.gsis_id = ?
-       LIMIT 1`,
-      [playerId]
-    );
+  // Example — replace with your actual fetched data
+  const player = {
+    name: "A.J. Brown",
+    position: "WR",
+    team: "PHI",
+    jersey: 11,
+    headshot: "/images/headshots/aj_brown.png", // or real URL
+  };
 
-    const [careerStats] = await connection.execute(
-      `SELECT
-         season_override AS season,
-         SUM(passing_yards) AS passing_yards,
-         SUM(rushing_yards) AS rushing_yards,
-         SUM(receiving_yards) AS receiving_yards,
-         SUM(fantasy_points_ppr) AS fantasy_points_ppr
-       FROM Player_Stats_Game_All
-       WHERE player_id = ?
-       GROUP BY season_override
-       ORDER BY season_override DESC`,
-      [playerId]
-    );
+  return (
+    <div className="min-h-screen bg-white text-gray-900 px-4 py-8">
+      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+        {/* Player Headshot */}
+        <div className="md:col-span-1 flex justify-center">
+          <Image
+            src={player.headshot}
+            alt={player.name}
+            width={250}
+            height={250}
+            className="rounded-xl shadow-md object-cover"
+          />
+        </div>
 
-    const [gameLogs] = await connection.execute(
-      `SELECT 
-        season,
-        week,
-        opponent_team_id,
-        SUM(passing_yards) AS passing_yards,
-        SUM(rushing_yards) AS rushing_yards,
-        SUM(receiving_yards) AS receiving_yards,
-        SUM(passing_tds) AS passing_tds,
-        SUM(rushing_tds) AS rushing_tds,
-        SUM(receiving_tds) AS receiving_tds,
-        SUM(fantasy_points_ppr) AS fantasy_points_ppr
-      FROM Player_Stats_Game_2024
-      WHERE player_id = ?
-      GROUP BY season, week, opponent_team_id
-      ORDER BY season DESC, week ASC`,
-      [playerId]
-    );
+        {/* Player Info + Stats */}
+        <div className="md:col-span-2 space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold">{player.name}</h1>
+            <p className="text-lg text-gray-600">
+              {player.position} | {player.team} | #{player.jersey}
+            </p>
+          </div>
 
-    await connection.end();
+          {/* Inject your stats, metrics, and sections here */}
+          <div className="space-y-4">
+            {/* Example Section */}
+            <div>
+              <h2 className="text-xl font-semibold border-b pb-1 mb-2">Game Logs</h2>
+              {/* Render game log table here */}
+            </div>
 
-    const player = playerRows[0] || null;
+            <div>
+              <h2 className="text-xl font-semibold border-b pb-1 mb-2">Career Stats</h2>
+              {/* Render career stats */}
+            </div>
 
-    console.log('PlayerPage data:', { player, careerStats, gameLogs });
-
-    return (
-      <PlayerProfileShell
-        player={player}
-        careerStats={careerStats}
-        gameLogs={gameLogs}
-      />
-    );
-  } catch (error) {
-    console.error('🔥 PlayerPage Error:', {
-      message: error.message,
-      code: error.code,
-      sqlMessage: error.sqlMessage,
-      stack: error.stack,
-    });
-    return (
-      <main style={{ padding: '2rem' }}>
-        <h1>Error</h1>
-        <p>{error.message}</p>
-      </main>
-    );
-  }
+            <div>
+              <h2 className="text-xl font-semibold border-b pb-1 mb-2">Receiving Metrics</h2>
+              {/* Render metrics */}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
