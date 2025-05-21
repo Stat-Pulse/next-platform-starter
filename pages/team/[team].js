@@ -136,7 +136,7 @@ export default function TeamPage({ teamData, injuries = [], error }) {
                 <h2 className="text-xl font-semibold mb-4">Injury Snapshot</h2>
                 {injuries.length > 0 ? injuries.map((inj, i) => (
                   <div key={i} className="border-b py-2">
-                    <p><strong>{inj.player_id}</strong></p>
+                    <p><strong>{inj.player_name}</strong></p>
                     <p className="text-gray-700">{inj.injury_description} - {inj.status}</p>
                     <p className="text-sm text-gray-500">{inj.report_date}</p>
                   </div>
@@ -210,10 +210,10 @@ export async function getServerSideProps({ params }) {
     );
 
     const [injuries] = await connection.execute(
-      `SELECT i.player_id, i.injury_description, i.status, i.report_date
+      `SELECT i.player_id, i.injury_description, i.status, i.report_date, p.player_name
        FROM Injuries i
        JOIN Players p ON i.player_id = p.player_id
-       JOIN Rosters_2024 r ON p.full_name = r.full_name
+       JOIN Rosters_2024 r ON p.first_name = r.first_name AND p.last_name = r.last_name
        WHERE r.team = ?
        ORDER BY i.report_date DESC
        LIMIT 5`,
