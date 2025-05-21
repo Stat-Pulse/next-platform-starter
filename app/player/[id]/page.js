@@ -6,17 +6,17 @@ import ReceivingMetricsTable from '@/components/player/ReceivingMetricsTable';
 async function getPlayerData(playerId) {
   try {
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/player/${playerId}`;
-    console.log('Fetching player data from:', url); // Debug log
+    console.log('Fetching player data from:', url);
     const res = await fetch(url, {
       cache: 'no-store',
     });
-    console.log('Fetch response status:', res.status); // Debug log
+    console.log('Fetch response status:', res.status);
     if (!res.ok) {
-      console.error('Fetch failed with status:', res.status);
+      console.error('Fetch failed with status:', res.status, 'Response:', await res.text());
       return null;
     }
     const data = await res.json();
-    console.log('Fetch response data:', data); // Debug log
+    console.log('Fetch response data:', data);
     return data;
   } catch (error) {
     console.error('Error fetching player data:', error);
@@ -29,7 +29,7 @@ export default async function PlayerProfilePage({ params }) {
   const data = await getPlayerData(playerId);
 
   if (!data || !data.player) {
-    console.log('No data or player found for ID:', playerId); // Debug log
+    console.log('No data or player found for ID:', playerId, 'Full data:', data);
     return notFound();
   }
 
