@@ -212,9 +212,9 @@ export async function getServerSideProps({ params }) {
     const [injuries] = await connection.execute(
       `SELECT i.player_id, i.injury_description, i.status, i.report_date
        FROM Injuries i
-       WHERE i.player_id IN (
-         SELECT player_id FROM Rosters_2024 WHERE team = ?
-       )
+       JOIN Players p ON i.player_id = p.player_id
+       JOIN Rosters_2024 r ON p.full_name = r.full_name
+       WHERE r.team = ?
        ORDER BY i.report_date DESC
        LIMIT 5`,
       [team]
