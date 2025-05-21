@@ -1,62 +1,122 @@
-// app/player/[id]/page.js
+import Image from 'next/image';
+import { notFound } from 'next/navigation';
 
-import Image from 'next/image'
+async function getPlayerData(playerId) {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/player/${playerId}`, {
+    cache: 'no-store',
+  });
 
-export default function PlayerPage({ params }) {
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export default async function PlayerProfilePage({ params }) {
   const playerId = params.id;
+  const data = await getPlayerData(playerId);
 
-  // Example — replace with your actual fetched data
-  const player = {
-    name: "A.J. Brown",
-    position: "WR",
-    team: "PHI",
-    jersey: 11,
-    headshot: "/images/headshots/aj_brown.png", // or real URL
-  };
+  if (!data || !data.player) return notFound();
+
+  const { player, gameLogs, receivingStats } = data;
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 px-4 py-8">
-      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-        {/* Player Headshot */}
-        <div className="md:col-span-1 flex justify-center">
+    <div className="max-w-6xl mx-auto px-4 py-10">
+      {/* Header */}
+      <div className="flex items-center gap-6 mb-8">
+        {player.headshot_url && (
           <Image
-            src={player.headshot}
-            alt={player.name}
-            width={250}
-            height={250}
-            className="rounded-xl shadow-md object-cover"
+            src={player.headshot_url}
+            alt={player.player_name}
+            width={140}
+            height={140}
+            className="rounded-md shadow-lg border"
           />
-        </div>
-
-        {/* Player Info + Stats */}
-        <div className="md:col-span-2 space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold">{player.name}</h1>
-            <p className="text-lg text-gray-600">
-              {player.position} | {player.team} | #{player.jersey}
-            </p>
-          </div>
-
-          {/* Inject your stats, metrics, and sections here */}
-          <div className="space-y-4">
-            {/* Example Section */}
-            <div>
-              <h2 className="text-xl font-semibold border-b pb-1 mb-2">Game Logs</h2>
-              {/* Render game log table here */}
-            </div>
-
-            <div>
-              <h2 className="text-xl font-semibold border-b pb-1 mb-2">Career Stats</h2>
-              {/* Render career stats */}
-            </div>
-
-            <div>
-              <h2 className="text-xl font-semibold border-b pb-1 mb-2">Receiving Metrics</h2>
-              {/* Render metrics */}
-            </div>
-          </div>
+        )}
+        <div>
+          <h1 className="text-3xl font-bold">{player.player_name}</h1>
+          <p className="text-sm text-gray-500">
+            {player.position} | {player.team_abbr} | #{player.jersey_number}
+          </p>
         </div>
       </div>
+
+      {/* Game Logs */}
+      {gameLogs?.length > 0 && (
+        <section className="mb-10">
+          <h2 className="text-2xl font-semibold mb-4">Game Logs</h2>
+          <div className="overflow-x-auto border rounded">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-100 text-left">
+                <tr>
+                  <th className="p-2">Week</th>
+                  <th className="p-2">Opp</th>
+                  <th className="p-2">Targets</th>
+                  <th className="p-2">Receptions</th>
+                  <th className="p-2">Yards</th>
+                  <th className="p-2">TDs</th>
+                </tr>
+              </thead>
+              <tbody>
+                {gameLogs.map((log, i) => (
+                  <tr key={i} className="border-t">
+                    <td className="p-2">{log.week}</td>
+                    <td className="p-2">{log.opponent}</td>
+                    <td className="p-2">{log.targets}</td>
+                    <td className="p-2">{log.receptions}</td>
+                    <td className="p-2">{log.receiving_yards}</td>
+                    <td className="p-2">{log.receiving_tds}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {/* Career Totals */}
+      {player.career && (
+        <section className="mb-10">
+          <h2 className="text-2xl font-semibold mb-4">Career Stats</h2>
+          <ul className="text-sm leading-relaxed">
+            <li>Total Games: {player.career.games}</li>
+            <li>Total Receptions: {player.career.receptions}</li>
+            <li>Total Yards: {player.career.yards}</li>
+            <li>Total TDs: {player.career.tds}</li>
+          </ul>
+        </section>
+      )}
+
+      {/* Receiving Metrics */}
+      {receivingStats?.length > 0 && (
+        <section>
+          <h2 className="text-2xl font-semibold mb-4">Receiving Metrics</h2>
+          <div className="overflow-x-auto border rounded">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-100 text-left">
+                <tr>
+                  <th className="p-2">Season</th>
+                  <th className="p-2">Targets</th>
+                  <th className="p-2">Air Yards</th>
+                  <th className="p-2">YAC</th>
+                  <th className="p-2">EPA</th>
+                  <th className="p-2">WOPR</th>
+                </tr>
+              </thead>
+              <tbody>
+                {receivingStats.map((row, i) => (
+                  <tr key={i} className="border-t">
+                    <td className="p-2">{row.season}</td>
+                    <td className="p-2">{row.targets}</td>
+                    <td className="p-2">{row.receiving_air_yards}</td>
+                    <td className="p-2">{row.receiving_yards_after_catch}</td>
+                    <td className="p-2">{row.receiving_epa}</td>
+                    <td className="p-2">{row.wopr}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
