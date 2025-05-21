@@ -1,6 +1,6 @@
 // app/layout.tsx
 
-import '../styles/globals.css';   // ← ensure this path matches your project
+import '../styles/globals.css';   // ← Make sure this points to /styles/globals.css
 
 export const metadata = {
   title: 'StatPulse Analytics',
