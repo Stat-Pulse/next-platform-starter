@@ -1,6 +1,6 @@
 // app/layout.tsx
 
-import '../styles/globals.css';   // ← Make sure this points to /styles/globals.css
+import '../styles/globals.css'; // or './globals.css' if moved
 
 export const metadata = {
   title: 'StatPulse Analytics',
@@ -15,6 +15,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-white text-gray-900 font-sans">
+        {/* DEBUG TAILWIND */}
+        <div className="fixed top-4 left-4 w-6 h-6 bg-red-500 z-50" />
         {children}
       </body>
     </html>
