@@ -13,9 +13,37 @@ const TEAM_NAME_MAP = {
 
 const slugToAbbreviation = {
   cardinals: 'ARI',
+  falcons: 'ATL',
+  ravens: 'BAL',
   bills: 'BUF',
-  chiefs: 'KC', // Added for Chiefs
-  // Add other team mappings as needed
+  panthers: 'CAR',
+  bears: 'CHI',
+  bengals: 'CIN',
+  browns: 'CLE',
+  cowboys: 'DAL',
+  broncos: 'DEN',
+  lions: 'DET',
+  packers: 'GB',
+  texans: 'HOU',
+  colts: 'IND',
+  jaguars: 'JAX',
+  chiefs: 'KC',
+  raiders: 'LV',
+  chargers: 'LAC',
+  rams: 'LAR',
+  dolphins: 'MIA',
+  vikings: 'MIN',
+  patriots: 'NE',
+  saints: 'NO',
+  giants: 'NYG',
+  jets: 'NYJ',
+  eagles: 'PHI',
+  steelers: 'PIT',
+  49ers: 'SF',
+  seahawks: 'SEA',
+  buccaneers: 'TB',
+  titans: 'TEN',
+  commanders: 'WAS',
 };
 
 export default function TeamPage({ teamData, error }) {
