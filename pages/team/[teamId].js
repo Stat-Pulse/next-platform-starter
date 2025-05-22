@@ -1,5 +1,6 @@
+// pages/teams/[teamId].js
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useRouter } from 'next/router';
 
 // Placeholder for fetching data (replace with your actual API calls)
 const fetchTeamData = async (teamId) => {
@@ -12,8 +13,8 @@ const fetchTeamData = async (teamId) => {
         logo_url: 'path/to/detroit-lions-logo.png',
       },
       seasonStats: {
-        wins: 13,
-        losses: 3,
+        wins: 32,
+        losses: 21,
         points_scored: 564,
         points_allowed: 342,
       },
@@ -39,11 +40,23 @@ const teamLogos = {
   // Add more team logos as needed
 };
 
-const TeamPage = ({ newsItems }) => {
-  const { teamId } = useParams(); // Get teamId from URL (e.g., /teams/DET)
+// Placeholder newsItems (replace with your actual news feed data)
+const newsItems = [
+  { title: 'News 1', link: '#', timestamp: '1 hour ago' },
+  { title: 'News 2', link: '#', timestamp: '2 hours ago' },
+  { title: 'News 3', link: '#', timestamp: '3 hours ago' },
+  { title: 'News 4', link: '#', timestamp: '4 hours ago' },
+  { title: 'News 5', link: '#', timestamp: '5 hours ago' },
+  { title: 'News 6', link: '#', timestamp: '6 hours ago' },
+];
+
+const TeamPage = () => {
+  const router = useRouter();
+  const { teamId } = router.query; // Get teamId from URL (e.g., /teams/DET)
   const [teamData, setTeamData] = useState(null);
 
   useEffect(() => {
+    if (!teamId) return; // Wait for teamId to be available
     const loadTeamData = async () => {
       const data = await fetchTeamData(teamId);
       setTeamData(data);
