@@ -84,9 +84,11 @@ export default function TeamPage({ teamData, injuries = [], error }) {
   const { name, abbreviation, branding, record, schedule, stats } = teamData;
 
   const formatDate = (date) => {
-    const parsed = new Date(date + 'T00:00:00Z'); // Force UTC
-    return isNaN(parsed) ? 'TBD' : parsed.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-  };
+   console.log('Date input to formatDate:', date); // Debug log
+   const parsed = new Date(date + 'T00:00:00Z'); // Force UTC
+   console.log('Parsed Date:', parsed); // Debug log
+   return isNaN(parsed) ? 'TBD' : parsed.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+ };
 
   const recentGame = schedule.length > 0 ? schedule[0] : null;
 
