@@ -1803,16 +1803,16 @@
       "first_downs": 177
     },
     "rushing": {
-      "attempts": 503,
-      "yards Shia
-      "touchdowns": 18,
-      "yards_per_attempt": 4.6,
-      "first_downs": 129
+      "attempts": 424,
+      "yards": 1783,
+      "touchdowns": 13,
+      "yards_per_attempt": 4.2,
+      "first_downs": 104
     },
     "penalties": {
-      "penalties": 106,
-      "yards": 870,
-      "first_downs_by_penalty": 25
+      "penalties": 112,
+      "yards": 928,
+      "first_downs_by_penalty": 27
     },
     "other": {
       "scoring_percentage": 38.7,
