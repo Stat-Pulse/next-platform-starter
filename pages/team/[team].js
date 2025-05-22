@@ -247,7 +247,15 @@ export async function getServerSideProps({ params }) {
       const opponent = isHome ? g.away_team_id : g.home_team_id;
       const score = g.is_final ? `${g.home_score} - ${g.away_score}` : 'TBD';
       const result = g.is_final ? ((isHome && g.home_score > g.away_score) || (!isHome && g.away_score > g.home_score)) ? 'W' : 'L' : '';
-      return { gameId: g.game_id, week: g.week, date: g.date, opponent, homeAway: isHome ? 'H' : 'A', score, result };
+      return { 
+        gameId: g.game_id, 
+        week: g.week, 
+        date: g.game_date, // Ensure full date is passed
+        opponent, 
+        homeAway: isHome ? 'H' : 'A', 
+        score, 
+        result 
+      };
     });
 
     const wins = schedule.filter(g => g.result === 'W').length;
@@ -264,12 +272,11 @@ export async function getServerSideProps({ params }) {
     );
 
     const [injuries] = await connection.execute(
-      `SELECT i.player_id, i.injury_description, i.status, i.report_date, p.player_name
-       FROM Injuries i
-       JOIN Players p ON i.player_id = p.player_id
-       JOIN Rosters_2024 r ON p.player_name = r.full_name
-       WHERE r.team = ?
-       ORDER BY i.report_date DESC
+      `SELECT gsis_id AS player_id, report_primary_injury AS injury_description, 
+              report_status AS status, date_modified AS report_date, full_name AS player_name
+       FROM Injuries
+       WHERE team = ?
+       ORDER BY date_modified DESC
        LIMIT 5`,
       [team]
     );
