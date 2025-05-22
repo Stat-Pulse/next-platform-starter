@@ -122,8 +122,13 @@ export default function TeamPage({ teamData, injuries = [], error, stats }) {
 
   const formatDate = (date) => {
     if (!date || typeof date !== 'string') return 'TBD'; // Ensure date is a string
+    // Try parsing the date
     const parsed = new Date(date + 'T00:00:00Z'); // Force UTC
-    return isNaN(parsed) ? date : parsed.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    if (!isNaN(parsed)) {
+      return parsed.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    }
+    // Fallback to raw date string if parsing fails
+    return date;
   };
 
   const recentGame = schedule.length > 0 ? schedule[0] : null;
