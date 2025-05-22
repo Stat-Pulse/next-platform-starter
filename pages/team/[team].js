@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import mysql from 'mysql2/promise';
-import teamDefenseData from '../../../data/team_defense_2024.json'; // Import the JSON file
+import teamDefenseData from '../../data/team_defense_2024.json'; // Corrected path
 
 const slugToAbbreviation = {
   cardinals: 'ARI',
@@ -285,10 +285,11 @@ export async function getServerSideProps({ params }) {
       const opponent = isHome ? g.away_team_id : g.home_team_id;
       const score = g.is_final ? `${g.home_score} - ${g.away_score}` : 'TBD';
       const result = g.is_final ? ((isHome && g.home_score > g.away_score) || (!isHome && g.away_score > g.home_score)) ? 'W' : 'L' : '';
+      const gameDate = g.game_date instanceof Date ? g.game_date.toISOString().split('T')[0] : g.game_date;
       return { 
         gameId: g.game_id, 
         week: g.week, 
-        date: g.game_date ? g.game_date.toString() : 'TBD', // Ensure date is a string
+        date: gameDate ? gameDate.toString() : 'TBD', // Ensure date is a string
         opponent, 
         homeAway: isHome ? 'H' : 'A', 
         score, 
