@@ -25,7 +25,8 @@
     "react-chartjs-2": "^5.2.0",
     "rss-parser": "^3.12.0",
     "fuse.js": "^6.6.2",
-    "@netlify/next": "^1.4.0"
+    "@netlify/next": "^1.4.0",
+    "react-router-dom": "^6.23.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",
