@@ -12,8 +12,8 @@ const fetchTeamData = async (teamId) => {
         logo_url: 'path/to/detroit-lions-logo.png',
       },
       seasonStats: {
-        wins: 32,
-        losses: 21,
+        wins: 13,
+        losses: 3,
         points_scored: 564,
         points_allowed: 342,
       },
