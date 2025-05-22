@@ -3,7 +3,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import mysql from 'mysql2/promise';
-import teamDefenseData from '../../data/team_defense_2024.json'; // Corrected path
+import teamDefenseData from '../../data/team_defense_2024.json';
+import teamOffenseData from '../../data/team_offense_2024.json';
 
 const slugToAbbreviation = {
   cardinals: 'ARI',
@@ -111,7 +112,7 @@ const teamNameToAbbrMap = {
   "Washington Commanders": "WAS"
 };
 
-export default function TeamPage({ teamData, injuries = [], error, stats }) {
+export default function TeamPage({ teamData, injuries = [], error, defenseStats, offenseStats }) {
   const [activeTab, setActiveTab] = useState('home');
 
   if (error || !teamData) {
@@ -122,13 +123,11 @@ export default function TeamPage({ teamData, injuries = [], error, stats }) {
 
   const formatDate = (date) => {
     if (!date || typeof date !== 'string') return 'TBD'; // Ensure date is a string
-    // Try parsing the date
     const parsed = new Date(date + 'T00:00:00Z'); // Force UTC
     if (!isNaN(parsed)) {
       return parsed.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
     }
-    // Fallback to raw date string if parsing fails
-    return date;
+    return date; // Fallback to raw date string
   };
 
   const recentGame = schedule.length > 0 ? schedule[0] : null;
@@ -203,18 +202,35 @@ export default function TeamPage({ teamData, injuries = [], error, stats }) {
                 )}
               </section>
 
-              {/* Key Stats */}
-              {stats ? (
+              {/* Key Team Stats */}
+              {(defenseStats || offenseStats) ? (
                 <section className="bg-white p-4 rounded shadow">
                   <h2 className="text-xl font-semibold mb-4">Key Team Stats</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div><strong>Points Allowed:</strong> {stats.points_allowed || 'N/A'}</div>
-                    <div><strong>Yards Allowed:</strong> {stats.total_yards_allowed || 'N/A'}</div>
-                    <div><strong>Sacks:</strong> {stats.sacks || 'N/A'}</div>
-                    <div><strong>Turnovers:</strong> {stats.turnovers || 'N/A'}</div>
-                    <div><strong>Red Zone %:</strong> {stats.red_zone_pct ? `${(stats.red_zone_pct * 100).toFixed(1)}%` : 'N/A'}</div>
-                    <div><strong>3rd Down %:</strong> {stats.third_down_pct ? `${(stats.third_down_pct * 100).toFixed(1)}%` : 'N/A'}</div>
-                    <div><strong>DVOA Rank:</strong> {stats.dvoa_rank || 'N/A'}</div>
+                    {/* Defense Stats */}
+                    {defenseStats && (
+                      <>
+                        <div><strong>Points Allowed:</strong> {defenseStats.points_allowed || 'N/A'}</div>
+                        <div><strong>Yards Allowed:</strong> {defenseStats.total_yards_allowed || 'N/A'}</div>
+                        <div><strong>Sacks (Def):</strong> {defenseStats.sacks || 'N/A'}</div>
+                        <div><strong>Turnovers Forced:</strong> {defenseStats.turnovers || 'N/A'}</div>
+                        <div><strong>Red Zone Def %:</strong> {defenseStats.red_zone_pct ? `${(defenseStats.red_zone_pct * 100).toFixed(1)}%` : 'N/A'}</div>
+                        <div><strong>3rd Down Def %:</strong> {defenseStats.third_down_pct ? `${(defenseStats.third_down_pct * 100).toFixed(1)}%` : 'N/A'}</div>
+                        <div><strong>DVOA Rank:</strong> {defenseStats.dvoa_rank || 'N/A'}</div>
+                      </>
+                    )}
+                    {/* Offense Stats */}
+                    {offenseStats && (
+                      <>
+                        <div><strong>Points Scored:</strong> {offenseStats.points_for || 'N/A'}</div>
+                        <div><strong>Total Yards:</strong> {offenseStats.total_yards || 'N/A'}</div>
+                        <div><strong>Passing Yards:</strong> {offenseStats.passing.yards || 'N/A'}</div>
+                        <div><strong>Rushing Yards:</strong> {offenseStats.rushing.yards || 'N/A'}</div>
+                        <div><strong>Turnovers (Off):</strong> {offenseStats.turnovers || 'N/A'}</div>
+                        <div><strong>QB Rating:</strong> {offenseStats.passing.qb_rating || 'N/A'}</div>
+                        <div><strong>Points Per Game:</strong> {offenseStats.points_per_game || 'N/A'}</div>
+                      </>
+                    )}
                   </div>
                 </section>
               ) : (
@@ -291,6 +307,7 @@ export async function getServerSideProps({ params }) {
       const score = g.is_final ? `${g.home_score} - ${g.away_score}` : 'TBD';
       const result = g.is_final ? ((isHome && g.home_score > g.away_score) || (!isHome && g.away_score > g.home_score)) ? 'W' : 'L' : '';
       const gameDate = g.game_date instanceof Date ? g.game_date.toISOString().split('T')[0] : g.game_date;
+      console.log(`Team: ${team}, Game Date: ${gameDate}`); // Debug log
       return { 
         gameId: g.game_id, 
         week: g.week, 
@@ -318,20 +335,27 @@ export async function getServerSideProps({ params }) {
       [team]
     );
 
-    // Fetch stats from team_defense_2024.json
-    let stats = null;
+    // Fetch defense stats from team_defense_2024.json
+    let defenseStats = null;
     const teamName = TEAM_NAME_MAP[team];
-    const teamStats = teamDefenseData.find(data => data.team === teamName);
-    if (teamStats) {
-      stats = {
-        points_allowed: teamStats.total_yards_to.points_allowed,
-        total_yards_allowed: teamStats.total_yards_to.yards,
-        sacks: teamStats.advanced_defense.sacks,
-        turnovers: teamStats.total_yards_to.turnovers,
-        red_zone_pct: teamStats.conversions_against.red_zone_percentage / 100, // Convert percentage to decimal
-        third_down_pct: teamStats.conversions_against.third_down_percentage / 100, // Convert percentage to decimal
+    const teamDefenseStats = teamDefenseData.find(data => data.team === teamName);
+    if (teamDefenseStats) {
+      defenseStats = {
+        points_allowed: teamDefenseStats.total_yards_to.points_allowed,
+        total_yards_allowed: teamDefenseStats.total_yards_to.yards,
+        sacks: teamDefenseStats.advanced_defense.sacks,
+        turnovers: teamDefenseStats.total_yards_to.turnovers,
+        red_zone_pct: teamDefenseStats.conversions_against.red_zone_percentage / 100,
+        third_down_pct: teamDefenseStats.conversions_against.third_down_percentage / 100,
         dvoa_rank: null // Not available in JSON
       };
+    }
+
+    // Fetch offense stats from team_offense_2024.json
+    let offenseStats = null;
+    const teamOffenseStats = teamOffenseData.teams.find(data => data.team_name === teamName);
+    if (teamOffenseStats) {
+      offenseStats = teamOffenseStats.offense;
     }
 
     return {
@@ -347,7 +371,8 @@ export async function getServerSideProps({ params }) {
           record,
           schedule: [recentGame],
         },
-        stats,
+        defenseStats,
+        offenseStats,
         injuries,
       },
     };
