@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -13,7 +13,7 @@ async function getPlayerData(playerId) {
     const data = await res.json();
     return data;
   } catch (error) {
-    console.error('Fetch error:', error);
+    console.error('Error fetching player data:', error);
     return null;
   }
 }
@@ -21,76 +21,81 @@ async function getPlayerData(playerId) {
 export default async function PlayerProfilePage({ params }) {
   const playerId = params.id;
   const data = await getPlayerData(playerId);
+
   if (!data || !data.player) return notFound();
 
   const { player, gameLogs, receivingStats } = data;
-  const gameLogsWithTDs = gameLogs.map((log) => ({
+  const gameLogsWithTotalTDs = gameLogs.map((log) => ({
     ...log,
     total_tds: (log.passing_tds || 0) + (log.rushing_tds || 0) + (log.receiving_tds || 0),
   }));
 
   return (
-    <div className="max-w-5xl mx-auto p-4 space-y-10">
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row items-center bg-white rounded-lg shadow p-6 gap-6">
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      {/* Player Header */}
+      <div className="bg-white shadow rounded-lg p-6 flex gap-6">
         {player.headshot_url && (
           <Image
             src={player.headshot_url}
             alt={player.player_name}
-            width={100}
-            height={100}
-            className="rounded-full border border-gray-300"
+            width={120}
+            height={120}
+            className="rounded-full border border-gray-300 object-cover"
           />
         )}
-        <div className="text-center sm:text-left">
+        <div>
           <h1 className="text-3xl font-bold text-gray-900">{player.player_name}</h1>
-          <p className="text-sm text-gray-600">{player.position} | {player.team_abbr} | #{player.jersey_number}</p>
-          <ul className="mt-2 text-sm text-gray-700 space-y-1">
-            <li><strong>College:</strong> {player.college || 'N/A'}</li>
-            <li><strong>Drafted:</strong> {player.draft_club || 'Undrafted'} #{player.draft_number || 'N/A'} ({player.rookie_year || 'N/A'})</li>
-            <li><strong>Experience:</strong> {player.years_exp || 'N/A'} years</li>
-            <li><strong>Status:</strong> {player.status || 'N/A'}</li>
-          </ul>
+          <p className="text-sm text-gray-500">
+            {player.position} | {player.team_abbr} | #{player.jersey_number}
+          </p>
+          <div className="mt-2 grid grid-cols-2 gap-x-8 gap-y-1 text-sm text-gray-700">
+            <div><span className="font-semibold">College:</span> {player.college || 'N/A'}</div>
+            <div><span className="font-semibold">Drafted:</span> {player.draft_club || 'Undrafted'} #{player.draft_number || 'N/A'} ({player.rookie_year || 'N/A'})</div>
+            <div><span className="font-semibold">Experience:</span> {player.years_exp || 'N/A'} years</div>
+            <div><span className="font-semibold">Status:</span> {player.status || 'N/A'}</div>
+          </div>
         </div>
       </div>
 
-      {/* Game Logs Section */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4">Game Logs</h2>
-        <SeasonSelector gameLogs={gameLogsWithTDs} />
-      </div>
+      {/* Game Logs */}
+      {gameLogs?.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Game Logs</h2>
+          <SeasonSelector gameLogs={gameLogsWithTotalTDs} />
+        </section>
+      )}
 
-      {/* Career Stats Section */}
+      {/* Career Stats */}
       {player.career && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Career Stats</h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm text-left border rounded">
-              <thead className="bg-gray-100">
+        <section className="mt-10">
+          <h2 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Career Totals</h2>
+          <div className="overflow-x-auto border rounded-md shadow-sm">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-50 text-left text-gray-700">
                 <tr>
-                  <th className="px-4 py-2">Total Games</th>
-                  <th className="px-4 py-2">Receptions</th>
-                  <th className="px-4 py-2">Yards</th>
-                  <th className="px-4 py-2">TDs</th>
+                  <th className="p-3 font-semibold">Games</th>
+                  <th className="p-3 font-semibold text-center">Receptions</th>
+                  <th className="p-3 font-semibold text-center">Yards</th>
+                  <th className="p-3 font-semibold text-center">TDs</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-t">
-                  <td className="px-4 py-2">{player.career.games}</td>
-                  <td className="px-4 py-2">{player.career.receptions}</td>
-                  <td className="px-4 py-2">{player.career.yards}</td>
-                  <td className="px-4 py-2">{player.career.tds}</td>
+                  <td className="p-3">{player.career.games}</td>
+                  <td className="p-3 text-center">{player.career.receptions}</td>
+                  <td className="p-3 text-center">{player.career.yards}</td>
+                  <td className="p-3 text-center">{player.career.tds}</td>
                 </tr>
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
       )}
 
-      {/* Receiving Metrics Section */}
-      <div className="bg-white rounded-lg shadow p-6">
+      {/* Receiving Metrics */}
+      <section className="mt-10">
         <ReceivingMetricsTable playerId={playerId} />
-      </div>
+      </section>
     </div>
   );
 }
