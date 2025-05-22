@@ -2,84 +2,136 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
-// Placeholder for fetching data (replace with your actual API calls)
-const fetchTeamData = async (teamId) => {
-  try {
-    // Simulate API calls with provided data for DET
-    if (teamId === 'DET') {
-      return {
-        team: {
-          team_name: 'Detroit Lions',
-          division: 'NFC North',
-          logo_url: 'path/to/detroit-lions-logo.png',
-        },
-        seasonStats: {
-          wins: 32,
-          losses: 21,
-          points_scored: 564,
-          points_allowed: 342,
-        },
-        lastGame: {
-          game_date: '2025-01-18',
-          game_time: '20:00:00',
-          home_team_id: 'DET',
-          away_team_id: 'WAS',
-          home_score: 31,
-          away_score: 45,
-        },
-        upcomingGame: null,
-      };
-    }
-    // Add logic for other teams or actual API calls
-    return {};
-  } catch (error) {
-    console.error('Error fetching team data:', error);
-    return null;
-  }
-};
-
-// Placeholder for team logos (fetch dynamically from Teams table)
-const teamLogos = {
-  DET: 'path/to/detroit-lions-logo.png',
-  WAS: 'path/to/washington-commanders-logo.png',
-  // Add more team logos as needed
-};
-
-// Placeholder newsItems (replace with your actual news feed data)
-const newsItems = [
-  { title: 'News 1', link: '#', timestamp: '1 hour ago' },
-  { title: 'News 2', link: '#', timestamp: '2 hours ago' },
-  { title: 'News 3', link: '#', timestamp: '3 hours ago' },
-  { title: 'News 4', link: '#', timestamp: '4 hours ago' },
-  { title: 'News 5', link: '#', timestamp: '5 hours ago' },
-  { title: 'News 6', link: '#', timestamp: '6 hours ago' },
-];
-
 // Placeholder components until the actual ones are implemented
-const TeamDepthChart = () => <div>Team Depth Chart - Coming Soon</div>;
-const TeamStatsTable = () => <div>Team Stats Table - Coming Soon</div>;
-const TeamInjuries = () => <div>Team Injuries - Coming Soon</div>;
-const TeamSchedule = () => <div>Team Schedule - Coming Soon</div>;
+const TeamDepthChart = ({ depthChart }) => (
+  <div>
+    <h2 className="text-xl font-semibold mb-4">Depth Chart</h2>
+    {depthChart.length > 0 ? (
+      <ul>
+        {depthChart.map((player, idx) => (
+          <li key={idx}>
+            {player.position}: {player.first_name} {player.last_name} (Depth: {player.depth})
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p>No depth chart available.</p>
+    )}
+  </div>
+);
+
+const TeamStatsTable = ({ detailedStats }) => (
+  <div>
+    <h2 className="text-xl font-semibold mb-4">Team Stats</h2>
+    {detailedStats.total_passing_yards !== undefined ? (
+      <div>
+        <p>Total Passing Yards: {detailedStats.total_passing_yards}</p>
+        <p>Total Rushing Yards: {detailedStats.total_rushing_yards}</p>
+        <p>Total Receiving Yards: {detailedStats.total_receiving_yards}</p>
+      </div>
+    ) : (
+      <p>No stats available.</p>
+    )}
+  </div>
+);
+
+const TeamInjuries = ({ injuries }) => (
+  <div>
+    <h2 className="text-xl font-semibold mb-4">Injuries</h2>
+    {injuries.length > 0 ? (
+      <ul>
+        {injuries.map((injury, idx) => (
+          <li key={idx}>
+            {injury.first_name} {injury.last_name} ({injury.position}): {injury.injury_type}, Out since {injury.date_out}, Expected return: {injury.expected_return}
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p>No injuries reported.</p>
+    )}
+  </div>
+);
+
+const TeamSchedule = ({ schedule }) => (
+  <div>
+    <h2 className="text-xl font-semibold mb-4">Schedule</h2>
+    {schedule.length > 0 ? (
+      <ul>
+        {schedule.map((game, idx) => (
+          <li key={idx}>
+            {new Date(game.game_date).toLocaleDateString('en-US', {
+              weekday: 'short',
+              month: 'short',
+              day: 'numeric',
+            })}, {game.game_time.slice(0, 5)}: {game.home_team_id} vs {game.away_team_id} at {game.stadium_name}
+            {game.is_final ? ` (Final: ${game.home_score} - ${game.away_score})` : ' (Upcoming)'}
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p>No games scheduled.</p>
+    )}
+  </div>
+);
 
 const TeamPage = () => {
   const router = useRouter();
-  const { teamId } = router.query; // Get teamId from URL (e.g., /teams/DET)
+  const { teamId } = router.query;
   const [teamData, setTeamData] = useState(null);
+  const [teamLogos, setTeamLogos] = useState({});
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('overview'); // Default to 'overview'
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
-    if (!teamId) return; // Wait for teamId to be available
-    const loadTeamData = async () => {
-      const data = await fetchTeamData(teamId);
-      if (!data) {
+    if (!teamId) return;
+
+    const fetchTeamData = async () => {
+      try {
+        const response = await fetch(`/api/teams/${teamId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch team data');
+        }
+        const data = await response.json();
+        setTeamData(data);
+      } catch (err) {
+        console.error('Error fetching team data:', err);
         setError('Failed to load team data.');
-        return;
       }
-      setTeamData(data);
     };
-    loadTeamData();
+
+    fetchTeamData();
   }, [teamId]);
+
+  useEffect(() => {
+    if (!teamData || !teamData.lastGame) return;
+
+    const fetchLogos = async () => {
+      const logoData = {};
+      logoData[teamId] = teamData.team.logo_url;
+
+      const lastGame = teamData.lastGame;
+      if (lastGame) {
+        const teamsToFetch = [lastGame.home_team_id, lastGame.away_team_id].filter(
+          (id) => id !== teamId
+        );
+        for (const id of teamsToFetch) {
+          try {
+            const response = await fetch(`/api/teams/${id}`);
+            if (response.ok) {
+              const data = await response.json();
+              logoData[id] = data.team.logo_url;
+            }
+          } catch (error) {
+            console.error(`Error fetching logo for team ${id}:`, error);
+          }
+        }
+      }
+
+      setTeamLogos(logoData);
+    };
+
+    fetchLogos();
+  }, [teamData, teamId]);
 
   if (error) {
     return <div className="container mx-auto py-6 text-red-600">{error}</div>;
@@ -89,7 +141,7 @@ const TeamPage = () => {
     return <div className="container mx-auto py-6">Loading...</div>;
   }
 
-  const { team, seasonStats, lastGame, upcomingGame } = teamData;
+  const { team, seasonStats, lastGame, upcomingGame, depthChart, detailedStats, injuries, schedule, news } = teamData;
 
   return (
     <div className="container mx-auto py-6">
@@ -97,7 +149,9 @@ const TeamPage = () => {
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-blue-600">{team?.team_name || 'Unknown Team'}</h1>
         <p className="text-lg text-gray-600">
-          Record: {seasonStats ? `${seasonStats.wins}-${seasonStats.losses}` : 'Loading...'}
+          Record: {seasonStats?.wins !== undefined && seasonStats?.losses !== undefined
+            ? `${seasonStats.wins}-${seasonStats.losses}`
+            : 'N/A'}
         </p>
         <nav className="flex space-x-4 mt-2">
           <button
@@ -119,7 +173,7 @@ const TeamPage = () => {
             Schedule
           </button>
           <button
-            onClick={() => setActiveTab('injuries')}
+            onClick(() => setActiveTab('injuries')}
             className={`text-blue-600 hover:underline ${activeTab === 'injuries' ? 'font-bold' : ''}`}
           >
             Injuries
@@ -149,19 +203,25 @@ const TeamPage = () => {
                 <div className="border p-4 rounded">
                   <p className="text-gray-600">Record</p>
                   <p className="text-lg font-semibold">
-                    {seasonStats ? `${seasonStats.wins}-${seasonStats.losses}` : 'Loading...'}
+                    {seasonStats?.wins !== undefined && seasonStats?.losses !== undefined
+                      ? `${seasonStats.wins}-${seasonStats.losses}`
+                      : 'N/A'}
                   </p>
                 </div>
                 <div className="border p-4 rounded">
                   <p className="text-gray-600">Points Scored</p>
                   <p className="text-lg font-semibold">
-                    {seasonStats?.points_scored || 'Loading...'}
+                    {seasonStats?.points_scored !== undefined
+                      ? seasonStats.points_scored
+                      : 'N/A'}
                   </p>
                 </div>
                 <div className="border p-4 rounded">
                   <p className="text-gray-600">Points Allowed</p>
                   <p className="text-lg font-semibold">
-                    {seasonStats?.points_allowed || 'Loading...'}
+                    {seasonStats?.points_allowed !== undefined
+                      ? seasonStats.points_allowed
+                      : 'N/A'}
                   </p>
                 </div>
               </div>
@@ -281,29 +341,29 @@ const TeamPage = () => {
           <div className="md:col-span-1">
             <div className="bg-white p-4 rounded shadow">
               <h2 className="text-xl font-semibold mb-4">Latest News</h2>
-              {newsItems.length === 0 ? (
-                <p className="text-gray-500">Loading latest news...</p>
-              ) : (
+              {news && news.length > 0 ? (
                 <div className="space-y-4">
-                  {newsItems.slice(0, 6).map((news, idx) => (
+                  {news.map((newsItem, idx) => (
                     <div key={idx} className="border-b pb-4 last:border-b-0">
                       <h4 className="text-md font-semibold text-gray-800 mb-2">
-                        {news.title}
+                        {newsItem.title}
                       </h4>
                       <div className="flex justify-between items-center">
                         <a
-                          href={news.link}
+                          href={newsItem.link}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-600 text-sm hover:underline"
                         >
                           Read More
                         </a>
-                        <span className="text-xs text-gray-600">{news.timestamp}</span>
+                        <span className="text-xs text-gray-600">{newsItem.timestamp}</span>
                       </div>
                     </div>
                   ))}
                 </div>
+              ) : (
+                <p className="text-gray-500">No news available.</p>
               )}
             </div>
           </div>
@@ -311,10 +371,10 @@ const TeamPage = () => {
       )}
 
       {/* Render other tabs */}
-      {activeTab === 'depthChart' && <TeamDepthChart />}
-      {activeTab === 'stats' && <TeamStatsTable />}
-      {activeTab === 'injuries' && <TeamInjuries />}
-      {activeTab === 'schedule' && <TeamSchedule />}
+      {activeTab === 'depthChart' && <TeamDepthChart depthChart={depthChart} />}
+      {activeTab === 'stats' && <TeamStatsTable detailedStats={detailedStats} />}
+      {activeTab === 'injuries' && <TeamInjuries injuries={injuries} />}
+      {activeTab === 'schedule' && <TeamSchedule schedule={schedule} />}
     </div>
   );
 };
