@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import mysql from 'mysql2/promise';
-import teamDefenseData from '../../../public/data/team_defense_2024.json'; // Import the JSON file
+import teamDefenseData from '../../../data/team_defense_2024.json'; // Import the JSON file
 
 const slugToAbbreviation = {
   cardinals: 'ARI',
