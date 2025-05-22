@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import mysql from 'mysql2/promise';
+import teamDefenseData from '../../../public/data/team_defense_2024.json'; // Import the JSON file
 
 const slugToAbbreviation = {
   cardinals: 'ARI',
@@ -74,21 +75,56 @@ const TEAM_NAME_MAP = {
   WAS: "Washington Commanders",
 };
 
-export default function TeamPage({ teamData, injuries = [], error }) {
+// Map team names to abbreviations for JSON lookup
+const teamNameToAbbrMap = {
+  "Arizona Cardinals": "ARI",
+  "Atlanta Falcons": "ATL",
+  "Baltimore Ravens": "BAL",
+  "Buffalo Bills": "BUF",
+  "Carolina Panthers": "CAR",
+  "Chicago Bears": "CHI",
+  "Cincinnati Bengals": "CIN",
+  "Cleveland Browns": "CLE",
+  "Dallas Cowboys": "DAL",
+  "Denver Broncos": "DEN",
+  "Detroit Lions": "DET",
+  "Green Bay Packers": "GB",
+  "Houston Texans": "HOU",
+  "Indianapolis Colts": "IND",
+  "Jacksonville Jaguars": "JAX",
+  "Kansas City Chiefs": "KC",
+  "Las Vegas Raiders": "LV",
+  "Los Angeles Chargers": "LAC",
+  "Los Angeles Rams": "LAR",
+  "Miami Dolphins": "MIA",
+  "Minnesota Vikings": "MIN",
+  "New England Patriots": "NE",
+  "New Orleans Saints": "NO",
+  "New York Giants": "NYG",
+  "New York Jets": "NYJ",
+  "Philadelphia Eagles": "PHI",
+  "Pittsburgh Steelers": "PIT",
+  "San Francisco 49ers": "SF",
+  "Seattle Seahawks": "SEA",
+  "Tampa Bay Buccaneers": "TB",
+  "Tennessee Titans": "TEN",
+  "Washington Commanders": "WAS"
+};
+
+export default function TeamPage({ teamData, injuries = [], error, stats }) {
   const [activeTab, setActiveTab] = useState('home');
 
   if (error || !teamData) {
     return <div className="p-6 text-center text-red-500">Error: {error || 'No team data'}</div>;
   }
 
-  const { name, abbreviation, branding, record, schedule, stats } = teamData;
+  const { name, abbreviation, branding, record, schedule } = teamData;
 
   const formatDate = (date) => {
-   console.log('Date input to formatDate:', date); // Debug log
-   const parsed = new Date(date + 'T00:00:00Z'); // Force UTC
-   console.log('Parsed Date:', parsed); // Debug log
-   return isNaN(parsed) ? 'TBD' : parsed.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
- };
+    if (!date || typeof date !== 'string') return 'TBD'; // Ensure date is a string
+    const parsed = new Date(date + 'T00:00:00Z'); // Force UTC
+    return isNaN(parsed) ? date : parsed.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  };
 
   const recentGame = schedule.length > 0 ? schedule[0] : null;
 
@@ -234,7 +270,7 @@ export async function getServerSideProps({ params }) {
     );
 
     const [gameRows] = await connection.execute(
-      `SELECT game_id, week, game_date AS date,
+      `SELECT game_id, week, game_date,
               home_team_id, away_team_id, home_score, away_score, is_final
        FROM Games
        WHERE (home_team_id = ? OR away_team_id = ?)
@@ -252,7 +288,7 @@ export async function getServerSideProps({ params }) {
       return { 
         gameId: g.game_id, 
         week: g.week, 
-        date: g.game_date, // Ensure full date is passed
+        date: g.game_date ? g.game_date.toString() : 'TBD', // Ensure date is a string
         opponent, 
         homeAway: isHome ? 'H' : 'A', 
         score, 
@@ -266,13 +302,6 @@ export async function getServerSideProps({ params }) {
 
     const recentGame = schedule.length > 0 ? schedule[0] : null;
 
-    const [[stats = null]] = await connection.execute(
-      `SELECT points_allowed, total_yards_allowed, sacks, turnovers, red_zone_pct, third_down_pct, dvoa_rank
-       FROM Team_Defense_Stats_2024
-       WHERE team_id = ? AND season = 2024`,
-      [team]
-    );
-
     const [injuries] = await connection.execute(
       `SELECT gsis_id AS player_id, report_primary_injury AS injury_description, 
               report_status AS status, date_modified AS report_date, full_name AS player_name
@@ -282,6 +311,22 @@ export async function getServerSideProps({ params }) {
        LIMIT 5`,
       [team]
     );
+
+    // Fetch stats from team_defense_2024.json
+    let stats = null;
+    const teamName = TEAM_NAME_MAP[team];
+    const teamStats = teamDefenseData.find(data => data.team === teamName);
+    if (teamStats) {
+      stats = {
+        points_allowed: teamStats.total_yards_to.points_allowed,
+        total_yards_allowed: teamStats.total_yards_to.yards,
+        sacks: teamStats.advanced_defense.sacks,
+        turnovers: teamStats.total_yards_to.turnovers,
+        red_zone_pct: teamStats.conversions_against.red_zone_percentage / 100, // Convert percentage to decimal
+        third_down_pct: teamStats.conversions_against.third_down_percentage / 100, // Convert percentage to decimal
+        dvoa_rank: null // Not available in JSON
+      };
+    }
 
     return {
       props: {
@@ -295,8 +340,8 @@ export async function getServerSideProps({ params }) {
           },
           record,
           schedule: [recentGame],
-          stats,
         },
+        stats,
         injuries,
       },
     };
