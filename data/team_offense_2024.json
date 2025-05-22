@@ -1,1 +1,144 @@
-{"teams":[{"team_abbr":"DET","team_name":"Detroit Lions","season":2024,"offense":{"games":17,"points_for":564,"total_yards":6962,"plays":1118,"yards_per_play":6.2,"turnovers":15,"fumbles_lost":3,"first_downs":410,"passing":{"completions":399,"attempts":551,"completion_percentage":72.4,"yards":4474,"touchdowns":39,"interceptions":12,"net_yards_per_attempt":7.7,"yards_per_attempt":8.6,"adjusted_yards_per_attempt":9.0,"yards_per_completion":11.8,"qb_rating":112.6,"first_downs":242,"sacks":33,"sack_yards":244,"sack_percentage":5.7},"rushing":{"attempts":534,"yards":2488,"touchdowns":29,"yards_per_attempt":4.7,"longest_rush":70,"first_downs":144,"fumbles":12,"expected_points":68.6},"scoring":{"rushing_touchdowns":29,"receiving_touchdowns":39,"punt_return_touchdowns":1,"kick_return_touchdowns":0,"fumble_return_touchdowns":0,"interception_return_touchdowns":1,"other_touchdowns":0,"total_touchdowns":70,"two_point_makes":1,"two_point_attempts":2,"defensive_two_point":0,"extra_points_made":64,"extra_points_attempted":67,"field_goals_made":26,"field_goals_attempted":29,"safeties":0,"points":564,"points_per_game":33.2},"penalties":{"count":107,"yards":988,"first_downs_by_penalty":24},"scoring_percentage":51.6,"turnover_percentage":8.2,"expected_points":269.8}},{"team_abbr":"BUF","team_name":"Buffalo Bills","season":2024,"offense":{"games":17,"points_for":525,"total_yards":6105,"plays":1025,"yards_per_play":6.0,"turnovers":8,"fumbles_lost":2,"first_downs":360,"passing":{"completions":329,"attempts":520,"completion_percentage":63.3,"yards":3875,"touchdowns":30,"interceptions":6,"net_yards_per_attempt":7.3,"yards_per_attempt":7.6,"adjusted_yards_per_attempt":8.2,"yards_per_completion":12.0,"qb_rating":100.8,"first_downs":181,"sacks":14,"sack_yards":63,"sack_percentage":2.6},"rushing":{"attempts":491,"yards":2230,"touchdowns":32,"yards_per_attempt":4.5,"longest_rush":65,"first_downs":140,"fumbles":11,"expected_points":83.25},"scoring":{"rushing_touchdowns":32,"receiving_touchdowns":30,"punt_return_touchdowns":0,"kick_return_touchdowns":0,"fumble_return_touchdowns":1,"interception_return_touchdowns":2,"other_touchdowns":0,"total_touchdowns":65,"two_point_makes":1,"two_point_attempts":1,"defensive_two_point":0,"extra_points_made":59,"extra_points_attempted":64,"field_goals_made":24,"field_goals_attempted":29,"safeties":1,"points":525,"points_per_game":30.9},"penalties":{"count":112,"yards":833,"first_downs_by_penalty":39},"scoring_percentage":49.7,"turnover_percentage":4.6,"expected_points":266.71}}
+{
+  "teams": [
+    {
+      "team_abbr": "DET",
+      "team_name": "Detroit Lions",
+      "season": 2024,
+      "offense": {
+        "games": 17,
+        "points_for": 564,
+        "total_yards": 6962,
+        "plays": 1118,
+        "yards_per_play": 6.2,
+        "turnovers": 15,
+        "fumbles_lost": 3,
+        "first_downs": 410,
+        "passing": {
+          "completions": 399,
+          "attempts": 551,
+          "completion_percentage": 72.4,
+          "yards": 4474,
+          "touchdowns": 39,
+          "interceptions": 12,
+          "net_yards_per_attempt": 7.7,
+          "yards_per_attempt": 8.6,
+          "adjusted_yards_per_attempt": 9.0,
+          "yards_per_completion": 11.8,
+          "qb_rating": 112.6,
+          "first_downs": 242,
+          "sacks": 33,
+          "sack_yards": 244,
+          "sack_percentage": 5.7
+        },
+        "rushing": {
+          "attempts": 534,
+          "yards": 2488,
+          "touchdowns": 29,
+          "yards_per_attempt": 4.7,
+          "longest_rush": 70,
+          "first_downs": 144,
+          "fumbles": 12,
+          "expected_points": 68.6
+        },
+        "scoring": {
+          "rushing_touchdowns": 29,
+          "receiving_touchdowns": 39,
+          "punt_return_touchdowns": 1,
+          "kick_return_touchdowns": 0,
+          "fumble_return_touchdowns": 0,
+          "interception_return_touchdowns": 1,
+          "other_touchdowns": 0,
+          "total_touchdowns": 70,
+          "two_point_makes": 1,
+          "two_point_attempts": 2,
+          "defensive_two_point": 0,
+          "extra_points_made": 64,
+          "extra_points_attempted": 67,
+          "field_goals_made": 26,
+          "field_goals_attempted": 29,
+          "safeties": 0,
+          "points": 564,
+          "points_per_game": 33.2
+        },
+        "penalties": {
+          "count": 107,
+          "yards": 988,
+          "first_downs_by_penalty": 24
+        },
+        "scoring_percentage": 51.6,
+        "turnover_percentage": 8.2,
+        "expected_points": 269.8
+      }
+    },
+    {
+      "team_abbr": "BUF",
+      "team_name": "Buffalo Bills",
+      "season": 2024,
+      "offense": {
+        "games": 17,
+        "points_for": 525,
+        "total_yards": 6105,
+        "plays": 1025,
+        "yards_per_play": 6.0,
+        "turnovers": 8,
+        "fumbles_lost": 2,
+        "first_downs": 360,
+        "passing": {
+          "completions": 329,
+          "attempts": 520,
+          "completion_percentage": 63.3,
+          "yards": 3875,
+          "touchdowns": 30,
+          "interceptions": 6,
+          "net_yards_per_attempt": 7.3,
+          "yards_per_attempt": 7.6,
+          "adjusted_yards_per_attempt": 8.2,
+          "yards_per_completion": 12.0,
+          "qb_rating": 100.8,
+          "first_downs": 181,
+          "sacks": 14,
+          "sack_yards": 63,
+          "sack_percentage": 2.6
+        },
+        "rushing": {
+          "attempts": 491,
+          "yards": 2230,
+          "touchdowns": 32,
+          "yards_per_attempt": 4.5,
+          "longest_rush": 65,
+          "first_downs": 140,
+          "fumbles": 11,
+          "expected_points": 83.25
+        },
+        "scoring": {
+          "rushing_touchdowns": 32,
+          "receiving_touchdowns": 30,
+          "punt_return_touchdowns": 0,
+          "kick_return_touchdowns": 0,
+          "fumble_return_touchdowns": 1,
+          "interception_return_touchdowns": 2,
+          "other_touchdowns": 0,
+          "total_touchdowns": 65,
+          "two_point_makes": 1,
+          "two_point_attempts": 1,
+          "defensive_two_point": 0,
+          "extra_points_made": 59,
+          "extra_points_attempted": 64,
+          "field_goals_made": 24,
+          "field_goals_attempted": 29,
+          "safeties": 1,
+          "points": 525,
+          "points_per_game": 30.9
+        },
+        "penalties": {
+          "count": 112,
+          "yards": 833,
+          "first_downs_by_penalty": 39
+        },
+        "scoring_percentage": 49.7,
+        "turnover_percentage": 4.6,
+        "expected_points": 266.71
+      }
+    }
+  ]
+}
