@@ -1,4 +1,3 @@
-// app/player/[id]/page.js
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import SeasonSelector from './SeasonSelector';
@@ -29,38 +28,16 @@ export default async function PlayerProfilePage({ params }) {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
-      {/* Player Header */}
+      {/* ✅ Player Header Component */}
       <PlayerHeader player={player} />
-        {player.headshot_url && (
-          <Image
-            src={player.headshot_url}
-            alt={player.player_name}
-            width={100}
-            height={100}
-            className="rounded-xl border border-gray-300 shadow"
-          />
-        )}
-        <div>
-          <h1 className="text-4xl font-bold">{player.player_name}</h1>
-          <p className="text-gray-600 text-sm">
-            {player.position} | {player.team_abbr} | #{player.jersey_number}
-          </p>
-          <div className="text-sm mt-2 space-y-1 text-gray-700">
-            <p><strong>College:</strong> {player.college || 'N/A'}</p>
-            <p><strong>Drafted:</strong> {player.draft_club || 'Undrafted'} #{player.draft_number || 'N/A'} ({player.rookie_year || 'N/A'})</p>
-            <p><strong>Experience:</strong> {player.years_exp || 'N/A'} years</p>
-            <p><strong>Status:</strong> {player.status || 'N/A'}</p>
-          </div>
-        </div>
-      </div>
 
-      {/* Game Logs */}
+      {/* ✅ Game Logs */}
       <section>
         <h2 className="text-2xl font-semibold mb-4 border-b pb-1">Game Logs</h2>
         <SeasonSelector gameLogs={gameLogsWithTDs} />
       </section>
 
-      {/* Career Stats */}
+      {/* ✅ Career Stats */}
       {player.career && (
         <section>
           <h2 className="text-2xl font-semibold mb-4 border-b pb-1">Career Stats</h2>
@@ -87,7 +64,7 @@ export default async function PlayerProfilePage({ params }) {
         </section>
       )}
 
-      {/* Receiving Metrics */}
+      {/* ✅ Receiving Metrics */}
       <section>
         <h2 className="text-2xl font-semibold mb-4 border-b pb-1">Receiving Metrics</h2>
         <ReceivingMetricsTable playerId={playerId} />
