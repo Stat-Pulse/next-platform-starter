@@ -2,9 +2,6 @@
   command = "npm run build"
   publish = ".next"
   functions = "netlify/functions"
-  
-[build.environment]
-  NEXT_PUBLIC_API_URL = "https://your-deployed-api-url.com"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
@@ -13,6 +10,8 @@
   node_bundler = "esbuild"
   included_files = ["!node_modules/**", "/tmp/*.log"]
 
-[[edge_functions]]
-  path = "/player/*"
-  function = "rewrite"
+# ✅ Universal fallback to enable dynamic App Router routes like /player/[id]
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/__render"
+  status = 200
