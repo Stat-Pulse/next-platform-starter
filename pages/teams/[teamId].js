@@ -1,6 +1,3 @@
-pages/teams/[teamId].js
-
-
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import TeamDepthChart from '@/components/team/TeamDepthChart';
@@ -235,8 +232,6 @@ export default function TeamPage({ teamData, teamLogos }) {
           <div className="md:col-span-1">
             <div className="bg-white p-4 rounded shadow">
               <h2 className="text-xl font-semibold mb-4">Team Info</h2>
-              <p className="text-gray-600">City: {team?.city || 'N/A'}</p>
-              <p className="text-gray-600">Conference: {team?.conference || 'N/A'}</p>
               <p className="text-gray-600">Division: {team?.division || 'N/A'}</p>
             </div>
           </div>
