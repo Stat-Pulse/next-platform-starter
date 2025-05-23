@@ -210,7 +210,7 @@ const TeamPage = () => {
       <div className="container mx-auto py-6">
         <div className="text-center py-12">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Team not found</h1>
-          <p className="text-gray-600">The team "{teamId}" could not be found.</p>
+          <p className="text-gray-600">The team {teamId} could not be found.</p>
           <button 
             onClick={() => router.push('/')} 
             className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
