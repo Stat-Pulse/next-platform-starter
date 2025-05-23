@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import SeasonSelector from './SeasonSelector';
 import ReceivingMetricsTable from '@/components/player/ReceivingMetricsTable';
+import PlayerHeader from '@/components/player/PlayerHeader';
 
 async function getPlayerData(playerId) {
   try {
@@ -29,7 +30,7 @@ export default async function PlayerProfilePage({ params }) {
   return (
     <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
       {/* Player Header */}
-      <div className="flex items-center space-x-6">
+      <PlayerHeader player={player} />
         {player.headshot_url && (
           <Image
             src={player.headshot_url}
