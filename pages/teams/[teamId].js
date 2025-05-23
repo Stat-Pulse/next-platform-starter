@@ -1,18 +1,24 @@
-// pages/teams/[teamId].js
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
 
-// Placeholder components until the actual ones are implemented
+// Components
 const TeamDepthChart = ({ depthChart }) => (
   <div className="bg-white p-4 rounded shadow">
     <h2 className="text-xl font-semibold mb-4">Team Depth Chart</h2>
-    {depthChart ? (
-      <div>
-        {/* Render depth chart data */}
-        <p className="text-gray-600">Depth chart data loaded</p>
+    {depthChart && depthChart.length > 0 ? (
+      <div className="space-y-2">
+        {depthChart.map((player, idx) => (
+          <div key={idx} className="border-b pb-2">
+            <p className="font-semibold">{player.full_name}</p>
+            <p className="text-sm text-gray-600">
+              Position: {player.position}, Jersey: {player.jersey_number || 'N/A'}
+            </p>
+          </div>
+        ))}
       </div>
     ) : (
-      <p className="text-gray-600">Coming Soon</p>
+      <p className="text-gray-600">No depth chart available.</p>
     )}
   </div>
 );
@@ -21,12 +27,13 @@ const TeamStatsTable = ({ detailedStats }) => (
   <div className="bg-white p-4 rounded shadow">
     <h2 className="text-xl font-semibold mb-4">Team Stats</h2>
     {detailedStats ? (
-      <div>
-        {/* Render detailed stats */}
-        <p className="text-gray-600">Detailed stats loaded</p>
+      <div className="space-y-2">
+        <p>Passing Yards: {detailedStats.total_passing_yards || 0}</p>
+        <p>Rushing Yards: {detailedStats.total_rushing_yards || 0}</p>
+        <p>Receiving Yards: {detailedStats.total_receiving_yards || 0}</p>
       </div>
     ) : (
-      <p className="text-gray-600">Coming Soon</p>
+      <p className="text-gray-600">No stats available.</p>
     )}
   </div>
 );
@@ -39,12 +46,14 @@ const TeamInjuries = ({ injuries }) => (
         {injuries.map((injury, idx) => (
           <div key={idx} className="border-b pb-2">
             <p className="font-semibold">{injury.player_name}</p>
-            <p className="text-sm text-gray-600">{injury.injury_status} - {injury.injury_description}</p>
+            <p className="text-sm text-gray-600">
+              {injury.injury_status} - {injury.injury_description}
+            </p>
           </div>
         ))}
       </div>
     ) : (
-      <p className="text-gray-600">No injuries reported</p>
+      <p className="text-gray-600">No injuries reported.</p>
     )}
   </div>
 );
@@ -60,7 +69,7 @@ const TeamSchedule = ({ schedule }) => (
               Week {game.week}: vs {game.opponent}
             </p>
             <p className="text-sm text-gray-600">
-              {new Date(game.game_date).toLocaleDateString()} at {game.game_time}
+              {new Date(game.game_date).toLocaleDateString()} at {game.game_time?.slice(0, 5) || 'TBD'}
             </p>
             {game.final_score && (
               <p className="text-sm">Final: {game.final_score}</p>
@@ -69,7 +78,7 @@ const TeamSchedule = ({ schedule }) => (
         ))}
       </div>
     ) : (
-      <p className="text-gray-600">Coming Soon</p>
+      <p className="text-gray-600">No games scheduled.</p>
     )}
   </div>
 );
@@ -92,12 +101,10 @@ const TeamPage = () => {
         setLoading(true);
         setError(null);
 
-        // Check if we're in a browser environment
         if (typeof window === 'undefined') {
           return;
         }
 
-        // Fetch main team data with proper error handling
         const teamResponse = await fetch(`/api/teams/${teamId}`);
         
         if (!teamResponse.ok) {
@@ -110,7 +117,6 @@ const TeamPage = () => {
         const data = await teamResponse.json();
         setTeamData(data);
 
-        // Fetch team logos for opponent teams
         const teamsToFetch = new Set([teamId]);
         
         if (data.lastGame) {
@@ -123,7 +129,6 @@ const TeamPage = () => {
           teamsToFetch.add(data.upcomingGame.away_team_id);
         }
 
-        // Fetch logos with better error handling
         const logoPromises = Array.from(teamsToFetch).map(async (abbr) => {
           try {
             const logoResponse = await fetch(`/api/teams/${abbr}`);
@@ -147,14 +152,12 @@ const TeamPage = () => {
         });
         setTeamLogos(logos);
 
-        // Fetch news with fallback
         try {
           const newsResponse = await fetch(`/api/news?team=${teamId}&limit=6`);
           if (newsResponse.ok) {
             const news = await newsResponse.json();
             setNewsItems(Array.isArray(news) ? news : []);
           } else {
-            // Fallback news
             setNewsItems([
               { title: `${data.team?.team_name || 'Team'} News 1`, link: '#', timestamp: '1 hour ago' },
               { title: `${data.team?.team_name || 'Team'} News 2`, link: '#', timestamp: '2 hours ago' },
@@ -225,10 +228,24 @@ const TeamPage = () => {
     <div className="container mx-auto py-6 px-4">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-blue-600">{team?.team_name || 'Unknown Team'}</h1>
-        <p className="text-lg text-gray-600">
-          Record: {seasonStats ? `${seasonStats.wins}-${seasonStats.losses}` : 'Loading...'}
-        </p>
+        <div className="flex items-center gap-4">
+          {team?.logo_url && (
+            <Image
+              src={team.logo_url}
+              alt={team.team_name}
+              width={80}
+              height={80}
+              className="rounded-full"
+              onError={(e) => (e.target.src = '/placeholder-logo.png')}
+            />
+          )}
+          <div>
+            <h1 className="text-3xl font-bold text-blue-600">{team?.team_name || 'Unknown Team'}</h1>
+            <p className="text-lg text-gray-600">
+              Record: {seasonStats ? `${seasonStats.wins}-${seasonStats.losses}` : 'Loading...'}
+            </p>
+          </div>
+        </div>
         <nav className="flex space-x-4 mt-2 overflow-x-auto">
           {[
             { key: 'overview', label: 'Overview' },
@@ -294,15 +311,21 @@ const TeamPage = () => {
                 </div>
                 <div className="border p-4 rounded flex items-center">
                   <p className="text-gray-600">Offense</p>
-                  <span className="ml-2 text-green-500">{seasonStats?.offense_grade || 'N/A'}</span>
+                  <span className={`ml-2 ${seasonStats?.offense_grade ? 'text-green-500' : 'text-gray-500'}`}>
+                    {seasonStats?.offense_grade || 'N/A'}
+                  </span>
                 </div>
                 <div className="border p-4 rounded flex items-center">
                   <p className="text-gray-600">Defense</p>
-                  <span className="ml-2 text-green-500">{seasonStats?.defense_grade || 'N/A'}</span>
+                  <span className={`ml-2 ${seasonStats?.defense_grade ? 'text-green-500' : 'text-gray-500'}`}>
+                    {seasonStats?.defense_grade || 'N/A'}
+                  </span>
                 </div>
                 <div className="border p-4 rounded flex items-center">
                   <p className="text-gray-600">Special Teams</p>
-                  <span className="ml-2 text-green-500">{seasonStats?.special_teams_grade || 'N/A'}</span>
+                  <span className={`ml-2 ${seasonStats?.special_teams_grade ? 'text-green-500' : 'text-gray-500'}`}>
+                    {seasonStats?.special_teams_grade || 'N/A'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -320,19 +343,21 @@ const TeamPage = () => {
                     })}, {lastGame.game_time?.slice(0, 5) || 'TBD'}
                   </p>
                   <div className="flex items-center justify-center space-x-4">
-                    <img
+                    <Image
                       src={teamLogos[lastGame.home_team_id] || '/placeholder-logo.png'}
                       alt={`${lastGame.home_team_id} logo`}
-                      className="w-12 h-12"
+                      width={48}
+                      height={48}
                       onError={(e) => (e.target.src = '/placeholder-logo.png')}
                     />
                     <p className="text-xl font-semibold">
                       {lastGame.home_score} - {lastGame.away_score}
                     </p>
-                    <img
+                    <Image
                       src={teamLogos[lastGame.away_team_id] || '/placeholder-logo.png'}
                       alt={`${lastGame.away_team_id} logo`}
-                      className="w-12 h-12"
+                      width={48}
+                      height={48}
                       onError={(e) => (e.target.src = '/placeholder-logo.png')}
                     />
                   </div>
@@ -359,26 +384,30 @@ const TeamPage = () => {
                     })}, {upcomingGame.game_time?.slice(0, 5) || 'TBD'}
                   </p>
                   <div className="flex items-center justify-center space-x-4">
-                    <img
+                    <Image
                       src={teamLogos[upcomingGame.home_team_id] || '/placeholder-logo.png'}
                       alt={`${upcomingGame.home_team_id} logo`}
-                      className="w-12 h-12"
+                      width={48}
+                      height={48}
                       onError={(e) => (e.target.src = '/placeholder-logo.png')}
                     />
                     <p className="text-xl font-semibold">vs</p>
-                    <img
+                    <Image
                       src={teamLogos[upcomingGame.away_team_id] || '/placeholder-logo.png'}
                       alt={`${upcomingGame.away_team_id} logo`}
-                      className="w-12 h-12"
+                      width={48}
+                      height={48}
                       onError={(e) => (e.target.src = '/placeholder-logo.png')}
                     />
                   </div>
                 </div>
               ) : (
                 <div className="relative">
-                  <img
+                  <Image
                     src={team?.logo_url || '/placeholder-logo.png'}
                     alt={`${team?.team_name || 'Team'} logo`}
+                    width={100}
+                    height={100}
                     className="absolute inset-0 w-full h-full object-cover opacity-10"
                     onError={(e) => (e.target.src = '/placeholder-logo.png')}
                   />
@@ -404,9 +433,7 @@ const TeamPage = () => {
                 <div className="space-y-4">
                   {newsItems.slice(0, 6).map((news, idx) => (
                     <div key={idx} className="border-b pb-4 last:border-b-0">
-                      <h4 className="text-md font-semibold text-gray-800 mb-2">
-                        {news.title}
-                      </h4>
+                      <h4 className="text-md font-semibold text-gray-800 mb-2">{news.title}</h4>
                       <div className="flex justify-between items-center">
                         <a
                           href={news.link}
@@ -436,6 +463,4 @@ const TeamPage = () => {
   );
 };
 
-// For production builds, we'll use client-side rendering only
-// Remove getStaticPaths to avoid build-time issues
 export default TeamPage;
