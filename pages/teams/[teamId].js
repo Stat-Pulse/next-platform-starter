@@ -1,5 +1,5 @@
 // pages/teams/[teamId].js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
 // Placeholder components until the actual ones are implemented
@@ -74,13 +74,107 @@ const TeamSchedule = ({ schedule }) => (
   </div>
 );
 
-const TeamPage = ({ teamData, newsItems, teamLogos }) => {
+const TeamPage = () => {
   const router = useRouter();
+  const { teamId } = router.query;
+  const [teamData, setTeamData] = useState(null);
+  const [newsItems, setNewsItems] = useState([]);
+  const [teamLogos, setTeamLogos] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Handle loading state for ISR
-  if (router.isFallback) {
+  useEffect(() => {
+    if (!teamId) return;
+
+    const fetchTeamData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch main team data
+        const teamResponse = await fetch(`/api/teams/${teamId}`);
+        
+        if (!teamResponse.ok) {
+          throw new Error(`Failed to fetch team data: ${teamResponse.status}`);
+        }
+        
+        const data = await teamResponse.json();
+        setTeamData(data);
+
+        // Fetch team logos for opponent teams
+        const teamsToFetch = new Set([teamId]);
+        
+        if (data.lastGame) {
+          teamsToFetch.add(data.lastGame.home_team_id);
+          teamsToFetch.add(data.lastGame.away_team_id);
+        }
+        
+        if (data.upcomingGame) {
+          teamsToFetch.add(data.upcomingGame.home_team_id);
+          teamsToFetch.add(data.upcomingGame.away_team_id);
+        }
+
+        // Fetch logos
+        const logoPromises = Array.from(teamsToFetch).map(async (abbr) => {
+          try {
+            const logoResponse = await fetch(`/api/teams/${abbr}`);
+            if (logoResponse.ok) {
+              const logoData = await logoResponse.json();
+              return { abbr, logo_url: logoData.team?.logo_url };
+            }
+          } catch (error) {
+            console.error(`Error fetching logo for ${abbr}:`, error);
+          }
+          return { abbr, logo_url: '/placeholder-logo.png' };
+        });
+        
+        const logoResults = await Promise.all(logoPromises);
+        const logos = {};
+        logoResults.forEach(({ abbr, logo_url }) => {
+          logos[abbr] = logo_url || '/placeholder-logo.png';
+        });
+        setTeamLogos(logos);
+
+        // Fetch news
+        try {
+          const newsResponse = await fetch(`/api/news?team=${teamId}&limit=6`);
+          if (newsResponse.ok) {
+            const news = await newsResponse.json();
+            setNewsItems(news);
+          } else {
+            // Fallback news
+            setNewsItems([
+              { title: `${data.team.team_name} News 1`, link: '#', timestamp: '1 hour ago' },
+              { title: `${data.team.team_name} News 2`, link: '#', timestamp: '2 hours ago' },
+            ]);
+          }
+        } catch (newsError) {
+          console.error('Error fetching news:', newsError);
+          setNewsItems([]);
+        }
+
+      } catch (error) {
+        console.error('Error fetching team data:', error);
+        setError('Failed to load team data. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTeamData();
+  }, [teamId]);
+
+  if (loading) {
     return <div className="container mx-auto py-6">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="container mx-auto py-6 text-red-600">{error}</div>;
+  }
+
+  if (!teamData || !teamData.team) {
+    return <div className="container mx-auto py-6">Team not found.</div>;
   }
 
   const { team, seasonStats, lastGame, upcomingGame, depthChart, detailedStats, injuries, schedule } = teamData;
@@ -223,9 +317,9 @@ const TeamPage = ({ teamData, newsItems, teamLogos }) => {
               )}
             </div>
 
-            {/* PFF Betting Odds */}
+            {/* Betting Odds */}
             <div className="bg-white p-4 rounded shadow relative">
-              <h2 className="text-xl font-semibold mb-4">PFF Betting Odds</h2>
+              <h2 className="text-xl font-semibold mb-4"> Betting Odds</h2>
               {upcomingGame ? (
                 <div>
                   <p className="text-gray-600 mb-2">
@@ -315,124 +409,24 @@ const TeamPage = ({ teamData, newsItems, teamLogos }) => {
 
 // Generate static paths for all teams
 export async function getStaticPaths() {
-  try {
-    // Fetch all team abbreviations from the database
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/teams`);
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch teams');
-    }
-    
-    const teams = await response.json();
-    
-    // Generate paths for each team
-    const paths = teams.map((team) => ({
-      params: { teamId: team.team_abbr }
-    }));
-
-    return {
-      paths,
-      fallback: 'blocking' // Enable ISR with blocking fallback
-    };
-  } catch (error) {
-    console.error('Error in getStaticPaths:', error);
-    
-    // Return empty paths and let fallback handle individual requests
-    return {
-      paths: [],
-      fallback: 'blocking'
-    };
-  }
-}
-
-// Fetch team data at build time
-export async function getStaticProps({ params }) {
-  const { teamId } = params;
+  // For Netlify deployment, provide common team paths
+  // You can expand this list or make it dynamic once your API is deployed
+  const commonTeams = [
+    'ARI', 'ATL', 'BAL', 'BUF', 'CAR', 'CHI', 'CIN', 'CLE',
+    'DAL', 'DEN', 'DET', 'GB', 'HOU', 'IND', 'JAX', 'KC',
+    'LV', 'LAC', 'LAR', 'MIA', 'MIN', 'NE', 'NO', 'NYG',
+    'NYJ', 'PHI', 'PIT', 'SF', 'SEA', 'TB', 'TEN', 'WAS'
+  ];
   
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-    
-    // Fetch main team data
-    const teamResponse = await fetch(`${baseUrl}/api/teams/${teamId}`);
-    
-    if (!teamResponse.ok) {
-      return { notFound: true };
-    }
-    
-    const teamData = await teamResponse.json();
-    
-    // Check if team data exists
-    if (!teamData || !teamData.team) {
-      return { notFound: true };
-    }
-    
-    // Fetch team logos for opponent teams in last and upcoming games
-    const teamLogos = {};
-    const teamsToFetch = new Set();
-    
-    // Add current team
-    teamsToFetch.add(teamId);
-    
-    // Add opponent teams from last and upcoming games
-    if (teamData.lastGame) {
-      teamsToFetch.add(teamData.lastGame.home_team_id);
-      teamsToFetch.add(teamData.lastGame.away_team_id);
-    }
-    
-    if (teamData.upcomingGame) {
-      teamsToFetch.add(teamData.upcomingGame.home_team_id);
-      teamsToFetch.add(teamData.upcomingGame.away_team_id);
-    }
-    
-    // Fetch logos for all relevant teams
-    const logoPromises = Array.from(teamsToFetch).map(async (abbr) => {
-      try {
-        const logoResponse = await fetch(`${baseUrl}/api/teams/${abbr}`);
-        if (logoResponse.ok) {
-          const logoData = await logoResponse.json();
-          return { abbr, logo_url: logoData.team?.logo_url };
-        }
-      } catch (error) {
-        console.error(`Error fetching logo for ${abbr}:`, error);
-      }
-      return { abbr, logo_url: null };
-    });
-    
-    const logoResults = await Promise.all(logoPromises);
-    logoResults.forEach(({ abbr, logo_url }) => {
-      teamLogos[abbr] = logo_url || '/placeholder-logo.png';
-    });
-    
-    // Fetch news data
-    let newsItems = [];
-    try {
-      const newsResponse = await fetch(`${baseUrl}/api/news?team=${teamId}&limit=6`);
-      if (newsResponse.ok) {
-        newsItems = await newsResponse.json();
-      }
-    } catch (error) {
-      console.error('Error fetching news:', error);
-      // Use fallback news or empty array
-      newsItems = [];
-    }
-    
-    return {
-      props: {
-        teamData,
-        newsItems,
-        teamLogos
-      },
-      // Revalidate every hour (3600 seconds)
-      revalidate: 3600
-    };
-    
-  } catch (error) {
-    console.error('Error in getStaticProps:', error);
-    
-    return {
-      notFound: true
-    };
-  }
+  const paths = commonTeams.map(teamId => ({
+    params: { teamId }
+  }));
+
+  return {
+    paths,
+    fallback: 'blocking' // This allows for additional teams not in the list
+  };
 }
 
+// No getStaticProps needed - data fetching happens client-side
 export default TeamPage;
