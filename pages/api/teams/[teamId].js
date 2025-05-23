@@ -3,6 +3,7 @@ import mysql from 'mysql2/promise';
 
 export default async function handler(req, res) {
   const { teamId } = req.query;
+  const normalizedTeamId = teamId.toUpperCase(); // Convert to uppercase to match team_abbr
 
   let connection;
   try {
@@ -18,10 +19,10 @@ export default async function handler(req, res) {
     console.log('Fetching team metadata...');
     const [teamRows] = await connection.execute(
       'SELECT team_name, team_division AS division, team_logo_espn AS logo_url FROM Teams WHERE team_abbr = ?',
-      [teamId]
+      [normalizedTeamId]
     );
     if (teamRows.length === 0) {
-      console.log(`Team not found for team_abbr: ${teamId}`);
+      console.log(`Team not found for team_abbr: ${normalizedTeamId}`);
       return res.status(404).json({ error: 'Team not found' });
     }
     const team = teamRows[0];
@@ -66,13 +67,13 @@ export default async function handler(req, res) {
         ) AS points_allowed
       `,
       [
-        teamId, teamId,
-        teamId, teamId,
-        teamId, teamId,
-        teamId, teamId,
-        teamId, teamId,
-        teamId, teamId,
-        teamId, teamId,
+        normalizedTeamId, normalizedTeamId,
+        normalizedTeamId, normalizedTeamId,
+        normalizedTeamId, normalizedTeamId,
+        normalizedTeamId, normalizedTeamId,
+        normalizedTeamId, normalizedTeamId,
+        normalizedTeamId, normalizedTeamId,
+        normalizedTeamId, normalizedTeamId,
       ]
     );
     const seasonStats = statsRows[0];
@@ -94,7 +95,7 @@ export default async function handler(req, res) {
       ORDER BY game_date DESC, game_time DESC
       LIMIT 1
       `,
-      [teamId, teamId]
+      [normalizedTeamId, normalizedTeamId]
     );
     const lastGame = lastGameRows[0] || null;
 
@@ -113,7 +114,7 @@ export default async function handler(req, res) {
       ORDER BY game_date ASC
       LIMIT 1
       `,
-      [teamId, teamId]
+      [normalizedTeamId, normalizedTeamId]
     );
     const upcomingGame = upcomingGameRows[0] || null;
 
@@ -126,7 +127,7 @@ export default async function handler(req, res) {
       ORDER BY position
       LIMIT 20
       `,
-      [teamId]
+      [normalizedTeamId]
     );
     const depthChart = depthChartRows;
 
@@ -140,7 +141,7 @@ export default async function handler(req, res) {
       FROM Player_Stats_Game_2024
       WHERE team_id = ? AND season_id = 2024
       `,
-      [teamId]
+      [normalizedTeamId]
     );
     const detailedStats = detailedStatsRows[0];
 
@@ -151,7 +152,7 @@ export default async function handler(req, res) {
       FROM Injuries
       WHERE team = ?
       `,
-      [teamId]
+      [normalizedTeamId]
     );
     const injuries = injuriesRows;
 
@@ -172,7 +173,7 @@ export default async function handler(req, res) {
         AND game_date <= '2025-05-22'
       ORDER BY game_date
       `,
-      [teamId, teamId]
+      [normalizedTeamId, normalizedTeamId]
     );
     const schedule = scheduleRows;
 
