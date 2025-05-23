@@ -203,7 +203,16 @@ export async function GET(req, { params }) {
         `,
         [teamAbbr]
       );
-      injuries = injuriesRows;
+      injuries = injuriesRows.map(injury => ({
+        full_name: injury.full_name,
+        player_name: injury.full_name,
+        position: injury.position,
+        report_primary_injury: injury.report_primary_injury,
+        injury_description: injury.report_primary_injury,
+        report_status: injury.report_status,
+        injury_status: injury.report_status,
+        date_modified: injury.date_modified,
+      }));
       console.log(`Injuries entries: ${injuries.length}`);
     } catch (error) {
       console.log('Injuries query failed:', error.message);
@@ -222,7 +231,8 @@ export async function GET(req, { params }) {
           home_score,
           away_score,
           stadium_name,
-          is_final
+          is_final,
+          week
         FROM Games
         WHERE (home_team_id = ? OR away_team_id = ?)
           AND game_date BETWEEN '2024-09-01' AND '2025-02-28'
@@ -230,19 +240,31 @@ export async function GET(req, { params }) {
         `,
         [teamAbbr, teamAbbr]
       );
-      schedule = scheduleRows;
+      schedule = scheduleRows.map(game => ({
+        game_date: game.game_date,
+        game_time: game.game_time,
+        home_team_id: game.home_team_id,
+        away_team_id: game.away_team_id,
+        home_score: game.home_score,
+        away_score: game.away_score,
+        stadium_name: game.stadium_name,
+        is_final: game.is_final,
+        week: game.week,
+        final_score: game.is_final ? `${game.home_score}-${game.away_score}` : null,
+        opponent: game.home_team_id === teamAbbr ? game.away_team_id : game.home_team_id,
+      }));
       console.log(`Schedule entries: ${schedule.length}`);
     } catch (error) {
       console.log('Schedule query failed:', error.message);
     }
 
     console.log('Fetching team grades...');
-    let teamGrades = { overall: 'N/A', offense: 'N/A', defense: 'N/A', specialTeams: 'N/A' };
+    let teamGrades = { overall_grade: 'N/A', offense_grade: 'N/A', defense_grade: 'N/A', special_teams_grade: 'N/A' };
     try {
       if (numericTeamIdString) {
         const [gradesRows] = await connection.execute(
           `
-          SELECT overall_grade AS overall, offense_grade AS offense, defense_grade AS defense, special_teams_grade AS specialTeams
+          SELECT overall_grade, offense_grade, defense_grade, special_teams_grade
           FROM Team_Grades
           WHERE team_id = ? AND season = 2024
           `,
@@ -250,7 +272,7 @@ export async function GET(req, { params }) {
         );
         if (gradesRows[0]) {
           teamGrades = gradesRows[0];
-          console.log(`Team grades found: overall=${teamGrades.overall}`);
+          console.log(`Team grades found: overall=${teamGrades.overall_grade}`);
         } else {
           console.log('No team grades found');
         }
@@ -259,50 +281,8 @@ export async function GET(req, { params }) {
       console.log('Team grades query failed:', error.message);
     }
 
-    console.log('Fetching fantasy projections...');
-    let fantasyProjections = [];
-    try {
-      if (numericTeamIdString) {
-        const [projRows] = await connection.execute(
-          `
-          SELECT player_id, projected_points, projected_yards, projected_touchdowns
-          FROM Fantasy_Projections
-          WHERE team_id = ? AND season = 2024
-          LIMIT 5
-          `,
-          [numericTeamIdString]
-        );
-        fantasyProjections = projRows;
-        console.log(`Fantasy projections entries: ${fantasyProjections.length}`);
-      }
-    } catch (error) {
-      console.log('Fantasy projections query failed:', error.message);
-    }
-
-    console.log('Fetching news...');
-    let newsItems = [];
-    try {
-      if (numericTeamIdString) {
-        const [newsRows] = await connection.execute(
-          `
-          SELECT title, link, timestamp
-          FROM News
-          WHERE team_id = ?
-          ORDER BY timestamp DESC
-          LIMIT 6
-          `,
-          [numericTeamIdString]
-        );
-        newsItems = newsRows.map(row => ({
-          title: row.title,
-          link: row.link,
-          timestamp: new Date(row.timestamp).toLocaleString(),
-        }));
-        console.log(`News entries: ${newsItems.length}`);
-      }
-    } catch (error) {
-      console.log('News query failed:', error.message);
-    }
+    // Merge teamGrades into seasonStats for the page
+    seasonStats = { ...seasonStats, ...teamGrades };
 
     const responseData = {
       team,
@@ -313,9 +293,6 @@ export async function GET(req, { params }) {
       detailedStats,
       injuries,
       schedule,
-      teamGrades,
-      fantasyProjections,
-      newsItems,
     };
     console.log('API response:', JSON.stringify(responseData, null, 2));
 
