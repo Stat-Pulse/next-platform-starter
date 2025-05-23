@@ -1,5 +1,12 @@
 import mysql from 'mysql2/promise';
 
+// Hardcoded mapping for now; ideally fetch from Teams table
+const teamIdMap = {
+  'KC': 2310,
+  'CHIEFS': 2310,
+  // Add other teams as needed
+};
+
 export async function GET(req, { params }) {
   const teamId = params.teamId.toUpperCase(); // Normalize to uppercase (e.g., chiefs -> CHIEFS)
   const altTeamId = teamId === 'CHIEFS' ? 'KC' : teamId; // Handle Chiefs-specific case
@@ -135,19 +142,24 @@ export async function GET(req, { params }) {
     console.log('Fetching detailed stats...');
     let detailedStats = { total_passing_yards: 0, total_rushing_yards: 0, total_receiving_yards: 0 };
     try {
-      const [detailedStatsRows] = await connection.execute(
-        `
-        SELECT 
-          SUM(passing_yards) AS total_passing_yards,
-          SUM(rushing_yards) AS total_rushing_yards,
-          SUM(receiving_yards) AS total_receiving_yards
-        FROM Player_Stats_Game_2024
-        WHERE team_id = ? AND season = 2024
-        `,
-        [teamAbbr]
-      );
-      if (detailedStatsRows[0] && detailedStatsRows[0].total_passing_yards !== null) {
-        detailedStats = detailedStatsRows[0];
+      const numericTeamId = teamIdMap[teamAbbr] || teamIdMap[altTeamId];
+      if (numericTeamId) {
+        const [detailedStatsRows] = await connection.execute(
+          `
+          SELECT 
+            SUM(passing_yards) AS total_passing_yards,
+            SUM(rushing_yards) AS total_rushing_yards,
+            SUM(receiving_yards) AS total_receiving_yards
+          FROM Player_Stats_Game_2024
+          WHERE team_id = ? AND season = 2024
+          `,
+          [numericTeamId]
+        );
+        if (detailedStatsRows[0] && detailedStatsRows[0].total_passing_yards !== null) {
+          detailedStats = detailedStatsRows[0];
+        }
+      } else {
+        console.log(`No numeric team_id found for ${teamAbbr}`);
       }
     } catch (error) {
       console.log('Detailed stats query failed:', error.message);
