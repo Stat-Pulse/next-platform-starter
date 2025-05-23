@@ -1,16 +1,45 @@
-'use client'
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import Link from 'next/link';
+import Image from 'next/image';
+import mysql from 'mysql2/promise';
 
-import Header from '../../components/Header'
-import Footer from '../../components/Footer'
-import Link from 'next/link'
-import teams from '../../data/teams'
+async function getTeams() {
+  try {
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: 'stat_pulse_analytics_db',
+    });
+    const [rows] = await connection.execute(
+      'SELECT team_abbr, team_name, team_division AS division, team_conference AS conference, team_logo_espn AS logo_url FROM Teams'
+    );
+    await connection.end();
+    return rows.map((row) => ({
+      slug: row.team_abbr.toLowerCase(),
+      name: row.team_name,
+      conference: row.conference,
+      division: row.division,
+      logo_url: row.logo_url,
+    }));
+  } catch (error) {
+    console.error('Error fetching teams:', error);
+    return [];
+  }
+}
+
+export async function getStaticProps() {
+  const teams = await getTeams();
+  return { props: { teams } };
+}
 
 const divisions = {
   AFC: ['East', 'North', 'South', 'West'],
-  NFC: ['East', 'North', 'South', 'West']
-}
+  NFC: ['East', 'North', 'South', 'West'],
+};
 
-export default function TeamsIndex() {
+export default function TeamsIndex({ teams }) {
   return (
     <>
       <Header />
@@ -24,7 +53,7 @@ export default function TeamsIndex() {
               {divs.map((division) => {
                 const filteredTeams = teams.filter(
                   (team) => team.conference === conference && team.division === division
-                )
+                );
 
                 return (
                   <div key={division}>
@@ -36,17 +65,19 @@ export default function TeamsIndex() {
                           href={`/teams/${team.slug}`}
                           className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition duration-200 border hover:border-red-600 text-center"
                         >
-                          <img
-                            src={`/team-logos/${team.slug}.png`}
+                          <Image
+                            src={team.logo_url || `/team-logos/${team.slug}.png`}
                             alt={`${team.name} Logo`}
-                            className="w-20 h-20 mx-auto mb-2"
+                            width={80}
+                            height={80}
+                            className="mx-auto mb-2"
                           />
                           <p className="text-sm font-medium text-gray-800">{team.name}</p>
                         </Link>
                       ))}
                     </div>
                   </div>
-                )
+                );
               })}
             </section>
           ))}
@@ -54,5 +85,5 @@ export default function TeamsIndex() {
       </main>
       <Footer />
     </>
-  )
+  );
 }
