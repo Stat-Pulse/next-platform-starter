@@ -4,7 +4,6 @@ import mysql from 'mysql2/promise';
 export default async function handler(req, res) {
   const { teamId } = req.query;
 
-  // Create a connection to your MySQL database
   const connection = await mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -23,7 +22,7 @@ export default async function handler(req, res) {
     }
     const team = teamRows[0];
 
-    // Fetch season stats from Games table
+    // Fetch season stats from Games table (include games up to May 22, 2025)
     const [statsRows] = await connection.execute(
       `
       SELECT 
@@ -31,13 +30,15 @@ export default async function handler(req, res) {
          FROM Games 
          WHERE (home_team_id = ? AND winning_team_id = ?)
             OR (away_team_id = ? AND winning_team_id = ?)
-            AND season_type = 'REG' AND season_id = 2024
+            AND season_type = 'REG'
+            AND game_date BETWEEN '2024-01-01' AND '2025-05-22'
         ) AS wins,
         (SELECT COUNT(*) 
          FROM Games 
          WHERE (home_team_id = ? AND losing_team_id = ?)
             OR (away_team_id = ? AND losing_team_id = ?)
-            AND season_type = 'REG' AND season_id = 2024
+            AND season_type = 'REG'
+            AND game_date BETWEEN '2024-01-01' AND '2025-05-22'
         ) AS losses,
         (SELECT SUM(CASE 
                        WHEN home_team_id = ? THEN home_score 
@@ -46,7 +47,8 @@ export default async function handler(req, res) {
                     END)
          FROM Games 
          WHERE (home_team_id = ? OR away_team_id = ?)
-            AND season_type = 'REG' AND season_id = 2024
+            AND season_type = 'REG'
+            AND game_date BETWEEN '2024-01-01' AND '2025-05-22'
         ) AS points_scored,
         (SELECT SUM(CASE 
                        WHEN home_team_id = ? THEN away_score 
@@ -55,7 +57,8 @@ export default async function handler(req, res) {
                     END)
          FROM Games 
          WHERE (home_team_id = ? OR away_team_id = ?)
-            AND season_type = 'REG' AND season_id = 2024
+            AND season_type = 'REG'
+            AND game_date BETWEEN '2024-01-01' AND '2025-05-22'
         ) AS points_allowed
       `,
       [
@@ -70,7 +73,7 @@ export default async function handler(req, res) {
     );
     const seasonStats = statsRows[0];
 
-    // Fetch last game from Games table
+    // Fetch last game from Games table (up to May 22, 2025)
     const [lastGameRows] = await connection.execute(
       `
       SELECT 
@@ -82,7 +85,7 @@ export default async function handler(req, res) {
         away_score
       FROM Games
       WHERE (home_team_id = ? OR away_team_id = ?)
-        AND season_id = 2024
+        AND game_date <= '2025-05-22'
         AND is_final = 1
       ORDER BY game_date DESC, game_time DESC
       LIMIT 1
@@ -148,7 +151,7 @@ export default async function handler(req, res) {
     );
     const injuries = injuriesRows;
 
-    // Fetch schedule from Games table
+    // Fetch schedule from Games table (up to May 22, 2025)
     const [scheduleRows] = await connection.execute(
       `
       SELECT 
@@ -162,17 +165,15 @@ export default async function handler(req, res) {
         is_final
       FROM Games
       WHERE (home_team_id = ? OR away_team_id = ?)
-        AND season_id = 2024
+        AND game_date <= '2025-05-22'
       ORDER BY game_date
       `,
       [teamId, teamId]
     );
     const schedule = scheduleRows;
 
-    // Close the database connection
     await connection.end();
 
-    // Return the data (excluding news, which will be fetched in the component)
     return res.status(200).json({
       team,
       seasonStats,
