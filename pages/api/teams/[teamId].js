@@ -1,4 +1,4 @@
-// pages/api/teams/[teamId].js (updated to use team_abbr)
+// pages/api/teams/[teamId].js
 import mysql from 'mysql2/promise';
 
 export default async function handler(req, res) {
@@ -17,7 +17,7 @@ export default async function handler(req, res) {
 
     console.log('Fetching team metadata...');
     const [teamRows] = await connection.execute(
-      'SELECT team_name, division, team_logo_espn AS logo_url FROM Teams WHERE team_abbr = ?',
+      'SELECT team_name, team_division AS division, team_logo_espn AS logo_url FROM Teams WHERE team_abbr = ?',
       [teamId]
     );
     if (teamRows.length === 0) {
