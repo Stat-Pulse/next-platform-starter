@@ -1,13 +1,13 @@
-// pages/api/teams/[teamId].js
 import mysql from 'mysql2/promise';
 
 export default async function handler(req, res) {
   const { teamId } = req.query;
-  const normalizedTeamId = teamId.toUpperCase(); // Convert to uppercase to match team_abbr
+  const normalizedTeamId = teamId.toUpperCase(); // Normalize to uppercase (e.g., chiefs -> CHIEFS)
+  const altTeamId = normalizedTeamId === 'CHIEFS' ? 'KC' : normalizedTeamId; // Handle Chiefs-specific case
 
   let connection;
   try {
-    console.log('Attempting to connect to database...');
+    console.log('Connecting to database...');
     connection = await mysql.createConnection({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
@@ -17,15 +17,16 @@ export default async function handler(req, res) {
     console.log('Database connection successful.');
 
     console.log('Fetching team metadata...');
-    const [teamRows] = await connection.execute(
-      'SELECT team_name, team_division AS division, team_logo_espn AS logo_url FROM Teams WHERE team_abbr = ?',
-      [normalizedTeamId]
+    let [teamRows] = await connection.execute(
+      'SELECT team_name, team_division AS division, team_logo_espn AS logo_url FROM Teams WHERE team_abbr = ? OR team_abbr = ?',
+      [normalizedTeamId, altTeamId]
     );
     if (teamRows.length === 0) {
-      console.log(`Team not found for team_abbr: ${normalizedTeamId}`);
+      console.log(`Team not found for team_abbr: ${normalizedTeamId} or ${altTeamId}`);
       return res.status(404).json({ error: 'Team not found' });
     }
     const team = teamRows[0];
+    const teamAbbr = teamRows[0].team_abbr; // Use the actual team_abbr from DB
 
     console.log('Fetching season stats...');
     const [statsRows] = await connection.execute(
@@ -36,14 +37,14 @@ export default async function handler(req, res) {
          WHERE (home_team_id = ? AND winning_team_id = ?)
             OR (away_team_id = ? AND winning_team_id = ?)
             AND season_type = 'REG'
-            AND game_date BETWEEN '2024-01-01' AND '2025-05-22'
+            AND game_date BETWEEN '2024-09-01' AND '2025-02-28'
         ) AS wins,
         (SELECT COUNT(*) 
          FROM Games 
          WHERE (home_team_id = ? AND losing_team_id = ?)
             OR (away_team_id = ? AND losing_team_id = ?)
             AND season_type = 'REG'
-            AND game_date BETWEEN '2024-01-01' AND '2025-05-22'
+            AND game_date BETWEEN '2024-09-01' AND '2025-02-28'
         ) AS losses,
         (SELECT SUM(CASE 
                        WHEN home_team_id = ? THEN home_score 
@@ -53,7 +54,7 @@ export default async function handler(req, res) {
          FROM Games 
          WHERE (home_team_id = ? OR away_team_id = ?)
             AND season_type = 'REG'
-            AND game_date BETWEEN '2024-01-01' AND '2025-05-22'
+            AND game_date BETWEEN '2024-09-01' AND '2025-02-28'
         ) AS points_scored,
         (SELECT SUM(CASE 
                        WHEN home_team_id = ? THEN away_score 
@@ -63,20 +64,17 @@ export default async function handler(req, res) {
          FROM Games 
          WHERE (home_team_id = ? OR away_team_id = ?)
             AND season_type = 'REG'
-            AND game_date BETWEEN '2024-01-01' AND '2025-05-22'
+            AND game_date BETWEEN '2024-09-01' AND '2025-02-28'
         ) AS points_allowed
       `,
       [
-        normalizedTeamId, normalizedTeamId,
-        normalizedTeamId, normalizedTeamId,
-        normalizedTeamId, normalizedTeamId,
-        normalizedTeamId, normalizedTeamId,
-        normalizedTeamId, normalizedTeamId,
-        normalizedTeamId, normalizedTeamId,
-        normalizedTeamId, normalizedTeamId,
+        teamAbbr, teamAbbr, teamAbbr, teamAbbr,
+        teamAbbr, teamAbbr, teamAbbr, teamAbbr,
+        teamAbbr, teamAbbr, teamAbbr, teamAbbr,
+        teamAbbr, teamAbbr, teamAbbr, teamAbbr,
       ]
     );
-    const seasonStats = statsRows[0];
+    const seasonStats = statsRows[0] || { wins: 0, losses: 0, points_scored: 0, points_allowed: 0 };
 
     console.log('Fetching last game...');
     const [lastGameRows] = await connection.execute(
@@ -90,12 +88,11 @@ export default async function handler(req, res) {
         away_score
       FROM Games
       WHERE (home_team_id = ? OR away_team_id = ?)
-        AND game_date <= '2025-05-22'
         AND is_final = 1
       ORDER BY game_date DESC, game_time DESC
       LIMIT 1
       `,
-      [normalizedTeamId, normalizedTeamId]
+      [teamAbbr, teamAbbr]
     );
     const lastGame = lastGameRows[0] || null;
 
@@ -106,30 +103,35 @@ export default async function handler(req, res) {
         game_date,
         game_time,
         home_team_id,
-        away_team_id
+        away_team_id,
+        stadium_name
       FROM Games
       WHERE (home_team_id = ? OR away_team_id = ?)
-        AND game_date > '2025-05-22'
         AND is_final = 0
       ORDER BY game_date ASC
       LIMIT 1
       `,
-      [normalizedTeamId, normalizedTeamId]
+      [teamAbbr, teamAbbr]
     );
     const upcomingGame = upcomingGameRows[0] || null;
 
     console.log('Fetching depth chart...');
-    const [depthChartRows] = await connection.execute(
-      `
-      SELECT full_name, position, jersey_number
-      FROM Player_Metadata
-      WHERE team_abbr = ?
-      ORDER BY position
-      LIMIT 20
-      `,
-      [normalizedTeamId]
-    );
-    const depthChart = depthChartRows;
+    let depthChart = [];
+    try {
+      const [depthChartRows] = await connection.execute(
+        `
+        SELECT full_name, position, jersey_number
+        FROM Rosters_2024
+        WHERE team = ?
+        ORDER BY position
+        LIMIT 20
+        `,
+        [teamAbbr]
+      );
+      depthChart = depthChartRows;
+    } catch (error) {
+      console.log('Depth chart query failed, likely table missing:', error.message);
+    }
 
     console.log('Fetching detailed stats...');
     const [detailedStatsRows] = await connection.execute(
@@ -141,20 +143,29 @@ export default async function handler(req, res) {
       FROM Player_Stats_Game_2024
       WHERE team_id = ? AND season_id = 2024
       `,
-      [normalizedTeamId]
+      [teamAbbr]
     );
-    const detailedStats = detailedStatsRows[0];
+    const detailedStats = detailedStatsRows[0] || {
+      total_passing_yards: 0,
+      total_rushing_yards: 0,
+      total_receiving_yards: 0,
+    };
 
     console.log('Fetching injuries...');
-    const [injuriesRows] = await connection.execute(
-      `
-      SELECT full_name, position, report_primary_injury, report_status, date_modified
-      FROM Injuries
-      WHERE team = ?
-      `,
-      [normalizedTeamId]
-    );
-    const injuries = injuriesRows;
+    let injuries = [];
+    try {
+      const [injuriesRows] = await connection.execute(
+        `
+        SELECT full_name, position, report_primary_injury, report_status, date_modified
+        FROM Injuries
+        WHERE team = ?
+        `,
+        [teamAbbr]
+      );
+      injuries = injuriesRows;
+    } catch (error) {
+      console.log('Injuries query failed, likely table missing:', error.message);
+    }
 
     console.log('Fetching schedule...');
     const [scheduleRows] = await connection.execute(
@@ -170,10 +181,9 @@ export default async function handler(req, res) {
         is_final
       FROM Games
       WHERE (home_team_id = ? OR away_team_id = ?)
-        AND game_date <= '2025-05-22'
       ORDER BY game_date
       `,
-      [normalizedTeamId, normalizedTeamId]
+      [teamAbbr, teamAbbr]
     );
     const schedule = scheduleRows;
 
