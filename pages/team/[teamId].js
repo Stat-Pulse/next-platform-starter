@@ -10,7 +10,7 @@ const TeamDepthChart = ({ depthChart }) => (
       <ul>
         {depthChart.map((player, idx) => (
           <li key={idx}>
-            {player.position}: {player.first_name} {player.last_name} (Depth: {player.depth})
+            {player.position}: {player.full_name} (Jersey: {player.jersey_number || 'N/A'})
           </li>
         ))}
       </ul>
@@ -42,7 +42,7 @@ const TeamInjuries = ({ injuries }) => (
       <ul>
         {injuries.map((injury, idx) => (
           <li key={idx}>
-            {injury.first_name} {injury.last_name} ({injury.position}): {injury.injury_type}, Out since {injury.date_out}, Expected return: {injury.expected_return}
+            {injury.full_name} ({injury.position}): {injury.report_primary_injury || 'N/A'}, Status: {injury.report_status || 'N/A'}, Last Updated: {new Date(injury.date_modified).toLocaleDateString()}
           </li>
         ))}
       </ul>
@@ -79,6 +79,7 @@ const TeamPage = () => {
   const { teamId } = router.query;
   const [teamData, setTeamData] = useState(null);
   const [teamLogos, setTeamLogos] = useState({});
+  const [news, setNews] = useState([]);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -99,7 +100,22 @@ const TeamPage = () => {
       }
     };
 
+    const fetchNews = async () => {
+      try {
+        const response = await fetch('/api/news');
+        if (!response.ok) {
+          throw new Error('Failed to fetch news');
+        }
+        const newsData = await response.json();
+        setNews(newsData);
+      } catch (err) {
+        console.error('Error fetching news:', err);
+        setNews([]);
+      }
+    };
+
     fetchTeamData();
+    fetchNews();
   }, [teamId]);
 
   useEffect(() => {
@@ -141,7 +157,7 @@ const TeamPage = () => {
     return <div className="container mx-auto py-6">Loading...</div>;
   }
 
-  const { team, seasonStats, lastGame, upcomingGame, depthChart, detailedStats, injuries, schedule, news } = teamData;
+  const { team, seasonStats, lastGame, upcomingGame, depthChart, detailedStats, injuries, schedule } = teamData;
 
   return (
     <div className="container mx-auto py-6">
@@ -173,93 +189,7 @@ const TeamPage = () => {
             Schedule
           </button>
           <button
-            onClick(() => setActiveTab('injuries')}
-            className={`text-blue-600 hover:underline ${activeTab === 'injuries' ? 'font-bold' : ''}`}
-          >
-            Injuries
-          </button>
-          <button
-            onClick={() => setActiveTab('stats')}
-            className={`text-blue-600 hover:underline ${activeTab === 'stats' ? 'font-bold' : ''}`}
-          >
-            Stats
-          </button>
-        </nav>
-      </div>
-  return (
-    <div className="container mx-auto py-6">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-blue-600">{team?.team_name || 'Unknown Team'}</h1>
-        <p className="text-lg text-gray-600">
-          Record: {seasonStats?.wins !== undefined && seasonStats?.losses !== undefined
-            ? `${seasonStats.wins}-${seasonStats.losses}`
-            : 'N/A'}
-        </p>
-        <nav className="flex space-x-4 mt-2">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`text-blue-600 hover:underline ${activeTab === 'overview' ? 'font-bold' : ''}`}
-          >
-            Overview
-          </button>
-          <button
-            onClick={() => setActiveTab('depthChart')}
-            className={`text-blue-600 hover:underline ${activeTab === 'depthChart' ? 'font-bold' : ''}`}
-          >
-            Depth Chart
-          </button>
-          <button
-            onClick={() => setActiveTab('schedule')}
-            className={`text-blue-600 hover:underline ${activeTab === 'schedule' ? 'font-bold' : ''}`}
-          >
-            Schedule
-          </button>
-          <button
-            onClick(() => setActiveTab('injuries')}
-            className={`text-blue-600 hover:underline ${activeTab === 'injuries' ? 'font-bold' : ''}`}
-          >
-            Injuries
-          </button>
-          <button
-            onClick={() => setActiveTab('stats')}
-            className={`text-blue-600 hover:underline ${activeTab === 'stats' ? 'font-bold' : ''}`}
-          >
-            Stats
-          </button>
-        </nav>
-      </div>
-  return (
-    <div className="container mx-auto py-6">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-blue-600">{team?.team_name || 'Unknown Team'}</h1>
-        <p className="text-lg text-gray-600">
-          Record: {seasonStats?.wins !== undefined && seasonStats?.losses !== undefined
-            ? `${seasonStats.wins}-${seasonStats.losses}`
-            : 'N/A'}
-        </p>
-        <nav className="flex space-x-4 mt-2">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`text-blue-600 hover:underline ${activeTab === 'overview' ? 'font-bold' : ''}`}
-          >
-            Overview
-          </button>
-          <button
-            onClick={() => setActiveTab('depthChart')}
-            className={`text-blue-600 hover:underline ${activeTab === 'depthChart' ? 'font-bold' : ''}`}
-          >
-            Depth Chart
-          </button>
-          <button
-            onClick={() => setActiveTab('schedule')}
-            className={`text-blue-600 hover:underline ${activeTab === 'schedule' ? 'font-bold' : ''}`}
-          >
-            Schedule
-          </button>
-          <button
-            onClick={() => setActiveTab('injuries')} // Line 176, fixed syntax
+            onClick={() => setActiveTab('injuries')}
             className={`text-blue-600 hover:underline ${activeTab === 'injuries' ? 'font-bold' : ''}`}
           >
             Injuries
@@ -427,7 +357,7 @@ const TeamPage = () => {
           <div className="md:col-span-1">
             <div className="bg-white p-4 rounded shadow">
               <h2 className="text-xl font-semibold mb-4">Latest News</h2>
-              {news && news.length > 0 ? (
+              {news.length > 0 ? (
                 <div className="space-y-4">
                   {news.map((newsItem, idx) => (
                     <div key={idx} className="border-b pb-4 last:border-b-0">
