@@ -1,197 +1,39 @@
-// pages/api/teams/[teamId].js
-import mysql from 'mysql2/promise';
-
+// pages/api/teams/[teamId].js (temporary for testing)
 export default async function handler(req, res) {
   const { teamId } = req.query;
 
-  let connection;
   try {
-    console.log('Attempting to connect to database...');
-    connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: 'stat_pulse_analytics_db',
-    });
-    console.log('Database connection successful.');
-
-    console.log('Fetching team metadata...');
-    const [teamRows] = await connection.execute(
-      'SELECT team_name, division, logo_url FROM Teams WHERE team_id = ?',
-      [teamId]
-    );
-    if (teamRows.length === 0) {
-      console.log(`Team not found for teamId: ${teamId}`);
-      return res.status(404).json({ error: 'Team not found' });
+    if (teamId === 'KC') {
+      return res.status(200).json({
+        team: {
+          team_name: 'Kansas City Chiefs',
+          division: 'AFC West',
+          logo_url: 'https://github.com/nflverse/nflverse-pbp/raw/master/squared_logos/KC.png',
+        },
+        seasonStats: {
+          wins: 17,
+          losses: 3,
+          points_scored: 462,
+          points_allowed: 373,
+        },
+        lastGame: {
+          game_date: '2025-02-09',
+          game_time: '00:00:00',
+          home_team_id: 'PHI',
+          away_team_id: 'KC',
+          home_score: 40,
+          away_score: 22,
+        },
+        upcomingGame: null,
+        depthChart: [],
+        detailedStats: { total_passing_yards: 0, total_rushing_yards: 0, total_receiving_yards: 0 },
+        injuries: [],
+        schedule: [],
+      });
     }
-    const team = teamRows[0];
-
-    console.log('Fetching season stats...');
-    const [statsRows] = await connection.execute(
-      `
-      SELECT 
-        (SELECT COUNT(*) 
-         FROM Games 
-         WHERE (home_team_id = ? AND winning_team_id = ?)
-            OR (away_team_id = ? AND winning_team_id = ?)
-            AND season_type = 'REG'
-            AND game_date BETWEEN '2024-01-01' AND '2025-05-22'
-        ) AS wins,
-        (SELECT COUNT(*) 
-         FROM Games 
-         WHERE (home_team_id = ? AND losing_team_id = ?)
-            OR (away_team_id = ? AND losing_team_id = ?)
-            AND season_type = 'REG'
-            AND game_date BETWEEN '2024-01-01' AND '2025-05-22'
-        ) AS losses,
-        (SELECT SUM(CASE 
-                       WHEN home_team_id = ? THEN home_score 
-                       WHEN away_team_id = ? THEN away_score 
-                       ELSE 0 
-                    END)
-         FROM Games 
-         WHERE (home_team_id = ? OR away_team_id = ?)
-            AND season_type = 'REG'
-            AND game_date BETWEEN '2024-01-01' AND '2025-05-22'
-        ) AS points_scored,
-        (SELECT SUM(CASE 
-                       WHEN home_team_id = ? THEN away_score 
-                       WHEN away_team_id = ? THEN home_score 
-                       ELSE 0 
-                    END)
-         FROM Games 
-         WHERE (home_team_id = ? OR away_team_id = ?)
-            AND season_type = 'REG'
-            AND game_date BETWEEN '2024-01-01' AND '2025-05-22'
-        ) AS points_allowed
-      `,
-      [
-        teamId, teamId,
-        teamId, teamId,
-        teamId, teamId,
-        teamId, teamId,
-        teamId, teamId,
-        teamId, teamId,
-        teamId, teamId,
-      ]
-    );
-    const seasonStats = statsRows[0];
-
-    console.log('Fetching last game...');
-    const [lastGameRows] = await connection.execute(
-      `
-      SELECT 
-        game_date,
-        game_time,
-        home_team_id,
-        away_team_id,
-        home_score,
-        away_score
-      FROM Games
-      WHERE (home_team_id = ? OR away_team_id = ?)
-        AND game_date <= '2025-05-22'
-        AND is_final = 1
-      ORDER BY game_date DESC, game_time DESC
-      LIMIT 1
-      `,
-      [teamId, teamId]
-    );
-    const lastGame = lastGameRows[0] || null;
-
-    console.log('Fetching upcoming game...');
-    const [upcomingGameRows] = await connection.execute(
-      `
-      SELECT 
-        game_date,
-        game_time,
-        home_team_id,
-        away_team_id
-      FROM Games
-      WHERE (home_team_id = ? OR away_team_id = ?)
-        AND game_date > '2025-05-22'
-        AND is_final = 0
-      ORDER BY game_date ASC
-      LIMIT 1
-      `,
-      [teamId, teamId]
-    );
-    const upcomingGame = upcomingGameRows[0] || null;
-
-    console.log('Fetching depth chart...');
-    const [depthChartRows] = await connection.execute(
-      `
-      SELECT full_name, position, jersey_number
-      FROM Player_Metadata
-      WHERE team_abbr = ?
-      ORDER BY position
-      LIMIT 20
-      `,
-      [teamId]
-    );
-    const depthChart = depthChartRows;
-
-    console.log('Fetching detailed stats...');
-    const [detailedStatsRows] = await connection.execute(
-      `
-      SELECT 
-        SUM(passing_yards) AS total_passing_yards,
-        SUM(rushing_yards) AS total_rushing_yards,
-        SUM(receiving_yards) AS total_receiving_yards
-      FROM Player_Stats_Game_2024
-      WHERE team_id = ? AND season_id = 2024
-      `,
-      [teamId]
-    );
-    const detailedStats = detailedStatsRows[0];
-
-    console.log('Fetching injuries...');
-    const [injuriesRows] = await connection.execute(
-      `
-      SELECT full_name, position, report_primary_injury, report_status, date_modified
-      FROM Injuries
-      WHERE team = ?
-      `,
-      [teamId]
-    );
-    const injuries = injuriesRows;
-
-    console.log('Fetching schedule...');
-    const [scheduleRows] = await connection.execute(
-      `
-      SELECT 
-        game_date,
-        game_time,
-        home_team_id,
-        away_team_id,
-        home_score,
-        away_score,
-        stadium_name,
-        is_final
-      FROM Games
-      WHERE (home_team_id = ? OR away_team_id = ?)
-        AND game_date <= '2025-05-22'
-      ORDER BY game_date
-      `,
-      [teamId, teamId]
-    );
-    const schedule = scheduleRows;
-
-    await connection.end();
-    console.log('Database connection closed.');
-
-    return res.status(200).json({
-      team,
-      seasonStats,
-      lastGame,
-      upcomingGame,
-      depthChart,
-      detailedStats,
-      injuries,
-      schedule,
-    });
+    return res.status(404).json({ error: 'Team not found' });
   } catch (error) {
     console.error('Error in /api/teams/[teamId]:', error.message);
-    if (connection) await connection.end();
     return res.status(500).json({ error: error.message || 'Failed to fetch team data' });
   }
 }
