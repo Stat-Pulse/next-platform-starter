@@ -6,6 +6,12 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
+[[redirects]]
+  from = "/player/*"
+  to = "/.netlify/functions/___netlify-handler"
+  status = 200
+  force = true
+
 #[[edge_functions]]
 #  path = "/player/*"
 #  function = "rewrite"
