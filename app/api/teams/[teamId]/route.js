@@ -18,7 +18,7 @@ export async function GET(req, { params }) {
 
     console.log('Fetching team metadata...');
     let [teamRows] = await connection.execute(
-      'SELECT team_name, team_division AS division, team_logo_espn AS logo_url, team_conference AS conference, team_city AS city FROM Teams WHERE team_abbr = ? OR team_abbr = ?',
+      'SELECT team_name, team_division AS division, team_logo_espn AS logo_url FROM Teams WHERE team_abbr = ? OR team_abbr = ?',
       [teamId, altTeamId]
     );
     if (teamRows.length === 0) {
@@ -141,7 +141,7 @@ export async function GET(req, { params }) {
         SUM(rushing_yards) AS total_rushing_yards,
         SUM(receiving_yards) AS total_receiving_yards
       FROM Player_Stats_Game_2024
-      WHERE team_id = ? AND season_id = 2024
+      WHERE team_id = ?
       `,
       [teamAbbr]
     );
