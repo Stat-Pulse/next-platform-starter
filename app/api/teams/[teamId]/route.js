@@ -1,4 +1,3 @@
-// app/api/teams/[teamId]/route.js
 import mysql from 'mysql2/promise';
 
 export async function GET(req, { params }) {
@@ -120,7 +119,7 @@ export async function GET(req, { params }) {
     try {
       const [depthChartRows] = await connection.execute(
         `
-        SELECT full_name, position, jersey_number
+        SELECT DISTINCT full_name, position, jersey_number
         FROM Rosters_2024
         WHERE team = ?
         ORDER BY position
@@ -134,22 +133,25 @@ export async function GET(req, { params }) {
     }
 
     console.log('Fetching detailed stats...');
-    const [detailedStatsRows] = await connection.execute(
-      `
-      SELECT 
-        SUM(passing_yards) AS total_passing_yards,
-        SUM(rushing_yards) AS total_rushing_yards,
-        SUM(receiving_yards) AS total_receiving_yards
-      FROM Player_Stats_Game_2024
-      WHERE team_id = ?
-      `,
-      [teamAbbr]
-    );
-    const detailedStats = detailedStatsRows[0] || {
-      total_passing_yards: 0,
-      total_rushing_yards: 0,
-      total_receiving_yards: 0,
-    };
+    let detailedStats = { total_passing_yards: 0, total_rushing_yards: 0, total_receiving_yards: 0 };
+    try {
+      const [detailedStatsRows] = await connection.execute(
+        `
+        SELECT 
+          SUM(passing_yards) AS total_passing_yards,
+          SUM(rushing_yards) AS total_rushing_yards,
+          SUM(receiving_yards) AS total_receiving_yards
+        FROM Player_Stats_Game_2024
+        WHERE team_id = ? AND season = 2024
+        `,
+        [teamAbbr]
+      );
+      if (detailedStatsRows[0] && detailedStatsRows[0].total_passing_yards !== null) {
+        detailedStats = detailedStatsRows[0];
+      }
+    } catch (error) {
+      console.log('Detailed stats query failed:', error.message);
+    }
 
     console.log('Fetching injuries...');
     let injuries = [];
