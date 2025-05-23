@@ -31,7 +31,7 @@ export async function GET(req, { params }) {
     }
 
     const team = teamRows[0];
-    const teamAbbr = team.team_abbr; // e.g., 'KC'
+    teamAbbr = team.team_abbr; // Update existing teamAbbr variable (no re-declaration)
     const numericTeamIdString = team.team_id; // e.g., '2310'
     console.log(`Team found: ${team.team_name} (Abbr: ${teamAbbr}, Numeric ID: ${numericTeamIdString})`);
 
@@ -87,7 +87,7 @@ export async function GET(req, { params }) {
         seasonStats = statsRows[0];
         console.log(`Season stats: wins=${seasonStats.wins}, losses=${seasonStats.losses}`);
       } else {
-        console.log('No season stats found');
+        console.log('No season stats found for this team and season.');
       }
     } catch (error) {
       console.log('Season stats query failed:', error.message);
@@ -183,10 +183,10 @@ export async function GET(req, { params }) {
           detailedStats = detailedStatsRows[0];
           console.log(`Detailed stats: passing_yards=${detailedStats.total_passing_yards}`);
         } else {
-          console.log('No detailed stats found');
+          console.log('No detailed stats found for this team and season.');
         }
       } else {
-        console.log(`No numeric team_id found for ${teamAbbr}`);
+        console.log(`No numeric team_id available for detailed stats query.`);
       }
     } catch (error) {
       console.log('Detailed stats query failed:', error.message);
@@ -302,7 +302,14 @@ export async function GET(req, { params }) {
     return new Response(JSON.stringify(responseData), { status: 200 });
   } catch (error) {
     console.error('Team API error:', error.message);
-    if (connection) await connection.end();
-    return new Response(JSON.stringify({ error: 'Failed to fetch team data' }), { status: 500 });
+    if (connection) {
+      try {
+        await connection.end();
+        console.log('Database connection closed after error.');
+      } catch (closeError) {
+        console.error('Error closing database connection:', closeError.message);
+      }
+    }
+    return new Response(JSON.stringify({ error: 'Failed to fetch team data', details: error.message }), { status: 500 });
   }
 }
