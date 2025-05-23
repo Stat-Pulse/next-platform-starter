@@ -1,15 +1,13 @@
 import mysql from 'mysql2/promise';
 
-// Hardcoded mapping for now; ideally fetch from Teams table
 const teamIdMap = {
   'KC': 2310,
   'CHIEFS': 2310,
-  // Add other teams as needed
 };
 
 export async function GET(req, { params }) {
-  const teamId = params.teamId.toUpperCase(); // Normalize to uppercase (e.g., chiefs -> CHIEFS)
-  const altTeamId = teamId === 'CHIEFS' ? 'KC' : teamId; // Handle Chiefs-specific case
+  const teamId = params.teamId.toUpperCase();
+  const altTeamId = teamId === 'CHIEFS' ? 'KC' : teamId;
 
   let connection;
   try {
@@ -32,94 +30,106 @@ export async function GET(req, { params }) {
       return new Response(JSON.stringify({ error: 'Team not found' }), { status: 404 });
     }
     const team = teamRows[0];
-    const teamAbbr = teamRows[0].team_abbr; // Use actual team_abbr from DB
+    const teamAbbr = teamRows[0].team_abbr;
 
     console.log('Fetching season stats...');
-    const [statsRows] = await connection.execute(
-      `
-      SELECT 
-        (SELECT COUNT(*) 
-         FROM Games 
-         WHERE (home_team_id = ? AND winning_team_id = ?)
-            OR (away_team_id = ? AND winning_team_id = ?)
-            AND season_type = 'REG'
-            AND game_date BETWEEN '2024-09-01' AND '2025-02-28'
-        ) AS wins,
-        (SELECT COUNT(*) 
-         FROM Games 
-         WHERE (home_team_id = ? AND losing_team_id = ?)
-            OR (away_team_id = ? AND losing_team_id = ?)
-            AND season_type = 'REG'
-            AND game_date BETWEEN '2024-09-01' AND '2025-02-28'
-        ) AS losses,
-        (SELECT SUM(CASE 
-                       WHEN home_team_id = ? THEN home_score 
-                       WHEN away_team_id = ? THEN away_score 
-                       ELSE 0 
-                    END)
-         FROM Games 
-         WHERE (home_team_id = ? OR away_team_id = ?)
-            AND season_type = 'REG'
-            AND game_date BETWEEN '2024-09-01' AND '2025-02-28'
-        ) AS points_scored,
-        (SELECT SUM(CASE 
-                       WHEN home_team_id = ? THEN away_score 
-                       WHEN away_team_id = ? THEN home_score 
-                       ELSE 0 
-                    END)
-         FROM Games 
-         WHERE (home_team_id = ? OR away_team_id = ?)
-            AND season_type = 'REG'
-            AND game_date BETWEEN '2024-09-01' AND '2025-02-28'
-        ) AS points_allowed
-      `,
-      [
-        teamAbbr, teamAbbr, teamAbbr, teamAbbr,
-        teamAbbr, teamAbbr, teamAbbr, teamAbbr,
-        teamAbbr, teamAbbr, teamAbbr, teamAbbr,
-        teamAbbr, teamAbbr, teamAbbr, teamAbbr,
-      ]
-    );
-    const seasonStats = statsRows[0] || { wins: 0, losses: 0, points_scored: 0, points_allowed: 0 };
+    let seasonStats = { wins: 0, losses: 0, points_scored: 0, points_allowed: 0 };
+    try {
+      const [statsRows] = await connection.execute(
+        `
+        SELECT 
+          (SELECT COUNT(*) 
+           FROM Games 
+           WHERE (home_team_id = ? AND winning_team_id = ?)
+              OR (away_team_id = ? AND winning_team_id = ?)
+              AND season_type = 'REG'
+          ) AS wins,
+          (SELECT COUNT(*) 
+           FROM Games 
+           WHERE (home_team_id = ? AND losing_team_id = ?)
+              OR (away_team_id = ? AND losing_team_id = ?)
+              AND season_type = 'REG'
+          ) AS losses,
+          (SELECT SUM(CASE 
+                         WHEN home_team_id = ? THEN home_score 
+                         WHEN away_team_id = ? THEN away_score 
+                         ELSE 0 
+                      END)
+           FROM Games 
+           WHERE (home_team_id = ? OR away_team_id = ?)
+              AND season_type = 'REG'
+          ) AS points_scored,
+          (SELECT SUM(CASE 
+                         WHEN home_team_id = ? THEN away_score 
+                         WHEN away_team_id = ? THEN home_score 
+                         ELSE 0 
+                      END)
+           FROM Games 
+           WHERE (home_team_id = ? OR away_team_id = ?)
+              AND season_type = 'REG'
+          ) AS points_allowed
+        `,
+        [
+          teamAbbr, teamAbbr, teamAbbr, teamAbbr,
+          teamAbbr, teamAbbr, teamAbbr, teamAbbr,
+          teamAbbr, teamAbbr, teamAbbr, teamAbbr,
+          teamAbbr, teamAbbr, teamAbbr, teamAbbr,
+        ]
+      );
+      if (statsRows[0]) seasonStats = statsRows[0];
+    } catch (error) {
+      console.log('Season stats query failed:', error.message);
+    }
 
     console.log('Fetching last game...');
-    const [lastGameRows] = await connection.execute(
-      `
-      SELECT 
-        game_date,
-        game_time,
-        home_team_id,
-        away_team_id,
-        home_score,
-        away_score
-      FROM Games
-      WHERE (home_team_id = ? OR away_team_id = ?)
-        AND is_final = 1
-      ORDER BY game_date DESC, game_time DESC
-      LIMIT 1
-      `,
-      [teamAbbr, teamAbbr]
-    );
-    const lastGame = lastGameRows[0] || null;
+    let lastGame = null;
+    try {
+      const [lastGameRows] = await connection.execute(
+        `
+        SELECT 
+          game_id,
+          game_date,
+          game_time,
+          home_team_id,
+          away_team_id,
+          home_score,
+          away_score
+        FROM Games
+        WHERE (home_team_id = ? OR away_team_id = ?)
+          AND is_final = 1
+        ORDER BY game_date DESC, game_time DESC
+        LIMIT 1
+        `,
+        [teamAbbr, teamAbbr]
+      );
+      lastGame = lastGameRows[0] || null;
+    } catch (error) {
+      console.log('Last game query failed:', error.message);
+    }
 
     console.log('Fetching upcoming game...');
-    const [upcomingGameRows] = await connection.execute(
-      `
-      SELECT 
-        game_date,
-        game_time,
-        home_team_id,
-        away_team_id,
-        stadium_name
-      FROM Games
-      WHERE (home_team_id = ? OR away_team_id = ?)
-        AND is_final = 0
-      ORDER BY game_date ASC
-      LIMIT 1
-      `,
-      [teamAbbr, teamAbbr]
-    );
-    const upcomingGame = upcomingGameRows[0] || null;
+    let upcomingGame = null;
+    try {
+      const [upcomingGameRows] = await connection.execute(
+        `
+        SELECT 
+          game_date,
+          game_time,
+          home_team_id,
+          away_team_id,
+          stadium_name
+        FROM Games
+        WHERE (home_team_id = ? OR away_team_id = ?)
+          AND is_final = 0
+        ORDER BY game_date ASC
+        LIMIT 1
+        `,
+        [teamAbbr, teamAbbr]
+      );
+      upcomingGame = upcomingGameRows[0] || null;
+    } catch (error) {
+      console.log('Upcoming game query failed:', error.message);
+    }
 
     console.log('Fetching depth chart...');
     let depthChart = [];
@@ -182,24 +192,29 @@ export async function GET(req, { params }) {
     }
 
     console.log('Fetching schedule...');
-    const [scheduleRows] = await connection.execute(
-      `
-      SELECT 
-        game_date,
-        game_time,
-        home_team_id,
-        away_team_id,
-        home_score,
-        away_score,
-        stadium_name,
-        is_final
-      FROM Games
-      WHERE (home_team_id = ? OR away_team_id = ?)
-      ORDER BY game_date
-      `,
-      [teamAbbr, teamAbbr]
-    );
-    const schedule = scheduleRows;
+    let schedule = [];
+    try {
+      const [scheduleRows] = await connection.execute(
+        `
+        SELECT 
+          game_date,
+          game_time,
+          home_team_id,
+          away_team_id,
+          home_score,
+          away_score,
+          stadium_name,
+          is_final
+        FROM Games
+        WHERE (home_team_id = ? OR away_team_id = ?)
+        ORDER BY game_date
+        `,
+        [teamAbbr, teamAbbr]
+      );
+      schedule = scheduleRows;
+    } catch (error) {
+      console.log('Schedule query failed:', error.message);
+    }
 
     await connection.end();
     console.log('Database connection closed.');
