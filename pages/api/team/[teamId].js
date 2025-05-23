@@ -4,25 +4,32 @@ import mysql from 'mysql2/promise';
 export default async function handler(req, res) {
   const { teamId } = req.query;
 
-  const connection = await mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: 'stat_pulse_analytics_db',
-  });
-
+  let connection;
   try {
+    // Create a connection to your MySQL database
+    console.log('Attempting to connect to database...');
+    connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: 'stat_pulse_analytics_db',
+    });
+    console.log('Database connection successful.');
+
     // Fetch team metadata from Teams table
+    console.log('Fetching team metadata...');
     const [teamRows] = await connection.execute(
       'SELECT team_name, division, logo_url FROM Teams WHERE team_id = ?',
       [teamId]
     );
     if (teamRows.length === 0) {
+      console.log(`Team not found for teamId: ${teamId}`);
       return res.status(404).json({ error: 'Team not found' });
     }
     const team = teamRows[0];
 
-    // Fetch season stats from Games table (include games up to May 22, 2025)
+    // Fetch season stats from Games table
+    console.log('Fetching season stats...');
     const [statsRows] = await connection.execute(
       `
       SELECT 
@@ -73,7 +80,8 @@ export default async function handler(req, res) {
     );
     const seasonStats = statsRows[0];
 
-    // Fetch last game from Games table (up to May 22, 2025)
+    // Fetch last game from Games table
+    console.log('Fetching last game...');
     const [lastGameRows] = await connection.execute(
       `
       SELECT 
@@ -95,6 +103,7 @@ export default async function handler(req, res) {
     const lastGame = lastGameRows[0] || null;
 
     // Fetch upcoming game from Games table
+    console.log('Fetching upcoming game...');
     const [upcomingGameRows] = await connection.execute(
       `
       SELECT 
@@ -114,6 +123,7 @@ export default async function handler(req, res) {
     const upcomingGame = upcomingGameRows[0] || null;
 
     // Fetch depth chart from Player_Metadata table
+    console.log('Fetching depth chart...');
     const [depthChartRows] = await connection.execute(
       `
       SELECT full_name, position, jersey_number
@@ -127,6 +137,7 @@ export default async function handler(req, res) {
     const depthChart = depthChartRows;
 
     // Fetch detailed stats from Player_Stats_Game_2024 table
+    console.log('Fetching detailed stats...');
     const [detailedStatsRows] = await connection.execute(
       `
       SELECT 
@@ -141,6 +152,7 @@ export default async function handler(req, res) {
     const detailedStats = detailedStatsRows[0];
 
     // Fetch injuries from Injuries table
+    console.log('Fetching injuries...');
     const [injuriesRows] = await connection.execute(
       `
       SELECT full_name, position, report_primary_injury, report_status, date_modified
@@ -151,7 +163,8 @@ export default async function handler(req, res) {
     );
     const injuries = injuriesRows;
 
-    // Fetch schedule from Games table (up to May 22, 2025)
+    // Fetch schedule from Games table
+    console.log('Fetching schedule...');
     const [scheduleRows] = await connection.execute(
       `
       SELECT 
@@ -173,6 +186,7 @@ export default async function handler(req, res) {
     const schedule = scheduleRows;
 
     await connection.end();
+    console.log('Database connection closed.');
 
     return res.status(200).json({
       team,
@@ -185,8 +199,8 @@ export default async function handler(req, res) {
       schedule,
     });
   } catch (error) {
-    console.error('Error fetching team data:', error);
-    await connection.end();
-    return res.status(500).json({ error: 'Failed to fetch team data' });
+    console.error('Error in /api/teams/[teamId]:', error.message);
+    if (connection) await connection.end();
+    return res.status(500).json({ error: error.message || 'Failed to fetch team data' });
   }
 }
