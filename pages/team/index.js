@@ -1,3 +1,4 @@
+// pages/team/index.js
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
@@ -13,13 +14,12 @@ async function getTeams() {
       database: 'stat_pulse_analytics_db',
     });
     const [rows] = await connection.execute(
-      'SELECT team_abbr, team_name, team_division AS division, team_conference AS conference, team_logo_espn AS logo_url FROM Teams'
+      'SELECT team_abbr, team_name, team_division AS division, team_logo_espn AS logo_url FROM Teams'
     );
     await connection.end();
     return rows.map((row) => ({
       slug: row.team_abbr.toLowerCase(),
       name: row.team_name,
-      conference: row.conference,
       division: row.division,
       logo_url: row.logo_url,
     }));
@@ -52,7 +52,7 @@ export default function TeamsIndex({ teams }) {
               <h2 className="text-2xl font-semibold text-red-600">{conference} Conference</h2>
               {divs.map((division) => {
                 const filteredTeams = teams.filter(
-                  (team) => team.conference === conference && team.division === division
+                  (team) => team.division === division
                 );
 
                 return (
