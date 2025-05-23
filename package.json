@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@netlify/plugin-nextjs": "^5.0.0",
+    "@netlify/plugin-nextjs": "^5.11.2",
     "@netlify/blobs": "^8.2.0",
     "blobshape": "^1.0.0",
     "bright": "^0.8.5",
