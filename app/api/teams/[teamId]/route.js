@@ -31,6 +31,7 @@ export async function GET(req, { params }) {
     }
     const team = teamRows[0];
     const teamAbbr = teamRows[0].team_abbr;
+    console.log(`Team found: ${team.team_name}`);
 
     console.log('Fetching season stats...');
     let seasonStats = { wins: 0, losses: 0, points_scored: 0, points_allowed: 0 };
@@ -43,12 +44,14 @@ export async function GET(req, { params }) {
            WHERE (home_team_id = ? AND winning_team_id = ?)
               OR (away_team_id = ? AND winning_team_id = ?)
               AND season_type = 'REG'
+              AND game_date BETWEEN '2024-09-01' AND '2025-02-28'
           ) AS wins,
           (SELECT COUNT(*) 
            FROM Games 
            WHERE (home_team_id = ? AND losing_team_id = ?)
               OR (away_team_id = ? AND losing_team_id = ?)
               AND season_type = 'REG'
+              AND game_date BETWEEN '2024-09-01' AND '2025-02-28'
           ) AS losses,
           (SELECT SUM(CASE 
                          WHEN home_team_id = ? THEN home_score 
@@ -58,6 +61,7 @@ export async function GET(req, { params }) {
            FROM Games 
            WHERE (home_team_id = ? OR away_team_id = ?)
               AND season_type = 'REG'
+              AND game_date BETWEEN '2024-09-01' AND '2025-02-28'
           ) AS points_scored,
           (SELECT SUM(CASE 
                          WHEN home_team_id = ? THEN away_score 
@@ -67,6 +71,7 @@ export async function GET(req, { params }) {
            FROM Games 
            WHERE (home_team_id = ? OR away_team_id = ?)
               AND season_type = 'REG'
+              AND game_date BETWEEN '2024-09-01' AND '2025-02-28'
           ) AS points_allowed
         `,
         [
@@ -76,7 +81,12 @@ export async function GET(req, { params }) {
           teamAbbr, teamAbbr, teamAbbr, teamAbbr,
         ]
       );
-      if (statsRows[0]) seasonStats = statsRows[0];
+      if (statsRows[0]) {
+        seasonStats = statsRows[0];
+        console.log(`Season stats: wins=${seasonStats.wins}, losses=${seasonStats.losses}`);
+      } else {
+        console.log('No season stats found');
+      }
     } catch (error) {
       console.log('Season stats query failed:', error.message);
     }
@@ -103,6 +113,7 @@ export async function GET(req, { params }) {
         [teamAbbr, teamAbbr]
       );
       lastGame = lastGameRows[0] || null;
+      console.log(lastGame ? `Last game found: ${lastGame.game_id}` : 'No last game found');
     } catch (error) {
       console.log('Last game query failed:', error.message);
     }
@@ -127,6 +138,7 @@ export async function GET(req, { params }) {
         [teamAbbr, teamAbbr]
       );
       upcomingGame = upcomingGameRows[0] || null;
+      console.log(upcomingGame ? `Upcoming game found` : 'No upcoming game found');
     } catch (error) {
       console.log('Upcoming game query failed:', error.message);
     }
@@ -145,6 +157,7 @@ export async function GET(req, { params }) {
         [teamAbbr]
       );
       depthChart = depthChartRows;
+      console.log(`Depth chart entries: ${depthChart.length}`);
     } catch (error) {
       console.log('Depth chart query failed:', error.message);
     }
@@ -167,6 +180,9 @@ export async function GET(req, { params }) {
         );
         if (detailedStatsRows[0] && detailedStatsRows[0].total_passing_yards !== null) {
           detailedStats = detailedStatsRows[0];
+          console.log(`Detailed stats: passing_yards=${detailedStats.total_passing_yards}`);
+        } else {
+          console.log('No detailed stats found');
         }
       } else {
         console.log(`No numeric team_id found for ${teamAbbr}`);
@@ -187,6 +203,7 @@ export async function GET(req, { params }) {
         [teamAbbr]
       );
       injuries = injuriesRows;
+      console.log(`Injuries entries: ${injuries.length}`);
     } catch (error) {
       console.log('Injuries query failed:', error.message);
     }
@@ -212,6 +229,7 @@ export async function GET(req, { params }) {
         [teamAbbr, teamAbbr]
       );
       schedule = scheduleRows;
+      console.log(`Schedule entries: ${schedule.length}`);
     } catch (error) {
       console.log('Schedule query failed:', error.message);
     }
