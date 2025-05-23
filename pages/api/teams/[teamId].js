@@ -6,7 +6,6 @@ export default async function handler(req, res) {
 
   let connection;
   try {
-    // Create a connection to your MySQL database
     console.log('Attempting to connect to database...');
     connection = await mysql.createConnection({
       host: process.env.DB_HOST,
@@ -16,7 +15,6 @@ export default async function handler(req, res) {
     });
     console.log('Database connection successful.');
 
-    // Fetch team metadata from Teams table
     console.log('Fetching team metadata...');
     const [teamRows] = await connection.execute(
       'SELECT team_name, division, logo_url FROM Teams WHERE team_id = ?',
@@ -28,7 +26,6 @@ export default async function handler(req, res) {
     }
     const team = teamRows[0];
 
-    // Fetch season stats from Games table
     console.log('Fetching season stats...');
     const [statsRows] = await connection.execute(
       `
@@ -80,7 +77,6 @@ export default async function handler(req, res) {
     );
     const seasonStats = statsRows[0];
 
-    // Fetch last game from Games table
     console.log('Fetching last game...');
     const [lastGameRows] = await connection.execute(
       `
@@ -102,7 +98,6 @@ export default async function handler(req, res) {
     );
     const lastGame = lastGameRows[0] || null;
 
-    // Fetch upcoming game from Games table
     console.log('Fetching upcoming game...');
     const [upcomingGameRows] = await connection.execute(
       `
@@ -122,7 +117,6 @@ export default async function handler(req, res) {
     );
     const upcomingGame = upcomingGameRows[0] || null;
 
-    // Fetch depth chart from Player_Metadata table
     console.log('Fetching depth chart...');
     const [depthChartRows] = await connection.execute(
       `
@@ -136,7 +130,6 @@ export default async function handler(req, res) {
     );
     const depthChart = depthChartRows;
 
-    // Fetch detailed stats from Player_Stats_Game_2024 table
     console.log('Fetching detailed stats...');
     const [detailedStatsRows] = await connection.execute(
       `
@@ -151,7 +144,6 @@ export default async function handler(req, res) {
     );
     const detailedStats = detailedStatsRows[0];
 
-    // Fetch injuries from Injuries table
     console.log('Fetching injuries...');
     const [injuriesRows] = await connection.execute(
       `
@@ -163,7 +155,6 @@ export default async function handler(req, res) {
     );
     const injuries = injuriesRows;
 
-    // Fetch schedule from Games table
     console.log('Fetching schedule...');
     const [scheduleRows] = await connection.execute(
       `
