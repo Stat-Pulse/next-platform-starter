@@ -186,6 +186,92 @@ const TeamPage = () => {
           </button>
         </nav>
       </div>
+  return (
+    <div className="container mx-auto py-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-blue-600">{team?.team_name || 'Unknown Team'}</h1>
+        <p className="text-lg text-gray-600">
+          Record: {seasonStats?.wins !== undefined && seasonStats?.losses !== undefined
+            ? `${seasonStats.wins}-${seasonStats.losses}`
+            : 'N/A'}
+        </p>
+        <nav className="flex space-x-4 mt-2">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`text-blue-600 hover:underline ${activeTab === 'overview' ? 'font-bold' : ''}`}
+          >
+            Overview
+          </button>
+          <button
+            onClick={() => setActiveTab('depthChart')}
+            className={`text-blue-600 hover:underline ${activeTab === 'depthChart' ? 'font-bold' : ''}`}
+          >
+            Depth Chart
+          </button>
+          <button
+            onClick={() => setActiveTab('schedule')}
+            className={`text-blue-600 hover:underline ${activeTab === 'schedule' ? 'font-bold' : ''}`}
+          >
+            Schedule
+          </button>
+          <button
+            onClick(() => setActiveTab('injuries')}
+            className={`text-blue-600 hover:underline ${activeTab === 'injuries' ? 'font-bold' : ''}`}
+          >
+            Injuries
+          </button>
+          <button
+            onClick={() => setActiveTab('stats')}
+            className={`text-blue-600 hover:underline ${activeTab === 'stats' ? 'font-bold' : ''}`}
+          >
+            Stats
+          </button>
+        </nav>
+      </div>
+  return (
+    <div className="container mx-auto py-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-blue-600">{team?.team_name || 'Unknown Team'}</h1>
+        <p className="text-lg text-gray-600">
+          Record: {seasonStats?.wins !== undefined && seasonStats?.losses !== undefined
+            ? `${seasonStats.wins}-${seasonStats.losses}`
+            : 'N/A'}
+        </p>
+        <nav className="flex space-x-4 mt-2">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`text-blue-600 hover:underline ${activeTab === 'overview' ? 'font-bold' : ''}`}
+          >
+            Overview
+          </button>
+          <button
+            onClick={() => setActiveTab('depthChart')}
+            className={`text-blue-600 hover:underline ${activeTab === 'depthChart' ? 'font-bold' : ''}`}
+          >
+            Depth Chart
+          </button>
+          <button
+            onClick={() => setActiveTab('schedule')}
+            className={`text-blue-600 hover:underline ${activeTab === 'schedule' ? 'font-bold' : ''}`}
+          >
+            Schedule
+          </button>
+          <button
+            onClick={() => setActiveTab('injuries')} // Line 176, fixed syntax
+            className={`text-blue-600 hover:underline ${activeTab === 'injuries' ? 'font-bold' : ''}`}
+          >
+            Injuries
+          </button>
+          <button
+            onClick={() => setActiveTab('stats')}
+            className={`text-blue-600 hover:underline ${activeTab === 'stats' ? 'font-bold' : ''}`}
+          >
+            Stats
+          </button>
+        </nav>
+      </div>
 
       {/* Tab Content */}
       {activeTab === 'overview' && (
