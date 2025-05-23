@@ -1,205 +1,112 @@
-// pages/teams/[teamId].js
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
+import Image from 'next/image';
+import { notFound } from 'next/navigation';
+import TeamDepthChart from '@/components/team/TeamDepthChart';
+import TeamStatsTable from '@/components/team/TeamStatsTable';
+import TeamInjuries from '@/components/team/TeamInjuries';
+import TeamSchedule from '@/components/team/TeamSchedule';
+import mysql from 'mysql2/promise';
+import { useState } from 'react';
 
-// Placeholder components until the actual ones are implemented
-const TeamDepthChart = ({ depthChart }) => (
-  <div>
-    <h2 className="text-xl font-semibold mb-4">Depth Chart</h2>
-    {depthChart.length > 0 ? (
-      <ul>
-        {depthChart.map((player, idx) => (
-          <li key={idx}>
-            {player.position}: {player.full_name} (Jersey: {player.jersey_number || 'N/A'})
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <p>No depth chart available.</p>
-    )}
-  </div>
-);
+async function getTeamData(teamId) {
+  try {
+    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/teams/${teamId}`;
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching team data:', error);
+    return null;
+  }
+}
 
-const TeamStatsTable = ({ detailedStats }) => (
-  <div>
-    <h2 className="text-xl font-semibold mb-4">Team Stats</h2>
-    {detailedStats.total_passing_yards !== undefined ? (
-      <div>
-        <p>Total Passing Yards: {detailedStats.total_passing_yards}</p>
-        <p>Total Rushing Yards: {detailedStats.total_rushing_yards}</p>
-        <p>Total Receiving Yards: {detailedStats.total_receiving_yards}</p>
-      </div>
-    ) : (
-      <p>No stats available.</p>
-    )}
-  </div>
-);
+export async function getStaticPaths() {
+  try {
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: 'stat_pulse_analytics_db',
+    });
+    const [rows] = await connection.execute('SELECT team_abbr FROM Teams');
+    await connection.end();
+    const paths = rows.map((row) => ({
+      params: { teamId: row.team_abbr.toLowerCase() },
+    }));
+    return { paths, fallback: 'blocking' };
+  } catch (error) {
+    console.error('Error generating static paths:', error);
+    return { paths: [], fallback: 'blocking' };
+  }
+}
 
-const TeamInjuries = ({ injuries }) => (
-  <div>
-    <h2 className="text-xl font-semibold mb-4">Injuries</h2>
-    {injuries.length > 0 ? (
-      <ul>
-        {injuries.map((injury, idx) => (
-          <li key={idx}>
-            {injury.full_name} ({injury.position}): {injury.report_primary_injury || 'N/A'}, Status: {injury.report_status || 'N/A'}, Last Updated: {new Date(injury.date_modified).toLocaleDateString()}
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <p>No injuries reported.</p>
-    )}
-  </div>
-);
+export async function getStaticProps({ params }) {
+  const teamId = params.teamId;
+  const teamData = await getTeamData(teamId);
+  if (!teamData || !teamData.team) return { notFound: true };
 
-const TeamSchedule = ({ schedule }) => (
-  <div>
-    <h2 className="text-xl font-semibold mb-4">Schedule</h2>
-    {schedule.length > 0 ? (
-      <ul>
-        {schedule.map((game, idx) => (
-          <li key={idx}>
-            {new Date(game.game_date).toLocaleDateString('en-US', {
-              weekday: 'short',
-              month: 'short',
-              day: 'numeric',
-            })}, {game.game_time.slice(0, 5)}: {game.home_team_id} vs {game.away_team_id} at {game.stadium_name}
-            {game.is_final ? ` (Final: ${game.home_score} - ${game.away_score})` : ' (Upcoming)'}
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <p>No games scheduled.</p>
-    )}
-  </div>
-);
+  // Fetch logos for lastGame and upcomingGame
+  const teamLogos = { [teamData.team.team_abbr]: teamData.team.logo_url };
+  const teamsToFetch = [];
 
-const TeamPage = () => {
-  const router = useRouter();
-  const { teamId } = router.query;
-  const [teamData, setTeamData] = useState(null);
-  const [teamLogos, setTeamLogos] = useState({});
-  const [news, setNews] = useState([]);
-  const [error, setError] = useState(null);
+  if (teamData.lastGame) {
+    teamsToFetch.push(
+      teamData.lastGame.home_team_id !== teamData.team.team_abbr ? teamData.lastGame.home_team_id : null,
+      teamData.lastGame.away_team_id !== teamData.team.team_abbr ? teamData.lastGame.away_team_id : null
+    );
+  }
+  if (teamData.upcomingGame) {
+    teamsToFetch.push(
+      teamData.upcomingGame.home_team_id !== teamData.team.team_abbr ? teamData.upcomingGame.home_team_id : null,
+      teamData.upcomingGame.away_team_id !== teamData.team.team_abbr ? teamData.upcomingGame.away_team_id : null
+    );
+  }
+
+  for (const id of teamsToFetch.filter(Boolean)) {
+    const data = await getTeamData(id.toLowerCase());
+    if (data?.team) teamLogos[id] = data.team.logo_url;
+  }
+
+  return { props: { teamData, teamLogos } };
+}
+
+export default function TeamPage({ teamData, teamLogos }) {
   const [activeTab, setActiveTab] = useState('overview');
-
-  useEffect(() => {
-    if (!teamId) return;
-
-    const fetchTeamData = async () => {
-      try {
-        const response = await fetch(`/api/teams/${teamId}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch team data');
-        }
-        const data = await response.json();
-        setTeamData(data);
-      } catch (err) {
-        console.error('Error fetching team data:', err);
-        setError('Failed to load team data.');
-      }
-    };
-
-    const fetchNews = async () => {
-      try {
-        const response = await fetch('/api/news');
-        if (!response.ok) {
-          throw new Error('Failed to fetch news');
-        }
-        const newsData = await response.json();
-        setNews(newsData);
-      } catch (err) {
-        console.error('Error fetching news:', err);
-        setNews([]);
-      }
-    };
-
-    fetchTeamData();
-    fetchNews();
-  }, [teamId]);
-
-  useEffect(() => {
-    if (!teamData || !teamData.lastGame) return;
-
-    const fetchLogos = async () => {
-      const logoData = {};
-      logoData[teamId] = teamData.team.logo_url;
-
-      const lastGame = teamData.lastGame;
-      if (lastGame) {
-        const teamsToFetch = [lastGame.home_team_id, lastGame.away_team_id].filter(
-          (id) => id !== teamId
-        );
-        for (const id of teamsToFetch) {
-          try {
-            const response = await fetch(`/api/teams/${id}`);
-            if (response.ok) {
-              const data = await response.json();
-              logoData[id] = data.team.logo_url;
-            }
-          } catch (error) {
-            console.error(`Error fetching logo for team ${id}:`, error);
-          }
-        }
-      }
-
-      setTeamLogos(logoData);
-    };
-
-    fetchLogos();
-  }, [teamData, teamId]);
-
-  if (error) {
-    return <div className="container mx-auto py-6 text-red-600">{error}</div>;
-  }
-
-  if (!teamData) {
-    return <div className="container mx-auto py-6">Loading...</div>;
-  }
-
   const { team, seasonStats, lastGame, upcomingGame, depthChart, detailedStats, injuries, schedule } = teamData;
 
   return (
     <div className="container mx-auto py-6">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-blue-600">{team?.team_name || 'Unknown Team'}</h1>
-        <p className="text-lg text-gray-600">
-          Record: {seasonStats?.wins !== undefined && seasonStats?.losses !== undefined
-            ? `${seasonStats.wins}-${seasonStats.losses}`
-            : 'N/A'}
-        </p>
+        <div className="flex items-center gap-4">
+          {team?.logo_url && (
+            <Image
+              src={team.logo_url}
+              alt={team.team_name}
+              width={80}
+              height={80}
+              className="rounded-full"
+            />
+          )}
+          <div>
+            <h1 className="text-3xl font-bold text-blue-600">{team?.team_name || 'Unknown Team'}</h1>
+            <p className="text-lg text-gray-600">
+              Record: {seasonStats?.wins !== undefined && seasonStats?.losses !== undefined
+                ? `${seasonStats.wins}-${seasonStats.losses}`
+                : 'N/A'}
+            </p>
+          </div>
+        </div>
         <nav className="flex space-x-4 mt-2">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`text-blue-600 hover:underline ${activeTab === 'overview' ? 'font-bold' : ''}`}
-          >
-            Overview
-          </button>
-          <button
-            onClick={() => setActiveTab('depthChart')}
-            className={`text-blue-600 hover:underline ${activeTab === 'depthChart' ? 'font-bold' : ''}`}
-          >
-            Depth Chart
-          </button>
-          <button
-            onClick={() => setActiveTab('schedule')}
-            className={`text-blue-600 hover:underline ${activeTab === 'schedule' ? 'font-bold' : ''}`}
-          >
-            Schedule
-          </button>
-          <button
-            onClick={() => setActiveTab('injuries')}
-            className={`text-blue-600 hover:underline ${activeTab === 'injuries' ? 'font-bold' : ''}`}
-          >
-            Injuries
-          </button>
-          <button
-            onClick={() => setActiveTab('stats')}
-            className={`text-blue-600 hover:underline ${activeTab === 'stats' ? 'font-bold' : ''}`}
-          >
-            Stats
-          </button>
+          {['overview', 'depthChart', 'schedule', 'injuries', 'stats'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`text-blue-600 hover:underline ${activeTab === tab ? 'font-bold' : ''}`}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
         </nav>
       </div>
 
@@ -227,41 +134,14 @@ const TeamPage = () => {
                 <div className="border p-4 rounded">
                   <p className="text-gray-600">Points Scored</p>
                   <p className="text-lg font-semibold">
-                    {seasonStats?.points_scored !== undefined
-                      ? seasonStats.points_scored
-                      : 'N/A'}
+                    {seasonStats?.points_scored !== undefined ? seasonStats.points_scored : 'N/A'}
                   </p>
                 </div>
                 <div className="border p-4 rounded">
                   <p className="text-gray-600">Points Allowed</p>
                   <p className="text-lg font-semibold">
-                    {seasonStats?.points_allowed !== undefined
-                      ? seasonStats.points_allowed
-                      : 'N/A'}
+                    {seasonStats?.points_allowed !== undefined ? seasonStats.points_allowed : 'N/A'}
                   </p>
-                </div>
-              </div>
-            </div>
-
-            {/* 2024 Team Grades */}
-            <div className="bg-white p-4 rounded shadow">
-              <h2 className="text-xl font-semibold mb-4">2024 Team Grades</h2>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="border p-4 rounded">
-                  <p className="text-gray-600">Overall</p>
-                  <p className="text-lg font-semibold">N/A</p>
-                </div>
-                <div className="border p-4 rounded flex items-center">
-                  <p className="text-gray-600">Offense</p>
-                  <span className="ml-2 text-green-500">✔</span>
-                </div>
-                <div className="border p-4 rounded flex items-center">
-                  <p className="text-gray-600">Defense</p>
-                  <span className="ml-2 text-green-500">✔</span>
-                </div>
-                <div className="border p-4 rounded flex items-center">
-                  <p className="text-gray-600">Special Teams</p>
-                  <span className="ml-2 text-green-500">✔</span>
                 </div>
               </div>
             </div>
@@ -276,23 +156,23 @@ const TeamPage = () => {
                       weekday: 'short',
                       month: 'short',
                       day: 'numeric',
-                    })}, {lastGame.game_time.slice(0, 5)}
+                    })}, {lastGame.game_time?.slice(0, 5) || 'N/A'}
                   </p>
                   <div className="flex items-center justify-center space-x-4">
-                    <img
+                    <Image
                       src={teamLogos[lastGame.home_team_id] || '/placeholder-logo.png'}
                       alt={`${lastGame.home_team_id} logo`}
-                      className="w-12 h-12"
-                      onError={(e) => (e.target.src = '/placeholder-logo.png')}
+                      width={48}
+                      height={48}
                     />
                     <p className="text-xl font-semibold">
                       {lastGame.home_score} - {lastGame.away_score}
                     </p>
-                    <img
+                    <Image
                       src={teamLogos[lastGame.away_team_id] || '/placeholder-logo.png'}
                       alt={`${lastGame.away_team_id} logo`}
-                      className="w-12 h-12"
-                      onError={(e) => (e.target.src = '/placeholder-logo.png')}
+                      width={48}
+                      height={48}
                     />
                   </div>
                   <div className="flex justify-center space-x-4 mt-2">
@@ -305,9 +185,9 @@ const TeamPage = () => {
               )}
             </div>
 
-            {/* PFF Betting Odds */}
+            {/* Upcoming Game */}
             <div className="bg-white p-4 rounded shadow relative">
-              <h2 className="text-xl font-semibold mb-4">PFF Betting Odds</h2>
+              <h2 className="text-xl font-semibold mb-4">Next Game</h2>
               {upcomingGame ? (
                 <div>
                   <p className="text-gray-600 mb-2">
@@ -315,84 +195,55 @@ const TeamPage = () => {
                       weekday: 'short',
                       month: 'short',
                       day: 'numeric',
-                    })}, {upcomingGame.game_time.slice(0, 5)}
+                    })}, {upcomingGame.game_time?.slice(0, 5) || 'N/A'}
                   </p>
                   <div className="flex items-center justify-center space-x-4">
-                    <img
+                    <Image
                       src={teamLogos[upcomingGame.home_team_id] || '/placeholder-logo.png'}
                       alt={`${upcomingGame.home_team_id} logo`}
-                      className="w-12 h-12"
-                      onError={(e) => (e.target.src = '/placeholder-logo.png')}
+                      width={48}
+                      height={48}
                     />
                     <p className="text-xl font-semibold">vs</p>
-                    <img
+                    <Image
                       src={teamLogos[upcomingGame.away_team_id] || '/placeholder-logo.png'}
                       alt={`${upcomingGame.away_team_id} logo`}
-                      className="w-12 h-12"
-                      onError={(e) => (e.target.src = '/placeholder-logo.png')}
+                      width={48}
+                      height={48}
                     />
                   </div>
                 </div>
               ) : (
                 <div className="relative">
-                  <img
+                  <Image
                     src={team?.logo_url || '/placeholder-logo.png'}
                     alt={`${team?.team_name || 'Team'} logo`}
+                    width={100}
+                    height={100}
                     className="absolute inset-0 w-full h-full object-cover opacity-10"
-                    onError={(e) => (e.target.src = '/placeholder-logo.png')}
                   />
                   <p className="text-gray-600 text-center">No Upcoming Game</p>
                 </div>
               )}
-            </div>
-
-            {/* Fantasy Projections */}
-            <div className="bg-white p-4 rounded shadow">
-              <h2 className="text-xl font-semibold mb-4">Fantasy Projections</h2>
-              <p className="text-gray-600">Coming Soon</p>
             </div>
           </div>
 
           {/* Right Column */}
           <div className="md:col-span-1">
             <div className="bg-white p-4 rounded shadow">
-              <h2 className="text-xl font-semibold mb-4">Latest News</h2>
-              {news.length > 0 ? (
-                <div className="space-y-4">
-                  {news.map((newsItem, idx) => (
-                    <div key={idx} className="border-b pb-4 last:border-b-0">
-                      <h4 className="text-md font-semibold text-gray-800 mb-2">
-                        {newsItem.title}
-                      </h4>
-                      <div className="flex justify-between items-center">
-                        <a
-                          href={newsItem.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 text-sm hover:underline"
-                        >
-                          Read More
-                        </a>
-                        <span className="text-xs text-gray-600">{newsItem.timestamp}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500">No news available.</p>
-              )}
+              <h2 className="text-xl font-semibold mb-4">Team Info</h2>
+              <p className="text-gray-600">City: {team?.city || 'N/A'}</p>
+              <p className="text-gray-600">Conference: {team?.conference || 'N/A'}</p>
+              <p className="text-gray-600">Division: {team?.division || 'N/A'}</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Render other tabs */}
       {activeTab === 'depthChart' && <TeamDepthChart depthChart={depthChart} />}
       {activeTab === 'stats' && <TeamStatsTable detailedStats={detailedStats} />}
       {activeTab === 'injuries' && <TeamInjuries injuries={injuries} />}
       {activeTab === 'schedule' && <TeamSchedule schedule={schedule} />}
     </div>
   );
-};
-
-export default TeamPage;
+}
