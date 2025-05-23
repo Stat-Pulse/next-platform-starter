@@ -85,17 +85,25 @@ const TeamPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
-    if (!teamId) return;
+    if (!teamId || !router.isReady) return;
 
     const fetchTeamData = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // Fetch main team data
+        // Check if we're in a browser environment
+        if (typeof window === 'undefined') {
+          return;
+        }
+
+        // Fetch main team data with proper error handling
         const teamResponse = await fetch(`/api/teams/${teamId}`);
         
         if (!teamResponse.ok) {
+          if (teamResponse.status === 404) {
+            throw new Error('Team not found');
+          }
           throw new Error(`Failed to fetch team data: ${teamResponse.status}`);
         }
         
@@ -115,7 +123,7 @@ const TeamPage = () => {
           teamsToFetch.add(data.upcomingGame.away_team_id);
         }
 
-        // Fetch logos
+        // Fetch logos with better error handling
         const logoPromises = Array.from(teamsToFetch).map(async (abbr) => {
           try {
             const logoResponse = await fetch(`/api/teams/${abbr}`);
@@ -129,24 +137,27 @@ const TeamPage = () => {
           return { abbr, logo_url: '/placeholder-logo.png' };
         });
         
-        const logoResults = await Promise.all(logoPromises);
+        const logoResults = await Promise.allSettled(logoPromises);
         const logos = {};
-        logoResults.forEach(({ abbr, logo_url }) => {
-          logos[abbr] = logo_url || '/placeholder-logo.png';
+        logoResults.forEach((result) => {
+          if (result.status === 'fulfilled') {
+            const { abbr, logo_url } = result.value;
+            logos[abbr] = logo_url || '/placeholder-logo.png';
+          }
         });
         setTeamLogos(logos);
 
-        // Fetch news
+        // Fetch news with fallback
         try {
           const newsResponse = await fetch(`/api/news?team=${teamId}&limit=6`);
           if (newsResponse.ok) {
             const news = await newsResponse.json();
-            setNewsItems(news);
+            setNewsItems(Array.isArray(news) ? news : []);
           } else {
             // Fallback news
             setNewsItems([
-              { title: `${data.team.team_name} News 1`, link: '#', timestamp: '1 hour ago' },
-              { title: `${data.team.team_name} News 2`, link: '#', timestamp: '2 hours ago' },
+              { title: `${data.team?.team_name || 'Team'} News 1`, link: '#', timestamp: '1 hour ago' },
+              { title: `${data.team?.team_name || 'Team'} News 2`, link: '#', timestamp: '2 hours ago' },
             ]);
           }
         } catch (newsError) {
@@ -156,76 +167,94 @@ const TeamPage = () => {
 
       } catch (error) {
         console.error('Error fetching team data:', error);
-        setError('Failed to load team data. Please try again.');
+        setError(error.message || 'Failed to load team data. Please try again.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchTeamData();
-  }, [teamId]);
+  }, [teamId, router.isReady]);
 
-  if (loading) {
-    return <div className="container mx-auto py-6">Loading...</div>;
+  if (!router.isReady || loading) {
+    return (
+      <div className="container mx-auto py-6">
+        <div className="flex justify-center items-center h-64">
+          <div className="text-lg">Loading...</div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="container mx-auto py-6 text-red-600">{error}</div>;
+    return (
+      <div className="container mx-auto py-6">
+        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+          <div className="text-red-800">{error}</div>
+          <button 
+            onClick={() => router.reload()} 
+            className="mt-2 text-red-600 hover:text-red-800 underline"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
   }
 
   if (!teamData || !teamData.team) {
-    return <div className="container mx-auto py-6">Team not found.</div>;
+    return (
+      <div className="container mx-auto py-6">
+        <div className="text-center py-12">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Team not found</h1>
+          <p className="text-gray-600">The team "{teamId}" could not be found.</p>
+          <button 
+            onClick={() => router.push('/')} 
+            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Go Home
+          </button>
+        </div>
+      </div>
+    );
   }
 
   const { team, seasonStats, lastGame, upcomingGame, depthChart, detailedStats, injuries, schedule } = teamData;
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto py-6 px-4">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-blue-600">{team?.team_name || 'Unknown Team'}</h1>
         <p className="text-lg text-gray-600">
           Record: {seasonStats ? `${seasonStats.wins}-${seasonStats.losses}` : 'Loading...'}
         </p>
-        <nav className="flex space-x-4 mt-2">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`text-blue-600 hover:underline ${activeTab === 'overview' ? 'font-bold' : ''}`}
-          >
-            Overview
-          </button>
-          <button
-            onClick={() => setActiveTab('depthChart')}
-            className={`text-blue-600 hover:underline ${activeTab === 'depthChart' ? 'font-bold' : ''}`}
-          >
-            Depth Chart
-          </button>
-          <button
-            onClick={() => setActiveTab('schedule')}
-            className={`text-blue-600 hover:underline ${activeTab === 'schedule' ? 'font-bold' : ''}`}
-          >
-            Schedule
-          </button>
-          <button
-            onClick={() => setActiveTab('injuries')}
-            className={`text-blue-600 hover:underline ${activeTab === 'injuries' ? 'font-bold' : ''}`}
-          >
-            Injuries
-          </button>
-          <button
-            onClick={() => setActiveTab('stats')}
-            className={`text-blue-600 hover:underline ${activeTab === 'stats' ? 'font-bold' : ''}`}
-          >
-            Stats
-          </button>
+        <nav className="flex space-x-4 mt-2 overflow-x-auto">
+          {[
+            { key: 'overview', label: 'Overview' },
+            { key: 'depthChart', label: 'Depth Chart' },
+            { key: 'schedule', label: 'Schedule' },
+            { key: 'injuries', label: 'Injuries' },
+            { key: 'stats', label: 'Stats' }
+          ].map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`text-blue-600 hover:underline whitespace-nowrap ${
+                activeTab === tab.key ? 'font-bold' : ''
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </nav>
       </div>
 
       {/* Tab Content */}
       {activeTab === 'overview' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left/Middle Column */}
-          <div className="md:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-6">
             {/* 2024 Season Stats */}
             <div className="bg-white p-4 rounded shadow">
               <h2 className="text-xl font-semibold mb-4">2024 Season Stats</h2>
@@ -288,7 +317,7 @@ const TeamPage = () => {
                       weekday: 'short',
                       month: 'short',
                       day: 'numeric',
-                    })}, {lastGame.game_time.slice(0, 5)}
+                    })}, {lastGame.game_time?.slice(0, 5) || 'TBD'}
                   </p>
                   <div className="flex items-center justify-center space-x-4">
                     <img
@@ -319,7 +348,7 @@ const TeamPage = () => {
 
             {/* Betting Odds */}
             <div className="bg-white p-4 rounded shadow relative">
-              <h2 className="text-xl font-semibold mb-4"> Betting Odds</h2>
+              <h2 className="text-xl font-semibold mb-4">Betting Odds</h2>
               {upcomingGame ? (
                 <div>
                   <p className="text-gray-600 mb-2">
@@ -327,7 +356,7 @@ const TeamPage = () => {
                       weekday: 'short',
                       month: 'short',
                       day: 'numeric',
-                    })}, {upcomingGame.game_time.slice(0, 5)}
+                    })}, {upcomingGame.game_time?.slice(0, 5) || 'TBD'}
                   </p>
                   <div className="flex items-center justify-center space-x-4">
                     <img
@@ -366,7 +395,7 @@ const TeamPage = () => {
           </div>
 
           {/* Right Column */}
-          <div className="md:col-span-1">
+          <div className="lg:col-span-1">
             <div className="bg-white p-4 rounded shadow">
               <h2 className="text-xl font-semibold mb-4">Latest News</h2>
               {!newsItems || newsItems.length === 0 ? (
@@ -407,26 +436,6 @@ const TeamPage = () => {
   );
 };
 
-// Generate static paths for all teams
-export async function getStaticPaths() {
-  // For Netlify deployment, provide common team paths
-  // You can expand this list or make it dynamic once your API is deployed
-  const commonTeams = [
-    'ARI', 'ATL', 'BAL', 'BUF', 'CAR', 'CHI', 'CIN', 'CLE',
-    'DAL', 'DEN', 'DET', 'GB', 'HOU', 'IND', 'JAX', 'KC',
-    'LV', 'LAC', 'LAR', 'MIA', 'MIN', 'NE', 'NO', 'NYG',
-    'NYJ', 'PHI', 'PIT', 'SF', 'SEA', 'TB', 'TEN', 'WAS'
-  ];
-  
-  const paths = commonTeams.map(teamId => ({
-    params: { teamId }
-  }));
-
-  return {
-    paths,
-    fallback: 'blocking' // This allows for additional teams not in the list
-  };
-}
-
-// No getStaticProps needed - data fetching happens client-side
+// For production builds, we'll use client-side rendering only
+// Remove getStaticPaths to avoid build-time issues
 export default TeamPage;
