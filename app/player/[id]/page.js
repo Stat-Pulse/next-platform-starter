@@ -6,11 +6,17 @@ import PlayerHeader from '@/components/player/PlayerHeader';
 
 async function getPlayerData(playerId) {
   try {
-    const url = `${process.env.NEXT_PUBLIC_SITE_URL}/api/player/${playerId}`;
+    const url = `https://statpulseanalytics.netlify.app/api/player/${playerId}`; // ← hardcoded for now
     const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
+    if (!res.ok) {
+      console.error('Bad response:', res.status);
+      return null;
+    }
+    const json = await res.json();
+    console.log('Fetched player data:', json);
+    return json;
+  } catch (err) {
+    console.error('Fetch failed:', err);
     return null;
   }
 }
