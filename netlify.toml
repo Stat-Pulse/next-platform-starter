@@ -10,8 +10,6 @@
   node_bundler = "esbuild"
   included_files = ["!node_modules/**", "/tmp/*.log"]
 
-# ✅ Universal fallback to enable dynamic App Router routes like /player/[id]
-[[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/__render"
-  status = 200
+[[edge_functions]]
+  path = "/player/*"
+  function = "rewrite"
