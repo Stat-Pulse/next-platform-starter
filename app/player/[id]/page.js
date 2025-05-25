@@ -22,11 +22,15 @@ async function getPlayerData(playerId) {
 }
 
 export default async function PlayerProfilePage({ params }) {
-  const playerId = params.id;
-  const data = await getPlayerData(playerId);
-  if (!data || !data.player) return notFound();
+  const playerId = params?.id;
+  console.log('Rendering player page for:', playerId);
 
-  // 🐛 DEBUGGING RENDER: Replace the full page temporarily
+  const data = await getPlayerData(playerId);
+  if (!data || !data.player) {
+    console.error('No player data found');
+    return notFound();
+  }
+
   return (
     <div className="p-10 text-center">
       <h1 className="text-3xl font-bold">Loaded Player Page</h1>
