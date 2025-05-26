@@ -1,3 +1,4 @@
+// pages/player/[id].js
 import Head from 'next/head';
 import PlayerHeader from '@/components/player/PlayerHeader';
 
@@ -10,11 +11,12 @@ export default function PlayerProfilePage({ player, gameLogs }) {
     );
   }
 
-  const logsWithTDs = gameLogs.map((g) => ({
-    ...g,
-    total_tds:
-      (g.passing_tds || 0) + (g.rushing_tds || 0) + (g.receiving_tds || 0),
-  }));
+  const logsWithTDs = gameLogs
+    .map((g) => ({
+      ...g,
+      total_tds: (g.passing_tds || 0) + (g.rushing_tds || 0) + (g.receiving_tds || 0),
+    }))
+    .sort((a, b) => a.week - b.week);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
@@ -42,7 +44,7 @@ export default function PlayerProfilePage({ player, gameLogs }) {
             <tbody>
               {logsWithTDs.map((log, idx) => (
                 <tr key={idx} className="even:bg-gray-50">
-                  <td className="p-2">{log.week}</td>
+                  <td className="p-2">{log.week || '-'}</td>
                   <td className="p-2">{log.opponent_team_abbr || '-'}</td>
                   <td className="p-2">{log.receptions || 0}</td>
                   <td className="p-2">{log.receiving_yards || 0}</td>
