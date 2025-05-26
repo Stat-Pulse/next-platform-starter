@@ -1,5 +1,5 @@
 // pages/player/[id].js
-
+throw new Error('Force crash to prove route is loading');
 export default function PlayerTestPage({ id }) {
   return (
     <div style={{ padding: '3rem', textAlign: 'center', backgroundColor: '#fff' }}>
