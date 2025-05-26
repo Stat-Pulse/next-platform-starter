@@ -1,23 +1,18 @@
 // pages/player/[id].js
 
-export default function PlayerProfilePage({ id }) {
+export default function PlayerTestPage({ id }) {
   return (
-    <div style={{ padding: '2rem', textAlign: 'center', color: 'green' }}>
-      <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>
-        ✅ Pages Router Working with Dynamic ID
-      </h1>
+    <div style={{ padding: '3rem', textAlign: 'center', backgroundColor: '#fff' }}>
+      <h1 style={{ fontSize: '2rem', color: 'green' }}>✅ Pages Router: Player Page Works</h1>
       <p>Player ID: {id}</p>
     </div>
   );
 }
 
 export async function getServerSideProps({ params }) {
-  const { id } = params;
-  console.log('Rendering /player/[id] for:', id);
-
   return {
     props: {
-      id,
+      id: params.id || 'UNKNOWN',
     },
   };
 }
