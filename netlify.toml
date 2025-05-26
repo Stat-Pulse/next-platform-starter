@@ -12,4 +12,4 @@
 
 [[edge_functions]]
   path = "/player/*"
-  function = "rewrite"
+  function = "rewrite2"
