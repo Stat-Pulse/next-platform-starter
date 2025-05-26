@@ -13,6 +13,10 @@ export async function GET(req, { params }) {
       database: process.env.DB_NAME,
     });
 
+    // 🧪 DEBUGGING LINE - test if we can pull A.J. Brown directly
+    const [test] = await connection.execute(`SELECT * FROM Rosters_2024 WHERE full_name = 'A.J. Brown'`);
+    console.log('🧪 Test query for A.J. Brown:', test);
+    
     // Fetch basic player info
     const [playerRows] = await connection.execute(
       `
