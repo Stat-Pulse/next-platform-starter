@@ -41,14 +41,24 @@ export async function GET(req, { params }) {
     const player = playerRows[0];
 
     // Fetch game logs (optional, adjust table/column names as needed)
+    // Fetch game logs with opponent info
     const [gameLogs] = await connection.execute(
-      `SELECT * FROM Player_Stats_Game_2024
-       WHERE player_id = ?
-       GROUP BY season, week, opponent_team_id
-       ORDER BY season DESC, week ASC`,
+      `
+      SELECT 
+        PSG.week,
+        G.opponent_team_abbr,
+        PSG.receptions,
+        PSG.receiving_yards,
+        PSG.receiving_tds,
+        PSG.passing_tds,
+        PSG.rushing_tds
+      FROM Player_Stats_Game_2024 PSG
+      JOIN Games_2024 G ON PSG.game_id = G.game_id
+      WHERE PSG.player_id = ?
+      ORDER BY PSG.week ASC
+      `,
       [playerId]
     );
-
 
     // Calculate career totals from game logs
     const career = gameLogs.length > 0
