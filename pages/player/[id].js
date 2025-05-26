@@ -22,6 +22,7 @@ export default function PlayerProfilePage({ player, gameLogs }) {
         <title>{player.player_name} | StatPulse</title>
       </Head>
 
+      {/* ✅ Header */}
       <PlayerHeader player={player} />
 
       {/* ✅ Game Logs */}
@@ -52,6 +53,33 @@ export default function PlayerProfilePage({ player, gameLogs }) {
           </table>
         </div>
       </section>
+
+      {/* ✅ Career Stats */}
+      {player.career && (
+        <section>
+          <h2 className="text-2xl font-semibold mb-4 border-b pb-1">Career Stats</h2>
+          <div className="overflow-x-auto border rounded-md shadow">
+            <table className="min-w-full text-sm text-center">
+              <thead className="bg-gray-50 text-gray-700">
+                <tr>
+                  <th className="p-3 font-semibold">Games</th>
+                  <th className="p-3 font-semibold">Receptions</th>
+                  <th className="p-3 font-semibold">Yards</th>
+                  <th className="p-3 font-semibold">Touchdowns</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="p-3">{player.career.games}</td>
+                  <td className="p-3">{player.career.receptions}</td>
+                  <td className="p-3">{player.career.yards}</td>
+                  <td className="p-3">{player.career.tds}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
@@ -61,8 +89,7 @@ export async function getServerSideProps({ params }) {
 
   try {
     const baseUrl =
-      process.env.NEXT_PUBLIC_SITE_URL ||
-      'https://statpulseanalytics.netlify.app';
+      process.env.NEXT_PUBLIC_SITE_URL || 'https://statpulseanalytics.netlify.app';
     const res = await fetch(`${baseUrl}/api/player/${playerId}`);
     if (!res.ok) throw new Error('Fetch failed');
     const data = await res.json();
