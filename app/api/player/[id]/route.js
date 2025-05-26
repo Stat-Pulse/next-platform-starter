@@ -2,7 +2,8 @@ import mysql from 'mysql2/promise';
 
 export async function GET(req, { params }) {
   const playerId = params.id;
-
+  console.log('🔍 Fetching player with ID:', playerId);
+  
   try {
     const connection = await mysql.createConnection({
       host: process.env.DB_HOST,
