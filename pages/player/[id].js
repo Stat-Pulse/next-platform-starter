@@ -1,5 +1,5 @@
 // pages/api/player/[id].js
-import mysql from 'mysql2/promise';
+const res = await fetch(`${baseUrl}/api/player/${playerId}`);
 
 export default async function handler(req, res) {
   const playerId = req.query.id;
