@@ -45,7 +45,9 @@ export default async function handler(req, res) {
         PSG.passing_tds
       FROM Player_Stats_Game_2024 PSG
       JOIN Games G ON PSG.game_id = G.game_id
-      JOIN Rosters_2024 R ON PSG.player_id = R.gsis_id
+        JOIN (
+          SELECT team FROM Rosters_2024 WHERE gsis_id = ? LIMIT 1
+        ) R ON 1=1
       WHERE PSG.player_id = ?
       ORDER BY G.week ASC
     `, [playerId]);
