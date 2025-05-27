@@ -84,11 +84,17 @@ export async function getServerSideProps({ params }) {
   const playerId = params.id;
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://statpulseanalytics.netlify.app';
 
+  console.log('🌐 Fetching from:', `${baseUrl}/api/player/${playerId}`);
+
   try {
     const res = await fetch(`${baseUrl}/api/player/${playerId}`);
-    if (!res.ok) throw new Error('Fetch failed');
-    const data = await res.json();
+    if (!res.ok) {
+      console.error('❌ Failed fetch:', res.status);
+      throw new Error('Fetch failed');
+    }
 
+    const data = await res.json();
+    console.log('✅ Player Data:', data.player?.player_name);
     return {
       props: {
         player: data.player || null,
@@ -96,7 +102,7 @@ export async function getServerSideProps({ params }) {
       },
     };
   } catch (error) {
-    console.error('Error loading player data:', error);
+    console.error('🚨 getServerSideProps error:', error);
     return {
       props: {
         player: null,
