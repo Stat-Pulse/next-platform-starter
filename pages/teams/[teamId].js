@@ -27,16 +27,6 @@ const teamLogos = {
   // Add other team logos as needed
 };
 
-// Placeholder newsItems (to be replaced with real data if no News table exists)
-const newsItems = [
-  { title: 'News 1', link: '#', timestamp: '1 hour ago', source: 'ESPN' },
-  { title: 'News 2', link: '#', timestamp: '2 hours ago', source: 'NFL.com' },
-  { title: 'News 3', link: '#', timestamp: '3 hours ago', source: 'ESPN' },
-  { title: 'News 4', link: '#', timestamp: '4 hours ago', source: 'NFL.com' },
-  { title: 'News 5', link: '#', timestamp: '5 hours ago', source: 'ESPN' },
-  { title: 'News 6', link: '#', timestamp: '6 hours ago', source: 'NFL.com' },
-];
-
 // Components for tabs
 const TeamDepthChart = ({ depthChart }) => (
   <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-red-600">
@@ -44,7 +34,7 @@ const TeamDepthChart = ({ depthChart }) => (
     {depthChart && depthChart.length > 0 ? (
       <ul className="space-y-2">
         {depthChart.map((player, idx) => (
-          <li key={idx} className="border-b py-2">
+          <li key={idx} className="border-b py-2 hover:bg-gray-100 transition-colors">
             {player.full_name} - {player.position} (#{player.jersey_number})
           </li>
         ))}
@@ -61,15 +51,15 @@ const TeamStatsTable = ({ detailedStats }) => (
     <p className="text-yellow-600 mb-2">Note: Stats are incomplete (only 1 game available). Full data import pending.</p>
     {detailedStats && Object.keys(detailedStats).length > 0 ? (
       <div className="grid grid-cols-2 gap-4">
-        <div className="border p-4 rounded bg-gray-50">
+        <div className="border p-4 rounded bg-gray-50 hover:shadow-md transition-shadow">
           <p className="text-gray-600">Passing Yards</p>
           <p className="text-lg font-semibold">{detailedStats.total_passing_yards || 0}</p>
         </div>
-        <div className="border p-4 rounded bg-gray-50">
+        <div className="border p-4 rounded bg-gray-50 hover:shadow-md transition-shadow">
           <p className="text-gray-600">Rushing Yards</p>
           <p className="text-lg font-semibold">{detailedStats.total_rushing_yards || 0}</p>
         </div>
-        <div className="border p-4 rounded bg-gray-50">
+        <div className="border p-4 rounded bg-gray-50 hover:shadow-md transition-shadow">
           <p className="text-gray-600">Receiving Yards</p>
           <p className="text-lg font-semibold">{detailedStats.total_receiving_yards || 0}</p>
         </div>
@@ -86,7 +76,7 @@ const TeamInjuries = ({ injuries }) => (
     {injuries && injuries.length > 0 ? (
       <ul className="space-y-2">
         {injuries.map((injury, idx) => (
-          <li key={idx} className="border-b py-2">
+          <li key={idx} className="border-b py-2 hover:bg-gray-100 transition-colors">
             {injury.player_name} ({injury.position}) - {injury.injury_description || 'N/A'} ({injury.injury_status || 'Unknown'})
           </li>
         ))}
@@ -105,7 +95,7 @@ const TeamSchedule = ({ schedule }) => (
         {schedule
           .filter(game => new Date(game.game_date).getFullYear() === 2024)
           .map((game, idx) => (
-            <li key={idx} className="border-b py-2">
+            <li key={idx} className="border-b py-2 hover:bg-gray-100 transition-colors">
               Week {game.week}: {new Date(game.game_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} vs {game.opponent}{' '}
               {game.is_final ? `(Final: ${game.final_score})` : '(Upcoming)'}
             </li>
@@ -114,6 +104,28 @@ const TeamSchedule = ({ schedule }) => (
     ) : (
       <p className="text-gray-500">No schedule data available.</p>
     )}
+  </div>
+);
+
+// New Top Players Component (Placeholder until Player_Stats_Game_2024 data is complete)
+const TopPlayers = () => (
+  <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-red-600">
+    <h2 className="text-xl font-semibold mb-4 text-red-600">Top Players (2024 Season)</h2>
+    <p className="text-yellow-600 mb-2">Note: Player stats are incomplete. Full data import pending.</p>
+    <div className="space-y-4">
+      <div className="border p-4 rounded bg-gray-50 hover:shadow-md transition-shadow">
+        <p className="text-gray-600">Top Passer</p>
+        <p className="text-lg font-semibold">Patrick Mahomes - 250 yards (placeholder)</p>
+      </div>
+      <div className="border p-4 rounded bg-gray-50 hover:shadow-md transition-shadow">
+        <p className="text-gray-600">Top Rusher</p>
+        <p className="text-lg font-semibold">TBD - 20 yards (placeholder)</p>
+      </div>
+      <div className="border p-4 rounded bg-gray-50 hover:shadow-md transition-shadow">
+        <p className="text-gray-600">Top Receiver</p>
+        <p className="text-lg font-semibold">Travis Kelce - 200 yards (placeholder)</p>
+      </div>
+    </div>
   </div>
 );
 
@@ -166,13 +178,13 @@ const TeamPage = () => {
           </div>
         </div>
         <nav className="flex space-x-4 mt-2">
-          {['overview', 'depthChart', 'schedule', 'injuries', 'stats'].map(tab => (
+          {['overview', 'depthChart', 'schedule', 'injuries', 'stats', 'topPlayers'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`hover:underline ${activeTab === tab ? 'font-bold text-gold-400' : 'text-white'}`}
             >
-              {tab.charAt(0).toUpperCase() + tab.slice(1).replace('Chart', ' Chart')}
+              {tab.charAt(0).toUpperCase() + tab.slice(1).replace('Chart', ' Chart').replace('TopPlayers', 'Top Players')}
             </button>
           ))}
         </nav>
@@ -187,23 +199,23 @@ const TeamPage = () => {
             <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-red-600">
               <h2 className="text-xl font-semibold mb-4 text-red-600">2024 Season Stats</h2>
               <div className="grid grid-cols-2 gap-4">
-                <div className="border p-4 rounded bg-gray-50">
+                <div className="border p-4 rounded bg-gray-50 hover:shadow-md transition-shadow">
                   <p className="text-gray-600">Division</p>
                   <p className="text-lg font-semibold">{team?.division || 'N/A'}</p>
                 </div>
-                <div className="border p-4 rounded bg-gray-50">
+                <div className="border p-4 rounded bg-gray-50 hover:shadow-md transition-shadow">
                   <p className="text-gray-600">Record</p>
                   <p className="text-lg font-semibold">
                     {seasonStats ? `${seasonStats.wins}-${seasonStats.losses}` : 'Loading...'}
                   </p>
                 </div>
-                <div className="border p-4 rounded bg-gray-50">
+                <div className="border p-4 rounded bg-gray-50 hover:shadow-md transition-shadow">
                   <p className="text-gray-600">Points Scored</p>
                   <p className="text-lg font-semibold">
                     {seasonStats?.points_scored || 'Loading...'}
                   </p>
                 </div>
-                <div className="border p-4 rounded bg-gray-50">
+                <div className="border p-4 rounded bg-gray-50 hover:shadow-md transition-shadow">
                   <p className="text-gray-600">Points Allowed</p>
                   <p className="text-lg font-semibold">
                     {seasonStats?.points_allowed || 'Loading...'}
@@ -216,23 +228,23 @@ const TeamPage = () => {
             <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-red-600">
               <h2 className="text-xl font-semibold mb-4 text-red-600">2024 Team Grades</h2>
               <div className="grid grid-cols-2 gap-4">
-                <div className="border p-4 rounded bg-gray-50">
+                <div className="border p-4 rounded bg-gray-50 hover:shadow-md transition-shadow">
                   <p className="text-gray-600">Overall</p>
                   <p className="text-lg font-semibold">{teamGrades?.overall || 'N/A'}</p>
                 </div>
-                <div className="border p-4 rounded bg-gray-50 flex items-center">
+                <div className="border p-4 rounded bg-gray-50 flex items-center hover:shadow-md transition-shadow">
                   <p className="text-gray-600">Offense</p>
                   <span className={`ml-2 ${teamGrades?.offense === 'A' ? 'text-green-500' : teamGrades?.offense === 'B' ? 'text-yellow-500' : 'text-red-500'}`}>
                     {teamGrades?.offense || 'N/A'}
                   </span>
                 </div>
-                <div className="border p-4 rounded bg-gray-50 flex items-center">
+                <div className="border p-4 rounded bg-gray-50 flex items-center hover:shadow-md transition-shadow">
                   <p className="text-gray-600">Defense</p>
                   <span className={`ml-2 ${teamGrades?.defense === 'A' ? 'text-green-500' : teamGrades?.defense === 'B' ? 'text-yellow-500' : 'text-red-500'}`}>
                     {teamGrades?.defense || 'N/A'}
                   </span>
                 </div>
-                <div className="border p-4 rounded bg-gray-50 flex items-center">
+                <div className="border p-4 rounded bg-gray-50 flex items-center hover:shadow-md transition-shadow">
                   <p className="text-gray-600">Special Teams</p>
                   <span className={`ml-2 ${teamGrades?.special_teams === 'A' ? 'text-green-500' : teamGrades?.special_teams === 'B' ? 'text-yellow-500' : 'text-red-500'}`}>
                     {teamGrades?.special_teams || 'N/A'}
@@ -336,7 +348,7 @@ const TeamPage = () => {
               {news && news.length > 0 ? (
                 <div className="space-y-4">
                   {news.map((newsItem, idx) => (
-                    <div key={idx} className="border-b pb-4 last:border-b-0">
+                    <div key={idx} className="border-b pb-4 last:border-b-0 hover:bg-gray-100 transition-colors">
                       <h4 className="text-md font-semibold text-gray-800 mb-2">
                         {newsItem.title}
                       </h4>
@@ -367,6 +379,7 @@ const TeamPage = () => {
       {activeTab === 'stats' && <TeamStatsTable detailedStats={detailedStats} />}
       {activeTab === 'injuries' && <TeamInjuries injuries={injuries} />}
       {activeTab === 'schedule' && <TeamSchedule schedule={schedule} />}
+      {activeTab === 'topPlayers' && <TopPlayers />}
     </div>
   );
 };
