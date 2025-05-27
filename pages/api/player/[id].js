@@ -1,4 +1,4 @@
-  // pages/api/player/[id].js
+// pages/api/player/[id].js
 import mysql from 'mysql2/promise';
 
 export default async function handler(req, res) {
@@ -30,9 +30,9 @@ export default async function handler(req, res) {
     const player = playerRows[0];
     console.log('✅ Player found:', player.player_name);
 
-    // Step 2: Game logs
+    // Step 2: Game logs (joined with Games table to get opponent)
     const [gameLogs] = await connection.execute(`
-       SELECT 
+      SELECT 
         G.week,
         CASE
           WHEN PSG.team_id = G.home_team_id THEN G.away_team_id
@@ -47,19 +47,7 @@ export default async function handler(req, res) {
       JOIN Games G ON PSG.game_id = G.game_id
       WHERE PSG.player_id = ?
       ORDER BY G.week ASC
-
-       CASE
-          WHEN PSG.team = G.home_team_id THEN G.away_team_id
-          ELSE G.home_team_id
-        END AS opponent_team_abbr,
-        PSG.receptions,
-        PSG.receiving_yards,
-       ...
-       FROM Player_Stats_Game_2024 PSG
-       JOIN Games G ON PSG.game_id = G.game_id
-       WHERE PSG.player_id = ?
-       ORDER BY PSG.week ASC
-     `, [playerId]);
+    `, [playerId]);
 
     // Step 3: Career totals
     const career = gameLogs.length > 0 ? {
