@@ -13,7 +13,7 @@ export default async function handler(req, res) {
       database: process.env.DB_NAME,
     });
 
-    // Step 1: Basic player metadata
+    // Step 1: Player metadata from Rosters_2024
     const [playerRows] = await connection.execute(`
       SELECT full_name AS player_name, position, team AS team_abbr, jersey_number, status, college,
              draft_club, draft_number, rookie_year, years_exp, headshot_url, height, weight
@@ -30,28 +30,19 @@ export default async function handler(req, res) {
     const player = playerRows[0];
     console.log('✅ Player found:', player.player_name);
 
-    // Step 2: Game logs (joined with Games table to get opponent)
+    // Step 2: Simplified Game Logs without JOIN
     const [gameLogs] = await connection.execute(`
       SELECT 
-        G.week,
-        CASE
-          WHEN R.team = G.home_team_id THEN G.away_team_id
-          ELSE G.home_team_id
-        END AS opponent_team_abbr,
-        PSG.receptions,
-        PSG.receiving_yards,
-        PSG.receiving_tds,
-        PSG.rushing_tds,
-        PSG.passing_tds
-      FROM Player_Stats_Game_2024 PSG
-      JOIN Games G ON PSG.game_id = G.game_id
-      JOIN (
-        SELECT team FROM Rosters_2024 WHERE gsis_id = ?
-      ) R ON 1=1
-      WHERE PSG.player_id = ?
-      ORDER BY G.week ASC
-    `, [playerId, playerId]); // ✅ Exactly 2 placeholders, exactly 2 parameters
-
+        week,
+        receptions,
+        receiving_yards,
+        receiving_tds,
+        rushing_tds,
+        passing_tds
+      FROM Player_Stats_Game_2024
+      WHERE player_id = ?
+      ORDER BY week ASC
+    `, [playerId]);
 
     // Step 3: Career totals
     const career = gameLogs.length > 0 ? {
