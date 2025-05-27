@@ -1,6 +1,16 @@
 // app/api/teams/[teamId]/route.js
 import mysql from 'mysql2/promise';
 
+// Static fallback for news if the News table query fails
+const newsItems = [
+  { title: 'News 1', link: '#', timestamp: '1 hour ago', source: 'ESPN' },
+  { title: 'News 2', link: '#', timestamp: '2 hours ago', source: 'NFL.com' },
+  { title: 'News 3', link: '#', timestamp: '3 hours ago', source: 'ESPN' },
+  { title: 'News 4', link: '#', timestamp: '4 hours ago', source: 'NFL.com' },
+  { title: 'News 5', link: '#', timestamp: '5 hours ago', source: 'ESPN' },
+  { title: 'News 6', link: '#', timestamp: '6 hours ago', source: 'NFL.com' },
+];
+
 export async function GET(req, { params }) {
   const teamIdentifier = params.teamId.toUpperCase();
 
@@ -17,7 +27,8 @@ export async function GET(req, { params }) {
 
     console.log(`Fetching team metadata for identifier: ${teamIdentifier}...`);
     let [teamRows] = await connection.execute(
-      `SELECT team_id, team_name, team_abbr, team_division AS division, team_logo_espn AS logo_url 
+      `SELECT team_id, team_name, team_abbr, team_division AS division, team_logo_espn AS logo_url, 
+              primary_color, secondary_color, city, nickname
        FROM Teams 
        WHERE team_abbr = ? OR team_name = ?`,
       [teamIdentifier, teamIdentifier]
@@ -25,13 +36,15 @@ export async function GET(req, { params }) {
 
     if (teamRows.length === 0 && teamIdentifier === 'CHIEFS') {
       [teamRows] = await connection.execute(
-        `SELECT team_id, team_name, team_abbr, team_division AS division, team_logo_espn AS logo_url 
+        `SELECT team_id, team_name, team_abbr, team_division AS division, team_logo_espn AS logo_url, 
+                primary_color, secondary_color, city, nickname
          FROM Teams 
          WHERE team_abbr = 'KC'`
       );
     } else if (teamRows.length === 0 && teamIdentifier === 'KC') {
       [teamRows] = await connection.execute(
-        `SELECT team_id, team_name, team_abbr, team_division AS division, team_logo_espn AS logo_url 
+        `SELECT team_id, team_name, team_abbr, team_division AS division, team_logo_espn AS logo_url, 
+                primary_color, secondary_color, city, nickname
          FROM Teams 
          WHERE team_name = 'Kansas City Chiefs'`
       );
@@ -51,50 +64,50 @@ export async function GET(req, { params }) {
     let seasonStats = { wins: 0, losses: 0, points_scored: 0, points_allowed: 0 };
     try {
       const [statsRows] = await connection.execute(
-      `
-      SELECT 
-        (SELECT COUNT(*) 
-         FROM Games 
-         WHERE (home_team_id = ? AND winning_team_id = ?)
-           OR (away_team_id = ? AND winning_team_id = ?)
-           AND season_type = 'REG'
-           AND season_id = 2024
-        ) AS wins,
-        (SELECT COUNT(*) 
-         FROM Games 
-         WHERE (home_team_id = ? AND losing_team_id = ?)
-           OR (away_team_id = ? AND losing_team_id = ?)
-           AND season_type = 'REG'
-           AND season_id = 2024
-        ) AS losses,
-        (SELECT SUM(CASE 
-                  WHEN home_team_id = ? THEN home_score 
-                  WHEN away_team_id = ? THEN away_score 
-                  ELSE 0 
-                END)
-         FROM Games 
-         WHERE (home_team_id = ? OR away_team_id = ?)
-           AND season_type = 'REG'
-           AND season_id = 2024
-        ) AS points_scored,
-        (SELECT SUM(CASE 
-                  WHEN home_team_id = ? THEN away_score 
-                  WHEN away_team_id = ? THEN home_score 
-                  ELSE 0 
-                END)
-     FROM Games 
-     WHERE (home_team_id = ? OR away_team_id = ?)
-       AND season_type = 'REG'
-       AND season_id = 2024
-    ) AS points_allowed
-  `,
-  [
-    teamAbbr, teamAbbr, teamAbbr, teamAbbr,
-    teamAbbr, teamAbbr, teamAbbr, teamAbbr,
-    teamAbbr, teamAbbr, teamAbbr, teamAbbr,
-    teamAbbr, teamAbbr, teamAbbr, teamAbbr
-  ]
-);
+        `
+        SELECT 
+          (SELECT COUNT(*) 
+           FROM Games 
+           WHERE (home_team_id = ? AND winning_team_id = ?)
+             OR (away_team_id = ? AND winning_team_id = ?)
+             AND season_type = 'REG'
+             AND season_id = 2024
+          ) AS wins,
+          (SELECT COUNT(*) 
+           FROM Games 
+           WHERE (home_team_id = ? AND losing_team_id = ?)
+             OR (away_team_id = ? AND losing_team_id = ?)
+             AND season_type = 'REG'
+             AND season_id = 2024
+          ) AS losses,
+          (SELECT SUM(CASE 
+                        WHEN home_team_id = ? THEN home_score 
+                        WHEN away_team_id = ? THEN away_score 
+                        ELSE 0 
+                      END)
+           FROM Games 
+           WHERE (home_team_id = ? OR away_team_id = ?)
+             AND season_type = 'REG'
+             AND season_id = 2024
+          ) AS points_scored,
+          (SELECT SUM(CASE 
+                        WHEN home_team_id = ? THEN away_score 
+                        WHEN away_team_id = ? THEN home_score 
+                        ELSE 0 
+                      END)
+           FROM Games 
+           WHERE (home_team_id = ? OR away_team_id = ?)
+             AND season_type = 'REG'
+             AND season_id = 2024
+          ) AS points_allowed
+        `,
+        [
+          teamAbbr, teamAbbr, teamAbbr, teamAbbr,
+          teamAbbr, teamAbbr, teamAbbr, teamAbbr,
+          teamAbbr, teamAbbr, teamAbbr, teamAbbr,
+          teamAbbr, teamAbbr, teamAbbr, teamAbbr
+        ]
+      );
       if (statsRows[0]) {
         seasonStats = statsRows[0];
         console.log(`Season stats: wins=${seasonStats.wins}, losses=${seasonStats.losses}`);
@@ -300,7 +313,6 @@ export async function GET(req, { params }) {
       console.log(`News entries: ${news.length}`);
     } catch (error) {
       console.log('News query failed:', error.message);
-      // Fallback to static newsItems if News table doesn't exist
       news = newsItems;
     }
 
