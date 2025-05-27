@@ -22,12 +22,12 @@ const fetchTeamData = async (teamId) => {
 
 // Team logos (fetch dynamically from team.logo_url or update as needed)
 const teamLogos = {
-  KC: 'https://a.espncdn.com/i/teamlogos/nfl/500/kc.png', // Chiefs logo
-  DET: 'https://a.espncdn.com/i/teamlogos/nfl/500/det.png', // Lions logo
+  KC: 'https://a.espncdn.com/i/teamlogos/nfl/500/kc.png',
+  DET: 'https://a.espncdn.com/i/teamlogos/nfl/500/det.png',
   // Add other team logos as needed
 };
 
-// Placeholder newsItems (replace with actual news feed data)
+// Placeholder newsItems (to be replaced with real data)
 const newsItems = [
   { title: 'News 1', link: '#', timestamp: '1 hour ago' },
   { title: 'News 2', link: '#', timestamp: '2 hours ago' },
@@ -57,7 +57,8 @@ const TeamDepthChart = ({ depthChart }) => (
 
 const TeamStatsTable = ({ detailedStats }) => (
   <div className="bg-white p-4 rounded shadow">
-    <h2 className="text-xl font-semibold mb-4">Detailed Stats</h2>
+    <h2 className="text-xl font-semibold mb-4">Detailed Stats (2024 Season)</h2>
+    <p className="text-yellow-600 mb-2">Note: Stats are incomplete (only 1 game available). Full data import pending.</p>
     {detailedStats && Object.keys(detailedStats).length > 0 ? (
       <div className="grid grid-cols-2 gap-4">
         <div className="border p-4 rounded">
@@ -86,7 +87,7 @@ const TeamInjuries = ({ injuries }) => (
       <ul className="space-y-2">
         {injuries.map((injury, idx) => (
           <li key={idx} className="border-b py-2">
-            {injury.player_name} ({injury.position}) - {injury.injury_description} ({injury.injury_status})
+            {injury.player_name} ({injury.position}) - {injury.injury_description || 'N/A'} ({injury.injury_status || 'Unknown'})
           </li>
         ))}
       </ul>
@@ -98,15 +99,17 @@ const TeamInjuries = ({ injuries }) => (
 
 const TeamSchedule = ({ schedule }) => (
   <div className="bg-white p-4 rounded shadow">
-    <h2 className="text-xl font-semibold mb-4">Schedule</h2>
+    <h2 className="text-xl font-semibold mb-4">Schedule (2024 Season)</h2>
     {schedule && schedule.length > 0 ? (
       <ul className="space-y-2">
-        {schedule.map((game, idx) => (
-          <li key={idx} className="border-b py-2">
-            Week {game.week}: {game.game_date} vs {game.opponent}{' '}
-            {game.is_final ? `(Final: ${game.final_score})` : '(Upcoming)'}
-          </li>
-        ))}
+        {schedule
+          .filter(game => new Date(game.game_date).getFullYear() === 2024)
+          .map((game, idx) => (
+            <li key={idx} className="border-b py-2">
+              Week {game.week}: {new Date(game.game_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} vs {game.opponent}{' '}
+              {game.is_final ? `(Final: ${game.final_score})` : '(Upcoming)'}
+            </li>
+          ))}
       </ul>
     ) : (
       <p className="text-gray-500">No schedule data available.</p>
@@ -126,7 +129,7 @@ const TeamPage = () => {
     const loadTeamData = async () => {
       const data = await fetchTeamData(teamId);
       if (!data) {
-        setError('Failed to load team data.');
+        setError('Failed to load team data. Please try again later.');
         return;
       }
       setTeamData(data);
@@ -163,36 +166,15 @@ const TeamPage = () => {
           </div>
         </div>
         <nav className="flex space-x-4 mt-2">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`text-blue-600 hover:underline ${activeTab === 'overview' ? 'font-bold' : ''}`}
-          >
-            Overview
-          </button>
-          <button
-            onClick={() => setActiveTab('depthChart')}
-            className={`text-blue-600 hover:underline ${activeTab === 'depthChart' ? 'font-bold' : ''}`}
-          >
-            Depth Chart
-          </button>
-          <button
-            onClick={() => setActiveTab('schedule')}
-            className={`text-blue-600 hover:underline ${activeTab === 'schedule' ? 'font-bold' : ''}`}
-          >
-            Schedule
-          </button>
-          <button
-            onClick={() => setActiveTab('injuries')}
-            className={`text-blue-600 hover:underline ${activeTab === 'injuries' ? 'font-bold' : ''}`}
-          >
-            Injuries
-          </button>
-          <button
-            onClick={() => setActiveTab('stats')}
-            className={`text-blue-600 hover:underline ${activeTab === 'stats' ? 'font-bold' : ''}`}
-          >
-            Stats
-          </button>
+          {['overview', 'depthChart', 'schedule', 'injuries', 'stats'].map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`text-blue-600 hover:underline ${activeTab === tab ? 'font-bold' : ''}`}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1).replace('Chart', ' Chart')}
+            </button>
+          ))}
         </nav>
       </div>
 
@@ -236,19 +218,19 @@ const TeamPage = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="border p-4 rounded">
                   <p className="text-gray-600">Overall</p>
-                  <p className="text-lg font-semibold">N/A</p>
+                  <p className="text-lg font-semibold">A-</p> {/* Replace with real data */}
                 </div>
                 <div className="border p-4 rounded flex items-center">
                   <p className="text-gray-600">Offense</p>
-                  <span className="ml-2 text-green-500">N/A</span>
+                  <span className="ml-2 text-green-500">A</span>
                 </div>
                 <div className="border p-4 rounded flex items-center">
                   <p className="text-gray-600">Defense</p>
-                  <span className="ml-2 text-green-500">N/A</span>
+                  <span className="ml-2 text-yellow-500">B</span>
                 </div>
                 <div className="border p-4 rounded flex items-center">
                   <p className="text-gray-600">Special Teams</p>
-                  <span className="ml-2 text-green-500">N/A</span>
+                  <span className="ml-2 text-red-500">C</span>
                 </div>
               </div>
             </div>
@@ -263,6 +245,7 @@ const TeamPage = () => {
                       weekday: 'short',
                       month: 'short',
                       day: 'numeric',
+                      year: 'numeric',
                     })}, {lastGame.game_time.slice(0, 5)}
                   </p>
                   <div className="flex items-center justify-center space-x-4">
