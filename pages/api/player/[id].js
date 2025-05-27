@@ -32,7 +32,7 @@ export default async function handler(req, res) {
 
     // Step 2: Game logs
     const [gameLogs] = await connection.execute(`
-      SELECT week, opponent_team_abbr, receptions, receiving_yards,
+      SELECT week, receptions, receiving_yards,
              receiving_tds, rushing_tds, passing_tds
       FROM Player_Stats_Game_2024
       WHERE player_id = ?
