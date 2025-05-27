@@ -2,7 +2,7 @@
 import mysql from 'mysql2/promise';
 
 export async function GET(req, { params }) {
-  const teamIdentifier = params.teamId.toUpperCase(); // This could be 'KC' or 'CHIEFS'
+  const teamIdentifier = params.teamId.toUpperCase();
 
   let connection;
   try {
@@ -15,33 +15,26 @@ export async function GET(req, { params }) {
     });
     console.log('Database connection successful.');
 
-    console.log(`Workspaceing team metadata for identifier: ${teamIdentifier}...`);
-    // First, get the canonical team abbreviation AND the numeric team_id
-    // We search by team_abbr first, then by team_name for the 'CHIEFS' alias.
+    console.log(`Fetching team metadata for identifier: ${teamIdentifier}...`);
     let [teamRows] = await connection.execute(
       `SELECT team_id, team_name, team_abbr, team_division AS division, team_logo_espn AS logo_url 
        FROM Teams 
-       WHERE team_abbr = ? OR team_name = ?`, // Search by abbreviation or full name
+       WHERE team_abbr = ? OR team_name = ?`,
       [teamIdentifier, teamIdentifier]
     );
 
-    // Specific handling for 'CHIEFS' to ensure 'KC' abbreviation is picked if 'CHIEFS' is not a direct abbr
     if (teamRows.length === 0 && teamIdentifier === 'CHIEFS') {
-        [teamRows] = await connection.execute(
-            `SELECT team_id, team_name, team_abbr, team_division AS division, team_logo_espn AS logo_url 
-             FROM Teams 
-             WHERE team_abbr = 'KC'`,
-            []
-        );
-    }
-    // Specific handling for 'KC' to ensure 'Chiefs' team_name is picked if 'KC' is not found as abbr (unlikely but safe)
-    else if (teamRows.length === 0 && teamIdentifier === 'KC') {
-        [teamRows] = await connection.execute(
-            `SELECT team_id, team_name, team_abbr, team_division AS division, team_logo_espn AS logo_url 
-             FROM Teams 
-             WHERE team_name = 'Chiefs'`, // Assuming the full name is 'Chiefs'
-            []
-        );
+      [teamRows] = await connection.execute(
+        `SELECT team_id, team_name, team_abbr, team_division AS division, team_logo_espn AS logo_url 
+         FROM Teams 
+         WHERE team_abbr = 'KC'`
+      );
+    } else if (teamRows.length === 0 && teamIdentifier === 'KC') {
+      [teamRows] = await connection.execute(
+        `SELECT team_id, team_name, team_abbr, team_division AS division, team_logo_espn AS logo_url 
+         FROM Teams 
+         WHERE team_name = 'Kansas City Chiefs'`
+      );
     }
 
     if (teamRows.length === 0) {
@@ -50,18 +43,10 @@ export async function GET(req, { params }) {
     }
 
     const team = teamRows[0];
-    const teamAbbr = team.team_abbr; // e.g., 'KC' - used for Games, Rosters, Injuries
-    // team.team_id is stored as TEXT in your DB, but represents the numeric ID.
-    // It should be passed as a string to queries.
-    const numericTeamIdString = team.team_id; // e.g., '2310' - used for Player_Stats_Game_2024
-
+    const teamAbbr = team.team_abbr;
+    const numericTeamIdString = team.team_id;
     console.log(`Team found: ${team.team_name} (Abbr: ${teamAbbr}, Numeric ID: ${numericTeamIdString})`);
 
-
-    // --- Use teamAbbr for Games, Rosters, Injuries tables ---
-    // --- Use numericTeamIdString for Player_Stats_Game_2024 ---
-
-    // Fetch season stats (Games table uses team_abbr)
     console.log('Fetching season stats...');
     let seasonStats = { wins: 0, losses: 0, points_scored: 0, points_allowed: 0 };
     try {
@@ -69,45 +54,45 @@ export async function GET(req, { params }) {
         `
         SELECT 
           (SELECT COUNT(*) 
-            FROM Games 
-            WHERE (home_team_id = ? AND winning_team_id = ?)
-              OR (away_team_id = ? AND winning_team_id = ?)
-              AND season_type = 'REG'
-              AND game_date BETWEEN '2024-09-01' AND '2025-02-28'
+           FROM Games 
+           WHERE (home_team_id = ? AND winning_team_id = ?)
+             OR (away_team_id = ? AND winning_team_id = ?)
+             AND season_type = 'REG'
+             AND season_id = 2024
           ) AS wins,
           (SELECT COUNT(*) 
-            FROM Games 
-            WHERE (home_team_id = ? AND losing_team_id = ?)
-              OR (away_team_id = ? AND losing_team_id = ?)
-              AND season_type = 'REG'
-              AND game_date BETWEEN '2024-09-01' AND '2025-02-28'
+           FROM Games 
+           WHERE (home_team_id = ? AND losing_team_id = ?)
+             OR (away_team_id = ? AND losing_team_id = ?)
+             AND season_type = 'REG'
+             AND season_id = 2024
           ) AS losses,
           (SELECT SUM(CASE 
                         WHEN home_team_id = ? THEN home_score 
                         WHEN away_team_id = ? THEN away_score 
                         ELSE 0 
                       END)
-            FROM Games 
-            WHERE (home_team_id = ? OR away_team_id = ?)
-              AND season_type = 'REG'
-              AND game_date BETWEEN '2024-09-01' AND '2025-02-28'
+           FROM Games 
+           WHERE (home_team_id = ? OR away_team_id = ?)
+             AND season_type = 'REG'
+             AND season_id = 2024
           ) AS points_scored,
           (SELECT SUM(CASE 
                         WHEN home_team_id = ? THEN away_score 
                         WHEN away_team_id = ? THEN home_score 
                         ELSE 0 
                       END)
-            FROM Games 
-            WHERE (home_team_id = ? OR away_team_id = ?)
-              AND season_type = 'REG'
-              AND game_date BETWEEN '2024-09-01' AND '2025-02-28'
+           FROM Games 
+           WHERE (home_team_id = ? OR away_team_id = ?)
+             AND season_type = 'REG'
+             AND season_id = 2024
           ) AS points_allowed
         `,
         [
-          teamAbbr, teamAbbr, teamAbbr, teamAbbr, // For wins
-          teamAbbr, teamAbbr, teamAbbr, teamAbbr, // For losses
-          teamAbbr, teamAbbr, teamAbbr, teamAbbr, // For points_scored
-          teamAbbr, teamAbbr, teamAbbr, teamAbbr, // For points_allowed
+          teamAbbr, teamAbbr, teamAbbr, teamAbbr,
+          teamAbbr, teamAbbr, teamAbbr, teamAbbr,
+          teamAbbr, teamAbbr, teamAbbr, teamAbbr,
+          teamAbbr, teamAbbr, teamAbbr, teamAbbr
         ]
       );
       if (statsRows[0]) {
@@ -120,7 +105,6 @@ export async function GET(req, { params }) {
       console.log('Season stats query failed:', error.message);
     }
 
-    // Fetch last game (Games table uses team_abbr)
     console.log('Fetching last game...');
     let lastGame = null;
     try {
@@ -148,7 +132,6 @@ export async function GET(req, { params }) {
       console.log('Last game query failed:', error.message);
     }
 
-    // Fetch upcoming game (Games table uses team_abbr)
     console.log('Fetching upcoming game...');
     let upcomingGame = null;
     try {
@@ -174,7 +157,6 @@ export async function GET(req, { params }) {
       console.log('Upcoming game query failed:', error.message);
     }
 
-    // Fetch depth chart (Rosters_2024 table uses team_abbr)
     console.log('Fetching depth chart...');
     let depthChart = [];
     try {
@@ -194,60 +176,56 @@ export async function GET(req, { params }) {
       console.log('Depth chart query failed:', error.message);
     }
 
-    // Fetch detailed stats (Player_Stats_Game_2024 uses numeric team_id as string)
     console.log('Fetching detailed stats...');
     let detailedStats = { total_passing_yards: 0, total_rushing_yards: 0, total_receiving_yards: 0 };
     try {
-        // Use the numericTeamIdString from the Teams table.
-        // It's stored as TEXT in Teams, but INT in Player_Stats_Game_2024.
-        // MySQL will implicitly convert the string to an integer for comparison here.
-        if (numericTeamIdString) { 
-            const [detailedStatsRows] = await connection.execute(
-                `
-                SELECT 
-                  SUM(passing_yards) AS total_passing_yards,
-                  SUM(rushing_yards) AS total_rushing_yards,
-                  SUM(receiving_yards) AS total_receiving_yards
-                FROM Player_Stats_Game_2024
-                WHERE team_id = ? AND season = 2024
-                `,
-                [numericTeamIdString] // Pass the string directly
-            );
-            if (detailedStatsRows[0] && detailedStatsRows[0].total_passing_yards !== null) {
-                detailedStats = detailedStatsRows[0];
-                console.log(`Detailed stats: passing_yards=${detailedStats.total_passing_yards}`);
-            } else {
-                console.log('No detailed stats found for this team and season.');
-            }
+      if (numericTeamIdString) {
+        const [detailedStatsRows] = await connection.execute(
+          `
+          SELECT 
+            SUM(passing_yards) AS total_passing_yards,
+            SUM(rushing_yards) AS total_rushing_yards,
+            SUM(receiving_yards) AS total_receiving_yards
+          FROM Player_Stats_Game_2024
+          WHERE team_id = ? AND season = 2024
+          `,
+          [numericTeamIdString]
+        );
+        if (detailedStatsRows[0] && detailedStatsRows[0].total_passing_yards !== null) {
+          detailedStats = detailedStatsRows[0];
+          console.log(`Detailed stats: passing_yards=${detailedStats.total_passing_yards}`);
         } else {
-            console.log(`No numeric team_id available for detailed stats query.`);
+          console.log('No detailed stats found for this team and season.');
         }
+      } else {
+        console.log(`No numeric team_id available for detailed stats query.`);
+      }
     } catch (error) {
       console.log('Detailed stats query failed:', error.message);
     }
 
-    // Fetch injuries (Injuries table uses team_abbr)
     console.log('Fetching injuries...');
     let injuries = [];
     try {
       const [injuriesRows] = await connection.execute(
         `
-        SELECT full_name, position, report_primary_injury AS injury_description, report_status AS injury_status, date_modified 
+        SELECT DISTINCT full_name, position, report_primary_injury AS injury_description, report_status AS injury_status, date_modified 
         FROM Injuries
         WHERE team = ?
+        AND (report_primary_injury IS NOT NULL OR report_status IS NOT NULL)
+        ORDER BY date_modified DESC
         `,
         [teamAbbr]
       );
       injuries = injuriesRows.map(injury => ({
         ...injury,
-        player_name: injury.full_name // Map to player_name for frontend consistency
+        player_name: injury.full_name
       }));
       console.log(`Injuries entries: ${injuries.length}`);
     } catch (error) {
       console.log('Injuries query failed:', error.message);
     }
 
-    // Fetch schedule (Games table is used for schedule)
     console.log('Fetching schedule...');
     let schedule = [];
     try {
@@ -272,8 +250,7 @@ export async function GET(req, { params }) {
       schedule = scheduleRows.map(game => ({
         ...game,
         final_score: game.is_final ? `${game.home_score}-${game.away_score}` : null,
-        opponent: game.home_team_id === teamAbbr ? game.away_team_id : game.home_team_id,
-        // Assuming 'week' column exists from your Games DESCRIBE
+        opponent: game.home_team_id === teamAbbr ? game.away_team_id : game.home_team_id
       }));
       console.log(`Schedule entries: ${schedule.length}`);
     } catch (error) {
