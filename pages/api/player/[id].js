@@ -32,12 +32,20 @@ export default async function handler(req, res) {
 
     // Step 2: Game logs
     const [gameLogs] = await connection.execute(`
-      SELECT week, receptions, receiving_yards,
-             receiving_tds, rushing_tds, passing_tds
-      FROM Player_Stats_Game_2024
-      WHERE player_id = ?
-      ORDER BY week ASC
-    `, [playerId]);
+    SELECT
+      week,
+      MAX(game_id) as game_id,
+      MAX(opponent_team_abbr) as opponent_team_abbr,
+      SUM(receptions) as receptions,
+      SUM(receiving_yards) as receiving_yards,
+      SUM(receiving_tds) as receiving_tds,
+      SUM(rushing_tds) as rushing_tds,
+      SUM(passing_tds) as passing_tds
+    FROM Player_Stats_Game_2024
+    WHERE player_id = ?
+    GROUP BY week
+    ORDER BY week ASC
+  `, [playerId]);
 
     // Step 3: Career totals
     const career = gameLogs.length > 0 ? {
