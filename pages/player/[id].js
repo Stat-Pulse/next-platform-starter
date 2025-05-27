@@ -1,80 +1,107 @@
-// pages/api/player/[id].js
-const res = await fetch(`${baseUrl}/api/player/${playerId}`);
+// pages/player/[id].js
+import Head from 'next/head';
+import PlayerHeader from '@/components/player/PlayerHeader';
 
-export default async function handler(req, res) {
-  const playerId = req.query.id;
+export default function PlayerProfilePage({ player, gameLogs }) {
+  if (!player) {
+    return (
+      <div className="p-10 text-center text-red-600">
+        <h1>❌ Player not found</h1>
+      </div>
+    );
+  }
+
+  const logsWithTDs = gameLogs.map((g) => ({
+    ...g,
+    total_tds: (g.passing_tds || 0) + (g.rushing_tds || 0) + (g.receiving_tds || 0),
+  })).sort((a, b) => a.week - b.week);
+
+  return (
+    <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
+      <Head><title>{player.player_name} | StatPulse</title></Head>
+      <PlayerHeader player={player} />
+
+      {/* Game Logs */}
+      <section>
+        <h2 className="text-2xl font-semibold mb-4 border-b pb-1">Game Logs</h2>
+        <div className="overflow-x-auto border rounded-md shadow">
+          <table className="min-w-full text-sm text-center">
+            <thead className="bg-gray-50 text-gray-700">
+              <tr>
+                <th className="p-3">Week</th>
+                <th className="p-3">Opponent</th>
+                <th className="p-3">Rec</th>
+                <th className="p-3">Yards</th>
+                <th className="p-3">TDs</th>
+              </tr>
+            </thead>
+            <tbody>
+              {logsWithTDs.map((log, idx) => (
+                <tr key={idx} className="even:bg-gray-50">
+                  <td className="p-2">{log.week || '-'}</td>
+                  <td className="p-2">{log.opponent_team_abbr || '-'}</td>
+                  <td className="p-2">{log.receptions || 0}</td>
+                  <td className="p-2">{log.receiving_yards || 0}</td>
+                  <td className="p-2">{log.total_tds}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* Career Stats */}
+      {player.career && (
+        <section>
+          <h2 className="text-2xl font-semibold mb-4 border-b pb-1">Career Stats</h2>
+          <div className="overflow-x-auto border rounded-md shadow">
+            <table className="min-w-full text-sm text-center">
+              <thead className="bg-gray-50 text-gray-700">
+                <tr>
+                  <th className="p-3">Games</th>
+                  <th className="p-3">Receptions</th>
+                  <th className="p-3">Yards</th>
+                  <th className="p-3">Touchdowns</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="p-3">{player.career.games}</td>
+                  <td className="p-3">{player.career.receptions}</td>
+                  <td className="p-3">{player.career.yards}</td>
+                  <td className="p-3">{player.career.tds}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
+export async function getServerSideProps({ params }) {
+  const playerId = params.id;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://statpulseanalytics.netlify.app';
 
   try {
-    const connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-    });
+    const res = await fetch(`${baseUrl}/api/player/${playerId}`);
+    if (!res.ok) throw new Error('Fetch failed');
+    const data = await res.json();
 
-    const [playerRows] = await connection.execute(
-      `
-      SELECT
-        full_name AS player_name,
-        position,
-        team AS team_abbr,
-        jersey_number,
-        status,
-        college,
-        draft_club,
-        draft_number,
-        rookie_year,
-        years_exp,
-        headshot_url,
-        height,
-        weight
-      FROM Rosters_2024
-      WHERE gsis_id = ?
-      LIMIT 1
-      `,
-      [playerId]
-    );
-
-    if (playerRows.length === 0) {
-      return res.status(404).json({ error: 'Player not found' });
-    }
-
-    const player = playerRows[0];
-
-    const [gameLogs] = await connection.execute(
-      `
-      SELECT
-        week,
-        opponent_team_abbr,
-        receptions,
-        receiving_yards,
-        receiving_tds,
-        rushing_tds,
-        passing_tds
-      FROM Player_Stats_Game_2024
-      WHERE player_id = ?
-      ORDER BY week ASC
-      `,
-      [playerId]
-    );
-
-    const career = gameLogs.length > 0
-      ? {
-          games: gameLogs.length,
-          receptions: gameLogs.reduce((acc, g) => acc + (g.receptions || 0), 0),
-          yards: gameLogs.reduce((acc, g) => acc + (g.receiving_yards || 0), 0),
-          tds: gameLogs.reduce((acc, g) => acc + (g.receiving_tds || 0), 0),
-        }
-      : null;
-
-    await connection.end();
-
-    return res.status(200).json({
-      player: { ...player, career },
-      gameLogs,
-    });
+    return {
+      props: {
+        player: data.player || null,
+        gameLogs: data.gameLogs || [],
+      },
+    };
   } catch (error) {
-    console.error('API error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error('Error loading player data:', error);
+    return {
+      props: {
+        player: null,
+        gameLogs: [],
+      },
+    };
   }
 }
