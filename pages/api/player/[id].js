@@ -53,7 +53,8 @@ console.log('🔍 API called for playerId:', playerId);
       gameLogs,
     });
   } catch (err) {
-    console.error('🔥 API error:', err);
+    console.error('🔥 API error message:', err.message);
+    console.error('🔥 Stack:', err.stack);
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
