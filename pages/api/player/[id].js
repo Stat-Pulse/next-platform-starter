@@ -34,8 +34,6 @@ export default async function handler(req, res) {
     const [gameLogs] = await connection.execute(`
     SELECT
       week,
-      MAX(game_id) as game_id,
-      MAX(opponent_team_abbr) as opponent_team_abbr,
       SUM(receptions) as receptions,
       SUM(receiving_yards) as receiving_yards,
       SUM(receiving_tds) as receiving_tds,
