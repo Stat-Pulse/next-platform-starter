@@ -1,7 +1,14 @@
+// app/api/player/[id]/route.js
+
 import mysql from 'mysql2/promise';
 
 export async function GET(req, { params }) {
+  console.log('🔔 ENTERED /api/player/[id] route'); // <-- ADD THIS
+
   const playerId = params.id;
+  console.log('🔍 Fetching player with ID:', playerId);
+
+  // (rest of your code follows...)
 
   console.log('🔍 Fetching player with ID:', playerId);
 
