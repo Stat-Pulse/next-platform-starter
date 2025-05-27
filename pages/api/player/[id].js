@@ -35,7 +35,7 @@ export default async function handler(req, res) {
   SELECT 
     G.week,
         CASE
-          WHEN PSG.team_id = G.home_team_id THEN G.away_team_id
+          WHEN PSG.team = G.home_team_id THEN G.away_team_id
           ELSE G.home_team_id
         END AS opponent_team_abbr,
         PSG.receptions,
