@@ -116,8 +116,37 @@ const TeamSchedule = ({ schedule }) => (
     )}
   </div>
 );
+// In the overview tab
+<div className="bg-white p-4 rounded shadow">
+  <h2 className="text-xl font-semibold mb-4">2024 Team Grades</h2>
+  <div className="grid grid-cols-2 gap-4">
+    <div className="border p-4 rounded">
+      <p className="text-gray-600">Overall</p>
+      <p className="text-lg font-semibold">{teamGrades?.overall || 'N/A'}</p>
+    </div>
+    <div className="border p-4 rounded flex items-center">
+      <p className="text-gray-600">Offense</p>
+      <span className={`ml-2 ${teamGrades?.offense === 'A' ? 'text-green-500' : teamGrades?.offense === 'B' ? 'text-yellow-500' : 'text-red-500'}`}>
+        {teamGrades?.offense || 'N/A'}
+      </span>
+    </div>
+    <div className="border p-4 rounded flex items-center">
+      <p className="text-gray-600">Defense</p>
+      <span className={`ml-2 ${teamGrades?.defense === 'A' ? 'text-green-500' : teamGrades?.defense === 'B' ? 'text-yellow-500' : 'text-red-500'}`}>
+        {teamGrades?.defense || 'N/A'}
+      </span>
+    </div>
+    <div className="border p-4 rounded flex items-center">
+      <p className="text-gray-600">Special Teams</p>
+      <span className={`ml-2 ${teamGrades?.special_teams === 'A' ? 'text-green-500' : teamGrades?.special_teams === 'B' ? 'text-yellow-500' : 'text-red-500'}`}>
+        {teamGrades?.special_teams || 'N/A'}
+      </span>
+    </div>
+  </div>
+</div>
 
-const TeamPage = () => {
+// Update TeamPage to destructure teamGrades
+const { team, seasonStats, lastGame, upcomingGame, depthChart, detailedStats, injuries, schedule, teamGrades } = teamData;
   const router = useRouter();
   const { teamId } = router.query;
   const [teamData, setTeamData] = useState(null);
