@@ -3,7 +3,7 @@ import mysql from 'mysql2/promise';
 
 export default async function handler(req, res) {
   const playerId = req.query.id;
-console.log('📦 Fetching player API for:', playerId);
+console.log('🔍 API called for playerId:', playerId);
   try {
     const connection = await mysql.createConnection({
       host: process.env.DB_HOST,
@@ -27,7 +27,8 @@ console.log('📦 Fetching player API for:', playerId);
     }
 
     const player = playerRows[0];
-
+    console.log('✅ Player query returned:', playerRows);
+    
     // 🧠 Step 2: Game logs
     const [gameLogs] = await connection.execute(`
       SELECT week, opponent_team_abbr, receptions, receiving_yards,
