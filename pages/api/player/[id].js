@@ -3,7 +3,8 @@ import mysql from 'mysql2/promise';
 
 export default async function handler(req, res) {
   const playerId = req.query.id;
-console.log('🔍 API called for gsis_id:', gsis_id);
+  console.log('🔍 API called for playerId:', playerId);
+
   try {
     const connection = await mysql.createConnection({
       host: process.env.DB_HOST,
@@ -12,33 +13,33 @@ console.log('🔍 API called for gsis_id:', gsis_id);
       database: process.env.DB_NAME,
     });
 
-    // 🧠 Step 1: Basic metadata
+    // Step 1: Basic player metadata
     const [playerRows] = await connection.execute(`
       SELECT full_name AS player_name, position, team AS team_abbr, jersey_number, status, college,
              draft_club, draft_number, rookie_year, years_exp, headshot_url, height, weight
       FROM Rosters_2024
       WHERE gsis_id = ?
       LIMIT 1
-    `, [gsis_id]);
+    `, [playerId]);
 
     if (playerRows.length === 0) {
-      console.log('❌ No player found with ID:', gsis_id);
+      console.log('❌ No player found with ID:', playerId);
       return res.status(404).json({ error: 'Player not found' });
     }
 
     const player = playerRows[0];
-    console.log('✅ Player query returned:', playerRows);
-    
-    // 🧠 Step 2: Game logs
+    console.log('✅ Player found:', player.player_name);
+
+    // Step 2: Game logs
     const [gameLogs] = await connection.execute(`
       SELECT week, opponent_team_abbr, receptions, receiving_yards,
              receiving_tds, rushing_tds, passing_tds
       FROM Player_Stats_Game_2024
       WHERE player_id = ?
       ORDER BY week ASC
-    `, [gsis_id]);
+    `, [playerId]);
 
-    // 🧠 Step 3: Career totals
+    // Step 3: Career totals
     const career = gameLogs.length > 0 ? {
       games: gameLogs.length,
       receptions: gameLogs.reduce((acc, g) => acc + (g.receptions || 0), 0),
