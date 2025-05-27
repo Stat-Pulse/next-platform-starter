@@ -32,8 +32,8 @@ export default async function handler(req, res) {
 
     // Step 2: Game logs (joined with Games table to get opponent)
     const [gameLogs] = await connection.execute(`
-      SELECT 
-        G.week,
+  SELECT 
+    G.week,
         CASE
           WHEN PSG.team_id = G.home_team_id THEN G.away_team_id
           ELSE G.home_team_id
@@ -45,7 +45,7 @@ export default async function handler(req, res) {
         PSG.passing_tds
       FROM Player_Stats_Game_2024 PSG
       JOIN Games G ON PSG.game_id = G.game_id
-      WHERE PSG.player_id = ?
+      WHERE PSG.gsis_id = ?
       ORDER BY G.week ASC
     `, [playerId]);
 
