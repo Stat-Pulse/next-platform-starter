@@ -1,4 +1,4 @@
-// pages/api/player/[id].js
+  // pages/api/player/[id].js
 import mysql from 'mysql2/promise';
 
 export default async function handler(req, res) {
@@ -32,17 +32,29 @@ export default async function handler(req, res) {
 
     // Step 2: Game logs
     const [gameLogs] = await connection.execute(`
-      SELECT
-         PSG.week,
-         CASE
-           WHEN G.home_team_id = PSG.team THEN G.away_team_id
-           ELSE G.home_team_id
-         END AS opponent_team_abbr,
-         PSG.receptions,
-         PSG.receiving_yards,
-         PSG.receiving_tds,
-         PSG.rushing_tds,
-         PSG.passing_tds
+       SELECT 
+        G.week,
+        CASE
+          WHEN PSG.team_id = G.home_team_id THEN G.away_team_id
+          ELSE G.home_team_id
+        END AS opponent_team_abbr,
+        PSG.receptions,
+        PSG.receiving_yards,
+        PSG.receiving_tds,
+        PSG.rushing_tds,
+        PSG.passing_tds
+      FROM Player_Stats_Game_2024 PSG
+      JOIN Games G ON PSG.game_id = G.game_id
+      WHERE PSG.player_id = ?
+      ORDER BY G.week ASC
+
+       CASE
+          WHEN PSG.team = G.home_team_id THEN G.away_team_id
+          ELSE G.home_team_id
+        END AS opponent_team_abbr,
+        PSG.receptions,
+        PSG.receiving_yards,
+       ...
        FROM Player_Stats_Game_2024 PSG
        JOIN Games G ON PSG.game_id = G.game_id
        WHERE PSG.player_id = ?
