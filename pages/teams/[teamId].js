@@ -21,9 +21,9 @@ const fetchTeamData = async (teamId) => {
 };
 
 // Components for tabs
-const TeamDepthChart = ({ depthChart }) => (
-  <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-blue-600">
-    <h2 className="text-xl font-semibold mb-4 text-blue-600">Depth Chart</h2>
+const TeamDepthChart = ({ depthChart, teamColors }) => (
+  <div className="bg-white p-4 rounded-lg shadow-md border-l-4" style={{ borderColor: teamColors.primary }}>
+    <h2 className="text-xl font-semibold mb-4" style={{ color: teamColors.primary }}>Depth Chart</h2>
     {depthChart && depthChart.length > 0 ? (
       <ul className="space-y-2">
         {depthChart.map((player, idx) => (
@@ -38,9 +38,9 @@ const TeamDepthChart = ({ depthChart }) => (
   </div>
 );
 
-const TeamStatsTable = ({ detailedStats }) => (
-  <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-blue-600">
-    <h2 className="text-xl font-semibold mb-4 text-blue-600">Detailed Stats (2024 Season)</h2>
+const TeamStatsTable = ({ detailedStats, teamColors }) => (
+  <div className="bg-white p-4 rounded-lg shadow-md border-l-4" style={{ borderColor: teamColors.primary }}>
+    <h2 className="text-xl font-semibold mb-4" style={{ color: teamColors.primary }}>Detailed Stats (2024 Season)</h2>
     <p className="text-yellow-600 mb-2">Note: Stats are incomplete (only 1 game available). Full data import pending.</p>
     {detailedStats && Object.keys(detailedStats).length > 0 ? (
       <div className="grid grid-cols-2 gap-4">
@@ -63,9 +63,9 @@ const TeamStatsTable = ({ detailedStats }) => (
   </div>
 );
 
-const TeamInjuries = ({ injuries }) => (
-  <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-blue-600">
-    <h2 className="text-xl font-semibold mb-4 text-blue-600">Injuries</h2>
+const TeamInjuries = ({ injuries, teamColors }) => (
+  <div className="bg-white p-4 rounded-lg shadow-md border-l-4" style={{ borderColor: teamColors.primary }}>
+    <h2 className="text-xl font-semibold mb-4" style={{ color: teamColors.primary }}>Injuries</h2>
     {injuries && injuries.length > 0 ? (
       <ul className="space-y-2">
         {injuries.map((injury, idx) => (
@@ -80,9 +80,9 @@ const TeamInjuries = ({ injuries }) => (
   </div>
 );
 
-const TeamSchedule = ({ schedule }) => (
-  <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-blue-600">
-    <h2 className="text-xl font-semibold mb-4 text-blue-600">Schedule (2024 Season)</h2>
+const TeamSchedule = ({ schedule, teamColors }) => (
+  <div className="bg-white p-4 rounded-lg shadow-md border-l-4" style={{ borderColor: teamColors.primary }}>
+    <h2 className="text-xl font-semibold mb-4" style={{ color: teamColors.primary }}>Schedule (2024 Season)</h2>
     {schedule && schedule.length > 0 ? (
       <ul className="space-y-2">
         {schedule
@@ -100,9 +100,9 @@ const TeamSchedule = ({ schedule }) => (
   </div>
 );
 
-const TopPlayers = () => (
-  <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-blue-600">
-    <h2 className="text-xl font-semibold mb-4 text-blue-600">Top Players (2024 Season)</h2>
+const TopPlayers = ({ teamColors }) => (
+  <div className="bg-white p-4 rounded-lg shadow-md border-l-4" style={{ borderColor: teamColors.primary }}>
+    <h2 className="text-xl font-semibold mb-4" style={{ color: teamColors.primary }}>Top Players (2024 Season)</h2>
     <p className="text-yellow-600 mb-2">Note: Player stats are incomplete. Full data import pending.</p>
     <div className="space-y-4">
       <div className="border p-4 rounded bg-gray-50 hover:shadow-md transition-shadow">
@@ -175,10 +175,10 @@ const TeamPage = () => {
 
   const { team, seasonStats, lastGame, upcomingGame, depthChart, detailedStats, injuries, schedule, teamGrades, news } = teamData;
 
-  // Dynamic team colors (fallback to neutral colors if team-specific colors aren't defined)
+  // Use team colors from the API, with fallbacks
   const teamColors = {
-    primary: team?.team_abbr === 'KC' ? '#E31837' : '#1D2526', // Chiefs red or neutral dark gray
-    secondary: team?.team_abbr === 'KC' ? '#FFB81C' : '#A5ACAF', // Chiefs gold or neutral light gray
+    primary: team?.primary_color || '#1D2526',
+    secondary: team?.secondary_color || '#A5ACAF',
   };
 
   return (
@@ -193,7 +193,7 @@ const TeamPage = () => {
             onError={(e) => (e.target.src = '/placeholder-logo.png')}
           />
           <div>
-            <h1 className="text-3xl font-bold">{team?.team_name || 'Unknown Team'}</h1>
+            <h1 className="text-3xl font-bold">{team?.city} {team?.nickname || team?.team_name || 'Unknown Team'}</h1>
             <p className="text-lg">
               Record: {seasonStats ? `${seasonStats.wins}-${seasonStats.losses}` : 'Loading...'}
             </p>
@@ -218,8 +218,8 @@ const TeamPage = () => {
           {/* Left/Middle Column */}
           <div className="md:col-span-2 space-y-6">
             {/* 2024 Season Stats */}
-            <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-blue-600">
-              <h2 className="text-xl font-semibold mb-4 text-blue-600">2024 Season Stats</h2>
+            <div className="bg-white p-4 rounded-lg shadow-md border-l-4" style={{ borderColor: teamColors.primary }}>
+              <h2 className="text-xl font-semibold mb-4" style={{ color: teamColors.primary }}>2024 Season Stats</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div className="border p-4 rounded bg-gray-50 hover:shadow-md transition-shadow">
                   <p className="text-gray-600">Division</p>
@@ -247,8 +247,8 @@ const TeamPage = () => {
             </div>
 
             {/* 2024 Team Grades */}
-            <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-blue-600">
-              <h2 className="text-xl font-semibold mb-4 text-blue-600">2024 Team Grades</h2>
+            <div className="bg-white p-4 rounded-lg shadow-md border-l-4" style={{ borderColor: teamColors.primary }}>
+              <h2 className="text-xl font-semibold mb-4" style={{ color: teamColors.primary }}>2024 Team Grades</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div className="border p-4 rounded bg-gray-50 hover:shadow-md transition-shadow">
                   <p className="text-gray-600">Overall</p>
@@ -276,8 +276,8 @@ const TeamPage = () => {
             </div>
 
             {/* Last Game */}
-            <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-blue-600">
-              <h2 className="text-xl font-semibold mb-4 text-blue-600">Last Game</h2>
+            <div className="bg-white p-4 rounded-lg shadow-md border-l-4" style={{ borderColor: teamColors.primary }}>
+              <h2 className="text-xl font-semibold mb-4" style={{ color: teamColors.primary }}>Last Game</h2>
               {lastGame ? (
                 <div>
                   <p className="text-gray-600 mb-2">
@@ -290,7 +290,7 @@ const TeamPage = () => {
                   </p>
                   <div className="flex items-center justify-center space-x-4">
                     <img
-                      src={lastGame.home_team_id === team.team_abbr ? team.logo_url : `/api/teams/${lastGame.home_team_id}`.logo_url || '/placeholder-logo.png'}
+                      src={lastGame.home_team_id === team.team_abbr ? team.logo_url : '/placeholder-logo.png'}
                       alt={`${lastGame.home_team_id} logo`}
                       className="w-12 h-12"
                       onError={(e) => (e.target.src = '/placeholder-logo.png')}
@@ -299,7 +299,7 @@ const TeamPage = () => {
                       {lastGame.home_score} - {lastGame.away_score}
                     </p>
                     <img
-                      src={lastGame.away_team_id === team.team_abbr ? team.logo_url : `/api/teams/${lastGame.away_team_id}`.logo_url || '/placeholder-logo.png'}
+                      src={lastGame.away_team_id === team.team_abbr ? team.logo_url : '/placeholder-logo.png'}
                       alt={`${lastGame.away_team_id} logo`}
                       className="w-12 h-12"
                       onError={(e) => (e.target.src = '/placeholder-logo.png')}
@@ -316,8 +316,8 @@ const TeamPage = () => {
             </div>
 
             {/* PFF Betting Odds */}
-            <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-blue-600 relative">
-              <h2 className="text-xl font-semibold mb-4 text-blue-600">PFF Betting Odds</h2>
+            <div className="bg-white p-4 rounded-lg shadow-md border-l-4 relative" style={{ borderColor: teamColors.primary }}>
+              <h2 className="text-xl font-semibold mb-4" style={{ color: teamColors.primary }}>PFF Betting Odds</h2>
               {upcomingGame ? (
                 <div>
                   <p className="text-gray-600 mb-2">
@@ -329,14 +329,14 @@ const TeamPage = () => {
                   </p>
                   <div className="flex items-center justify-center space-x-4">
                     <img
-                      src={upcomingGame.home_team_id === team.team_abbr ? team.logo_url : `/api/teams/${upcomingGame.home_team_id}`.logo_url || '/placeholder-logo.png'}
+                      src={upcomingGame.home_team_id === team.team_abbr ? team.logo_url : '/placeholder-logo.png'}
                       alt={`${upcomingGame.home_team_id} logo`}
                       className="w-12 h-12"
                       onError={(e) => (e.target.src = '/placeholder-logo.png')}
                     />
                     <p className="text-xl font-semibold">vs</p>
                     <img
-                      src={upcomingGame.away_team_id === team.team_abbr ? team.logo_url : `/api/teams/${upcomingGame.away_team_id}`.logo_url || '/placeholder-logo.png'}
+                      src={upcomingGame.away_team_id === team.team_abbr ? team.logo_url : '/placeholder-logo.png'}
                       alt={`${upcomingGame.away_team_id} logo`}
                       className="w-12 h-12"
                       onError={(e) => (e.target.src = '/placeholder-logo.png')}
@@ -357,16 +357,16 @@ const TeamPage = () => {
             </div>
 
             {/* Fantasy Projections */}
-            <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-blue-600">
-              <h2 className="text-xl font-semibold mb-4 text-blue-600">Fantasy Projections</h2>
+            <div className="bg-white p-4 rounded-lg shadow-md border-l-4" style={{ borderColor: teamColors.primary }}>
+              <h2 className="text-xl font-semibold mb-4" style={{ color: teamColors.primary }}>Fantasy Projections</h2>
               <p className="text-gray-600">Coming Soon</p>
             </div>
           </div>
 
           {/* Right Column */}
           <div className="md:col-span-1">
-            <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-gray-400">
-              <h2 className="text-xl font-semibold mb-4 text-gray-600">Latest News</h2>
+            <div className="bg-white p-4 rounded-lg shadow-md border-l-4" style={{ borderColor: teamColors.secondary }}>
+              <h2 className="text-xl font-semibold mb-4" style={{ color: teamColors.secondary }}>Latest News</h2>
               {news && news.length > 0 ? (
                 <div className="space-y-4">
                   {news.map((newsItem, idx) => (
@@ -397,11 +397,11 @@ const TeamPage = () => {
       )}
 
       {/* Render other tabs */}
-      {activeTab === 'depthChart' && <TeamDepthChart depthChart={depthChart} />}
-      {activeTab === 'stats' && <TeamStatsTable detailedStats={detailedStats} />}
-      {activeTab === 'injuries' && <TeamInjuries injuries={injuries} />}
-      {activeTab === 'schedule' && <TeamSchedule schedule={schedule} />}
-      {activeTab === 'topPlayers' && <TopPlayers />}
+      {activeTab === 'depthChart' && <TeamDepthChart depthChart={depthChart} teamColors={teamColors} />}
+      {activeTab === 'stats' && <TeamStatsTable detailedStats={detailedStats} teamColors={teamColors} />}
+      {activeTab === 'injuries' && <TeamInjuries injuries={injuries} teamColors={teamColors} />}
+      {activeTab === 'schedule' && <TeamSchedule schedule={schedule} teamColors={teamColors} />}
+      {activeTab === 'topPlayers' && <TopPlayers teamColors={teamColors} />}
     </div>
   );
 };
