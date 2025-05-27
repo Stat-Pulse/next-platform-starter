@@ -12,20 +12,32 @@ export default async function handler(req, res) {
       database: process.env.DB_NAME,
     });
 
+    // 🧠 Step 1: Basic metadata
     const [playerRows] = await connection.execute(`
       SELECT full_name AS player_name, position, team AS team_abbr, jersey_number, status, college,
              draft_club, draft_number, rookie_year, years_exp, headshot_url, height, weight
-      FROM Rosters_2024 WHERE gsis_id = ? LIMIT 1`, [playerId]);
+      FROM Rosters_2024
+      WHERE gsis_id = ?
+      LIMIT 1
+    `, [playerId]);
 
-    if (playerRows.length === 0) return res.status(404).json({ error: 'Player not found' });
+    if (playerRows.length === 0) {
+      console.log('❌ No player found with ID:', playerId);
+      return res.status(404).json({ error: 'Player not found' });
+    }
 
     const player = playerRows[0];
 
+    // 🧠 Step 2: Game logs
     const [gameLogs] = await connection.execute(`
       SELECT week, opponent_team_abbr, receptions, receiving_yards,
              receiving_tds, rushing_tds, passing_tds
-      FROM Player_Stats_Game_2024 WHERE player_id = ? ORDER BY week ASC`, [playerId]);
+      FROM Player_Stats_Game_2024
+      WHERE player_id = ?
+      ORDER BY week ASC
+    `, [playerId]);
 
+    // 🧠 Step 3: Career totals
     const career = gameLogs.length > 0 ? {
       games: gameLogs.length,
       receptions: gameLogs.reduce((acc, g) => acc + (g.receptions || 0), 0),
@@ -34,7 +46,11 @@ export default async function handler(req, res) {
     } : null;
 
     await connection.end();
-    return res.status(200).json({ player: { ...player, career }, gameLogs });
+
+    return res.status(200).json({
+      player: { ...player, career },
+      gameLogs,
+    });
   } catch (err) {
     console.error('🔥 API error:', err);
     return res.status(500).json({ error: 'Internal server error' });
