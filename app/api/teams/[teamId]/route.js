@@ -257,6 +257,53 @@ export async function GET(req, { params }) {
       console.log('Schedule query failed:', error.message);
     }
 
+    console.log('Fetching team grades...');
+    let teamGrades = { overall: 'N/A', offense: 'N/A', defense: 'N/A', special_teams: 'N/A' };
+    try {
+      const [gradesRows] = await connection.execute(
+        `
+        SELECT overall_grade AS overall, offense_grade AS offense, defense_grade AS defense, special_teams_grade AS special_teams
+        FROM Team_Grades
+        WHERE team_abbr = ? AND season = 2024
+        `,
+        [teamAbbr]
+      );
+      if (gradesRows[0]) {
+        teamGrades = gradesRows[0];
+        console.log(`Team grades: overall=${teamGrades.overall}`);
+      } else {
+        console.log('No team grades found for this team and season.');
+      }
+    } catch (error) {
+      console.log('Team grades query failed:', error.message);
+    }
+
+    console.log('Fetching news...');
+    let news = [];
+    try {
+      const [newsRows] = await connection.execute(
+        `
+        SELECT title, link, timestamp, source
+        FROM News
+        WHERE team_abbr = ?
+        ORDER BY timestamp DESC
+        LIMIT 6
+        `,
+        [teamAbbr]
+      );
+      news = newsRows.map(item => ({
+        title: item.title,
+        link: item.link,
+        timestamp: new Date(item.timestamp).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' }),
+        source: item.source
+      }));
+      console.log(`News entries: ${news.length}`);
+    } catch (error) {
+      console.log('News query failed:', error.message);
+      // Fallback to static newsItems if News table doesn't exist
+      news = newsItems;
+    }
+
     await connection.end();
     console.log('Database connection closed.');
 
@@ -270,6 +317,8 @@ export async function GET(req, { params }) {
         detailedStats,
         injuries,
         schedule,
+        teamGrades,
+        news
       }),
       { status: 200 }
     );
