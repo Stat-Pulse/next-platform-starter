@@ -3,7 +3,7 @@ import mysql from 'mysql2/promise';
 
 export default async function handler(req, res) {
   const playerId = req.query.id;
-console.log('🔍 API called for playerId:', playerId);
+console.log('🔍 API called for gsis_id:', gsis_id);
   try {
     const connection = await mysql.createConnection({
       host: process.env.DB_HOST,
@@ -19,10 +19,10 @@ console.log('🔍 API called for playerId:', playerId);
       FROM Rosters_2024
       WHERE gsis_id = ?
       LIMIT 1
-    `, [playerId]);
+    `, [gsis_id]);
 
     if (playerRows.length === 0) {
-      console.log('❌ No player found with ID:', playerId);
+      console.log('❌ No player found with ID:', gsis_id);
       return res.status(404).json({ error: 'Player not found' });
     }
 
@@ -36,7 +36,7 @@ console.log('🔍 API called for playerId:', playerId);
       FROM Player_Stats_Game_2024
       WHERE player_id = ?
       ORDER BY week ASC
-    `, [playerId]);
+    `, [gsis_id]);
 
     // 🧠 Step 3: Career totals
     const career = gameLogs.length > 0 ? {
