@@ -31,10 +31,14 @@ export default async function handler(req, res) {
     console.log('✅ Player found:', player.player_name);
 
     // Step 2: Simplified Game Logs without JOIN
-    const [gameLogs] = await connection.execute(`
+   const [gameLogs] = await connection.execute(`
   SELECT 
     G.week,
-    IF(G.home_team_id = PSG.team_id, T2.team_abbr, T1.team_abbr) AS opponent_team_abbr,
+    CASE
+      WHEN PSG.team_id = G.home_team_id THEN G.away_team_id
+      WHEN PSG.team_id = G.away_team_id THEN G.home_team_id
+      ELSE NULL
+    END AS opponent_team_abbr,
     PSG.receptions,
     PSG.receiving_yards,
     PSG.receiving_tds,
@@ -42,10 +46,8 @@ export default async function handler(req, res) {
     PSG.passing_tds
   FROM Player_Stats_Game_2024 PSG
   JOIN Games G ON PSG.game_id = G.game_id
-  JOIN Teams T1 ON G.home_team_id = T1.team_id
-  JOIN Teams T2 ON G.away_team_id = T2.team_id
   WHERE PSG.player_id = ?
-  GROUP BY G.week, PSG.game_id
+  GROUP BY G.week, opponent_team_abbr, PSG.receptions, PSG.receiving_yards, PSG.receiving_tds, PSG.rushing_tds, PSG.passing_tds
   ORDER BY G.week ASC
 `, [playerId]);
 
