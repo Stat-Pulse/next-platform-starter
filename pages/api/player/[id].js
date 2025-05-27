@@ -32,18 +32,22 @@ export default async function handler(req, res) {
 
     // Step 2: Game logs
     const [gameLogs] = await connection.execute(`
-    SELECT
-      week,
-      SUM(receptions) as receptions,
-      SUM(receiving_yards) as receiving_yards,
-      SUM(receiving_tds) as receiving_tds,
-      SUM(rushing_tds) as rushing_tds,
-      SUM(passing_tds) as passing_tds
-    FROM Player_Stats_Game_2024
-    WHERE player_id = ?
-    GROUP BY week
-    ORDER BY week ASC
-  `, [playerId]);
+      SELECT
+         PSG.week,
+         CASE
+           WHEN G.home_team_id = PSG.team THEN G.away_team_id
+           ELSE G.home_team_id
+         END AS opponent_team_abbr,
+         PSG.receptions,
+         PSG.receiving_yards,
+         PSG.receiving_tds,
+         PSG.rushing_tds,
+         PSG.passing_tds
+       FROM Player_Stats_Game_2024 PSG
+       JOIN Games_2024 G ON PSG.game_id = G.game_id
+       WHERE PSG.player_id = ?
+       ORDER BY PSG.week ASC
+     `, [playerId]);
 
     // Step 3: Career totals
     const career = gameLogs.length > 0 ? {
