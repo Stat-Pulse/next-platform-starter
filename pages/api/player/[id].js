@@ -34,7 +34,7 @@ export default async function handler(req, res) {
     const [gameLogs] = await connection.execute(`
   SELECT 
     G.week,
-    IF(G.home_team_id = PSG.team_id, T2.abbreviation, T1.abbreviation) AS opponent_team_abbr,
+    IF(G.home_team_id = PSG.team_id, T2.team_abbr, T1.team_abbr) AS opponent_team_abbr,
     PSG.receptions,
     PSG.receiving_yards,
     PSG.receiving_tds,
@@ -42,8 +42,8 @@ export default async function handler(req, res) {
     PSG.passing_tds
   FROM Player_Stats_Game_2024 PSG
   JOIN Games G ON PSG.game_id = G.game_id
-  JOIN Teams_2024 T1 ON G.home_team_id = T1.team_id
-  JOIN Teams_2024 T2 ON G.away_team_id = T2.team_id
+  JOIN Teams T1 ON G.home_team_id = T1.team_id
+  JOIN Teams T2 ON G.away_team_id = T2.team_id
   WHERE PSG.player_id = ?
   GROUP BY G.week, PSG.game_id
   ORDER BY G.week ASC
