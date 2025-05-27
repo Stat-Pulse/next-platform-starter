@@ -35,9 +35,8 @@ export default async function handler(req, res) {
   SELECT 
     G.week,
     CASE
-      WHEN PSG.team_id = G.home_team_id THEN G.away_team_id
-      WHEN PSG.team_id = G.away_team_id THEN G.home_team_id
-      ELSE NULL
+      WHEN T.team_abbr = G.home_team_id THEN G.away_team_id
+      ELSE G.home_team_id
     END AS opponent_team_abbr,
     PSG.receptions,
     PSG.receiving_yards,
@@ -45,9 +44,9 @@ export default async function handler(req, res) {
     PSG.rushing_tds,
     PSG.passing_tds
   FROM Player_Stats_Game_2024 PSG
+  JOIN Teams T ON T.team_id = PSG.team_id
   JOIN Games G ON PSG.game_id = G.game_id
   WHERE PSG.player_id = ?
-  GROUP BY G.week, opponent_team_abbr, PSG.receptions, PSG.receiving_yards, PSG.receiving_tds, PSG.rushing_tds, PSG.passing_tds
   ORDER BY G.week ASC
 `, [playerId]);
 
