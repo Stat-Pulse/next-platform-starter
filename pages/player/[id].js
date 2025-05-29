@@ -1,3 +1,4 @@
+// pages/player/[id].js
 import mysql from 'mysql2/promise';
 import Head from 'next/head';
 
@@ -48,20 +49,23 @@ export default function PlayerPage({ player }) {
 
       <div className="max-w-4xl mx-auto px-6 py-8">
         <h1 className="text-4xl font-bold mb-4">{player.player_name}</h1>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-lg shadow">
+          {/* Player Info */}
           <div>
             <h2 className="text-xl font-semibold mb-2">Player Info</h2>
             <p><strong>Position:</strong> {player.position}</p>
-            <p><strong>Team:</strong> {player.team_abbr} ({player.team_name})</p>
+            <p><strong>Team:</strong> {player.team_abbr} ({player.team_name || 'N/A'})</p>
             <p><strong>College:</strong> {player.college}</p>
             <p><strong>Height / Weight:</strong> {player.height_inches} in / {player.weight_pounds} lbs</p>
-            <p><strong>Birth Date:</strong> {new Date(player.date_of_birth).toLocaleDateString()}</p>
+            <p><strong>Birth Date:</strong> {player.date_of_birth ? new Date(player.date_of_birth).toLocaleDateString() : 'N/A'}</p>
             <p><strong>Status:</strong> {player.is_active ? "Active" : "Inactive"}</p>
           </div>
 
+          {/* Draft & Contract */}
           <div>
             <h2 className="text-xl font-semibold mb-2">Draft & Contract</h2>
-            <p><strong>Drafted:</strong> {player.draft_season} | {player.draft_team} | Round {player.draft_round}, Pick {player.draft_pick}</p>
+            <p><strong>Drafted:</strong> {player.draft_season || '—'} | {player.draft_team || '—'} | Round {player.draft_round || '—'}, Pick {player.draft_pick || '—'}</p>
             <p><strong>Contract Type:</strong> {player.contract_type || 'N/A'} ({player.contract_year || '—'})</p>
             <p><strong>Base Salary:</strong> ${player.base_salary?.toLocaleString() || 'N/A'}</p>
             <p><strong>Cap Hit:</strong> ${player.cap_number?.toLocaleString() || 'N/A'}</p>
@@ -69,6 +73,20 @@ export default function PlayerPage({ player }) {
             <p><strong>Cap Savings:</strong> ${player.cap_savings?.toLocaleString() || 'N/A'}</p>
           </div>
         </div>
+
+        {/* Career Summary */}
+        {player.career && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold mb-2">Career Receiving Summary</h2>
+            <div className="bg-white p-4 rounded shadow">
+              <p><strong>Games:</strong> {player.career.games}</p>
+              <p><strong>Targets:</strong> {player.career.targets}</p>
+              <p><strong>Receptions:</strong> {player.career.receptions}</p>
+              <p><strong>Yards:</strong> {player.career.yards}</p>
+              <p><strong>Touchdowns:</strong> {player.career.tds}</p>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
