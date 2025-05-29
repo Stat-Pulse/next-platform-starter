@@ -13,7 +13,7 @@ export default async function handler(req, res) {
       database: process.env.DB_NAME,
     });
 
-    // Step 1: Use the view instead of multiple joins
+    // Step 1: Use the Active_Player_Profiles view
     const [playerRows] = await connection.execute(`
       SELECT *
       FROM Active_Player_Profiles
@@ -29,37 +29,46 @@ export default async function handler(req, res) {
     const player = playerRows[0];
     console.log('✅ Player found in view:', player.player_name);
 
-    // Step 2: Pull game logs
-    const [gameLogs] = await connection.execute(`
-      SELECT 
-        G.week,
-        G.season_id AS season,
-        G.home_team_id,
-        G.away_team_id,
-        PSG.receptions,
-        PSG.receiving_yards,
-        PSG.receiving_tds,
-        PSG.rushing_tds,
-        PSG.passing_tds
-      FROM Player_Stats_Game_All PSG
-      JOIN Games G ON PSG.game_id = G.game_id
-      WHERE PSG.player_id = ?
-      ORDER BY G.season_id, G.week
+    // Step 2: Receiving metrics from NextGen_Stats_Receiving_2024
+    const [receivingMetrics] = await connection.execute(`
+      SELECT
+        season,
+        week,
+        team,
+        opponent,
+        targets,
+        receptions,
+        receiving_yards,
+        receiving_tds,
+        catch_percentage,
+        avg_yac,
+        avg_cushion,
+        avg_separation,
+        receiving_epa,
+        receiving_air_yards,
+        percent_share_of_intended_air_yards,
+        avg_expected_yac,
+        avg_yac_above_expectation,
+        wopr
+      FROM NextGen_Stats_Receiving_2024
+      WHERE player_id = ?
+      ORDER BY season, week
     `, [playerId]);
 
-    // Step 3: Aggregate basic career stats
-    const career = gameLogs.length > 0 ? {
-      games: gameLogs.length,
-      receptions: gameLogs.reduce((acc, g) => acc + (g.receptions || 0), 0),
-      yards: gameLogs.reduce((acc, g) => acc + (g.receiving_yards || 0), 0),
-      tds: gameLogs.reduce((acc, g) => acc + (g.receiving_tds || 0), 0),
+    // Step 3: Aggregate basic career totals
+    const career = receivingMetrics.length > 0 ? {
+      games: receivingMetrics.length,
+      targets: receivingMetrics.reduce((sum, g) => sum + (g.targets || 0), 0),
+      receptions: receivingMetrics.reduce((sum, g) => sum + (g.receptions || 0), 0),
+      yards: receivingMetrics.reduce((sum, g) => sum + (g.receiving_yards || 0), 0),
+      tds: receivingMetrics.reduce((sum, g) => sum + (g.receiving_tds || 0), 0),
     } : null;
 
     await connection.end();
 
     return res.status(200).json({
       player: { ...player, career },
-      gameLogs,
+      receivingMetrics
     });
   } catch (err) {
     console.error('🔥 API error:', err.message);
