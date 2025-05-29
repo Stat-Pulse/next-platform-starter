@@ -66,13 +66,14 @@ export default function PlayerPage({ player }) {
           <div>
             <h2 className="text-xl font-semibold mb-2">Draft & Contract</h2>
             <p><strong>Drafted:</strong> {player.draft_season || '—'} | {player.draft_team || '—'} | Round {player.draft_round || '—'}, Pick {player.draft_pick || '—'}</p>
-            <p><strong>Contract Type:</strong> {player.contract_type || 'N/A'} ({player.contract_year || '—'})</p>
-            <p><strong>Base Salary:</strong> ${player.base_salary?.toLocaleString() || 'N/A'}</p>
-            <p><strong>Cap Hit:</strong> ${player.cap_number?.toLocaleString() || 'N/A'}</p>
-            <p><strong>Dead Cap:</strong> ${player.dead_cap?.toLocaleString() || 'N/A'}</p>
-            <p><strong>Cap Savings:</strong> ${player.cap_savings?.toLocaleString() || 'N/A'}</p>
+            <p><strong>Contract Year:</strong> {player.contract_year || '—'}</p>
+            <p><strong>Total Value:</strong> ${player.value?.toLocaleString() || 'N/A'}</p>
+            <p><strong>APY:</strong> ${player.apy?.toLocaleString() || 'N/A'}</p>
+            <p><strong>Guaranteed:</strong> ${player.guaranteed?.toLocaleString() || 'N/A'}</p>
+            <p><strong>APY Cap %:</strong> {(player.apy_cap_pct !== null && player.apy_cap_pct !== undefined) ? `${(player.apy_cap_pct * 100).toFixed(1)}%` : 'N/A'}</p>
+            <p><strong>Inflated Value:</strong> ${player.inflated_value?.toLocaleString() || 'N/A'}</p>
+            <p><strong>Inflated Guaranteed:</strong> ${player.inflated_guaranteed?.toLocaleString() || 'N/A'}</p>
           </div>
-        </div>
 
         {/* Career Summary */}
         {player.career && (
