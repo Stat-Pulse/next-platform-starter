@@ -50,6 +50,7 @@ export default function PlayerPage({ player }) {
       <div className="max-w-4xl mx-auto px-6 py-8">
         <h1 className="text-4xl font-bold mb-4">{player.player_name}</h1>
 
+        {/* Grid for Info and Contract */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-lg shadow">
           {/* Player Info */}
           <div>
@@ -74,6 +75,8 @@ export default function PlayerPage({ player }) {
             <p><strong>Inflated Value:</strong> ${player.inflated_value?.toLocaleString() || 'N/A'}</p>
             <p><strong>Inflated Guaranteed:</strong> ${player.inflated_guaranteed?.toLocaleString() || 'N/A'}</p>
           </div>
+        </div> {/* <-- this closes the grid */}
+
 
         {/* Career Summary */}
         {player.career && (
