@@ -33,23 +33,21 @@ export default async function handler(req, res) {
     const [receivingMetrics] = await connection.execute(`
       SELECT
         season,
+        season_type,
         week,
-        team,
-        opponent,
+        team_abbr,
         targets,
         receptions,
-        receiving_yards,
-        receiving_tds,
+        yards,
+        rec_touchdowns,
         catch_percentage,
         avg_yac,
         avg_cushion,
         avg_separation,
-        receiving_epa,
-        receiving_air_yards,
+        avg_intended_air_yards,
         percent_share_of_intended_air_yards,
         avg_expected_yac,
-        avg_yac_above_expectation,
-        wopr
+        avg_yac_above_expectation
       FROM NextGen_Stats_Receiving
       WHERE player_id = ?
       ORDER BY season, week
