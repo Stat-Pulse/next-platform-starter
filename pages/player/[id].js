@@ -77,12 +77,12 @@ export default function PlayerPage({ player }) {
             <h2 className="text-xl font-semibold mb-2">Draft & Contract</h2>
             <p><strong>Drafted:</strong> {player.draft_season || '—'} | {player.draft_team || '—'} | Round {player.draft_round || '—'}, Pick {player.draft_pick || '—'}</p>
             <p><strong>Contract Year:</strong> {player.contract_year || '—'}</p>
-            <p><strong>Total Value:</strong> ${player.value?.toLocaleString() || 'N/A'}</p>
-            <p><strong>APY:</strong> ${player.apy?.toLocaleString() || 'N/A'}</p>
-            <p><strong>Guaranteed:</strong> ${player.guaranteed?.toLocaleString() || 'N/A'}</p>
+            <p><strong>Total Value:</strong> ${player.value?.toFixed(2)}M</p>
+            <p><strong>APY:</strong> ${player.apy?.toFixed(2)}M</p>
+            <p><strong>Guaranteed:</strong> ${player.guaranteed?.toFixed(2)}M</p>           
             <p><strong>APY Cap %:</strong> {(player.apy_cap_pct !== null && player.apy_cap_pct !== undefined) ? `${(player.apy_cap_pct * 100).toFixed(1)}%` : 'N/A'}</p>
-            <p><strong>Inflated Value:</strong> ${player.inflated_value?.toLocaleString() || 'N/A'}</p>
-            <p><strong>Inflated Guaranteed:</strong> ${player.inflated_guaranteed?.toLocaleString() || 'N/A'}</p>
+            <p><strong>Inflated Value:</strong> ${player.inflated_value?.toFixed(2)}M</p>
+            <p><strong>Inflated Guaranteed:</strong> ${player.inflated_guaranteed?.toFixed(2)}M</p>
           </div>
         </div> {/* <-- this closes the grid */}
 
