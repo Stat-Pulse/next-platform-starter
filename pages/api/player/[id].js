@@ -58,8 +58,8 @@ export default async function handler(req, res) {
       games: receivingMetrics.length,
       targets: receivingMetrics.reduce((sum, g) => sum + (g.targets || 0), 0),
       receptions: receivingMetrics.reduce((sum, g) => sum + (g.receptions || 0), 0),
-      yards: receivingMetrics.reduce((sum, g) => sum + (g.receiving_yards || 0), 0),
-      tds: receivingMetrics.reduce((sum, g) => sum + (g.receiving_tds || 0), 0),
+      yards: receivingMetrics.reduce((sum, g) => sum + (g.yards || 0), 0),
+      tds: receivingMetrics.reduce((sum, g) => sum + (g.rec_touchdowns || 0), 0),
     } : null;
 
     await connection.end();
