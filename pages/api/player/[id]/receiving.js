@@ -35,26 +35,23 @@ export default async function handler(req, res) {
     const [rows] = await connection.execute(
       `
       SELECT 
-        PSG.season,
-        SUM(PSG.targets) AS TGTS,
-        SUM(PSG.receptions) AS REC,
-        SUM(PSG.receiving_yards) AS YDS,
-        SUM(PSG.receiving_tds) AS TD,
-        SUM(PSG.receiving_fumbles) AS FUM,
-        SUM(PSG.receiving_first_downs) AS FD,
+        NGS.season,
+        SUM(NGS.targets) AS TGTS,
+        SUM(NGS.receptions) AS REC,
+        SUM(NGS.rec_touchdowns) AS TD,
         AVG(NGS.avg_cushion) AS avg_cushion,
         AVG(NGS.avg_separation) AS avg_separation,
         AVG(NGS.avg_intended_air_yards) AS avg_intended_air_yards,
-        SUM(NGS.yards) AS receiving_air_yards,
+        SUM(NGS.yards) AS receiving_yards,
         AVG(NGS.percent_share_of_intended_air_yards) AS percent_share_air_yards,
         SUM(NGS.avg_expected_yac) AS xYAC,
         SUM(NGS.avg_yac) AS YAC,
         SUM(NGS.avg_yac_above_expectation) AS plus_yac
       FROM Player_Stats_Game_2024 PSG
-      LEFT JOIN NextGen_Stats_Receiving_2024 NGS
-        ON PSG.player_id = NGS.player_gsis_id AND PSG.season = NGS.season AND PSG.week = NGS.week
-      WHERE PSG.player_id = ?
-      GROUP BY PSG.season
+      LEFT JOIN NextGen_Stats_Receiving NGS
+        ON NGS.player_id AND NGS.season AND NGS.week
+      WHERE NGS.player_id = ?
+      GROUP BY NGS.season
       `,
       [id]
     );
