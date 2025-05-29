@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     const player = playerRows[0];
     console.log('✅ Player found in view:', player.player_name);
 
-    // Step 2: Receiving metrics from NextGen_Stats_Receiving_2024
+    // Step 2: Receiving metrics from NextGen_Stats_Receiving
     const [receivingMetrics] = await connection.execute(`
       SELECT
         season,
@@ -50,7 +50,7 @@ export default async function handler(req, res) {
         avg_expected_yac,
         avg_yac_above_expectation,
         wopr
-      FROM NextGen_Stats_Receiving_2024
+      FROM NextGen_Stats_Receiving
       WHERE player_id = ?
       ORDER BY season, week
     `, [playerId]);
