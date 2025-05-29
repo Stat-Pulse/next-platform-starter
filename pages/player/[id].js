@@ -56,7 +56,7 @@ export default function PlayerPage({ player }) {
             <p><strong>College:</strong> {player.college}</p>
             <p><strong>Height / Weight:</strong> {player.height_inches}" / {player.weight_pounds} lbs</p>
             <p><strong>Birth Date:</strong> {player.date_of_birth}</p>
-            <p><strong>Status:</strong> {player.is_active ? 'Active' : 'Inactive'}</p>
+            <p><strong>Status:</strong> {player.is_active ? "Active" : "Inactive"}</p>
           </div>
 
           <div>
