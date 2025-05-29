@@ -49,6 +49,15 @@ export default function PlayerPage({ player }) {
 
       <div className="max-w-4xl mx-auto px-6 py-8">
         <h1 className="text-4xl font-bold mb-4">{player.player_name}</h1>
+        {player.headshot_url && (
+          <div className="mb-4">
+            <img
+              src={player.headshot_url}
+              alt={`${player.player_name} headshot`}
+              className="w-32 h-32 object-cover rounded-full border"
+            />
+          </div>
+        )}
 
         {/* Grid for Info and Contract */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-lg shadow">
