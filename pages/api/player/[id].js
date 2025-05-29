@@ -13,12 +13,21 @@ export default async function handler(req, res) {
       database: process.env.DB_NAME,
     });
 
-    // Step 1: Player metadata from Rosters_2024
+    // Step 1: Pull player metadata from Players
     const [playerRows] = await connection.execute(`
-      SELECT full_name AS player_name, position, team AS team_abbr, jersey_number, status, college,
-             draft_club, draft_number, rookie_year, years_exp, headshot_url, height, weight
-      FROM Rosters_2024
-      WHERE gsis_id = ?
+      SELECT 
+        player_id,
+        player_name,
+        position,
+        team,
+        college,
+        draft_year,
+        date_of_birth,
+        height_inches,
+        weight_pounds,
+        is_active
+      FROM Players
+      WHERE player_id = ?
       LIMIT 1
     `, [playerId]);
 
@@ -30,27 +39,27 @@ export default async function handler(req, res) {
     const player = playerRows[0];
     console.log('✅ Player found:', player.player_name);
 
-    // Step 2: Simplified Game Logs without JOIN
-   const [gameLogs] = await connection.execute(`
-  SELECT 
-    G.week,
-    CASE
-      WHEN T.team_abbr = G.home_team_id THEN G.away_team_id
-      ELSE G.home_team_id
-    END AS opponent_team_abbr,
-    PSG.receptions,
-    PSG.receiving_yards,
-    PSG.receiving_tds,
-    PSG.rushing_tds,
-    PSG.passing_tds
-  FROM Player_Stats_Game_2024 PSG
-  JOIN Teams T ON T.team_id = PSG.team_id
-  JOIN Games G ON PSG.game_id = G.game_id
-  WHERE PSG.player_id = ?
-  ORDER BY G.week ASC
-`, [playerId]);
+    // Step 2: Game logs from Player_Stats_Game_All + Games
+    const [gameLogs] = await connection.execute(`
+      SELECT 
+        G.week,
+        G.season_id AS season,
+        CASE
+          WHEN PSG.team_abbr = G.home_team_id THEN G.away_team_id
+          ELSE G.home_team_id
+        END AS opponent_team_abbr,
+        PSG.receptions,
+        PSG.receiving_yards,
+        PSG.receiving_tds,
+        PSG.rushing_tds,
+        PSG.passing_tds
+      FROM Player_Stats_Game_All PSG
+      JOIN Games G ON PSG.game_id = G.game_id
+      WHERE PSG.player_id = ?
+      ORDER BY G.season_id, G.week
+    `, [playerId]);
 
-    // Step 3: Career totals
+    // Step 3: Aggregate career totals
     const career = gameLogs.length > 0 ? {
       games: gameLogs.length,
       receptions: gameLogs.reduce((acc, g) => acc + (g.receptions || 0), 0),
