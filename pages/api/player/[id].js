@@ -13,20 +13,10 @@ export default async function handler(req, res) {
       database: process.env.DB_NAME,
     });
 
-    // Step 1: Pull player metadata from Players
+    // Step 1: Use the view instead of multiple joins
     const [playerRows] = await connection.execute(`
-      SELECT 
-        player_id,
-        player_name,
-        position,
-        team,
-        college,
-        draft_year,
-        date_of_birth,
-        height_inches,
-        weight_pounds,
-        is_active
-      FROM Players
+      SELECT *
+      FROM Active_Player_Profiles
       WHERE player_id = ?
       LIMIT 1
     `, [playerId]);
@@ -37,17 +27,15 @@ export default async function handler(req, res) {
     }
 
     const player = playerRows[0];
-    console.log('✅ Player found:', player.player_name);
+    console.log('✅ Player found in view:', player.player_name);
 
-    // Step 2: Game logs from Player_Stats_Game_All + Games
+    // Step 2: Pull game logs
     const [gameLogs] = await connection.execute(`
       SELECT 
         G.week,
         G.season_id AS season,
-        CASE
-          WHEN PSG.team_abbr = G.home_team_id THEN G.away_team_id
-          ELSE G.home_team_id
-        END AS opponent_team_abbr,
+        G.home_team_id,
+        G.away_team_id,
         PSG.receptions,
         PSG.receiving_yards,
         PSG.receiving_tds,
@@ -59,7 +47,7 @@ export default async function handler(req, res) {
       ORDER BY G.season_id, G.week
     `, [playerId]);
 
-    // Step 3: Aggregate career totals
+    // Step 3: Aggregate basic career stats
     const career = gameLogs.length > 0 ? {
       games: gameLogs.length,
       receptions: gameLogs.reduce((acc, g) => acc + (g.receptions || 0), 0),
@@ -74,8 +62,7 @@ export default async function handler(req, res) {
       gameLogs,
     });
   } catch (err) {
-    console.error('🔥 API error message:', err.message);
-    console.error('🔥 Stack:', err.stack);
+    console.error('🔥 API error:', err.message);
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
