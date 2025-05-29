@@ -1,113 +1,75 @@
-// pages/player/[id].js
+import mysql from 'mysql2/promise';
 import Head from 'next/head';
-import PlayerHeader from '@/components/player/PlayerHeader';
-
-export default function PlayerProfilePage({ player, gameLogs }) {
-  if (!player) {
-    return (
-      <div className="p-10 text-center text-red-600">
-        <h1>❌ Player not found</h1>
-      </div>
-    );
-  }
-
-  const logsWithTDs = gameLogs.map((g) => ({
-    ...g,
-    total_tds: (g.passing_tds || 0) + (g.rushing_tds || 0) + (g.receiving_tds || 0),
-  })).sort((a, b) => a.week - b.week);
-
-  return (
-    <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
-      <Head><title>{player.player_name} | StatPulse</title></Head>
-      <PlayerHeader player={player} />
-
-      {/* Game Logs */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-4 border-b pb-1">Game Logs</h2>
-        <div className="overflow-x-auto border rounded-md shadow">
-          <table className="min-w-full text-sm text-center">
-            <thead className="bg-gray-50 text-gray-700">
-              <tr>
-                <th className="p-3">Week</th>
-                <th className="p-3">Opponent</th>
-                <th className="p-3">Rec</th>
-                <th className="p-3">Yards</th>
-                <th className="p-3">TDs</th>
-              </tr>
-            </thead>
-            <tbody>
-              {logsWithTDs.map((log, idx) => (
-                <tr key={idx} className="even:bg-gray-50">
-                  <td className="p-2">{log.week || '-'}</td>
-                  <td className="p-2">{log.opponent_team_abbr || '-'}</td>
-                  <td className="p-2">{log.receptions || 0}</td>
-                  <td className="p-2">{log.receiving_yards || 0}</td>
-                  <td className="p-2">{log.total_tds}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* Career Stats */}
-      {player.career && (
-        <section>
-          <h2 className="text-2xl font-semibold mb-4 border-b pb-1">Career Stats</h2>
-          <div className="overflow-x-auto border rounded-md shadow">
-            <table className="min-w-full text-sm text-center">
-              <thead className="bg-gray-50 text-gray-700">
-                <tr>
-                  <th className="p-3">Games</th>
-                  <th className="p-3">Receptions</th>
-                  <th className="p-3">Yards</th>
-                  <th className="p-3">Touchdowns</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="p-3">{player.career.games}</td>
-                  <td className="p-3">{player.career.receptions}</td>
-                  <td className="p-3">{player.career.yards}</td>
-                  <td className="p-3">{player.career.tds}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
-    </div>
-  );
-}
 
 export async function getServerSideProps({ params }) {
   const playerId = params.id;
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://statpulseanalytics.netlify.app';
-
-  console.log('🌐 Fetching from:', `${baseUrl}/api/player/${playerId}`);
+  let connection;
 
   try {
-    const res = await fetch(`${baseUrl}/api/player/${playerId}`);
-    if (!res.ok) {
-      console.error('❌ Failed fetch:', res.status);
-      throw new Error('Fetch failed');
+    connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME
+    });
+
+    const [profileRows] = await connection.execute(`
+      SELECT *
+      FROM Active_Player_Profiles
+      WHERE player_id = ?
+      LIMIT 1
+    `, [playerId]);
+
+    if (profileRows.length === 0) {
+      return { notFound: true };
     }
 
-    const data = await res.json();
-    console.log('✅ Player Data:', data.player?.player_name);
+    const player = profileRows[0];
+
     return {
       props: {
-        player: data.player || null,
-        gameLogs: data.gameLogs || [],
-      },
+        player
+      }
     };
   } catch (error) {
-    console.error('🚨 getServerSideProps error:', error);
-    return {
-      props: {
-        player: null,
-        gameLogs: [],
-      },
-    };
+    console.error('Database error:', error);
+    return { notFound: true };
+  } finally {
+    if (connection) await connection.end();
   }
+}
+
+export default function PlayerPage({ player }) {
+  return (
+    <>
+      <Head>
+        <title>{player.player_name} | StatPulse Profile</title>
+      </Head>
+
+      <div className="max-w-4xl mx-auto px-6 py-8">
+        <h1 className="text-4xl font-bold mb-4">{player.player_name}</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-lg shadow">
+          <div>
+            <h2 className="text-xl font-semibold mb-2">Player Info</h2>
+            <p><strong>Position:</strong> {player.position}</p>
+            <p><strong>Team:</strong> {player.team_abbr} ({player.team_name})</p>
+            <p><strong>College:</strong> {player.college}</p>
+            <p><strong>Height / Weight:</strong> {player.height_inches}" / {player.weight_pounds} lbs</p>
+            <p><strong>Birth Date:</strong> {player.date_of_birth}</p>
+            <p><strong>Status:</strong> {player.is_active ? 'Active' : 'Inactive'}</p>
+          </div>
+
+          <div>
+            <h2 className="text-xl font-semibold mb-2">Draft & Contract</h2>
+            <p><strong>Drafted:</strong> {player.draft_season} | {player.draft_team} | Round {player.draft_round}, Pick {player.draft_pick}</p>
+            <p><strong>Contract Type:</strong> {player.contract_type || 'N/A'} ({player.contract_year || '—'})</p>
+            <p><strong>Base Salary:</strong> ${player.base_salary?.toLocaleString() || 'N/A'}</p>
+            <p><strong>Cap Hit:</strong> ${player.cap_number?.toLocaleString() || 'N/A'}</p>
+            <p><strong>Dead Cap:</strong> ${player.dead_cap?.toLocaleString() || 'N/A'}</p>
+            <p><strong>Cap Savings:</strong> ${player.cap_savings?.toLocaleString() || 'N/A'}</p>
+          </div>
+        </div>
+      </div>
+    </>
+  );
 }
