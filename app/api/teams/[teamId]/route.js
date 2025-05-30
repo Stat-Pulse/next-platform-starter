@@ -33,7 +33,7 @@ export async function GET(request, { params }) {
       primary_color: teamRows[0].primary_color || '#1D2526', // Fallback
       secondary_color: teamRows[0].secondary_color || '#A5ACAF',
       city: teamRows[0].city || 'Unknown',
-      nickname: teamRows[0].nickname || teamRows[0].team_name.split(' ').pop(), // Fallback to last word of team_name
+      nickname: teamRows[0].nickname || teamRows[0].team_name.split(' ').pop(),
       stadium_name: teamRows[0].stadium_name || 'N/A',
       head_coach: teamRows[0].head_coach || 'N/A',
       founded_year: teamRows[0].founded_year || null,
@@ -94,17 +94,17 @@ export async function GET(request, { params }) {
       console.log('News query failed:', error.message);
     }
 
-    // Top players (using Player_Stats_Game_All)
+    // Top players (using Player_Stats_Game_All with recent_team)
     let topPlayers = { topPasser: { name: 'N/A', yards: 0 }, topRusher: { name: 'N/A', yards: 0 }, topReceiver: { name: 'N/A', yards: 0 } };
     try {
       const [topPlayersRows] = await connection.execute(
         `SELECT 
-           (SELECT player_id FROM Player_Stats_Game_All WHERE team_abbr = ? AND season = 2024 ORDER BY passing_yards DESC LIMIT 1) AS top_passer,
-           (SELECT passing_yards FROM Player_Stats_Game_All WHERE team_abbr = ? AND season = 2024 ORDER BY passing_yards DESC LIMIT 1) AS top_passing_yards,
-           (SELECT player_id FROM Player_Stats_Game_All WHERE team_abbr = ? AND season = 2024 ORDER BY rushing_yards DESC LIMIT 1) AS top_rusher,
-           (SELECT rushing_yards FROM Player_Stats_Game_All WHERE team_abbr = ? AND season = 2024 ORDER BY rushing_yards DESC LIMIT 1) AS top_rushing_yards,
-           (SELECT player_id FROM Player_Stats_Game_All WHERE team_abbr = ? AND season = 2024 ORDER BY receiving_yards DESC LIMIT 1) AS top_receiver,
-           (SELECT receiving_yards FROM Player_Stats_Game_All WHERE team_abbr = ? AND season = 2024 ORDER BY receiving_yards DESC LIMIT 1) AS top_receiving_yards
+           (SELECT player_id FROM Player_Stats_Game_All WHERE recent_team = ? AND season = 2024 ORDER BY passing_yards DESC LIMIT 1) AS top_passer,
+           (SELECT passing_yards FROM Player_Stats_Game_All WHERE recent_team = ? AND season = 2024 ORDER BY passing_yards DESC LIMIT 1) AS top_passing_yards,
+           (SELECT player_id FROM Player_Stats_Game_All WHERE recent_team = ? AND season = 2024 ORDER BY rushing_yards DESC LIMIT 1) AS top_rusher,
+           (SELECT rushing_yards FROM Player_Stats_Game_All WHERE recent_team = ? AND season = 2024 ORDER BY rushing_yards DESC LIMIT 1) AS top_rushing_yards,
+           (SELECT player_id FROM Player_Stats_Game_All WHERE recent_team = ? AND season = 2024 ORDER BY receiving_yards DESC LIMIT 1) AS top_receiver,
+           (SELECT receiving_yards FROM Player_Stats_Game_All WHERE recent_team = ? AND season = 2024 ORDER BY receiving_yards DESC LIMIT 1) AS top_receiving_yards
          `,
         [teamAbbr, teamAbbr, teamAbbr, teamAbbr, teamAbbr, teamAbbr]
       );
