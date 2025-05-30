@@ -9,4 +9,8 @@ export default function MyApp({ Component, pageProps }) {
       <Component {...pageProps} />
     </>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 504cdbb (Add Tailwind safelist for primary colors)
