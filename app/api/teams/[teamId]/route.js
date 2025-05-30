@@ -17,9 +17,9 @@ export async function GET(request, { params }) {
     // Fetch team data by nickname (case-insensitive)
     const [teamRows] = await connection.execute(
       `SELECT team_abbr, team_name, team_division AS division, team_conf AS conference, team_logo_espn AS logo_url, 
-              team_color, team_color2, city, nickname, stadium_name, head_coach, founded_year
+              team_color, team_color2, city, team_nick, stadium_name, head_coach, founded_year
        FROM Teams
-       WHERE LOWER(nickname) = ?`,
+       WHERE LOWER(team_nick) = ?`,
       [teamIdLower]
     );
 
