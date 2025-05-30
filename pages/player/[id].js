@@ -26,7 +26,7 @@ export async function getServerSideProps({ params }) {
 
     const player = profileRows[0];
 
-    // Get weekly receiving stats from Player_Stats_Game_All
+    // Receiving metrics from Player_Stats_Game_All
     const [receivingMetrics] = await connection.execute(`
       SELECT week, season, recent_team, receiving_yards, receiving_tds AS rec_touchdowns
       FROM Player_Stats_Game_All
@@ -36,7 +36,14 @@ export async function getServerSideProps({ params }) {
       ORDER BY week
     `, [playerId]);
 
-    // Optional career total
+    // Advanced metrics from NextGen_Stats_Receiving
+    const [advancedMetrics] = await connection.execute(`
+      SELECT *
+      FROM NextGen_Stats_Receiving
+      WHERE player_gsis_id = ?
+        AND season = 2024
+    `, [playerId]);
+
     const career = receivingMetrics.length > 0 ? {
       games: receivingMetrics.length,
       yards: receivingMetrics.reduce((sum, g) => sum + (g.receiving_yards || 0), 0),
@@ -46,7 +53,8 @@ export async function getServerSideProps({ params }) {
     return {
       props: {
         player: { ...player, career },
-        receivingMetrics
+        receivingMetrics,
+        advancedMetrics: advancedMetrics[0] || null
       }
     };
   } catch (error) {
@@ -57,7 +65,7 @@ export async function getServerSideProps({ params }) {
   }
 }
 
-export default function PlayerPage({ player, receivingMetrics }) {
+export default function PlayerPage({ player, receivingMetrics, advancedMetrics }) {
   return (
     <>
       <Head>
@@ -112,7 +120,7 @@ export default function PlayerPage({ player, receivingMetrics }) {
           </div>
         )}
 
-        {receivingMetrics && receivingMetrics.length > 0 && (
+        {receivingMetrics?.length > 0 && (
           <div className="mt-8">
             <h2 className="text-2xl font-bold mb-2">2024 Receiving Stats</h2>
             <div className="overflow-x-auto bg-white p-4 rounded shadow">
@@ -134,6 +142,25 @@ export default function PlayerPage({ player, receivingMetrics }) {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {advancedMetrics && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold mb-2">2024 Advanced Receiving Metrics</h2>
+            <div className="bg-white p-4 rounded shadow">
+              <p><strong>Targets:</strong> {advancedMetrics.targets}</p>
+              <p><strong>Receptions:</strong> {advancedMetrics.receptions}</p>
+              <p><strong>Avg Cushion:</strong> {advancedMetrics.avg_cushion}</p>
+              <p><strong>Avg Separation:</strong> {advancedMetrics.avg_separation}</p>
+              <p><strong>Intended Air Yards:</strong> {advancedMetrics.avg_intended_air_yards}</p>
+              <p><strong>Air Yards Share:</strong> {(advancedMetrics.percent_share_of_intended_air_yards * 100).toFixed(1)}%</p>
+              <p><strong>Avg YAC:</strong> {advancedMetrics.avg_yac}</p>
+              <p><strong>YAC Over Expectation:</strong> {advancedMetrics.avg_yac_above_expectation}</p>
+              <p><strong>Receiving EPA:</strong> {advancedMetrics.receiving_epa}</p>
+              <p><strong>Target Share:</strong> {(advancedMetrics.target_share * 100).toFixed(1)}%</p>
+              <p><strong>WOPR:</strong> {advancedMetrics.wopr.toFixed(3)}</p>
             </div>
           </div>
         )}
