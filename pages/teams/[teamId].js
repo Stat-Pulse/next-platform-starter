@@ -35,8 +35,8 @@ export default function TeamPage({ teamId }) {
 
   const { team, seasonStats, lastGame, upcomingGame, news, topPlayers } = data;
   const teamColors = {
-    primary: team.primary_color || '#1D2526',
-    secondary: team.secondary_color || '#A5ACAF',
+    primary: team.team_color,
+    secondary: team.team_color2,
   };
 
   return (
