@@ -28,7 +28,7 @@ export async function getServerSideProps({ params }) {
 
     // Get weekly receiving stats from Player_Stats_Game_All
     const [receivingMetrics] = await connection.execute(`
-      SELECT week, season, team_abbr, receiving_yards, receiving_tds AS rec_touchdowns
+      SELECT week, season, recent_team, receiving_yards, receiving_tds AS rec_touchdowns
       FROM Player_Stats_Game_All
       WHERE player_id = ?
         AND season = 2024
