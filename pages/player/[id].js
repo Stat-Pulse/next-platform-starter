@@ -28,13 +28,28 @@ export async function getServerSideProps({ params }) {
     const player = profileRows[0];
 
     const [receivingMetrics] = await connection.execute(`
-      SELECT *
+      SELECT
+        season,
+        season_type,
+        week,
+        team_abbr,
+        targets,
+        receptions,
+        yards,
+        rec_touchdowns,
+        catch_percentage,
+        avg_yac,
+        avg_cushion,
+        avg_separation,
+        avg_intended_air_yards,
+        percent_share_of_intended_air_yards,
+        avg_expected_yac,
+        avg_yac_above_expectation
       FROM NextGen_Stats_Receiving
-      WHERE player_id = ? AND season = 2024
-      ORDER BY week
+      WHERE player_id = ?
+      ORDER BY season, week
     `, [playerId]);
 
-    // Aggregate career stats
     const career = receivingMetrics.length > 0 ? {
       games: receivingMetrics.length,
       targets: receivingMetrics.reduce((sum, g) => sum + (g.targets || 0), 0),
