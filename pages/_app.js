@@ -2,5 +2,11 @@
 import '../styles/globals.css';
 
 export default function MyApp({ Component, pageProps }) {
-  return <Component {...pageProps} />;
+  return (
+    <>
+      {/* Tailwind debug safelist */}
+      <div className="hidden bg-primary text-primary border-primary"></div>
+      <Component {...pageProps} />
+    </>
+  );
 }
