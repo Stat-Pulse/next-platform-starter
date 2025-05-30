@@ -2,7 +2,7 @@ import mysql from 'mysql2/promise';
 
 export async function GET(request, { params }) {
   const { teamId } = params;
-  const teamAbbr = teamId.toUpperCase(); // e.g., 'CHIEFS' -> 'KC'
+  const teamIdLower = teamId.toLowerCase(); // e.g., 'chiefs'
 
   // Database connection
   const connection = await mysql.createConnection({
@@ -14,13 +14,13 @@ export async function GET(request, { params }) {
   });
 
   try {
-    // Fetch team data (using confirmed columns)
+    // Fetch team data by nickname (case-insensitive)
     const [teamRows] = await connection.execute(
       `SELECT team_abbr, team_name, team_division AS division, team_conf AS conference, team_logo_espn AS logo_url, 
-              team_color, team_color2, city, team_nick, stadium_name, head_coach, founded_year
+              team_color, team_color2, city, nickname, stadium_name, head_coach, founded_year
        FROM Teams
-       WHERE team_abbr = ?`,
-      [teamAbbr]
+       WHERE LOWER(nickname) = ?`,
+      [teamIdLower]
     );
 
     if (!teamRows.length) {
@@ -28,8 +28,9 @@ export async function GET(request, { params }) {
     }
 
     const team = teamRows[0];
+    const teamAbbr = team.team_abbr; // e.g., 'KC'
 
-    // Season stats (corrected query)
+    // Season stats
     const [statsRows] = await connection.execute(
       `SELECT 
          (SELECT COUNT(*) FROM Games WHERE (home_team_id = ? AND winning_team_id = ?) OR (away_team_id = ? AND winning_team_id = ?) AND season_type = 'REG' AND season_id = 2024) AS wins,
@@ -104,7 +105,6 @@ export async function GET(request, { params }) {
         topReceiver: { name: 'N/A', yards: topPlayersRows[0].top_receiving_yards || 0 },
       };
 
-      // Fetch player names
       if (topPlayersRows[0].top_passer) {
         const [playerRows] = await connection.execute(
           `SELECT player_name FROM Players WHERE player_id = ?`,
