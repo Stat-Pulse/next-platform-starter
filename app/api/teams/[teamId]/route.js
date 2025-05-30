@@ -16,8 +16,8 @@ export async function GET(request, { params }) {
   try {
     // Fetch team data (using confirmed columns)
     const [teamRows] = await connection.execute(
-      `SELECT team_abbr, team_name, team_division AS division, team_logo_espn AS logo_url, 
-              primary_color, secondary_color, city, nickname, stadium_name, head_coach, founded_year
+      `SELECT team_abbr, team_name, team_division AS division, team_conf AS conference, team_logo_espn AS logo_url, 
+              team_color, team_color2, city, team_nick, stadium_name, head_coach, founded_year
        FROM Teams
        WHERE team_abbr = ?`,
       [teamAbbr]
