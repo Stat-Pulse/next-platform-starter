@@ -17,7 +17,8 @@ export async function GET(request, { params }) {
     // Fetch team data by nickname (case-insensitive)
     const [teamRows] = await connection.execute(
       `SELECT team_abbr, team_name, team_division AS division, team_conf AS conference, team_logo_espn AS logo_url, 
-              primary_color, secondary_color, city, nickname, stadium_name, head_coach, founded_year
+              primary_color, secondary_color, tertiary_color, quaternary_color, nickname, 
+              city, stadium_name, head_coach, founded_year
        FROM Teams
        WHERE LOWER(nickname) = ?`,
       [teamIdLower]
@@ -27,8 +28,17 @@ export async function GET(request, { params }) {
       return new Response(JSON.stringify({ error: 'Team not found' }), { status: 404 });
     }
 
-    const team = teamRows[0];
-    const teamAbbr = team.team_abbr; // e.g., 'KC'
+    const team = {
+      ...teamRows[0],
+      primary_color: teamRows[0].primary_color || '#1D2526', // Fallback
+      secondary_color: teamRows[0].secondary_color || '#A5ACAF',
+      city: teamRows[0].city || 'Unknown',
+      nickname: teamRows[0].nickname || teamRows[0].team_name.split(' ').pop(), // Fallback to last word of team_name
+      stadium_name: teamRows[0].stadium_name || 'N/A',
+      head_coach: teamRows[0].head_coach || 'N/A',
+      founded_year: teamRows[0].founded_year || null,
+    };
+    const teamAbbr = team.team_abbr;
 
     // Season stats
     const [statsRows] = await connection.execute(
