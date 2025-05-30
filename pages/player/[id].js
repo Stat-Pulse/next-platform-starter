@@ -1,4 +1,3 @@
-// pages/player/[id].js
 import mysql from 'mysql2/promise';
 import Head from 'next/head';
 
@@ -14,9 +13,9 @@ export async function getServerSideProps({ params }) {
       database: process.env.DB_NAME
     });
 
+    // Get profile data
     const [profileRows] = await connection.execute(`
-      SELECT *
-      FROM Active_Player_Profiles
+      SELECT * FROM Active_Player_Profiles
       WHERE player_id = ?
       LIMIT 1
     `, [playerId]);
@@ -27,34 +26,20 @@ export async function getServerSideProps({ params }) {
 
     const player = profileRows[0];
 
+    // Get weekly receiving stats from Player_Stats_Game_All
     const [receivingMetrics] = await connection.execute(`
-      SELECT
-        season,
-        season_type,
-        week,
-        team_abbr,
-        targets,
-        receptions,
-        yards,
-        rec_touchdowns,
-        catch_percentage,
-        avg_yac,
-        avg_cushion,
-        avg_separation,
-        avg_intended_air_yards,
-        percent_share_of_intended_air_yards,
-        avg_expected_yac,
-        avg_yac_above_expectation
-      FROM NextGen_Stats_Receiving
+      SELECT week, season, team_abbr, receiving_yards, receiving_tds AS rec_touchdowns
+      FROM Player_Stats_Game_All
       WHERE player_id = ?
-      ORDER BY season, week
+        AND season = 2024
+        AND receiving_yards IS NOT NULL
+      ORDER BY week
     `, [playerId]);
 
+    // Optional career total
     const career = receivingMetrics.length > 0 ? {
       games: receivingMetrics.length,
-      targets: receivingMetrics.reduce((sum, g) => sum + (g.targets || 0), 0),
-      receptions: receivingMetrics.reduce((sum, g) => sum + (g.receptions || 0), 0),
-      yards: receivingMetrics.reduce((sum, g) => sum + (g.yards || 0), 0),
+      yards: receivingMetrics.reduce((sum, g) => sum + (g.receiving_yards || 0), 0),
       tds: receivingMetrics.reduce((sum, g) => sum + (g.rec_touchdowns || 0), 0),
     } : null;
 
@@ -93,7 +78,6 @@ export default function PlayerPage({ player, receivingMetrics }) {
 
         {/* Grid for Info and Contract */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-lg shadow">
-          {/* Player Info */}
           <div>
             <h2 className="text-xl font-semibold mb-2">Player Info</h2>
             <p><strong>Position:</strong> {player.position}</p>
@@ -104,7 +88,6 @@ export default function PlayerPage({ player, receivingMetrics }) {
             <p><strong>Status:</strong> {player.is_active ? "Active" : "Inactive"}</p>
           </div>
 
-          {/* Draft & Contract */}
           <div>
             <h2 className="text-xl font-semibold mb-2">Draft & Contract</h2>
             <p><strong>Drafted:</strong> {player.draft_season || '—'} | {player.draft_team || '—'} | Round {player.draft_round || '—'}, Pick {player.draft_pick || '—'}</p>
@@ -118,49 +101,35 @@ export default function PlayerPage({ player, receivingMetrics }) {
           </div>
         </div>
 
-        {/* Career Summary */}
         {player.career && (
           <div className="mt-8">
             <h2 className="text-2xl font-bold mb-2">Career Receiving Summary</h2>
             <div className="bg-white p-4 rounded shadow">
               <p><strong>Games:</strong> {player.career.games}</p>
-              <p><strong>Targets:</strong> {player.career.targets}</p>
-              <p><strong>Receptions:</strong> {player.career.receptions}</p>
               <p><strong>Yards:</strong> {player.career.yards}</p>
               <p><strong>Touchdowns:</strong> {player.career.tds}</p>
             </div>
           </div>
         )}
 
-        {/* Receiving Metrics Table */}
         {receivingMetrics && receivingMetrics.length > 0 && (
           <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-2">Receiving Metrics (2024)</h2>
+            <h2 className="text-2xl font-bold mb-2">2024 Receiving Stats</h2>
             <div className="overflow-x-auto bg-white p-4 rounded shadow">
               <table className="table-auto w-full text-sm">
                 <thead>
                   <tr className="border-b">
                     <th className="text-left p-2">Week</th>
-                    <th className="text-left p-2">Targets</th>
-                    <th className="text-left p-2">Receptions</th>
                     <th className="text-left p-2">Yards</th>
                     <th className="text-left p-2">TDs</th>
-                    <th className="text-left p-2">Catch %</th>
-                    <th className="text-left p-2">Avg YAC</th>
-                    <th className="text-left p-2">Separation</th>
                   </tr>
                 </thead>
                 <tbody>
                   {receivingMetrics.map((g, idx) => (
                     <tr key={idx} className="border-b">
                       <td className="p-2">{g.week}</td>
-                      <td className="p-2">{g.targets}</td>
-                      <td className="p-2">{g.receptions}</td>
-                      <td className="p-2">{g.yards}</td>
+                      <td className="p-2">{g.receiving_yards}</td>
                       <td className="p-2">{g.rec_touchdowns}</td>
-                      <td className="p-2">{(g.catch_percentage * 100).toFixed(1)}%</td>
-                      <td className="p-2">{g.avg_yac?.toFixed(1)}</td>
-                      <td className="p-2">{g.avg_separation?.toFixed(1)}</td>
                     </tr>
                   ))}
                 </tbody>
