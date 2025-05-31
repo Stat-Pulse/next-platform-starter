@@ -1,17 +1,23 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
+import { useRouter } from 'next/router'; // ✅ Import router
 
-export default function TeamPage({ teamId }) {
+export default function TeamPage() {
+  const router = useRouter();
+  const { teamId } = router.query; // ✅ Get teamId from route
+
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null); // Added for debugging
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
+    if (!teamId) return; // Wait for teamId to be available
+
     async function fetchData() {
       try {
         console.log(`Fetching data for teamId: ${teamId}`);
-        const res = await fetch(`/api/team/${teamId}`); // Singular: /team/
+        const res = await fetch(`/api/team/${teamId}`);
         console.log(`Fetch response status: ${res.status}`);
         if (!res.ok) {
           const errorData = await res.json();
@@ -29,6 +35,7 @@ export default function TeamPage({ teamId }) {
         setLoading(false);
       }
     }
+
     fetchData();
   }, [teamId]);
 
