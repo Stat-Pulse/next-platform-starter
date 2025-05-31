@@ -71,8 +71,13 @@ export default function TeamPage() {
       {/* Team Info */}
       <div className="bg-white p-4 rounded-lg shadow-md border-l-4 mb-6" style={{ borderColor: teamColors.primary }}>
         <h2 className="text-xl font-semibold mb-4" style={{ color: teamColors.primary }}>Team Information</h2>
+        <p><strong>City:</strong> {team.city || 'N/A'}</p>
         <p><strong>Stadium:</strong> {team.stadium_name || 'N/A'}</p>
+        <p><strong>Capacity:</strong> {team.stadium_capacity?.toLocaleString() || 'N/A'}</p>
         <p><strong>Head Coach:</strong> {team.head_coach || 'N/A'}</p>
+        <p><strong>Offensive Coordinator:</strong> {team.o_coord || 'N/A'}</p>
+        <p><strong>Defensive Coordinator:</strong> {team.d_coord || 'N/A'}</p>
+        <p><strong>Founded:</strong> {team.founded_year || 'N/A'}</p>
       </div>
 
       {/* Tabs */}
