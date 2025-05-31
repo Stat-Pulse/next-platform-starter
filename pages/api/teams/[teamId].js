@@ -36,10 +36,12 @@ export default async function handler(req, res) {
     );
     const seasonStats = Object.fromEntries(statRows.map(row => [row.stat_type, row.total]));
 
-    // Last game
+    // Last finalized game
     const [lastGameRows] = await connection.execute(
       `SELECT * FROM Games
-       WHERE (home_team_id = ? OR away_team_id = ?) AND season_id = 2024
+       WHERE (home_team_id = ? OR away_team_id = ?)
+         AND season_id = 2024
+         AND is_final = 1
        ORDER BY game_date DESC, game_time DESC
        LIMIT 1`,
       [team.team_id, team.team_id]
@@ -49,7 +51,9 @@ export default async function handler(req, res) {
     // Upcoming game
     const [upcomingGameRows] = await connection.execute(
       `SELECT * FROM Games
-       WHERE (home_team_id = ? OR away_team_id = ?) AND season_id = 2024 AND game_date > CURRENT_DATE()
+       WHERE (home_team_id = ? OR away_team_id = ?)
+         AND season_id = 2024
+         AND game_date > CURRENT_DATE()
        ORDER BY game_date ASC, game_time ASC
        LIMIT 1`,
       [team.team_id, team.team_id]
