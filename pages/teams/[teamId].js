@@ -11,7 +11,7 @@ export default function TeamPage({ teamId }) {
     async function fetchData() {
       try {
         console.log(`Fetching data for teamId: ${teamId}`);
-        const res = await fetch(`/api/teams/${teamId}`);
+        const res = await fetch(`/api/team/${teamId}`); // Singular: /team/
         console.log(`Fetch response status: ${res.status}`);
         if (!res.ok) {
           const errorData = await res.json();
