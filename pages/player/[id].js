@@ -164,16 +164,15 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics }
               <p><strong>YAC Over Expectation:</strong> {advancedMetrics.avg_yac_above_expectation}</p>
               <p><strong>Receiving EPA:</strong> {advancedMetrics.receiving_epa}</p>
               <p><strong>Target Share:</strong> 
-                  {typeof advancedMetrics.target_share === 'undefined' 
+                  {typeof advancedMetrics.target_share === 'number' 
                      ? (advancedMetrics.target_share * 100).toFixed(1) + '%' 
                      : 'N/A'}
               </p>
               <p><strong>WOPR:</strong> 
-                  {typeof advancedMetrics.wopr === 'undefined' 
+                  {typeof advancedMetrics.wopr === 'number' 
                      ? advancedMetrics.wopr.toFixed(3) 
                      : 'N/A'}
               </p>
-              <p><strong>WOPR:</strong> {advancedMetrics.wopr.toFixed(3)}</p>
             </div>
           </div>
         )}
