@@ -6,9 +6,9 @@ export default async function handler(req, res) {
     query: { teamId },
   } = req;
 
-  if (!teamId) return res.status(400).json({ error: 'Missing teamId' });
+  const normalizedId = teamId?.toUpperCase();
 
-  const normalizedId = teamId.toUpperCase(); // ✅ normalize here
+  if (!normalizedId) return res.status(400).json({ error: 'Missing teamId' });
 
   try {
     const connection = await mysql.createConnection({
@@ -18,51 +18,60 @@ export default async function handler(req, res) {
       database: process.env.DB_NAME,
     });
 
+    // Fetch team metadata
     const [teamRows] = await connection.execute(
-      `SELECT * FROM Teams WHERE team_id = ? LIMIT 1`,
-      [normalizedId] // ✅ use normalizedId
+      `SELECT * FROM Teams WHERE team_abbr = ? LIMIT 1`,
+      [normalizedId]
     );
     if (teamRows.length === 0) return res.status(404).json({ error: 'Team not found' });
     const team = teamRows[0];
 
-    const [statsRows] = await connection.execute(
-      `SELECT wins, losses, points_scored, points_allowed
-       FROM Team_Stats_2024
-       WHERE team_id = ? LIMIT 1`,
-      [normalizedId] // ✅ use normalizedId
+    // Aggregate season stats by stat_type
+    const [statRows] = await connection.execute(
+      `SELECT stat_type, SUM(stat_value) AS total
+       FROM Team_Stats
+       WHERE team_abbr = ? AND season = 2024
+       GROUP BY stat_type`,
+      [normalizedId]
     );
-    const seasonStats = statsRows[0] || null;
+    const seasonStats = Object.fromEntries(statRows.map(row => [row.stat_type, row.total]));
 
+    // Last game
     const [lastGameRows] = await connection.execute(
       `SELECT * FROM Games
        WHERE (home_team_id = ? OR away_team_id = ?) AND season_id = 2024
        ORDER BY game_date DESC, game_time DESC
        LIMIT 1`,
-      [normalizedId, normalizedId] // ✅ use normalizedId
+      [team.team_id, team.team_id]
     );
     const lastGame = lastGameRows[0] || null;
 
+    // Upcoming game
     const [upcomingGameRows] = await connection.execute(
       `SELECT * FROM Games
        WHERE (home_team_id = ? OR away_team_id = ?) AND season_id = 2024 AND game_date > CURRENT_DATE()
        ORDER BY game_date ASC, game_time ASC
        LIMIT 1`,
-      [normalizedId, normalizedId] // ✅ use normalizedId
+      [team.team_id, team.team_id]
     );
     const upcomingGame = upcomingGameRows[0] || null;
 
-    const teamIds = [
+    // Team logos for teams in both games
+    const logoTeamIds = [
       lastGame?.home_team_id,
       lastGame?.away_team_id,
       upcomingGame?.home_team_id,
       upcomingGame?.away_team_id,
     ].filter(Boolean);
 
-    const [logoRows] = await connection.query(
-      `SELECT team_id, team_logo_espn FROM Teams WHERE team_id IN (${teamIds.map(() => '?').join(',')})`,
-      teamIds
-    );
-    const teamLogos = Object.fromEntries(logoRows.map((t) => [t.team_id, t.team_logo_espn]));
+    const [logoRows] = logoTeamIds.length > 0
+      ? await connection.query(
+          `SELECT team_id, team_logo_espn FROM Teams WHERE team_id IN (${logoTeamIds.map(() => '?').join(',')})`,
+          logoTeamIds
+        )
+      : [[]];
+
+    const teamLogos = Object.fromEntries(logoRows.map(t => [t.team_id, t.team_logo_espn]));
 
     res.status(200).json({
       team,
