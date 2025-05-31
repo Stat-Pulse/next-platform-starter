@@ -155,11 +155,24 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics }
               <p><strong>Avg Cushion:</strong> {advancedMetrics.avg_cushion}</p>
               <p><strong>Avg Separation:</strong> {advancedMetrics.avg_separation}</p>
               <p><strong>Intended Air Yards:</strong> {advancedMetrics.avg_intended_air_yards}</p>
-              <p><strong>Air Yards Share:</strong> {(advancedMetrics.percent_share_of_intended_air_yards * 100).toFixed(1)}%</p>
+              <p><strong>Air Yards Share:</strong> 
+                 {typeof advancedMetrics.percent_share_of_intended_air_yards === 'number' 
+                    ? (advancedMetrics.percent_share_of_intended_air_yards * 100).toFixed(1) + '%' 
+                    : 'N/A'}
+              </p>
               <p><strong>Avg YAC:</strong> {advancedMetrics.avg_yac}</p>
               <p><strong>YAC Over Expectation:</strong> {advancedMetrics.avg_yac_above_expectation}</p>
               <p><strong>Receiving EPA:</strong> {advancedMetrics.receiving_epa}</p>
-              <p><strong>Target Share:</strong> {(advancedMetrics.target_share * 100).toFixed(1)}%</p>
+              <p><strong>Target Share:</strong> 
+                  {typeof advancedMetrics.target_share === 'number' 
+                     ? (advancedMetrics.target_share * 100).toFixed(1) + '%' 
+                     : 'N/A'}
+              </p>
+              <p><strong>WOPR:</strong> 
+                  {typeof advancedMetrics.wopr === 'number' 
+                     ? advancedMetrics.wopr.toFixed(3) 
+                     : 'N/A'}
+              </p>
               <p><strong>WOPR:</strong> {advancedMetrics.wopr.toFixed(3)}</p>
             </div>
           </div>
