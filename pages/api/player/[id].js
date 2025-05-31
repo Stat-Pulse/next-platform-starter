@@ -49,7 +49,7 @@ export default async function handler(req, res) {
         avg_expected_yac,
         avg_yac_above_expectation
       FROM NextGen_Stats_Receiving
-      WHERE player_id = ?
+      WHERE player_gsis_id = ?
       ORDER BY season, week
     `, [playerId]);
 
