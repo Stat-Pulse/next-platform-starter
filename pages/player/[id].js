@@ -13,7 +13,6 @@ export async function getServerSideProps({ params }) {
       database: process.env.DB_NAME
     });
 
-    // Get profile data
     const [profileRows] = await connection.execute(`
       SELECT * FROM Active_Player_Profiles
       WHERE player_id = ?
@@ -26,9 +25,8 @@ export async function getServerSideProps({ params }) {
 
     const player = profileRows[0];
 
-    // Receiving metrics from Player_Stats_Game_All
     const [receivingMetrics] = await connection.execute(`
-      SELECT week, season, recent_team, receiving_yards, receiving_tds AS rec_touchdowns
+      SELECT week, season, recent_team, opponent_team, targets, receptions, receiving_yards, receiving_tds AS rec_touchdowns
       FROM Player_Stats_Game_All
       WHERE player_id = ?
         AND season = 2024
@@ -36,7 +34,6 @@ export async function getServerSideProps({ params }) {
       ORDER BY week
     `, [playerId]);
 
-    // Advanced metrics from NextGen_Stats_Receiving
     const [advancedMetrics] = await connection.execute(`
       SELECT *
       FROM NextGen_Stats_Receiving
@@ -84,7 +81,6 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics }
           </div>
         )}
 
-        {/* Grid for Info and Contract */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-lg shadow">
           <div>
             <h2 className="text-xl font-semibold mb-2">Player Info</h2>
@@ -95,7 +91,6 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics }
             <p><strong>Birth Date:</strong> {player.date_of_birth ? new Date(player.date_of_birth).toLocaleDateString() : 'N/A'}</p>
             <p><strong>Status:</strong> {player.is_active ? "Active" : "Inactive"}</p>
           </div>
-
           <div>
             <h2 className="text-xl font-semibold mb-2">Draft & Contract</h2>
             <p><strong>Drafted:</strong> {player.draft_season || '—'} | {player.draft_team || '—'} | Round {player.draft_round || '—'}, Pick {player.draft_pick || '—'}</p>
@@ -128,6 +123,9 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics }
                 <thead>
                   <tr className="border-b">
                     <th className="text-left p-2">Week</th>
+                    <th className="text-left p-2">Opponent</th>
+                    <th className="text-left p-2">Targets</th>
+                    <th className="text-left p-2">Receptions</th>
                     <th className="text-left p-2">Yards</th>
                     <th className="text-left p-2">TDs</th>
                   </tr>
@@ -136,11 +134,32 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics }
                   {receivingMetrics.map((g, idx) => (
                     <tr key={idx} className="border-b">
                       <td className="p-2">{g.week}</td>
+                      <td className="p-2">{g.opponent_team}</td>
+                      <td className="p-2">{g.targets}</td>
+                      <td className="p-2">{g.receptions}</td>
                       <td className="p-2">{g.receiving_yards}</td>
                       <td className="p-2">{g.rec_touchdowns}</td>
                     </tr>
                   ))}
                 </tbody>
+                <tfoot>
+                  <tr className="font-bold border-t">
+                    <td className="p-2">Total</td>
+                    <td className="p-2">—</td>
+                    <td className="p-2">
+                      {receivingMetrics.reduce((sum, g) => sum + (g.targets || 0), 0)}
+                    </td>
+                    <td className="p-2">
+                      {receivingMetrics.reduce((sum, g) => sum + (g.receptions || 0), 0)}
+                    </td>
+                    <td className="p-2">
+                      {receivingMetrics.reduce((sum, g) => sum + (g.receiving_yards || 0), 0)}
+                    </td>
+                    <td className="p-2">
+                      {receivingMetrics.reduce((sum, g) => sum + (g.rec_touchdowns || 0), 0)}
+                    </td>
+                  </tr>
+                </tfoot>
               </table>
             </div>
           </div>
@@ -152,26 +171,26 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics }
             <div className="bg-white p-4 rounded shadow">
               <p><strong>Targets:</strong> {advancedMetrics.targets}</p>
               <p><strong>Receptions:</strong> {advancedMetrics.receptions}</p>
-              <p><strong>Avg Cushion:</strong> {advancedMetrics.avg_cushion}</p>
-              <p><strong>Avg Separation:</strong> {advancedMetrics.avg_separation}</p>
-              <p><strong>Intended Air Yards:</strong> {advancedMetrics.avg_intended_air_yards}</p>
+              <p><strong>Avg Cushion:</strong> {typeof advancedMetrics.avg_cushion === 'number' ? advancedMetrics.avg_cushion.toFixed(2) : 'N/A'}</p>
+              <p><strong>Avg Separation:</strong> {typeof advancedMetrics.avg_separation === 'number' ? advancedMetrics.avg_separation.toFixed(2) : 'N/A'}</p>
+              <p><strong>Intended Air Yards:</strong> {typeof advancedMetrics.avg_intended_air_yards === 'number' ? advancedMetrics.avg_intended_air_yards.toFixed(2) : 'N/A'}</p>
               <p><strong>Air Yards Share:</strong> 
-                 {typeof advancedMetrics.percent_share_of_intended_air_yards === 'number' 
-                    ? (advancedMetrics.percent_share_of_intended_air_yards * 100).toFixed(1) + '%' 
-                    : 'N/A'}
+                {typeof advancedMetrics.percent_share_of_intended_air_yards === 'number'
+                  ? (advancedMetrics.percent_share_of_intended_air_yards * 100).toFixed(1) + '%'
+                  : 'N/A'}
               </p>
-              <p><strong>Avg YAC:</strong> {advancedMetrics.avg_yac}</p>
-              <p><strong>YAC Over Expectation:</strong> {advancedMetrics.avg_yac_above_expectation}</p>
-              <p><strong>Receiving EPA:</strong> {advancedMetrics.receiving_epa}</p>
+              <p><strong>Avg YAC:</strong> {typeof advancedMetrics.avg_yac === 'number' ? advancedMetrics.avg_yac.toFixed(2) : 'N/A'}</p>
+              <p><strong>YAC Over Expectation:</strong> {typeof advancedMetrics.avg_yac_above_expectation === 'number' ? advancedMetrics.avg_yac_above_expectation.toFixed(2) : 'N/A'}</p>
+              <p><strong>Receiving EPA:</strong> {typeof advancedMetrics.receiving_epa === 'number' ? advancedMetrics.receiving_epa.toFixed(2) : 'N/A'}</p>
               <p><strong>Target Share:</strong> 
-                  {typeof advancedMetrics.target_share === 'number' 
-                     ? (advancedMetrics.target_share * 100).toFixed(1) + '%' 
-                     : 'N/A'}
+                {typeof advancedMetrics.target_share === 'number'
+                  ? (advancedMetrics.target_share * 100).toFixed(1) + '%'
+                  : 'N/A'}
               </p>
               <p><strong>WOPR:</strong> 
-                  {typeof advancedMetrics.wopr === 'number' 
-                     ? advancedMetrics.wopr.toFixed(3) 
-                     : 'N/A'}
+                {typeof advancedMetrics.wopr === 'number'
+                  ? advancedMetrics.wopr.toFixed(3)
+                  : 'N/A'}
               </p>
             </div>
           </div>
