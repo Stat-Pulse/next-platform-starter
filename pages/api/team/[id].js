@@ -13,7 +13,7 @@ export default async function handler(req, res) {
 
     // Fetch team metadata
     const [teamRows] = await connection.execute(
-      `SELECT * FROM Teams WHERE team_id = ?`,
+      `SELECT * FROM Teams WHERE team_abbr = ?`,
       [teamId]
     );
 
