@@ -4,20 +4,27 @@ import Head from 'next/head';
 export default function TeamPage({ teamId }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); // Added for debugging
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     async function fetchData() {
       try {
+        console.log(`Fetching data for teamId: ${teamId}`);
         const res = await fetch(`/api/teams/${teamId}`);
-        const result = await res.json();
-        if (res.ok) {
-          setData(result);
-        } else {
-          console.error(result.error, result.details);
+        console.log(`Fetch response status: ${res.status}`);
+        if (!res.ok) {
+          const errorData = await res.json();
+          console.log('Fetch error response:', errorData);
+          throw new Error(errorData.error || 'Failed to fetch data');
         }
+        const result = await res.json();
+        console.log('Fetch result:', result);
+        setData(result);
       } catch (error) {
-        console.error('Fetch error:', error);
+        console.error('Fetch error:', error.message);
+        setError(error.message);
+        setData(null); // Ensure data is null on error
       } finally {
         setLoading(false);
       }
@@ -29,14 +36,14 @@ export default function TeamPage({ teamId }) {
     return <div className="animate-pulse">Loading...</div>;
   }
 
-  if (!data || data.error) {
-    return <div>Error: {data?.error || 'Failed to load data'}</div>;
+  if (error || !data) {
+    return <div>Error: {error || 'Failed to load data'}</div>;
   }
 
   const { team, seasonStats, lastGame, upcomingGame, news, topPlayers } = data;
   const teamColors = {
-    primary: team.team_color,
-    secondary: team.team_color2,
+    primary: team.primary_color || '#1D2526',
+    secondary: team.secondary_color || '#A5ACAF',
   };
 
   return (
