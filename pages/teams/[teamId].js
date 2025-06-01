@@ -133,7 +133,7 @@ const TeamPage = () => {
                       <li>Completions: {teamData.offenseStats?.['Completions'] ?? '—'}</li>
                       <li>Pass Yards: {teamData.offenseStats?.['Pass Yards'] ?? '—'}</li>
                       <li>Rush Yards: {teamData.offenseStats?.['Rush Yards'] ?? '—'}</li>
-                      <li>Rush TDs: {teamData.offenseStats?.['Rush_TD'] ?? '—'}</li>
+                      <li>Rush TDs: {teamData.offenseStats?.['Rush TD'] ?? '—'}</li>
                     </ul>
                   </div>
 
@@ -141,14 +141,14 @@ const TeamPage = () => {
                   <div>
                     <h3 className="text-md font-semibold mb-1 text-red-600">Defense</h3>
                     <ul className="text-sm text-gray-700 space-y-1">
-                      <li>Points Allowed: {teamData.defenseStats?.['points_allowed'] ?? '—'}</li>
-                      <li>Total Yards Allowed: {teamData.defenseStats?.['total_yards_allowed'] ?? '—'}</li>
-                      <li>Pass Yards Allowed: {teamData.defenseStats?.['pass_yards_allowed'] ?? '—'}</li>
-                      <li>Rush Yards Allowed: {teamData.defenseStats?.['rush_yards_allowed'] ?? '—'}</li>
-                      <li>Sacks: {teamData.defenseStats?.['sacks'] ?? '—'}</li>
-                      <li>Turnovers: {teamData.defenseStats?.['turnovers'] ?? '—'}</li>
-                      <li>Third Down %: {teamData.defenseStats?.['third_down_pct'] ?? '—'}</li>
-                      <li>EPA/play allowed: {teamData.defenseStats?.['epa_per_play_allowed'] ?? '—'}</li>
+                      <li>Points Allowed: {teamData.defenseStats?.['Points Allowed'] ?? '—'}</li>
+                      <li>Total Yards Allowed: {teamData.defenseStats?.['Total Yards Allowed'] ?? '—'}</li>
+                      <li>Pass Yards Allowed: {teamData.defenseStats?.['Pass Yards Allowed'] ?? '—'}</li>
+                      <li>Rush Yards Allowed: {teamData.defenseStats?.['Rush Yards Allowed'] ?? '—'}</li>
+                      <li>Sacks: {teamData.defenseStats?.['Sacks'] ?? '—'}</li>
+                      <li>Turnovers: {teamData.defenseStats?.['Turnovers'] ?? '—'}</li>
+                      <li>Third Down %: {teamData.defenseStats?.['Third Down %'] ?? '—'}</li>
+                      <li>EPA/play allowed: {teamData.defenseStats?.['EPA/play allowed'] ?? '—'}</li>
                     </ul>
                   </div>
                 </div>
