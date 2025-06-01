@@ -27,7 +27,7 @@ const TeamPage = () => {
   if (error) return <div className="text-red-600 p-4">{error}</div>;
   if (!teamData) return <div className="p-4">Loading...</div>;
 
-  const { team, seasonStats, lastGame, upcomingGame, teamLogos } = teamData;
+  const { team, lastGame, upcomingGame, teamLogos, offenseStats, defenseStats } = teamData;
 
   return (
     <div className="bg-gradient-to-r from-blue-50 via-white to-gray-50 min-h-screen p-6">
@@ -69,9 +69,8 @@ const TeamPage = () => {
               {/* Snapshot */}
               <div className="bg-white p-4 rounded-lg shadow">
                 <h2 className="text-lg font-semibold mb-2">Team Snapshot</h2>
-                <p className="text-sm text-gray-700">Record: {seasonStats?.wins}-{seasonStats?.losses}</p>
-                <p className="text-sm text-gray-700">Points Scored: {seasonStats?.points_scored}</p>
-                <p className="text-sm text-gray-700">Points Allowed: {seasonStats?.points_allowed}</p>
+                <p className="text-sm text-gray-700">Points Scored: {offenseStats?.points_scored ?? '—'}</p>
+                <p className="text-sm text-gray-700">Points Allowed: {defenseStats?.points_allowed ?? '—'}</p>
               </div>
 
               {/* Last Game */}
@@ -86,7 +85,7 @@ const TeamPage = () => {
                       <span className="text-sm">{lastGame.away_score}</span>
                       <img src={teamLogos[lastGame.away_team_id]} className="w-10 h-10" />
                     </div>
-                    <span className="text-sm text-gray-500">{lastGame.game_date}</span>
+                    <span className="text-sm text-gray-500">{new Date(lastGame.game_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                   </div>
                 ) : <p>No recent game</p>}
               </div>
@@ -101,7 +100,7 @@ const TeamPage = () => {
                       <span className="text-xs text-gray-500">vs</span>
                       <img src={teamLogos[upcomingGame.away_team_id]} className="w-10 h-10" />
                     </div>
-                    <span className="text-sm text-gray-500">{upcomingGame.game_date}</span>
+                    <span className="text-sm text-gray-500">{new Date(upcomingGame.game_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                   </div>
                 ) : <p>No upcoming game</p>}
               </div>
