@@ -26,15 +26,19 @@ export default async function handler(req, res) {
     if (teamRows.length === 0) return res.status(404).json({ error: 'Team not found' });
     const team = teamRows[0];
 
-    // Aggregate season stats by stat_type
-    const [statRows] = await connection.execute(
-      `SELECT stat_type, SUM(stat_value) AS total
-       FROM Team_Stats
-       WHERE team_abbr = ? AND season = 2024
-       GROUP BY stat_type`,
+    // Offensive Totals
+    const [offenseRows] = await connection.execute(
+      `SELECT * FROM Team_Off_Tot WHERE team_abbr = ?`,
       [normalizedId]
     );
-    const seasonStats = Object.fromEntries(statRows.map(row => [row.stat_type, row.total]));
+    const offenseStats = offenseRows[0] || null;
+
+    // Defensive Totals
+    const [defenseRows] = await connection.execute(
+      `SELECT * FROM Team_Def_Tot WHERE team_abbr = ?`,
+      [normalizedId]
+    );
+    const defenseStats = defenseRows[0] || null;
 
     // Last finalized game
     const [lastGameRows] = await connection.execute(
@@ -79,14 +83,15 @@ export default async function handler(req, res) {
 
     res.status(200).json({
       team,
-      seasonStats,
       lastGame,
       upcomingGame,
       teamLogos,
       record: {
-        wins: seasonStats?.wins ?? null,
-        losses: seasonStats?.losses ?? null,
+        wins: null,
+        losses: null,
       },
+      offenseStats,
+      defenseStats,
     });
   } catch (error) {
     console.error('Team API error:', error);
