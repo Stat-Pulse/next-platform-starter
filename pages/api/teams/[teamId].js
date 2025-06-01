@@ -31,14 +31,14 @@ export default async function handler(req, res) {
       `SELECT * FROM Team_Off_Tot WHERE team_name = ?`,
       [team.team_name]
     );
-    const offenseStats = offenseRows[0] || null;
+    const offenseStats = offenseRows.length > 0 ? offenseRows[0] : null;
 
     // Defensive Totals
     const [defenseRows] = await connection.execute(
       `SELECT * FROM Team_Def_Tot WHERE team_name = ?`,
       [team.team_name]
     );
-    const defenseStats = defenseRows[0] || null;
+    const defenseStats = defenseRows.length > 0 ? defenseRows[0] : null;
 
     // Last finalized game
     const [lastGameRows] = await connection.execute(
@@ -86,10 +86,12 @@ export default async function handler(req, res) {
       lastGame,
       upcomingGame,
       teamLogos,
-      record: {
-        wins: null,
-        losses: null,
-      },
+      record: (lastGame || upcomingGame)
+        ? {
+            wins: null,
+            losses: null,
+          }
+        : null,
       offenseStats,
       defenseStats,
     });
