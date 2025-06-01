@@ -38,15 +38,15 @@ const TeamPage = () => {
             <img src={team.team_logo_espn} alt={`${team.team_name} logo`} className="w-16 h-16 rounded-full" />
             <div>
               <h1 className="text-2xl font-bold text-gray-800">{team.team_name}</h1>
-              <p className="text-sm text-gray-500">{team.team_conf} {team.team_division} • Est. {team.founded_year}</p>
-              <p className="text-sm text-gray-500">Stadium: {team.stadium_name} ({team.stadium_capacity?.toLocaleString() ?? '—'} seats)</p>
+              <p className="text-sm text-gray-500">{team.team_division} • Est. {team.founded_year}</p>
+              <p className="text-sm text-gray-500">Stadium: {team.stadium_name} ({team.stadium_capacity?.toLocaleString() ?? '—'} Capacity)</p>
+              <p className="text-sm text-gray-500">City: {team.city}</p>
             </div>
           </div>
           <div className="text-right text-sm text-gray-600 space-y-1">
             <p className="font-semibold">Head Coach: {team.head_coach}</p>
             <p className="text-sm">Offensive Coord: {team.o_coord ?? '—'}</p>
             <p className="text-sm">Defensive Coord: {team.d_coord ?? '—'}</p>
-            <p className="text-xs italic">{team.city}</p>
           </div>
         </div>
 
@@ -136,14 +136,13 @@ const TeamPage = () => {
                     <div>
                       <h3 className="text-md font-semibold mb-1 text-red-600">Defense</h3>
                       <ul className="text-sm text-gray-700 space-y-1">
-                        <li>Points Allowed: {defenseStats.points_allowed ?? '—'}</li>
-                        <li>Total Yards Allowed: {defenseStats.total_yards_allowed ?? '—'}</li>
-                        <li>Pass Yards Allowed: {defenseStats.pass_yards_allowed ?? '—'}</li>
-                        <li>Rush Yards Allowed: {defenseStats.rush_yards_allowed ?? '—'}</li>
-                        <li>Sacks: {defenseStats.sacks ?? '—'}</li>
-                        <li>Turnovers: {defenseStats.turnovers ?? '—'}</li>
-                        <li>Third Down %: {defenseStats.third_down_pct ?? '—'}</li>
-                        <li>EPA/play allowed: {defenseStats.epa_per_play_allowed ?? '—'}</li>
+                        <li> ADOT Against: {defenseStats.adot_against ?? '—'}</li>
+                        <li> YAC Allowed: {defenseStats.yac_allowed ?? '—'}</li>
+                        <li> Pass Yards Allowed: {defenseStats.pass_yards_allowed ?? '—'}</li>
+                        <li> Pass TD Allowed: {defenseStats.pass_td_allowed ?? '—'}</li>
+                        <li> Sacks: {defenseStats.sacks ?? '—'}</li>
+                        <li> Blitz %: {defenseStats.blitz_percent ?? '—'}</li>
+                        <li> QB Pressures: {defenseStats.qb_press ?? '—'}</li>
                       </ul>
                     </div>
                   )}
