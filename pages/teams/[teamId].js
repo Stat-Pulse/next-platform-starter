@@ -17,12 +17,9 @@ const TeamPage = () => {
         const json = await res.json();
         if (!res.ok) throw new Error(json.error || 'Failed to load team data');
 
-        const record =
-          json.record?.wins != null && json.record?.losses != null
-            ? json.record
-            : (json.seasonStats?.wins != null && json.seasonStats?.losses != null
-                ? { wins: json.seasonStats.wins, losses: json.seasonStats.losses }
-                : null);
+        const record = json.record ?? (json.seasonStats?.wins != null && json.seasonStats?.losses != null
+          ? { wins: json.seasonStats.wins, losses: json.seasonStats.losses }
+          : null);
 
         setTeamData({ ...json, record });
       } catch (err) {
@@ -57,7 +54,7 @@ const TeamPage = () => {
             <p className="text-sm text-gray-700"><span className="font-semibold">Defensive Coordinator:</span> {team.d_coord}</p>
             <p className="text-sm text-gray-700">
               <span className="font-semibold">Record:</span>{' '}
-              {record?.wins != null && record?.losses != null ? `${record.wins}-${record.losses}` : '-'}
+              {record ? `${record.wins}-${record.losses}` : '-'}
             </p>
             {/* Optional: Add coordinators here if available in data */}
           </div>
@@ -119,6 +116,42 @@ const TeamPage = () => {
                     <span className="text-sm text-gray-500">{new Date(upcomingGame.game_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                   </div>
                 ) : <p>No upcoming game</p>}
+              </div>
+
+              {/* Team Stats Overview */}
+              <div className="bg-white p-4 rounded-lg shadow">
+                <h2 className="text-lg font-semibold mb-4">Team Stats (2024)</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Offense */}
+                  <div>
+                    <h3 className="text-md font-semibold mb-1 text-blue-600">Offense</h3>
+                    <ul className="text-sm text-gray-700 space-y-1">
+                      <li>Points Scored: {teamData.offenseStats?.['Points Scored'] ?? '—'}</li>
+                      <li>Total Yards: {teamData.offenseStats?.['Total Off Yards'] ?? '—'}</li>
+                      <li>Yards/Play: {teamData.offenseStats?.['Yards per Off Play'] ?? '—'}</li>
+                      <li>Turnovers Lost: {teamData.offenseStats?.['Team Turnovers Lost'] ?? '—'}</li>
+                      <li>Completions: {teamData.offenseStats?.['Completions'] ?? '—'}</li>
+                      <li>Pass Yards: {teamData.offenseStats?.['Pass Yards'] ?? '—'}</li>
+                      <li>Rush Yards: {teamData.offenseStats?.['Rush Yards'] ?? '—'}</li>
+                      <li>Rush TDs: {teamData.offenseStats?.['Rush_TD'] ?? '—'}</li>
+                    </ul>
+                  </div>
+
+                  {/* Defense */}
+                  <div>
+                    <h3 className="text-md font-semibold mb-1 text-red-600">Defense</h3>
+                    <ul className="text-sm text-gray-700 space-y-1">
+                      <li>Points Allowed: {teamData.defenseStats?.['points_allowed'] ?? '—'}</li>
+                      <li>Total Yards Allowed: {teamData.defenseStats?.['total_yards_allowed'] ?? '—'}</li>
+                      <li>Pass Yards Allowed: {teamData.defenseStats?.['pass_yards_allowed'] ?? '—'}</li>
+                      <li>Rush Yards Allowed: {teamData.defenseStats?.['rush_yards_allowed'] ?? '—'}</li>
+                      <li>Sacks: {teamData.defenseStats?.['sacks'] ?? '—'}</li>
+                      <li>Turnovers: {teamData.defenseStats?.['turnovers'] ?? '—'}</li>
+                      <li>Third Down %: {teamData.defenseStats?.['third_down_pct'] ?? '—'}</li>
+                      <li>EPA/play allowed: {teamData.defenseStats?.['epa_per_play_allowed'] ?? '—'}</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
 
