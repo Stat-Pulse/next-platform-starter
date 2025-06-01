@@ -18,11 +18,14 @@ const TeamPage = () => {
         if (!res.ok) throw new Error(json.error || 'Failed to load team data');
 
         const hasRecord = json.record?.wins != null && json.record?.losses != null;
-        const derivedRecord = !hasRecord && json.seasonStats?.wins != null && json.seasonStats?.losses != null
-          ? { wins: json.seasonStats.wins, losses: json.seasonStats.losses }
-          : json.record;
+        const hasSeasonStats = json.seasonStats?.wins != null && json.seasonStats?.losses != null;
+        const record = hasRecord
+          ? json.record
+          : (hasSeasonStats
+              ? { wins: json.seasonStats.wins, losses: json.seasonStats.losses }
+              : null);
 
-        setTeamData({ ...json, record: derivedRecord });
+        setTeamData({ ...json, record });
       } catch (err) {
         setError(err.message);
       }
@@ -55,11 +58,7 @@ const TeamPage = () => {
             <p className="text-sm text-gray-700"><span className="font-semibold">Defensive Coordinator:</span> {team.d_coord}</p>
             <p className="text-sm text-gray-700">
               <span className="font-semibold">Record:</span>{' '}
-              {record?.wins != null && record?.losses != null
-                ? `${record.wins}-${record.losses}`
-                : (seasonStats?.wins != null && seasonStats?.losses != null
-                  ? `${seasonStats.wins}-${seasonStats.losses}`
-                  : '-')}
+              {record?.wins != null && record?.losses != null ? `${record.wins}-${record.losses}` : '-'}
             </p>
             {/* Optional: Add coordinators here if available in data */}
           </div>
