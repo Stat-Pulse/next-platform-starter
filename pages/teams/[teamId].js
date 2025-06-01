@@ -51,7 +51,9 @@ const TeamPage = () => {
               <span className="font-semibold">Record:</span>{' '}
               {record?.wins != null && record?.losses != null
                 ? `${record.wins}-${record.losses}`
-                : '-'}
+                : (seasonStats?.wins != null && seasonStats?.losses != null
+                  ? `${seasonStats.wins}-${seasonStats.losses}`
+                  : '-')}
             </p>
             {/* Optional: Add coordinators here if available in data */}
           </div>
@@ -95,7 +97,7 @@ const TeamPage = () => {
                       <span className="text-sm">{lastGame.away_score}</span>
                       <img src={teamLogos[lastGame.away_team_id]} className="w-10 h-10" />
                     </div>
-                    <span className="text-sm text-gray-500">{lastGame.game_date}</span>
+                    <span className="text-sm text-gray-500">{new Date(lastGame.game_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                   </div>
                 ) : <p>No recent game</p>}
               </div>
@@ -110,7 +112,7 @@ const TeamPage = () => {
                       <span className="text-xs text-gray-500">vs</span>
                       <img src={teamLogos[upcomingGame.away_team_id]} className="w-10 h-10" />
                     </div>
-                    <span className="text-sm text-gray-500">{upcomingGame.game_date}</span>
+                    <span className="text-sm text-gray-500">{new Date(upcomingGame.game_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                   </div>
                 ) : <p>No upcoming game</p>}
               </div>
