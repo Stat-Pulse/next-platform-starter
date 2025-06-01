@@ -17,13 +17,12 @@ const TeamPage = () => {
         const json = await res.json();
         if (!res.ok) throw new Error(json.error || 'Failed to load team data');
 
-        const hasRecord = json.record?.wins != null && json.record?.losses != null;
-        const hasSeasonStats = json.seasonStats?.wins != null && json.seasonStats?.losses != null;
-        const record = hasRecord
-          ? json.record
-          : (hasSeasonStats
-              ? { wins: json.seasonStats.wins, losses: json.seasonStats.losses }
-              : null);
+        const record =
+          json.record?.wins != null && json.record?.losses != null
+            ? json.record
+            : (json.seasonStats?.wins != null && json.seasonStats?.losses != null
+                ? { wins: json.seasonStats.wins, losses: json.seasonStats.losses }
+                : null);
 
         setTeamData({ ...json, record });
       } catch (err) {
