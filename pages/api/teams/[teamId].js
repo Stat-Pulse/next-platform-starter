@@ -18,10 +18,11 @@ export default async function handler(req, res) {
       database: process.env.DB_NAME,
     });
 
-    // Fetch team metadata, explicitly select key fields
+    // Fetch team metadata, explicitly select key fields (including header fields)
     const [teamRows] = await connection.execute(
       `SELECT team_id, team_abbr, team_name, team_logo_espn,
-        stadium_name, stadium_capacity, head_coach, o_coord, d_coord, city
+        stadium_name, stadium_capacity, head_coach, o_coord, d_coord, city,
+        division, conference, bye_week, record_wins, record_losses
       FROM Teams WHERE team_abbr = ? LIMIT 1`,
       [normalizedId]
     );
