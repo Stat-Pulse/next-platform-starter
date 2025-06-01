@@ -18,24 +18,33 @@ export default async function handler(req, res) {
       database: process.env.DB_NAME,
     });
 
-    // Fetch team metadata
+    // Fetch team metadata, explicitly select key fields
     const [teamRows] = await connection.execute(
-      `SELECT * FROM Teams WHERE team_abbr = ? LIMIT 1`,
+      `SELECT team_id, team_abbr, team_name, team_logo_espn, conference, division,
+        stadium_name, stadium_capacity, head_coach, o_coord, d_coord, city
+      FROM Teams WHERE team_abbr = ? LIMIT 1`,
       [normalizedId]
     );
     if (teamRows.length === 0) return res.status(404).json({ error: 'Team not found' });
     const team = teamRows[0];
 
-    // Offensive Totals
+    // Offensive Totals - fetch only frontend-used fields
     const [offenseRows] = await connection.execute(
-      `SELECT * FROM Team_Off_Tot WHERE LOWER(TRIM(team_name)) = LOWER(TRIM(?))`,
+      `SELECT
+        wins, losses,
+        points_scored, total_off_yards, yards_per_off_play,
+        pass_yards, rush_yards, turnovers, third_down_pct, redzone_pct
+      FROM Team_Off_Tot WHERE LOWER(TRIM(team_name)) = LOWER(TRIM(?))`,
       [team.team_name]
     );
     const offenseStats = offenseRows[0] || null;
 
-    // Defensive Totals
+    // Defensive Totals - fetch only frontend-used fields
     const [defenseRows] = await connection.execute(
-      `SELECT * FROM Team_Def_Tot WHERE LOWER(TRIM(team_name)) = LOWER(TRIM(?))`,
+      `SELECT
+        points_allowed, total_def_yards, yards_per_def_play,
+        pass_yards_allowed, rush_yards_allowed, takeaways, third_down_pct_allowed, redzone_pct_allowed
+      FROM Team_Def_Tot WHERE LOWER(TRIM(team_name)) = LOWER(TRIM(?))`,
       [team.team_name]
     );
     const defenseStats = defenseRows[0] || null;
@@ -86,12 +95,10 @@ export default async function handler(req, res) {
       lastGame,
       upcomingGame,
       teamLogos,
-      record: (lastGame || upcomingGame)
-        ? {
-            wins: null,
-            losses: null,
-          }
-        : null,
+      record: {
+        wins: offenseStats?.wins ?? null,
+        losses: offenseStats?.losses ?? null,
+      },
       offenseStats,
       defenseStats,
     });
