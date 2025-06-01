@@ -16,7 +16,13 @@ const TeamPage = () => {
         const res = await fetch(`/api/teams/${teamId}`);
         const json = await res.json();
         if (!res.ok) throw new Error(json.error || 'Failed to load team data');
-        setTeamData(json);
+
+        const hasRecord = json.record?.wins != null && json.record?.losses != null;
+        const derivedRecord = !hasRecord && json.seasonStats?.wins != null && json.seasonStats?.losses != null
+          ? { wins: json.seasonStats.wins, losses: json.seasonStats.losses }
+          : json.record;
+
+        setTeamData({ ...json, record: derivedRecord });
       } catch (err) {
         setError(err.message);
       }
