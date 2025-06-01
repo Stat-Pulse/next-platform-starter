@@ -30,75 +30,96 @@ const TeamPage = () => {
   const { team, seasonStats, lastGame, upcomingGame, teamLogos } = teamData;
 
   return (
-    <div className="container mx-auto py-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-blue-600">{team.team_name}</h1>
-        <p className="text-lg text-gray-600">{team.division}</p>
-        <div className="text-sm text-gray-500">Founded: {team.founded_year}, Coach: {team.head_coach}</div>
-        <nav className="mt-4 space-x-4">
+    <div className="bg-gradient-to-r from-blue-50 via-white to-gray-50 min-h-screen p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between bg-gray-100 rounded-lg p-6 shadow-sm mb-6 space-y-4 md:space-y-0 md:space-x-6">
+          <div className="flex items-center space-x-4">
+            <img src={team.team_logo_espn} alt={`${team.team_name} logo`} className="w-20 h-20 rounded-full" />
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">{team.team_name}</h1>
+              <p className="text-sm text-gray-600">Founded: {team.founded_year}</p>
+              <p className="text-sm text-gray-600">{team.stadium_name} ({team.city})</p>
+              <p className="text-sm text-gray-600">Stadium Capacity: {team.stadium_capacity?.toLocaleString()}</p>
+            </div>
+          </div>
+          <div className="text-right space-y-1">
+            <p className="text-sm text-gray-700"><span className="font-semibold">Head Coach:</span> {team.head_coach}</p>
+            <p className="text-sm text-gray-700"><span className="font-semibold">Offensive Coordinator:</span> {team.offensive_coordinator}</p>
+            <p className="text-sm text-gray-700"><span className="font-semibold">Defensive Coordinator:</span> {team.defensive_coordinator}</p>
+            <p className="text-sm text-gray-700"><span className="font-semibold">Record:</span> {seasonStats?.wins}-{seasonStats?.losses}</p>
+            {/* Optional: Add coordinators here if available in data */}
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <nav className="flex space-x-4 border-b border-gray-200 mb-6">
           {['overview', 'depthChart', 'schedule', 'injuries', 'stats'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`text-blue-600 hover:underline ${activeTab === tab ? 'font-bold' : ''}`}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-all duration-200 ${
+                activeTab === tab ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-blue-600'
+              }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
         </nav>
+
+        {/* Main Content */}
+        {activeTab === 'overview' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              {/* Snapshot */}
+              <div className="bg-white p-4 rounded-lg shadow">
+                <h2 className="text-lg font-semibold mb-2">Team Snapshot</h2>
+                <p className="text-sm text-gray-700">Record: {seasonStats?.wins}-{seasonStats?.losses}</p>
+                <p className="text-sm text-gray-700">Points Scored: {seasonStats?.points_scored}</p>
+                <p className="text-sm text-gray-700">Points Allowed: {seasonStats?.points_allowed}</p>
+              </div>
+
+              {/* Last Game */}
+              <div className="bg-white p-4 rounded-lg shadow">
+                <h2 className="text-lg font-semibold mb-2">Last Game</h2>
+                {lastGame ? (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <img src={teamLogos[lastGame.home_team_id]} className="w-10 h-10" />
+                      <span className="text-sm">{lastGame.home_score}</span>
+                      <span className="text-xs text-gray-500">vs</span>
+                      <span className="text-sm">{lastGame.away_score}</span>
+                      <img src={teamLogos[lastGame.away_team_id]} className="w-10 h-10" />
+                    </div>
+                    <span className="text-sm text-gray-500">{lastGame.game_date}</span>
+                  </div>
+                ) : <p>No recent game</p>}
+              </div>
+
+              {/* Upcoming Game */}
+              <div className="bg-white p-4 rounded-lg shadow">
+                <h2 className="text-lg font-semibold mb-2">Upcoming Game</h2>
+                {upcomingGame ? (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <img src={teamLogos[upcomingGame.home_team_id]} className="w-10 h-10" />
+                      <span className="text-xs text-gray-500">vs</span>
+                      <img src={teamLogos[upcomingGame.away_team_id]} className="w-10 h-10" />
+                    </div>
+                    <span className="text-sm text-gray-500">{upcomingGame.game_date}</span>
+                  </div>
+                ) : <p>No upcoming game</p>}
+              </div>
+            </div>
+
+            {/* News */}
+            <div className="bg-white p-4 rounded-lg shadow h-fit">
+              <h2 className="text-lg font-semibold mb-4">Latest News</h2>
+              <p className="text-sm text-gray-500">Coming soon...</p>
+            </div>
+          </div>
+        )}
       </div>
-
-      {activeTab === 'overview' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 space-y-6">
-            <div className="bg-white p-4 rounded shadow">
-              <h2 className="text-xl font-semibold mb-4">2024 Season Stats</h2>
-              <p>Record: {seasonStats ? `${seasonStats.wins}-${seasonStats.losses}` : 'N/A'}</p>
-              <p>Points Scored: {seasonStats?.points_scored}</p>
-              <p>Points Allowed: {seasonStats?.points_allowed}</p>
-            </div>
-
-            <div className="bg-white p-4 rounded shadow">
-              <h2 className="text-xl font-semibold mb-4">Stadium</h2>
-              <p>{team.stadium_name} ({team.city})</p>
-              <p>Capacity: {team.stadium_capacity?.toLocaleString()}</p>
-            </div>
-
-            <div className="bg-white p-4 rounded shadow">
-              <h2 className="text-xl font-semibold mb-4">Last Game</h2>
-              {lastGame ? (
-                <div>
-                  <p>{lastGame.game_date} - {lastGame.game_time}</p>
-                  <div className="flex items-center gap-4">
-                    <img src={teamLogos[lastGame.home_team_id]} alt="Home Logo" className="w-12 h-12" />
-                    <p>{lastGame.home_score} - {lastGame.away_score}</p>
-                    <img src={teamLogos[lastGame.away_team_id]} alt="Away Logo" className="w-12 h-12" />
-                  </div>
-                </div>
-              ) : 'No recent games.'}
-            </div>
-
-            <div className="bg-white p-4 rounded shadow">
-              <h2 className="text-xl font-semibold mb-4">Upcoming Game</h2>
-              {upcomingGame ? (
-                <div>
-                  <p>{upcomingGame.game_date} - {upcomingGame.game_time}</p>
-                  <div className="flex items-center gap-4">
-                    <img src={teamLogos[upcomingGame.home_team_id]} alt="Home Logo" className="w-12 h-12" />
-                    <span>vs</span>
-                    <img src={teamLogos[upcomingGame.away_team_id]} alt="Away Logo" className="w-12 h-12" />
-                  </div>
-                </div>
-              ) : 'No upcoming games.'}
-            </div>
-          </div>
-
-          <div className="md:col-span-1 bg-white p-4 rounded shadow">
-            <h2 className="text-xl font-semibold mb-4">Latest News</h2>
-            <p>Coming soon...</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
