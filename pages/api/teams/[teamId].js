@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     const [offenseRows] = await connection.execute(
       `SELECT
         points_scored, total_off_yards, yards_per_off_play,
-        pass_yards, rush_yards, turnovers, third_down_pct, redzone_pct
+        pass_yards, rush_yards, team_turnovers_lost AS turnovers
       FROM Team_Off_Tot WHERE LOWER(TRIM(team_name)) = LOWER(TRIM(?))`,
       [team.team_name]
     );
@@ -41,8 +41,8 @@ export default async function handler(req, res) {
     // Defensive Totals - fetch only frontend-used fields
     const [defenseRows] = await connection.execute(
       `SELECT
-        points_allowed, total_def_yards, yards_per_def_play,
-        pass_yards_allowed, rush_yards_allowed, takeaways, third_down_pct_allowed, redzone_pct_allowed
+        pass_yds_allowed, airyds_allowed, yac_allowed,
+        blitz_attempts, qb_hurry, qbkd, sacks, qb_press, misstkl
       FROM Team_Def_Tot WHERE LOWER(TRIM(team_name)) = LOWER(TRIM(?))`,
       [team.team_name]
     );
