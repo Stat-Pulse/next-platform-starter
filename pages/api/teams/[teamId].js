@@ -31,7 +31,6 @@ export default async function handler(req, res) {
     // Offensive Totals - fetch only frontend-used fields
     const [offenseRows] = await connection.execute(
       `SELECT
-        wins, losses,
         points_scored, total_off_yards, yards_per_off_play,
         pass_yards, rush_yards, turnovers, third_down_pct, redzone_pct
       FROM Team_Off_Tot WHERE LOWER(TRIM(team_name)) = LOWER(TRIM(?))`,
@@ -95,10 +94,7 @@ export default async function handler(req, res) {
       lastGame,
       upcomingGame,
       teamLogos,
-      record: {
-        wins: offenseStats?.wins ?? null,
-        losses: offenseStats?.losses ?? null,
-      },
+      record: null,
       offenseStats,
       defenseStats,
     });
