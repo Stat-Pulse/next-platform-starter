@@ -105,7 +105,48 @@ const TeamPage = () => {
                 ) : <p>No upcoming game</p>}
               </div>
             </div>
+            
+            {/* Team Stats (2024) */}
+            {(offenseStats || defenseStats) && (
+              <div className="bg-white p-4 rounded-lg shadow">
+                <h2 className="text-lg font-semibold mb-4">Team Stats (2024)</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Offense */}
+                  {offenseStats && (
+                    <div>
+                      <h3 className="text-md font-semibold mb-1 text-blue-600">Offense</h3>
+                      <ul className="text-sm text-gray-700 space-y-1">
+                        <li>Points Scored: {offenseStats.points_scored ?? '—'}</li>
+                        <li>Total Yards: {offenseStats.total_off_yards ?? '—'}</li>
+                        <li>Yards/Play: {offenseStats.yards_per_off_play ?? '—'}</li>
+                        <li>Turnovers Lost: {offenseStats.turnovers_lost ?? '—'}</li>
+                        <li>Completions: {offenseStats.completions ?? '—'}</li>
+                        <li>Pass Yards: {offenseStats.pass_yards ?? '—'}</li>
+                        <li>Rush Yards: {offenseStats.rush_yards ?? '—'}</li>
+                        <li>Rush TDs: {offenseStats.rush_tds ?? '—'}</li>
+                      </ul>
+                    </div>
+                  )}
 
+                  {/* Defense */}
+                  {defenseStats && (
+                    <div>
+                      <h3 className="text-md font-semibold mb-1 text-red-600">Defense</h3>
+                      <ul className="text-sm text-gray-700 space-y-1">
+                        <li>Points Allowed: {defenseStats.points_allowed ?? '—'}</li>
+                        <li>Total Yards Allowed: {defenseStats.total_yards_allowed ?? '—'}</li>
+                        <li>Pass Yards Allowed: {defenseStats.pass_yards_allowed ?? '—'}</li>
+                        <li>Rush Yards Allowed: {defenseStats.rush_yards_allowed ?? '—'}</li>
+                        <li>Sacks: {defenseStats.sacks ?? '—'}</li>
+                        <li>Turnovers: {defenseStats.turnovers ?? '—'}</li>
+                        <li>Third Down %: {defenseStats.third_down_pct ?? '—'}</li>
+                        <li>EPA/play allowed: {defenseStats.epa_per_play_allowed ?? '—'}</li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
             {/* News */}
             <div className="bg-white p-4 rounded-lg shadow h-fit">
               <h2 className="text-lg font-semibold mb-4">Latest News</h2>
