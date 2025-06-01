@@ -24,6 +24,12 @@ const TeamPage = () => {
     fetchData();
   }, [teamId]);
 
+  const formatStat = (num, decimals = 0) =>
+    num != null ? num.toLocaleString(undefined, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }) : '—';
+
   if (error) return <div className="text-red-600 p-4">{error}</div>;
   if (!teamData) return <div className="p-4">Loading...</div>;
 
@@ -119,14 +125,14 @@ const TeamPage = () => {
                     <div>
                       <h3 className="text-md font-semibold mb-1 text-blue-600">Offense</h3>
                       <ul className="text-sm text-gray-700 space-y-1">
-                        <li>Points Scored: {offenseStats.points_scored ?? '—'}</li>
-                        <li>Total Yards: {offenseStats.total_off_yards ?? '—'}</li>
-                        <li>Yards/Play: {offenseStats.yards_per_off_play ?? '—'}</li>
-                        <li>Turnovers Lost: {offenseStats.turnovers_lost ?? '—'}</li>
-                        <li>Completions: {offenseStats.completions ?? '—'}</li>
-                        <li>Pass Yards: {offenseStats.pass_yards ?? '—'}</li>
-                        <li>Rush Yards: {offenseStats.rush_yards ?? '—'}</li>
-                        <li>Rush TDs: {offenseStats.rush_tds ?? '—'}</li>
+                        <li>Points Scored: {formatStat(offenseStats.points_scored)}</li>
+                        <li>Total Yards: {formatStat(offenseStats.total_off_yards)}</li>
+                        <li>Yards/Play: {formatStat(offenseStats.yards_per_off_play, 1)}</li>
+                        <li>Turnovers Lost: {formatStat(offenseStats.turnovers_lost)}</li>
+                        <li>Completions: {formatStat(offenseStats.completions)}</li>
+                        <li>Pass Yards: {formatStat(offenseStats.pass_yards)}</li>
+                        <li>Rush Yards: {formatStat(offenseStats.rush_yards)}</li>
+                        <li>Rush TDs: {formatStat(offenseStats.rush_tds)}</li>
                       </ul>
                     </div>
                   )}
@@ -136,13 +142,13 @@ const TeamPage = () => {
                     <div>
                       <h3 className="text-md font-semibold mb-1 text-red-600">Defense</h3>
                       <ul className="text-sm text-gray-700 space-y-1">
-                        <li> ADOT Against: {defenseStats.adot_against ?? '—'}</li>
-                        <li> YAC Allowed: {defenseStats.yac_allowed ?? '—'}</li>
-                        <li> Pass Yards Allowed: {defenseStats.pass_yards_allowed ?? '—'}</li>
-                        <li> Pass TD Allowed: {defenseStats.pass_td_allowed ?? '—'}</li>
-                        <li> Sacks: {defenseStats.sacks ?? '—'}</li>
-                        <li> Blitz %: {defenseStats.blitz_percent ?? '—'}</li>
-                        <li> QB Pressures: {defenseStats.qb_press ?? '—'}</li>
+                        <li>ADOT Against: {formatStat(defenseStats.adot_against, 1)}</li>
+                        <li>YAC Allowed: {formatStat(defenseStats.yac_allowed)}</li>
+                        <li>Pass Yards Allowed: {formatStat(defenseStats.pass_yards_allowed)}</li>
+                        <li>Pass TD Allowed: {formatStat(defenseStats.pass_td_allowed)}</li>
+                        <li>Sacks: {formatStat(defenseStats.sacks)}</li>
+                        <li>Blitz %: {formatStat(defenseStats.blitz_percent, 1)}</li>
+                        <li>QB Pressures: {formatStat(defenseStats.qb_press)}</li>
                       </ul>
                     </div>
                   )}
