@@ -1,49 +1,35 @@
-// pages/api/news.js
-import Parser from 'rss-parser';
+import { NextResponse } from 'next/server';
 
-const parser = new Parser();
+export async function GET(request) {
+  const apiKey = process.env.NEWS_API_KEY;
+  const { searchParams } = new URL(request.url);
+  const teamId = searchParams.get('team')?.toUpperCase();
 
-export default async function handler(req, res) {
+  const teamMap = {
+    PHI: 'Philadelphia Eagles',
+    KC: 'Kansas City Chiefs',
+    SF: 'San Francisco 49ers',
+    DAL: 'Dallas Cowboys',
+    BUF: 'Buffalo Bills',
+    NYJ: 'New York Jets',
+    MIA: 'Miami Dolphins',
+    GB: 'Green Bay Packers',
+    NE: 'New England Patriots',
+    DET: 'Detroit Lions',
+    // Add more as needed
+  };
+
+  const query = teamMap[teamId] || 'NFL';
+
+  const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&apiKey=${apiKey}&language=en&pageSize=5&sortBy=publishedAt`;
+
   try {
-    // Define RSS feeds (excluding ESPN and NFL due to parsing errors)
-    const feeds = [
-      { url: 'https://rss.cbssports.com/rss/headlines/nfl', name: 'CBS Sports NFL' },
-      { url: 'https://sports.yahoo.com/nfl/rss.xml', name: 'Yahoo Sports NFL' },
-    ];
-
-    const newsItems = [];
-
-    // Fetch and parse each RSS feed
-    for (const feed of feeds) {
-      try {
-        console.log(`Fetching RSS feed from ${feed.name}: ${feed.url}`);
-        const feedData = await parser.parseURL(feed.url);
-        feedData.items.slice(0, 3).forEach((item) => {
-          newsItems.push({
-            title: item.title,
-            link: item.link,
-            timestamp: item.pubDate ? new Date(item.pubDate).toLocaleString() : 'N/A',
-          });
-        });
-        console.log(`Successfully parsed ${feed.name} feed.`);
-      } catch (error) {
-        console.error(`Error fetching/parsing ${feed.name} feed (${feed.url}):`, error.message);
-        continue;
-      }
-    }
-
-    // Sort by timestamp (newest first) and limit to 6 items
-    newsItems.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-    const limitedNewsItems = newsItems.slice(0, 6);
-
-    if (limitedNewsItems.length === 0) {
-      console.log('No news items fetched from any feed.');
-      return res.status(200).json([]);
-    }
-
-    return res.status(200).json(limitedNewsItems);
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Failed to fetch news');
+    const data = await response.json();
+    return NextResponse.json(data.articles);
   } catch (error) {
-    console.error('Error in /api/news:', error.message);
-    return res.status(500).json({ error: 'Failed to fetch news' });
+    console.error('Error fetching news:', error);
+    return NextResponse.json({ error: 'Failed to fetch news' }, { status: 500 });
   }
 }
