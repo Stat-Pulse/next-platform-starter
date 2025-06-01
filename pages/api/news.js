@@ -1,9 +1,6 @@
-import { NextResponse } from 'next/server';
-
-export async function GET(request) {
+export default async function handler(req, res) {
   const apiKey = process.env.NEWS_API_KEY;
-  const { searchParams } = new URL(request.url);
-  const teamId = searchParams.get('team')?.toUpperCase();
+  const teamId = req.query.team?.toUpperCase();
 
   const teamMap = {
     PHI: 'Philadelphia Eagles',
@@ -20,16 +17,15 @@ export async function GET(request) {
   };
 
   const query = teamMap[teamId] || 'NFL';
-
   const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&apiKey=${apiKey}&language=en&pageSize=5&sortBy=publishedAt`;
 
   try {
     const response = await fetch(url);
     if (!response.ok) throw new Error('Failed to fetch news');
     const data = await response.json();
-    return NextResponse.json(data.articles);
+    res.status(200).json(data.articles);
   } catch (error) {
     console.error('Error fetching news:', error);
-    return NextResponse.json({ error: 'Failed to fetch news' }, { status: 500 });
+    res.status(500).json({ error: 'Failed to fetch news' });
   }
 }
