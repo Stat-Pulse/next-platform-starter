@@ -28,14 +28,14 @@ export default async function handler(req, res) {
 
     // Offensive Totals
     const [offenseRows] = await connection.execute(
-      `SELECT * FROM Team_Off_Tot WHERE team_id = ?`,
+      `SELECT * FROM Team_Off_Tot WHERE team_name = ?`,
       [team.team_name]
     );
     const offenseStats = offenseRows[0] || null;
 
     // Defensive Totals
     const [defenseRows] = await connection.execute(
-      `SELECT * FROM Team_Def_Tot WHERE team_id = ?`,
+      `SELECT * FROM Team_Def_Tot WHERE team_name = ?`,
       [team.team_name]
     );
     const defenseStats = defenseRows[0] || null;
