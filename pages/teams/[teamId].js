@@ -27,7 +27,7 @@ const TeamPage = () => {
   if (error) return <div className="text-red-600 p-4">{error}</div>;
   if (!teamData) return <div className="p-4">Loading...</div>;
 
-  const { team, seasonStats, lastGame, upcomingGame, teamLogos } = teamData;
+  const { team, seasonStats, lastGame, upcomingGame, teamLogos, record } = teamData;
 
   return (
     <div className="bg-gradient-to-r from-blue-50 via-white to-gray-50 min-h-screen p-6">
@@ -45,9 +45,14 @@ const TeamPage = () => {
           </div>
           <div className="text-right space-y-1">
             <p className="text-sm text-gray-700"><span className="font-semibold">Head Coach:</span> {team.head_coach}</p>
-            <p className="text-sm text-gray-700"><span className="font-semibold">Offensive Coordinator:</span> {team.offensive_coordinator}</p>
-            <p className="text-sm text-gray-700"><span className="font-semibold">Defensive Coordinator:</span> {team.defensive_coordinator}</p>
-            <p className="text-sm text-gray-700"><span className="font-semibold">Record:</span> {seasonStats?.wins}-{seasonStats?.losses}</p>
+            <p className="text-sm text-gray-700"><span className="font-semibold">Offensive Coordinator:</span> {team.o_coord}</p>
+            <p className="text-sm text-gray-700"><span className="font-semibold">Defensive Coordinator:</span> {team.d_coord}</p>
+            <p className="text-sm text-gray-700">
+              <span className="font-semibold">Record:</span>{' '}
+              {record?.wins != null && record?.losses != null
+                ? `${record.wins}-${record.losses}`
+                : '-'}
+            </p>
             {/* Optional: Add coordinators here if available in data */}
           </div>
         </div>
@@ -74,7 +79,6 @@ const TeamPage = () => {
               {/* Snapshot */}
               <div className="bg-white p-4 rounded-lg shadow">
                 <h2 className="text-lg font-semibold mb-2">Team Snapshot</h2>
-                <p className="text-sm text-gray-700">Record: {seasonStats?.wins}-{seasonStats?.losses}</p>
                 <p className="text-sm text-gray-700">Points Scored: {seasonStats?.points_scored}</p>
                 <p className="text-sm text-gray-700">Points Allowed: {seasonStats?.points_allowed}</p>
               </div>

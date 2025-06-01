@@ -83,6 +83,10 @@ export default async function handler(req, res) {
       lastGame,
       upcomingGame,
       teamLogos,
+      record: {
+        wins: seasonStats?.wins ?? null,
+        losses: seasonStats?.losses ?? null,
+      },
     });
   } catch (error) {
     console.error('Team API error:', error);
