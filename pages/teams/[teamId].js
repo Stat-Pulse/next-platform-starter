@@ -38,11 +38,14 @@ const TeamPage = () => {
             <img src={team.team_logo_espn} alt={`${team.team_name} logo`} className="w-16 h-16 rounded-full" />
             <div>
               <h1 className="text-2xl font-bold text-gray-800">{team.team_name}</h1>
-              <p className="text-sm text-gray-500">{team.division} • Est. {team.founded_year}</p>
+              <p className="text-sm text-gray-500">{team.team_conf} {team.team_division} • Est. {team.founded_year}</p>
+              <p className="text-sm text-gray-500">Stadium: {team.stadium_name} ({team.stadium_capacity?.toLocaleString() ?? '—'} seats)</p>
             </div>
           </div>
-          <div className="text-right text-sm text-gray-600">
-            <p className="font-semibold">Coach: {team.head_coach}</p>
+          <div className="text-right text-sm text-gray-600 space-y-1">
+            <p className="font-semibold">Head Coach: {team.head_coach}</p>
+            <p className="text-sm">Offensive Coord: {team.o_coord ?? '—'}</p>
+            <p className="text-sm">Defensive Coord: {team.d_coord ?? '—'}</p>
             <p className="text-xs italic">{team.city}</p>
           </div>
         </div>
