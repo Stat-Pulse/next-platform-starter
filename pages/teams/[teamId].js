@@ -16,12 +16,7 @@ const TeamPage = () => {
         const res = await fetch(`/api/teams/${teamId}`);
         const json = await res.json();
         if (!res.ok) throw new Error(json.error || 'Failed to load team data');
-
-        const record = json.record ?? (json.seasonStats?.wins != null && json.seasonStats?.losses != null
-          ? { wins: json.seasonStats.wins, losses: json.seasonStats.losses }
-          : null);
-
-        setTeamData({ ...json, record });
+        setTeamData(json);
       } catch (err) {
         setError(err.message);
       }
@@ -32,31 +27,23 @@ const TeamPage = () => {
   if (error) return <div className="text-red-600 p-4">{error}</div>;
   if (!teamData) return <div className="p-4">Loading...</div>;
 
-  const { team, seasonStats, lastGame, upcomingGame, teamLogos, record } = teamData;
+  const { team, seasonStats, lastGame, upcomingGame, teamLogos } = teamData;
 
   return (
     <div className="bg-gradient-to-r from-blue-50 via-white to-gray-50 min-h-screen p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between bg-gray-100 rounded-lg p-6 shadow-sm mb-6 space-y-4 md:space-y-0 md:space-x-6">
+        <div className="flex items-center justify-between bg-gray-100 rounded-lg p-4 shadow-sm mb-6">
           <div className="flex items-center space-x-4">
-            <img src={team.team_logo_espn} alt={`${team.team_name} logo`} className="w-20 h-20 rounded-full" />
+            <img src={team.team_logo_espn} alt={`${team.team_name} logo`} className="w-16 h-16 rounded-full" />
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">{team.team_name}</h1>
-              <p className="text-sm text-gray-600">Founded: {team.founded_year}</p>
-              <p className="text-sm text-gray-600">{team.stadium_name} ({team.city})</p>
-              <p className="text-sm text-gray-600">Stadium Capacity: {team.stadium_capacity?.toLocaleString()}</p>
+              <h1 className="text-2xl font-bold text-gray-800">{team.team_name}</h1>
+              <p className="text-sm text-gray-500">{team.division} • Est. {team.founded_year}</p>
             </div>
           </div>
-          <div className="text-right space-y-1">
-            <p className="text-sm text-gray-700"><span className="font-semibold">Head Coach:</span> {team.head_coach}</p>
-            <p className="text-sm text-gray-700"><span className="font-semibold">Offensive Coordinator:</span> {team.o_coord}</p>
-            <p className="text-sm text-gray-700"><span className="font-semibold">Defensive Coordinator:</span> {team.d_coord}</p>
-            <p className="text-sm text-gray-700">
-              <span className="font-semibold">Record:</span>{' '}
-              {record ? `${record.wins}-${record.losses}` : '-'}
-            </p>
-            {/* Optional: Add coordinators here if available in data */}
+          <div className="text-right text-sm text-gray-600">
+            <p className="font-semibold">Coach: {team.head_coach}</p>
+            <p className="text-xs italic">{team.city}</p>
           </div>
         </div>
 
@@ -82,6 +69,7 @@ const TeamPage = () => {
               {/* Snapshot */}
               <div className="bg-white p-4 rounded-lg shadow">
                 <h2 className="text-lg font-semibold mb-2">Team Snapshot</h2>
+                <p className="text-sm text-gray-700">Record: {seasonStats?.wins}-{seasonStats?.losses}</p>
                 <p className="text-sm text-gray-700">Points Scored: {seasonStats?.points_scored}</p>
                 <p className="text-sm text-gray-700">Points Allowed: {seasonStats?.points_allowed}</p>
               </div>
@@ -98,7 +86,7 @@ const TeamPage = () => {
                       <span className="text-sm">{lastGame.away_score}</span>
                       <img src={teamLogos[lastGame.away_team_id]} className="w-10 h-10" />
                     </div>
-                    <span className="text-sm text-gray-500">{new Date(lastGame.game_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                    <span className="text-sm text-gray-500">{lastGame.game_date}</span>
                   </div>
                 ) : <p>No recent game</p>}
               </div>
@@ -113,45 +101,9 @@ const TeamPage = () => {
                       <span className="text-xs text-gray-500">vs</span>
                       <img src={teamLogos[upcomingGame.away_team_id]} className="w-10 h-10" />
                     </div>
-                    <span className="text-sm text-gray-500">{new Date(upcomingGame.game_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                    <span className="text-sm text-gray-500">{upcomingGame.game_date}</span>
                   </div>
                 ) : <p>No upcoming game</p>}
-              </div>
-
-              {/* Team Stats Overview */}
-              <div className="bg-white p-4 rounded-lg shadow">
-                <h2 className="text-lg font-semibold mb-4">Team Stats (2024)</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Offense */}
-                  <div>
-                    <h3 className="text-md font-semibold mb-1 text-blue-600">Offense</h3>
-                    <ul className="text-sm text-gray-700 space-y-1">
-                      <li>Points Scored: {teamData.offenseStats?.['Points Scored'] ?? '—'}</li>
-                      <li>Total Yards: {teamData.offenseStats?.['Total Off Yards'] ?? '—'}</li>
-                      <li>Yards/Play: {teamData.offenseStats?.['Yards per Off Play'] ?? '—'}</li>
-                      <li>Turnovers Lost: {teamData.offenseStats?.['Team Turnovers Lost'] ?? '—'}</li>
-                      <li>Completions: {teamData.offenseStats?.['Completions'] ?? '—'}</li>
-                      <li>Pass Yards: {teamData.offenseStats?.['Pass Yards'] ?? '—'}</li>
-                      <li>Rush Yards: {teamData.offenseStats?.['Rush Yards'] ?? '—'}</li>
-                      <li>Rush TDs: {teamData.offenseStats?.['Rush TD'] ?? '—'}</li>
-                    </ul>
-                  </div>
-
-                  {/* Defense */}
-                  <div>
-                    <h3 className="text-md font-semibold mb-1 text-red-600">Defense</h3>
-                    <ul className="text-sm text-gray-700 space-y-1">
-                      <li>Points Allowed: {teamData.defenseStats?.['Points Allowed'] ?? '—'}</li>
-                      <li>Total Yards Allowed: {teamData.defenseStats?.['Total Yards Allowed'] ?? '—'}</li>
-                      <li>Pass Yards Allowed: {teamData.defenseStats?.['Pass Yards Allowed'] ?? '—'}</li>
-                      <li>Rush Yards Allowed: {teamData.defenseStats?.['Rush Yards Allowed'] ?? '—'}</li>
-                      <li>Sacks: {teamData.defenseStats?.['Sacks'] ?? '—'}</li>
-                      <li>Turnovers: {teamData.defenseStats?.['Turnovers'] ?? '—'}</li>
-                      <li>Third Down %: {teamData.defenseStats?.['Third Down %'] ?? '—'}</li>
-                      <li>EPA/play allowed: {teamData.defenseStats?.['EPA/play allowed'] ?? '—'}</li>
-                    </ul>
-                  </div>
-                </div>
               </div>
             </div>
 
