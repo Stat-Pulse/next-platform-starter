@@ -28,15 +28,15 @@ export default async function handler(req, res) {
 
     // Offensive Totals
     const [offenseRows] = await connection.execute(
-      `SELECT * FROM Team_Off_Tot WHERE team_abbr = ?`,
-      [team.team_abbr]
+      `SELECT * FROM Team_Off_Tot WHERE LOWER(TRIM(team_name)) = LOWER(TRIM(?))`,
+      [team.team_name]
     );
     const offenseStats = offenseRows[0] || null;
 
     // Defensive Totals
     const [defenseRows] = await connection.execute(
-      `SELECT * FROM Team_Def_Tot WHERE team_abbr = ?`,
-      [team.team_abbr]
+      `SELECT * FROM Team_Def_Tot WHERE LOWER(TRIM(team_name)) = LOWER(TRIM(?))`,
+      [team.team_name]
     );
     const defenseStats = defenseRows[0] || null;
 
