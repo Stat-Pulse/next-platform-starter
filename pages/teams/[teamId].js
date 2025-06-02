@@ -14,13 +14,14 @@ const TeamPage = () => {
     if (!teamId) return;
     const fetchData = async () => {
       try {
-        const res = await fetch(`/api/news?team=${teamId.toUpperCase()}`);
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.error || 'Failed to load team data');
-        setTeamData(json);
         const newsRes = await fetch(`/api/news?team=${teamId.toUpperCase()}`);
         const newsJson = await newsRes.json();
         if (newsRes.ok) setNews(newsJson.slice(0, 5));
+
+        const teamRes = await fetch(`/api/teams/${teamId}`);
+        const teamJson = await teamRes.json();
+        if (!teamRes.ok) throw new Error(teamJson.error || 'Failed to load team data');
+        setTeamData(teamJson);
       } catch (err) {
         setError(err.message);
       }
