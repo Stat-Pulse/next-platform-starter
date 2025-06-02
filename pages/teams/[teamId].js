@@ -147,11 +147,17 @@ if (!teamData || !teamData.team) return <div className="p-4">Loading...</div>;
                     {(showAllGames ? seasonGames : [seasonGames[0]]).map((game, idx) => (
                       <div key={idx} className="flex items-center justify-between border rounded p-2">
                         <div className="flex items-center space-x-3">
-                          <img src={teamLogos[game.home_team_id]} className="w-8 h-8" />
-                          <span className="text-sm">{game.home_score}</span>
+                          <div className="flex items-center space-x-1">
+                            <img src={teamLogos[game.home_team_abbr]} className="w-6 h-6" />
+                            <span className="text-sm font-medium">{game.home_team_abbr}</span>
+                            <span className="text-sm">{game.home_score}</span>
+                          </div>
                           <span className="text-xs text-gray-500">vs</span>
-                          <span className="text-sm">{game.away_score}</span>
-                          <img src={teamLogos[game.away_team_id]} className="w-8 h-8" />
+                          <div className="flex items-center space-x-1">
+                            <span className="text-sm">{game.away_score}</span>
+                            <span className="text-sm font-medium">{game.away_team_abbr}</span>
+                            <img src={teamLogos[game.away_team_abbr]} className="w-6 h-6" />
+                          </div>
                         </div>
                         <span className="text-sm text-gray-500">{new Date(game.game_date).toLocaleDateString('en-US', {
                           year: 'numeric',
