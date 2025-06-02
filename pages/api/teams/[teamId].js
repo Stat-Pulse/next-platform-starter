@@ -75,13 +75,13 @@ export default async function handler(req, res) {
     );
     const upcomingGame = upcomingGameRows[0] || null;
 
-    // Team logos for teams in both games
-    const logoTeamIds = [
-      lastGame?.home_team_id,
-      lastGame?.away_team_id,
+    // Team logos for all teams in season games and upcoming game
+    const logoTeamIds = Array.from(new Set([
+      ...seasonGames.map(g => g.home_team_id),
+      ...seasonGames.map(g => g.away_team_id),
       upcomingGame?.home_team_id,
       upcomingGame?.away_team_id,
-    ].filter(Boolean);
+    ].filter(Boolean)));
 
     const [logoRows] = logoTeamIds.length > 0
       ? await connection.query(
@@ -94,13 +94,13 @@ export default async function handler(req, res) {
 
     res.status(200).json({
       team,
-      lastGame,
+      offenseStats,
+      defenseStats,
+      lastGame: seasonGames[0] || null,
       upcomingGame,
       seasonGames,
       teamLogos,
       record: null,
-      offenseStats,
-      defenseStats,
     });
   } catch (error) {
     console.error('Team API error:', error);
