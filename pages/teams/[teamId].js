@@ -11,6 +11,8 @@ const TeamPage = () => {
   const [news, setNews] = useState([]);
   const [seasonGames, setSeasonGames] = useState([]);
   const [showAllGames, setShowAllGames] = useState(false);
+  const [upcomingSchedule, setUpcomingSchedule] = useState([]);
+  const [showAllUpcoming, setShowAllUpcoming] = useState(false);
 
   useEffect(() => {
     if (!teamId) return;
@@ -25,6 +27,7 @@ const TeamPage = () => {
         if (!teamRes.ok) throw new Error(teamJson.error || 'Failed to load team data');
         setTeamData(teamJson);
         setSeasonGames(teamJson.seasonGames || []);
+        setUpcomingSchedule(teamJson.upcomingSchedule || []);
       } catch (err) {
         setError(err.message);
       }
@@ -163,19 +166,51 @@ if (!teamData || !teamData.team) return <div className="p-4">Loading...</div>;
                 )}
               </div>
 
-              {/* Upcoming Game */}
+              {/* Upcoming Games */}
               <div className="bg-white p-4 rounded-lg shadow">
-                <h2 className="text-lg font-semibold mb-2">Upcoming Game</h2>
-                {upcomingGame ? (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <img src={teamLogos[upcomingGame.home_team_id]} className="w-10 h-10" />
-                      <span className="text-xs text-gray-500">vs</span>
-                      <img src={teamLogos[upcomingGame.away_team_id]} className="w-10 h-10" />
-                    </div>
-                    <span className="text-sm text-gray-500">{new Date(upcomingGame.game_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="text-lg font-semibold">Upcoming Game{showAllUpcoming && 's'}</h2>
+                  {upcomingSchedule.length > 1 && (
+                    <button
+                      onClick={() => setShowAllUpcoming(!showAllUpcoming)}
+                      className="text-blue-600 text-sm hover:underline"
+                    >
+                      {showAllUpcoming ? 'Hide All' : 'Show All'}
+                    </button>
+                  )}
+                </div>
+                {upcomingSchedule && upcomingSchedule.length > 0 ? (
+                  <div className="space-y-3">
+                    {(showAllUpcoming ? upcomingSchedule : [upcomingSchedule[0]]).map((game, idx) => (
+                      <div key={idx} className="border rounded p-2 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <img src={teamLogos[game.away_team]} className="w-6 h-6" />
+                            <span className="text-sm font-medium">{game.away_team_name || game.away_team}</span>
+                            <span className="text-xs text-gray-500">at</span>
+                            <span className="text-sm font-medium">{game.home_team_name || game.home_team}</span>
+                            <img src={teamLogos[game.home_team]} className="w-6 h-6" />
+                          </div>
+                          <span className="text-sm text-gray-500">
+                            {new Date(game.gameday).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          {game.stadium || 'Stadium TBD'}
+                          {game.spread != null && (
+                            <span className="ml-2 text-red-600 font-medium">Spread: {game.spread > 0 ? '+' : ''}{game.spread}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ) : <p>No upcoming game</p>}
+                ) : (
+                  <p className="text-sm text-gray-500">No upcoming games scheduled.</p>
+                )}
               </div>
             </div>
             
