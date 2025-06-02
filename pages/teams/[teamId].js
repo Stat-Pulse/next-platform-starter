@@ -34,8 +34,8 @@ const TeamPage = () => {
       maximumFractionDigits: decimals,
     }) : '—';
 
-  if (error) return <div className="text-red-600 p-4">{error}</div>;
-  if (!teamData) return <div className="p-4">Loading...</div>;
+if (error) return <div className="text-red-600 p-4">{error}</div>;
+if (!teamData || !teamData.team) return <div className="p-4">Loading...</div>;
 
   const { team, lastGame, upcomingGame, teamLogos, offenseStats, defenseStats } = teamData;
 
@@ -43,22 +43,24 @@ const TeamPage = () => {
     <div className="bg-gradient-to-r from-blue-50 via-white to-gray-50 min-h-screen p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between bg-gray-100 rounded-lg p-4 shadow-sm mb-6">
-          <div className="flex items-center space-x-4">
-            <img src={team.team_logo_espn} alt={`${team.team_name} logo`} className="w-16 h-16 rounded-full" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">{team.team_name}</h1>
-              <p className="text-sm text-gray-500">{team.team_division} • Est. {team.founded_year}</p>
-              <p className="text-sm text-gray-500">Stadium: {team.stadium_name} ({team.stadium_capacity?.toLocaleString() ?? '—'} Capacity)</p>
-              <p className="text-sm text-gray-500">City: {team.city}</p>
+        {team && (
+          <div className="flex items-center justify-between bg-gray-100 rounded-lg p-4 shadow-sm mb-6">
+            <div className="flex items-center space-x-4">
+              <img src={team.team_logo_espn} alt={`${team.team_name} logo`} className="w-16 h-16 rounded-full" />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-800">{team.team_name}</h1>
+                <p className="text-sm text-gray-500">{team.team_division} • Est. {team.founded_year}</p>
+                <p className="text-sm text-gray-500">Stadium: {team.stadium_name} ({team.stadium_capacity?.toLocaleString() ?? '—'} Capacity)</p>
+                <p className="text-sm text-gray-500">City: {team.city}</p>
+              </div>
+            </div>
+            <div className="text-right text-sm text-gray-600 space-y-1">
+              <p className="font-semibold">Head Coach: {team.head_coach}</p>
+              <p className="text-sm">Offensive Coord: {team.o_coord ?? '—'}</p>
+              <p className="text-sm">Defensive Coord: {team.d_coord ?? '—'}</p>
             </div>
           </div>
-          <div className="text-right text-sm text-gray-600 space-y-1">
-            <p className="font-semibold">Head Coach: {team.head_coach}</p>
-            <p className="text-sm">Offensive Coord: {team.o_coord ?? '—'}</p>
-            <p className="text-sm">Defensive Coord: {team.d_coord ?? '—'}</p>
-          </div>
-        </div>
+        )}
 
         {/* Tabs */}
         <nav className="flex space-x-4 border-b border-gray-200 mb-6">
