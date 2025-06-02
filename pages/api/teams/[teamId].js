@@ -111,12 +111,12 @@ export default async function handler(req, res) {
 
     const [logoRows] = logoTeamIds.length > 0
       ? await connection.query(
-          `SELECT team_id, team_logo_espn FROM Teams WHERE team_id IN (${logoTeamIds.map(() => '?').join(',')})`,
+          `SELECT team_abbr, team_logo_espn FROM Teams WHERE team_abbr IN (${logoTeamIds.map(() => '?').join(',')})`,
           logoTeamIds
         )
       : [[]];
 
-    const teamLogos = Object.fromEntries(logoRows.map(t => [t.team_id, t.team_logo_espn]));
+    const teamLogos = Object.fromEntries(logoRows.map(t => [t.team_abbr, t.team_logo_espn]));
 
     res.status(200).json({
       team,
