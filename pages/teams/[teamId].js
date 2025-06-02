@@ -201,10 +201,23 @@ if (!teamData || !teamData.team) return <div className="p-4">Loading...</div>;
                         </div>
                         <div className="text-xs text-gray-600">
                           {game.stadium || 'Stadium TBD'}
-                          {game.spread != null && (
-                            <span className="ml-2 text-red-600 font-medium">Spread: {game.spread > 0 ? '+' : ''}{game.spread}</span>
-                          )}
                         </div>
+                        {(game.spread_line != null || game.total_line != null) && (
+                          <div className="text-xs text-gray-700 mt-1">
+                            {game.spread_line != null && (
+                              <span className="mr-4 text-red-600 font-medium">
+                                Spread: {game.spread_line > 0 ? '+' : ''}{game.spread_line} 
+                                <span className="ml-1 text-gray-500">({game.home_spread_odds ?? '—'} / {game.away_spread_odds ?? '—'})</span>
+                              </span>
+                            )}
+                            {game.total_line != null && (
+                              <span className="text-blue-700 font-medium">
+                                O/U: {game.total_line}
+                                <span className="ml-1 text-gray-500">({game.over_odds ?? '—'} / {game.under_odds ?? '—'})</span>
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

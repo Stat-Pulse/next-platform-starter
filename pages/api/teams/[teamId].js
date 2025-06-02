@@ -86,7 +86,9 @@ export default async function handler(req, res) {
 
     const [futureScheduleRows] = await connection.execute(
       `SELECT 
-          s.game_id, s.away_team, s.home_team, s.gameday, s.stadium, s.spread,
+          s.game_id, s.away_team, s.home_team, s.gameday, s.stadium,
+          s.spread_line, s.away_spread_odds, s.home_spread_odds,
+          s.total_line, s.under_odds, s.over_odds,
           th.team_name AS home_team_name, ta.team_name AS away_team_name
        FROM Schedules_2025 s
        LEFT JOIN Teams th ON s.home_team = th.team_abbr
