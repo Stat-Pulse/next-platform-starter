@@ -8,15 +8,19 @@ const TeamPage = () => {
   const [teamData, setTeamData] = useState(null);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
+  const [news, setNews] = useState([]);
 
   useEffect(() => {
     if (!teamId) return;
     const fetchData = async () => {
       try {
-        const res = await fetch(`/api/teams/${teamId}`);
+        const res = await fetch(`/api/news?team=${teamId.toUpperCase()}`);
         const json = await res.json();
         if (!res.ok) throw new Error(json.error || 'Failed to load team data');
         setTeamData(json);
+        const newsRes = await fetch(`/api/news?team=${teamId.toUpperCase()}`);
+        const newsJson = await newsRes.json();
+        if (newsRes.ok) setNews(newsJson.slice(0, 5));
       } catch (err) {
         setError(err.message);
       }
@@ -152,7 +156,20 @@ const TeamPage = () => {
             {/* News */}
             <div className="bg-white p-4 rounded-lg shadow h-fit">
               <h2 className="text-lg font-semibold mb-4">Latest News</h2>
-              <p className="text-sm text-gray-500">Coming soon...</p>
+              {news.length === 0 ? (
+                <p className="text-sm text-gray-500">No recent news available.</p>
+              ) : (
+                <ul className="space-y-4">
+                  {news.map((article, idx) => (
+                    <li key={idx} className="text-sm">
+                      <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-medium hover:underline">
+                        {article.title}
+                      </a>
+                      <p className="text-gray-500 text-xs">{new Date(article.publishedAt).toLocaleDateString()}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
         )}
