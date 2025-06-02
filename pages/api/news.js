@@ -50,10 +50,17 @@ export default async function handler(req, res) {
     if (!response.ok) throw new Error('Failed to fetch news');
     const data = await response.json();
 
-    const filtered = data.articles.filter(article =>
-      article.title?.toLowerCase().includes(teamAbbr.toLowerCase()) ||
-      article.description?.toLowerCase().includes(teamAbbr.toLowerCase())
-    );
+    const teamFullName = teamNameMap[teamAbbr.toUpperCase()];
+    const filtered = data.articles.filter(article => {
+      const title = article.title?.toLowerCase() || '';
+      const description = article.description?.toLowerCase() || '';
+      return (
+        title.includes(teamAbbr.toLowerCase()) ||
+        description.includes(teamAbbr.toLowerCase()) ||
+        (teamFullName &&
+          (title.includes(teamFullName.toLowerCase()) || description.includes(teamFullName.toLowerCase())))
+      );
+    });
 
     res.status(200).json(filtered.slice(0, 5));
   } catch (error) {
