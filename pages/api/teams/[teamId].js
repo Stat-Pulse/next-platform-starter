@@ -52,17 +52,16 @@ export default async function handler(req, res) {
     );
     const defenseStats = defenseRows[0] || null;
 
-    // Last finalized game
-    const [lastGameRows] = await connection.execute(
+    // All 2024 season finalized games
+    const [seasonGames] = await connection.execute(
       `SELECT * FROM Games
        WHERE (home_team_id = ? OR away_team_id = ?)
          AND season_id = 2024
          AND is_final = 1
-       ORDER BY game_date DESC, game_time DESC
-       LIMIT 1`,
+       ORDER BY game_date DESC, game_time DESC`,
       [team.team_id, team.team_id]
     );
-    const lastGame = lastGameRows[0] || null;
+    const lastGame = seasonGames[0] || null;
 
     // Upcoming game
     const [upcomingGameRows] = await connection.execute(
@@ -97,6 +96,7 @@ export default async function handler(req, res) {
       team,
       lastGame,
       upcomingGame,
+      seasonGames,
       teamLogos,
       record: null,
       offenseStats,
