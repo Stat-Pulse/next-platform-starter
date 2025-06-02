@@ -6,7 +6,17 @@ export default async function handler(req, res) {
     query: { teamId },
   } = req;
 
-  const normalizedId = teamId?.toUpperCase();
+  const slugToAbbr = {
+    cardinals: 'ARI', falcons: 'ATL', ravens: 'BAL', bills: 'BUF',
+    panthers: 'CAR', bears: 'CHI', bengals: 'CIN', browns: 'CLE',
+    cowboys: 'DAL', broncos: 'DEN', lions: 'DET', packers: 'GB',
+    texans: 'HOU', colts: 'IND', jaguars: 'JAX', chiefs: 'KC',
+    raiders: 'LV', chargers: 'LAC', rams: 'LAR', dolphins: 'MIA',
+    vikings: 'MIN', patriots: 'NE', saints: 'NO', giants: 'NYG',
+    jets: 'NYJ', eagles: 'PHI', steelers: 'PIT', 49ers: 'SF',
+    seahawks: 'SEA', buccaneers: 'TB', titans: 'TEN', commanders: 'WAS'
+  };
+  const normalizedId = slugToAbbr[teamId?.toLowerCase()] || teamId?.toUpperCase();
 
   if (!normalizedId) return res.status(400).json({ error: 'Missing teamId' });
 
@@ -73,14 +83,28 @@ export default async function handler(req, res) {
        LIMIT 1`,
       [team.team_id, team.team_id]
     );
-    const upcomingGame = upcomingGameRows[0] || null;
+
+    const [futureScheduleRows] = await connection.execute(
+      `SELECT 
+          s.game_id, s.away_team, s.home_team, s.gameday, s.stadium, s.spread,
+          th.team_name AS home_team_name, ta.team_name AS away_team_name
+       FROM Schedules_2025 s
+       LEFT JOIN Teams th ON s.home_team = th.team_abbr
+       LEFT JOIN Teams ta ON s.away_team = ta.team_abbr
+       WHERE (s.home_team = ? OR s.away_team = ?)
+         AND s.gameday >= CURRENT_DATE()
+       ORDER BY s.gameday ASC`,
+      [normalizedId, normalizedId]
+    );
+
+    const upcomingGame = futureScheduleRows[0] || null;
 
     // Team logos for all teams in season games and upcoming game
     const logoTeamIds = Array.from(new Set([
       ...seasonGames.map(g => g.home_team_id),
       ...seasonGames.map(g => g.away_team_id),
-      upcomingGame?.home_team_id,
-      upcomingGame?.away_team_id,
+      upcomingGame?.home_team,
+      upcomingGame?.away_team,
     ].filter(Boolean)));
 
     const [logoRows] = logoTeamIds.length > 0
@@ -98,6 +122,7 @@ export default async function handler(req, res) {
       defenseStats,
       lastGame: seasonGames[0] || null,
       upcomingGame,
+      upcomingSchedule: futureScheduleRows,
       seasonGames,
       teamLogos,
       record: null,
