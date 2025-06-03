@@ -70,19 +70,21 @@ if (!teamData || !teamData.team) return <div className="p-4">Loading...</div>;
         )}
 
         {/* Tabs */}
-        <nav className="flex space-x-4 border-b border-gray-200 mb-6">
-          {['overview', 'depthChart', 'schedule', 'injuries', 'stats'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-all duration-200 ${
-                activeTab === tab ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-blue-600'
-              }`}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </nav>
+        <nav className="flex overflow-x-auto scrollbar-none space-x-4 border-b border-gray-200 mb-6 pb-2 whitespace-nowrap">
+  {['overview', 'depthChart', 'schedule', 'injuries', 'stats'].map(tab => (
+    <button
+      key={tab}
+      onClick={() => setActiveTab(tab)}
+      className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-all duration-200 ${
+        activeTab === tab
+          ? 'border-blue-600 text-blue-600'
+          : 'border-transparent text-gray-500 hover:text-blue-600'
+      }`}
+    >
+      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+    </button>
+  ))}
+</nav>
 
         {/* Main Content */}
         {activeTab === 'overview' && (
