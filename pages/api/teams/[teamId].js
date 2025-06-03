@@ -77,6 +77,8 @@ export default async function handler(req, res) {
       [team.team_id, team.team_id]
     );
     const lastGame = seasonGames[0] || null;
+    console.log('lastGame team IDs:', lastGame?.home_team_id, lastGame?.away_team_id);
+    console.log('lastGame team abbrs:', lastGame?.home_team_abbr, lastGame?.away_team_abbr);
 
     // Upcoming game
     const [upcomingGameRows] = await connection.execute(
