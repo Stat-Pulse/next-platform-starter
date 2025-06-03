@@ -106,12 +106,12 @@ export default async function handler(req, res) {
 
     const upcomingGame = futureScheduleRows[0] || null;
 
-    // Team logos for all teams in season games and upcoming game
+    // Team logos for teams in lastGame and upcomingSchedule
     const logoTeamIds = Array.from(new Set([
-      ...seasonGames.map(g => g.home_team_id),
-      ...seasonGames.map(g => g.away_team_id),
-      upcomingGame?.home_team,
-      upcomingGame?.away_team,
+      lastGame?.home_team_abbr,
+      lastGame?.away_team_abbr,
+      ...futureScheduleRows.map(g => g.home_team),
+      ...futureScheduleRows.map(g => g.away_team),
     ].filter(Boolean)));
 
     const [logoRows] = logoTeamIds.length > 0
