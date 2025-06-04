@@ -9,23 +9,24 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@netlify/plugin-nextjs": "^5.11.2",
     "@netlify/blobs": "^8.2.0",
+    "@netlify/next": "^1.4.0",
+    "@netlify/plugin-nextjs": "^5.11.2",
     "blobshape": "^1.0.0",
     "bright": "^0.8.5",
     "chart.js": "^4.4.9",
+    "fuse.js": "^6.6.2",
+    "lodash": "^4.17.21",
     "markdown-to-jsx": "^7.4.5",
     "mysql2": "^3.11.0",
     "next": "15.3.1",
     "react": "18.3.1",
+    "react-chartjs-2": "^5.2.0",
     "react-dom": "18.3.1",
     "react-icons": "^4.12.0",
     "recharts": "^2.7.2",
-    "unique-names-generator": "^4.7.1",
-    "react-chartjs-2": "^5.2.0",
     "rss-parser": "^3.12.0",
-    "fuse.js": "^6.6.2",
-    "@netlify/next": "^1.4.0"
+    "unique-names-generator": "^4.7.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",
