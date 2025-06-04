@@ -76,6 +76,23 @@ const TeamPage = () => {
             </div>
           )}
         </div>
+        <div className="md:col-span-3">
+          <nav className="flex overflow-x-auto scrollbar-none space-x-4 border-b border-gray-200 pb-2 whitespace-nowrap">
+            {['overview', 'depthChart', 'schedule', 'injuries', 'stats'].map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-all duration-200 ${
+                  activeTab === tab
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-blue-600'
+                }`}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
+          </nav>
+        </div>
         <div className="md:col-span-2 space-y-6">
           {/* Team Stats */}
           {(offenseStats || defenseStats) && (
