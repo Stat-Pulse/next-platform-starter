@@ -94,7 +94,7 @@ const TeamPage = () => {
 
         {/* Main Content */}
         {(offenseStats || defenseStats) && (
-  <div className="bg-white rounded-lg shadow p-6 max-w-3xl mx-auto">
+  <div className="bg-white rounded-lg shadow p-6 w-full max-w-xl">
     <h2 className="text-xl font-bold mb-4">Team Stats (2024)</h2>
     <div className="grid grid-cols-2 gap-4 text-sm">
       <div className="border-r border-b pr-4 pb-4">
