@@ -57,12 +57,12 @@ const TeamPage = () => {
     MIN: '/stadiums/usbank_stadium_MIN.jpg',
   };
 
-  const stadiumBg = stadiumImages[team?.team_abbr];
 
   if (error) return <div className="text-red-600 p-4">{error}</div>;
   if (!teamData || !teamData.team) return <div className="p-4">Loading...</div>;
 
   const { team, lastGame, upcomingGame, teamLogos, offenseStats, defenseStats } = teamData;
+  const stadiumBg = stadiumImages[team?.team_abbr];
 
   return (
     <div
