@@ -54,7 +54,7 @@ const TeamPage = () => {
 
   return (
     <div className="bg-gradient-to-r from-blue-50 via-white to-gray-50 min-h-screen p-6">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         {team && (
           <div className="flex items-center justify-between bg-gray-100 rounded-lg p-4 shadow-sm mb-6">
@@ -94,7 +94,7 @@ const TeamPage = () => {
 
         {/* Main Content */}
         {(offenseStats || defenseStats) && (
-  <div className="bg-white rounded-lg shadow p-6 w-full max-w-xl">
+  <div className="bg-white rounded-lg shadow p-6">
     <h2 className="text-xl font-bold mb-4">Team Stats (2024)</h2>
     <div className="grid grid-cols-2 gap-4 text-sm">
       <div className="border-r border-b pr-4 pb-4">
