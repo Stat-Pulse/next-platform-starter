@@ -36,7 +36,7 @@ const TeamPage = () => {
   }, [teamId]);
 
   const formatStat = (num, decimals = 0) =>
-    num != null ? num.toLocaleString(undefined, {
+    num != null && !isNaN(num) ? Number(num).toLocaleString(undefined, {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     }) : '—';
@@ -100,14 +100,14 @@ if (!teamData || !teamData.team) return <div className="p-4">Loading...</div>;
                       <div>
                         <h3 className="text-md font-semibold mb-1 text-blue-600">Offense</h3>
                         <ul className="text-sm text-gray-700 space-y-1">
-                          <li>Points Scored: {formatStat(offenseStats.points_scored)}</li>
-                          <li>Total Yds: {formatStat(offenseStats.total_off_yards)}</li>
-                          <li>Yds/Play: {formatStat(offenseStats.yards_per_off_play, 1)}</li>
-                          <li>Turnovers: {formatStat(offenseStats.turnovers_lost)}</li>
-                          <li>Comp: {formatStat(offenseStats.completions)}</li>
-                          <li>Pass Yds: {formatStat(offenseStats.pass_yards)}</li>
-                          <li>Rush Yds: {formatStat(offenseStats.rush_yards)}</li>
-                          <li>Rush TDs: {formatStat(offenseStats.rush_tds)}</li>
+                        <li>Points Scored: {formatStat(offenseStats.points_scored)}</li>
+                        <li>Total Yards: {formatStat(offenseStats.total_off_yards)}</li>
+                        <li>Yards/Play: {formatStat(offenseStats.yards_per_off_play, 1)}</li>
+                        <li>Turnovers: {formatStat(offenseStats.turnovers_lost)}</li>
+                        <li>Comp: {formatStat(offenseStats.completions)}</li>
+                        <li>Pass Yds: {formatStat(offenseStats.pass_yards)}</li>
+                        <li>Rush Yds: {formatStat(offenseStats.rush_yards)}</li>
+                        <li>Rush TDs: {formatStat(offenseStats.rush_tds)}</li>
                         </ul>
                       </div>
                     )}
