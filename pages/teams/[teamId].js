@@ -96,46 +96,37 @@ if (!teamData || !teamData.team) return <div className="p-4">Loading...</div>;
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              {/* Team Stats (2024) */}
-              {(offenseStats || defenseStats) && (
-                <div className="bg-white p-4 rounded-lg shadow">
-                  <h2 className="text-lg font-semibold mb-4">Team Stats (2024)</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Offense */}
-                    {offenseStats && (
-                      <div>
-                        <h3 className="text-md font-semibold mb-1 text-blue-600">Offense</h3>
-                        <ul className="text-sm text-gray-700 space-y-1">
-                        <li>Points Scored: {formatStat(offenseStats.points_scored)}</li>
-                        <li>Total Yards: {formatStat(offenseStats.total_off_yards)}</li>
-                        <li>Yards/Play: {formatStat(offenseStats.yards_per_off_play, 1)}</li>
-                        <li>Turnovers: {formatStat(offenseStats.turnovers_lost)}</li>
-                        <li>Comp: {formatStat(offenseStats.completions)}</li>
-                        <li>Pass Yds: {formatStat(offenseStats.pass_yards)}</li>
-                        <li>Rush Yds: {formatStat(offenseStats.rush_yards)}</li>
-                        <li>Rush TDs: {formatStat(offenseStats.rush_tds)}</li>
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* Defense */}
-                    {defenseStats && (
-                      <div>
-                        <h3 className="text-md font-semibold mb-1 text-red-600">Defense</h3>
-                        <ul className="text-sm text-gray-700 space-y-1">
-                          <li>ADOT Against: {formatStat(defenseStats.adot_against, 1)}</li>
-                          <li>YAC Allowed: {formatStat(defenseStats.yac_allowed)}</li>
-                          <li>Pass Yards Allowed: {formatStat(defenseStats.pass_yards_allowed)}</li>
-                          <li>Pass TD Allowed: {formatStat(defenseStats.pass_td_allowed)}</li>
-                          <li>Sacks: {formatStat(defenseStats.sacks)}</li>
-                          <li>Blitz %: {formatStat(defenseStats.blitz_percent, 1)}</li>
-                          <li>QB Pressures: {formatStat(defenseStats.qb_press)}</li>
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+            {(offenseStats || defenseStats) && (
+  <div className="bg-white p-4 rounded-lg shadow">
+    <h2 className="text-lg font-semibold mb-4">Team Stats (2024)</h2>
+    <div className="grid grid-cols-2 gap-6 divide-x divide-y divide-gray-300">
+      <div className="p-2">
+        <h3 className="font-semibold text-blue-600">Pass Offense</h3>
+        <p>Yards: {formatStat(offenseStats.pass_yards)}</p>
+        <p>TDs: {formatStat(offenseStats.pass_tds)}</p>
+        <p>NFL Rank: —</p>
+      </div>
+      <div className="p-2">
+        <h3 className="font-semibold text-red-600">Pass Defense</h3>
+        <p>Yards: {formatStat(defenseStats.pass_yards_allowed)}</p>
+        <p>TDs: {formatStat(defenseStats.pass_td_allowed)}</p>
+        <p>NFL Rank: —</p>
+      </div>
+      <div className="p-2">
+        <h3 className="font-semibold text-blue-600">Total Offense</h3>
+        <p>Yards: {formatStat(offenseStats.total_off_yards)}</p>
+        <p>TDs: {formatStat(offenseStats.pass_tds + offenseStats.rush_tds)}</p>
+        <p>NFL Rank: —</p>
+      </div>
+      <div className="p-2">
+        <h3 className="font-semibold text-red-600">Total Defense</h3>
+        <p>Yards: —</p>
+        <p>TDs: —</p>
+        <p>NFL Rank: —</p>
+      </div>
+    </div>
+  </div>
+)}
 
               {/* Last Game */}
               <div className="bg-white p-4 rounded-lg shadow">
@@ -243,49 +234,6 @@ if (!teamData || !teamData.team) return <div className="p-4">Loading...</div>;
                   <p className="text-sm text-gray-500">No upcoming games scheduled.</p>
                 )}
               </div>
-            </div>
-            {/* Toggleable Rush Defense Section */}
-<div className="bg-white p-4 rounded-lg shadow mt-6">
-  <div className="flex items-center justify-between">
-    <h2 className="text-lg font-semibold">Rush Defense (2024)</h2>
-    <button
-      onClick={() => setShowRushDef(!showRushDef)}
-      className="text-blue-600 text-sm hover:underline"
-    >
-      {showRushDef ? 'Hide' : 'Show'}
-    </button>
-  </div>
-  {showRushDef && rushDefense && (
-    <div className="mt-4 overflow-x-auto">
-      <table className="min-w-full text-sm text-left text-gray-700">
-        <thead className="bg-gray-100 font-semibold">
-          <tr>
-            <th className="px-3 py-2">Team</th>
-            <th className="px-3 py-2">Games</th>
-            <th className="px-3 py-2">Rush Att</th>
-            <th className="px-3 py-2">Yards</th>
-            <th className="px-3 py-2">TDs</th>
-            <th className="px-3 py-2">Yds/Att</th>
-            <th className="px-3 py-2">Yds/G</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rushDefense.map((row, idx) => (
-            <tr key={idx} className="border-b">
-              <td className="px-3 py-2">{row.team_name}</td>
-              <td className="px-3 py-2">{row.games}</td>
-              <td className="px-3 py-2">{row.rush_att_against}</td>
-              <td className="px-3 py-2">{formatStat(row.yds_against)}</td>
-              <td className="px-3 py-2">{row.td_allowed}</td>
-              <td className="px-3 py-2">{formatStat(row.yds_per_att, 1)}</td>
-              <td className="px-3 py-2">{formatStat(row.yds_per_game, 1)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )}
-</div>
 
             {/* News */}
             <div className="bg-white p-4 rounded-lg shadow h-fit">
