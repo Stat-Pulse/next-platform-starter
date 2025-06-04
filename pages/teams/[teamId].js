@@ -93,33 +93,37 @@ if (!teamData || !teamData.team) return <div className="p-4">Loading...</div>;
 </nav>
 
         {/* Main Content */}
-        {activeTab === 'overview' && 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
-            {(offenseStats || defenseStats) && (
-  <div className="bg-white p-4 rounded-lg shadow">
-    <h2 className="text-lg font-semibold mb-4">Team Stats (2024)</h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div>
-        <h3 className="text-sm font-bold uppercase text-gray-500 mb-2">Offense</h3>
-        <p className="text-sm">Total Yards: {formatStat(offenseStats?.total_off_yards)}</p>
-        <p className="text-sm">Passing Yards: {formatStat(offenseStats?.pass_yards)}</p>
-        <p className="text-sm">Passing TDs: {formatStat(offenseStats?.pass_tds)}</p>
-        <p className="text-sm">Total TDs: {formatStat(
-          (offenseStats?.pass_tds ?? 0) + (offenseStats?.rush_tds ?? 0)
-        )}</p>
+        {(offenseStats || defenseStats) && (
+  <div className="bg-white rounded-lg shadow p-6">
+    <h2 className="text-xl font-bold mb-4">Team Stats (2024)</h2>
+    <div className="grid grid-cols-2 gap-4 text-sm">
+      <div className="border-r border-b pr-4 pb-4">
+        <h3 className="font-semibold text-gray-700 mb-1">Pass Offense</h3>
+        <p>Yards: {formatStat(offenseStats?.pass_yards)}</p>
+        <p>TDs: {formatStat(offenseStats?.pass_tds)}</p>
+        <p>NFL Rank: —</p>
       </div>
-      <div>
-        <h3 className="text-sm font-bold uppercase text-gray-500 mb-2">Defense</h3>
-        <p className="text-sm">Pass Yards Allowed: {formatStat(defenseStats?.pass_yards_allowed)}</p>
-        <p className="text-sm">Pass TDs Allowed: {formatStat(defenseStats?.pass_td_allowed)}</p>
-        <p className="text-sm">Yards Per Game: —</p>
-        <p className="text-sm">Total TDs Allowed: —</p>
+      <div className="border-b pl-4 pb-4">
+        <h3 className="font-semibold text-gray-700 mb-1">Pass Defense</h3>
+        <p>Yards: {formatStat(defenseStats?.pass_yards_allowed)}</p>
+        <p>TDs: {formatStat(defenseStats?.pass_td_allowed)}</p>
+        <p>NFL Rank: —</p>
+      </div>
+      <div className="border-r pt-4 pr-4">
+        <h3 className="font-semibold text-gray-700 mb-1">Total Offense</h3>
+        <p>Yards: {formatStat(offenseStats?.total_off_yards)}</p>
+        <p>TDs: {formatStat((offenseStats?.pass_tds ?? 0) + (offenseStats?.rush_tds ?? 0))}</p>
+        <p>NFL Rank: —</p>
+      </div>
+      <div className="pt-4 pl-4">
+        <h3 className="font-semibold text-gray-700 mb-1">Total Defense</h3>
+        <p>Yards: —</p>
+        <p>TDs: —</p>
+        <p>NFL Rank: —</p>
       </div>
     </div>
   </div>
 )}
-
               {/* Last Game */}
               <div className="bg-white p-4 rounded-lg shadow">
                 <div className="flex items-center justify-between">
@@ -246,9 +250,7 @@ if (!teamData || !teamData.team) return <div className="p-4">Loading...</div>;
               )}
             </div>
           </div>
-            }
-          </div>
-        }
+        </div>
       </div>
     </div>
   );
