@@ -254,6 +254,8 @@ if (!teamData || !teamData.team) return <div className="p-4">Loading...</div>;
               )}
             </div>
           </div>
+            )}
+          </div>
         )}
       </div>
     </div>
