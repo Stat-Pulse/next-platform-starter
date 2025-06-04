@@ -13,6 +13,8 @@ const TeamPage = () => {
   const [showAllGames, setShowAllGames] = useState(false);
   const [upcomingSchedule, setUpcomingSchedule] = useState([]);
   const [showAllUpcoming, setShowAllUpcoming] = useState(false);
+  const [rushDefense, setRushDefense] = useState(null);
+  const [showRushDef, setShowRushDef] = useState(false);
 
   useEffect(() => {
     if (!teamId) return;
@@ -21,6 +23,10 @@ const TeamPage = () => {
         const newsRes = await fetch(`/api/news?team=${teamId.toUpperCase()}`);
         const newsJson = await newsRes.json();
         if (newsRes.ok) setNews(newsJson.slice(0, 5));
+
+        const rushDefRes = await fetch('/api/team-stats/rush-defense');
+        const rushDefJson = await rushDefRes.json();
+        if (rushDefRes.ok) setRushDefense(rushDefJson);
 
         const teamRes = await fetch(`/api/teams/${teamId}`);
         const teamJson = await teamRes.json();
@@ -238,7 +244,49 @@ if (!teamData || !teamData.team) return <div className="p-4">Loading...</div>;
                 )}
               </div>
             </div>
-            
+            {/* Toggleable Rush Defense Section */}
+<div className="bg-white p-4 rounded-lg shadow mt-6">
+  <div className="flex items-center justify-between">
+    <h2 className="text-lg font-semibold">Rush Defense (2024)</h2>
+    <button
+      onClick={() => setShowRushDef(!showRushDef)}
+      className="text-blue-600 text-sm hover:underline"
+    >
+      {showRushDef ? 'Hide' : 'Show'}
+    </button>
+  </div>
+  {showRushDef && rushDefense && (
+    <div className="mt-4 overflow-x-auto">
+      <table className="min-w-full text-sm text-left text-gray-700">
+        <thead className="bg-gray-100 font-semibold">
+          <tr>
+            <th className="px-3 py-2">Team</th>
+            <th className="px-3 py-2">Games</th>
+            <th className="px-3 py-2">Rush Att</th>
+            <th className="px-3 py-2">Yards</th>
+            <th className="px-3 py-2">TDs</th>
+            <th className="px-3 py-2">Yds/Att</th>
+            <th className="px-3 py-2">Yds/G</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rushDefense.map((row, idx) => (
+            <tr key={idx} className="border-b">
+              <td className="px-3 py-2">{row.team_name}</td>
+              <td className="px-3 py-2">{row.games}</td>
+              <td className="px-3 py-2">{row.rush_att_against}</td>
+              <td className="px-3 py-2">{formatStat(row.yds_against)}</td>
+              <td className="px-3 py-2">{row.td_allowed}</td>
+              <td className="px-3 py-2">{formatStat(row.yds_per_att, 1)}</td>
+              <td className="px-3 py-2">{formatStat(row.yds_per_game, 1)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</div>
+
             {/* News */}
             <div className="bg-white p-4 rounded-lg shadow h-fit">
               <h2 className="text-lg font-semibold mb-4">Latest News</h2>
