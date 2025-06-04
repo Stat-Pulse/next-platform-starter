@@ -249,10 +249,9 @@ const TeamPage = () => {
                 </ul>
               )}
             </div>
-          </div>
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
 export default TeamPage;
