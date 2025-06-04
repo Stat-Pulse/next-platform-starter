@@ -141,21 +141,3 @@ export default async function handler(req, res) {
     res.status(500).json({ error: 'Internal server error' });
   }
 }
-export default function TeamPage({ teamData }) {
-  const stadiumImage = '/images/field_overlay.png'; // Replace this later with real stadium image
-
-  return (
-    <div className="relative min-h-screen">
-      {/* Background image layer */}
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-10 z-0"
-        style={{ backgroundImage: `url(${stadiumImage})` }}
-      ></div>
-
-      {/* Foreground content */}
-      <div className="relative z-10">
-        {/* Your existing team content goes here */}
-      </div>
-    </div>
-  );
-}
