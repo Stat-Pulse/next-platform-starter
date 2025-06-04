@@ -218,6 +218,36 @@ const TeamPage = () => {
           </div>
         </div>
         <div className="space-y-6">
+          {/* Team Overview */}
+          <div className="bg-white rounded-md shadow p-4 border border-gray-200 text-sm">
+            <h2 className="text-base font-bold text-gray-700 uppercase tracking-wide mb-2 border-b pb-1">2024 Season Overview</h2>
+            <div className="space-y-1">
+              <p><strong>Division:</strong> {team.team_division}</p>
+              <p><strong>Record:</strong> {team.record ?? '—'}</p>
+              <p><strong>Points Scored:</strong> {team.points_scored ?? '—'}</p>
+              <p><strong>Points Allowed:</strong> {team.points_allowed ?? '—'}</p>
+            </div>
+          </div>
+
+          {/* Betting Info */}
+          <div className="bg-white rounded-md shadow p-4 border border-gray-200 text-sm">
+            <h2 className="text-base font-bold text-gray-700 uppercase tracking-wide mb-2 border-b pb-1">Betting Info</h2>
+            {upcomingSchedule && upcomingSchedule.length > 0 ? (
+              <div className="space-y-1">
+                <p>
+                  <strong>Spread:</strong> {upcomingSchedule[0].spread_line != null ? `${upcomingSchedule[0].spread_line > 0 ? '+' : ''}${upcomingSchedule[0].spread_line}` : '—'}
+                  <span className="ml-1 text-gray-500 text-xs">({upcomingSchedule[0].home_spread_odds ?? '—'} / {upcomingSchedule[0].away_spread_odds ?? '—'})</span>
+                </p>
+                <p>
+                  <strong>O/U:</strong> {upcomingSchedule[0].total_line ?? '—'}
+                  <span className="ml-1 text-gray-500 text-xs">({upcomingSchedule[0].over_odds ?? '—'} / {upcomingSchedule[0].under_odds ?? '—'})</span>
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No upcoming betting data available.</p>
+            )}
+          </div>
+
           {/* News */}
           <div className="bg-white rounded-md shadow p-4 border border-gray-200 text-sm">
             <h2 className="text-base font-bold text-gray-700 uppercase tracking-wide mb-2 border-b pb-1">Latest News</h2>
