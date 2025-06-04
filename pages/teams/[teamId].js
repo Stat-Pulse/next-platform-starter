@@ -47,13 +47,32 @@ const TeamPage = () => {
       maximumFractionDigits: decimals,
     }) : '—';
 
+  const stadiumImages = {
+    DAL: '/stadiums/att_stadium_DAL.jpg',
+    SEA: '/stadiums/centurylink_field_SEA.jpg',
+    KC: '/stadiums/chiefs_kingdom_KC.jpg',
+    MIA: '/stadiums/hardrock_stadium_MIA.jpg',
+    SF: '/stadiums/levis_stadium_SF.jpg',
+    DEN: '/stadiums/mile_high_DEN.jpg',
+    MIN: '/stadiums/usbank_stadium_MIN.jpg',
+  };
+
+  const stadiumBg = stadiumImages[team?.team_abbr];
+
   if (error) return <div className="text-red-600 p-4">{error}</div>;
   if (!teamData || !teamData.team) return <div className="p-4">Loading...</div>;
 
   const { team, lastGame, upcomingGame, teamLogos, offenseStats, defenseStats } = teamData;
 
   return (
-    <div className="bg-gradient-to-r from-blue-50 via-white to-gray-50 min-h-screen p-6">
+    <div
+      className="min-h-screen p-6 bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: stadiumBg ? `url(${stadiumBg})` : undefined,
+        backgroundColor: stadiumBg ? 'rgba(255, 255, 255, 0.85)' : undefined,
+        backgroundBlendMode: stadiumBg ? 'overlay' : undefined,
+      }}
+    >
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-3 mb-6">
           {/* Header */}
