@@ -141,15 +141,19 @@ useEffect(() => {
           {/* Games Section */}
           <SectionWrapper title="Games">
             <div className="grid md:grid-cols-3 gap-6">
-              {games.map((game) => (
-                <div key={game.id} className="bg-white p-4 rounded shadow">
-                  <h4 className="text-md font-semibold text-gray-700 mb-1">
-                    {game.home_team} vs {game.away_team}
-                  </h4>
-                  <p className="text-sm text-gray-500">{game.date_time}</p>
-                  <p className="text-sm">{game.status}</p>
-                </div>
-              ))}
+              {games.length === 0 ? (
+                <p className="text-gray-500">No upcoming games found.</p>
+              ) : (
+                games.map((game) => (
+                  <div key={game.id} className="bg-white p-4 rounded shadow">
+                    <h4 className="text-md font-semibold text-gray-700 mb-1">
+                      {game.away_team} @ {game.home_team}
+                    </h4>
+                    <p className="text-sm text-gray-500">{game.date_time}</p>
+                    <p className="text-sm text-blue-600 uppercase">{game.status}</p>
+                  </div>
+                ))
+              )}
             </div>
           </SectionWrapper>
 
