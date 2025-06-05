@@ -31,7 +31,8 @@ useEffect(() => {
   useEffect(() => {
     async function fetchNews() {
       try {
-        const res = await fetch('/api/news');
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+        const res = await fetch(`${baseUrl}/api/news`);
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
