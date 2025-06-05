@@ -8,6 +8,7 @@
 
 [functions]
   node_bundler = "esbuild"
+  directory = "netlify/functions"
   included_files = ["!node_modules/**", "/tmp/*.log"]
 
 [[edge_functions]]
