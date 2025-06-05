@@ -8,47 +8,28 @@ export default function TrendingTopics() {
   const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
-    const dummyNews = [
-      {
-        title: 'Derek Carr Announces Retirement',
-        content: 'Saints HC Kellen Moore confirms surprise retirement.',
-        date: 'May 10, 2025',
-        category: 'Transactions',
-        team: 'Saints',
-        player: 'Derek Carr',
-        tags: ['QB', 'retire']
-      },
-      {
-        title: 'J.J. McCarthy Named QB1 for Vikings',
-        content: 'Vikings confirm J.J. McCarthy as starter for Week 1.',
-        date: 'May 8, 2025',
-        category: 'Transactions',
-        team: 'Vikings',
-        player: 'J.J. McCarthy',
-        tags: ['QB', 'starter']
-      },
-      {
-        title: 'Sean Payton to Coach Broncos in 2025',
-        content: 'Broncos GM outlines expectations.',
-        date: 'May 7, 2025',
-        category: 'Coaching',
-        team: 'Broncos',
-        player: '',
-        tags: ['coach']
-      },
-      {
-        title: 'New Kickoff Rule Approved by NFL',
-        content: 'Kickoff rule changes aimed at player safety.',
-        date: 'May 6, 2025',
-        category: 'Rules',
-        team: '',
-        player: '',
-        tags: ['rules']
+    async function fetchNews() {
+      try {
+        const res = await fetch('/api/news');
+        const data = await res.json();
+        const transformed = data.map(item => ({
+          title: item.title,
+          content: '', // or item.description if you want to include it
+          date: new Date(item.pubDate).toLocaleDateString(),
+          category: item.source,
+          team: '',
+          player: '',
+          tags: [],
+          link: item.link,
+          image: item.image || null,
+        }));
+        setNewsItems(transformed);
+      } catch (err) {
+        console.error('Failed to load news:', err);
       }
-    ]
-
-    setNewsItems(dummyNews)
-  }, [])
+    }
+    fetchNews();
+  }, []);
 
   const filteredNews = newsItems.filter(item => {
     const query = searchQuery.toLowerCase()
@@ -73,8 +54,11 @@ export default function TrendingTopics() {
       {filteredNews.length > 0 ? (
         filteredNews.map((item, index) => (
           <div key={index} className="bg-gray-100 p-4 rounded shadow">
+            {item.image && (
+              <img src={item.image} alt={item.title} className="w-full h-40 object-cover rounded mb-2" />
+            )}
             <h3 className="text-lg font-semibold text-gray-800">
-              <Link href="/league-news" className="hover:underline text-red-600">
+              <Link href={item.link || '/league-news'} target="_blank" rel="noopener noreferrer" className="hover:underline text-red-600">
                 {item.title}
               </Link>
             </h3>
