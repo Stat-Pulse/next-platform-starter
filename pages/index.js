@@ -188,7 +188,7 @@ export async function getServerSideProps() {
 
     games = rows.map(game => ({
       ...game,
-      date_time: new Date(`${game.gameday}T${game.gametime}`).toLocaleString('en-US', {
+      date_time: new Date(`${game.gameday} ${game.gametime}`).toLocaleString('en-US', {
         weekday: 'short',
         hour: 'numeric',
         minute: 'numeric',
