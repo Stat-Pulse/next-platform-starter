@@ -179,26 +179,31 @@ export async function getServerSideProps() {
     });
 
     const [rows] = await connection.execute(`
-      SELECT game_id AS id, home_team, away_team, gameday, gametime
-      FROM Schedule_2025
+      SELECT game_id AS id, home_team, away_team, gameday
+      FROM Schedules_2025
       WHERE gameday >= CURDATE()
       ORDER BY gameday ASC
       LIMIT 9
     `);
 
-    games = rows.map(game => ({
-      ...game,
-      date_time: new Date(`${game.gameday} ${game.gametime}`).toLocaleString('en-US', {
-        weekday: 'short',
-        hour: 'numeric',
-        minute: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      }),
-      status: 'upcoming',
-    }));
-  } catch (err) {
-    console.error('Failed to fetch upcoming games:', err);
+    games = rows.map(game => {
+      const dateStr = `${game.gameday}T12:00:00`; // Fallback default noon
+    
+      return {
+        ...game,
+        date_time: new Date(dateStr).toLocaleString('en-US', {
+          weekday: 'short',
+          hour: 'numeric',
+          minute: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        }),
+        status: 'upcoming',
+      };
+    });
+
+  } catch (error) {
+    console.error('Database query failed:', error);
   }
 
   return {
