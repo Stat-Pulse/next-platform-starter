@@ -7,8 +7,8 @@ import SectionWrapper from '../components/SectionWrapper';
 import Link from 'next/link';
 import SearchBar from '../components/SearchBar';
 
-export default function HomePage({ initialGames }) {
-  const [newsItems, setNewsItems] = useState([]);
+export default function HomePage({ initialGames, news }) {
+  const [newsItems, setNewsItems] = useState(news || []);
   const [newsError, setNewsError] = useState(null); // Track news fetch errors
   const games = initialGames || [];
 
@@ -28,6 +28,7 @@ useEffect(() => {
   fetchSearchIndex();
 }, []);
 
+/*
   useEffect(() => {
     async function fetchNews() {
       try {
@@ -51,6 +52,7 @@ useEffect(() => {
 
     fetchNews();
   }, []);
+*/
 
   return (
     <>
@@ -95,7 +97,7 @@ useEffect(() => {
       </>
     ) : (
       <>
-        <h1 className="text-4xl font-bold mb-4">Clash of the Titans</h1>
+        <h1 className="text-4xl font-bold mb-4">Big Story Here. IDK</h1>
         <p className="mb-6">Awaiting top NFL headline...</p>
       </>
     )}
@@ -169,8 +171,10 @@ useEffect(() => {
 
 import mysql from 'mysql2/promise';
 
-export async function getServerSideProps() {
+export async function getStaticProps() {
   let games = [];
+  let news = [];
+
   try {
     const connection = await mysql.createConnection({
       host: process.env.DB_HOST,
@@ -188,8 +192,7 @@ export async function getServerSideProps() {
     `);
 
     games = rows.map(game => {
-      const dateStr = `${game.gameday}T12:00:00`; // Fallback default noon
-    
+      const dateStr = `${game.gameday}T12:00:00`;
       return {
         ...game,
         date_time: new Date(dateStr).toLocaleString('en-US', {
@@ -202,14 +205,22 @@ export async function getServerSideProps() {
         status: 'upcoming',
       };
     });
-
   } catch (error) {
     console.error('Database query failed:', error);
+  }
+
+  try {
+    const newsRes = await fetch('https://statpulseanalytics.netlify.app/api/news');
+    news = await newsRes.json();
+  } catch (e) {
+    console.error('Failed to fetch news:', e);
   }
 
   return {
     props: {
       initialGames: games,
+      news,
     },
+    revalidate: 900, // Rebuild every 15 minutes
   };
 }
