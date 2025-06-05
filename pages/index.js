@@ -118,22 +118,27 @@ useEffect(() => {
       <p className="text-gray-500">Loading latest NFL news...</p>
     ) : (
       newsItems.slice(0, 6).map((news, idx) => (
-        <div key={idx} className="bg-white p-4 rounded shadow hover:shadow-md transition">
-          <div className="flex justify-between items-center mb-2">
-            <h4 className="text-md font-semibold text-gray-800">{news.title}</h4>
-          </div>
-          <div className="flex justify-between items-center mt-4">
-            <a
-              href={news.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 text-sm hover:underline"
-            >
-              Read More
+        <div key={idx} className="bg-white rounded shadow overflow-hidden hover:shadow-md transition">
+          {news.image && (
+            <img
+              src={news.image}
+              alt={news.title}
+              className="w-full h-40 object-cover"
+            />
+          )}
+          <div className="p-4 space-y-2">
+            <a href={news.link} target="_blank" rel="noopener noreferrer">
+              <h3 className="text-lg font-semibold text-gray-900 hover:text-blue-700">{news.title}</h3>
             </a>
-            <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded">
-              {news.source}
-            </span>
+            {news.description && (
+              <p className="text-sm text-gray-600 line-clamp-3">
+                {news.description}
+              </p>
+            )}
+            <div className="text-xs text-gray-400 flex justify-between items-center mt-2">
+              <span>{news.source}</span>
+              <span>{new Date(news.pubDate).toLocaleDateString()}</span>
+            </div>
           </div>
         </div>
       ))
