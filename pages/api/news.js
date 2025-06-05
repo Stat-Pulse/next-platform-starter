@@ -1,6 +1,8 @@
 export default async function handler(req, res) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/.netlify/functions/getNFLNews`);
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://statpulseanalytics.netlify.app';
+    const queryString = req.url?.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+    const response = await fetch(`${baseUrl}/.netlify/functions/getNFLNews${queryString}`);
     const data = await response.json();
     res.status(200).json(data);
   } catch (error) {
