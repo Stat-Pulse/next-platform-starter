@@ -66,10 +66,10 @@ const TeamPage = () => {
 
   return (
     <div
-      className="min-h-screen p-6 bg-cover bg-center bg-no-repeat"
+      className="min-h-screen p-4 md:p-6 bg-cover bg-center bg-no-repeat bg-fixed filter brightness-110 bg-mobile-contain"
       style={{
         backgroundImage: stadiumBg ? `url(${stadiumBg})` : undefined,
-        backgroundColor: stadiumBg ? 'rgba(255, 255, 255, 0.85)' : undefined,
+        backgroundColor: stadiumBg ? 'rgba(255, 255, 255, 0.65)' : undefined,
         backgroundBlendMode: stadiumBg ? 'overlay' : undefined,
       }}
     >
