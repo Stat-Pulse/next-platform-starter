@@ -175,16 +175,16 @@ export async function getServerSideProps() {
     });
 
     const [rows] = await connection.execute(`
-      SELECT game_id AS id, home_team, away_team, scheduled_time
+      SELECT game_id AS id, home_team, away_team, gameday, gametime
       FROM Schedule_2025
-      WHERE scheduled_time > NOW()
-      ORDER BY scheduled_time ASC
+      WHERE gameday > CURDATE()
+      ORDER BY gameday ASC
       LIMIT 9
     `);
 
     games = rows.map(game => ({
       ...game,
-      date_time: new Date(game.scheduled_time).toLocaleString('en-US', {
+      date_time: new Date(`${game.gameday}T${game.gametime}`).toLocaleString('en-US', {
         weekday: 'short',
         hour: 'numeric',
         minute: 'numeric',
