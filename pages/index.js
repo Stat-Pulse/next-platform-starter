@@ -7,15 +7,10 @@ import SectionWrapper from '../components/SectionWrapper';
 import Link from 'next/link';
 import SearchBar from '../components/SearchBar';
 
-export default function HomePage() {
+export default function HomePage({ initialGames }) {
   const [newsItems, setNewsItems] = useState([]);
   const [newsError, setNewsError] = useState(null); // Track news fetch errors
-
-  const games = [
-    { id: 301, home_team: 'KC', away_team: 'BUF', status: 'upcoming', date_time: 'Sunday 8:20 PM ET' },
-    { id: 302, home_team: 'PHI', away_team: 'DAL', status: 'live', date_time: 'Q2 10:15' },
-    { id: 303, home_team: 'CIN', away_team: 'CLE', status: 'final', date_time: 'Final Score: 27-17' },
-  ];
+  const games = initialGames || [];
 
   const [searchIndex, setSearchIndex] = useState([]);
 
@@ -165,4 +160,46 @@ useEffect(() => {
       <Footer />
     </>
   );
+}
+
+import mysql from 'mysql2/promise';
+
+export async function getServerSideProps() {
+  let games = [];
+  try {
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+    });
+
+    const [rows] = await connection.execute(`
+      SELECT game_id AS id, home_team, away_team, scheduled_time
+      FROM Schedule_2025
+      WHERE scheduled_time > NOW()
+      ORDER BY scheduled_time ASC
+      LIMIT 9
+    `);
+
+    games = rows.map(game => ({
+      ...game,
+      date_time: new Date(game.scheduled_time).toLocaleString('en-US', {
+        weekday: 'short',
+        hour: 'numeric',
+        minute: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      }),
+      status: 'upcoming',
+    }));
+  } catch (err) {
+    console.error('Failed to fetch upcoming games:', err);
+  }
+
+  return {
+    props: {
+      initialGames: games,
+    },
+  };
 }
