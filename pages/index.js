@@ -181,7 +181,7 @@ export async function getServerSideProps() {
     const [rows] = await connection.execute(`
       SELECT game_id AS id, home_team, away_team, gameday, gametime
       FROM Schedule_2025
-      WHERE gameday > CURDATE()
+      WHERE gameday >= CURDATE()
       ORDER BY gameday ASC
       LIMIT 9
     `);
