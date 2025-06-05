@@ -31,7 +31,7 @@ useEffect(() => {
   useEffect(() => {
     async function fetchNews() {
       try {
-        const res = await fetch('/.netlify/functions/getNFLNews');
+        const res = await fetch('/api/news');
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
