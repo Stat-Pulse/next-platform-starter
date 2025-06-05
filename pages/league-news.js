@@ -13,7 +13,7 @@ export default function LeagueNews() {
       try {
         const res = await fetch('/api/news')
         const data = await res.json()
-        setNews(data.slice(0, 6))
+        setNews(data)
       } catch (err) {
         console.error('Failed to fetch league news:', err)
       }
@@ -74,7 +74,7 @@ export default function LeagueNews() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredNews.length > 0 ? (
-              filteredNews.map((item, index) => (
+              filteredNews.slice(0, 6).map((item, index) => (
                 <article key={index} className="bg-white p-4 rounded shadow space-y-2">
                   <h2 className="text-lg font-semibold text-gray-700">
                     <a
