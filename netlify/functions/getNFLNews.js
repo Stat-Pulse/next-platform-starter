@@ -20,7 +20,7 @@ exports.handler = async (event) => {
   const playerTerms = getPlayerTerms(playerQuery);
   const feeds = [
     { name: 'ESPN', url: 'https://www.espn.com/espn/rss/nfl/news' },
-    { name: 'NFL', url: 'https://www.nfl.com/rss/rsslanding?searchString=home' },
+    { name: 'Sporting News', url: 'https://www.sportingnews.com/us/nfl/rss' }, // Add this
     { name: 'CBS Sports', url: 'https://www.cbssports.com/rss/nfl' },
     { name: 'Yahoo Sports', url: 'https://sports.yahoo.com/nfl/rss.xml' },
     { name: 'NBC Sports (PFT)', url: 'https://profootballtalk.nbcsports.com/feed/' },
