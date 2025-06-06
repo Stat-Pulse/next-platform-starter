@@ -143,36 +143,43 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
           </div>
           {/* Center Column */}
           <div className="space-y-8">
-            {/* Career Summaries */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {player.career && (
-                <div className="bg-white p-4 rounded shadow">
-                  <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Receiving Career</h3>
-                  <p><strong>Games:</strong> {player.career.games}</p>
-                  <p><strong>Yards:</strong> {player.career.yards}</p>
-                  <p><strong>Touchdowns:</strong> {player.career.tds}</p>
-                </div>
-              )}
-              {player.rushingCareer && (player.rushingCareer.yards > 0 || player.rushingCareer.tds > 0) && (
-                <div className="bg-white p-4 rounded shadow">
-                  <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Rushing Career</h3>
-                  <p><strong>Games:</strong> {player.rushingCareer.games}</p>
-                  <p><strong>Yards:</strong> {player.rushingCareer.yards}</p>
-                  <p><strong>Touchdowns:</strong> {player.rushingCareer.tds}</p>
-                </div>
-              )}
-              {player.passingCareer && (player.passingCareer.yards > 0 || player.passingCareer.tds > 0 || player.passingCareer.completions > 0) && (
-                <div className="bg-white p-4 rounded shadow">
-                  <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Passing Career</h3>
-                  <p><strong>Games:</strong> {player.passingCareer.games}</p>
-                  <p><strong>Completions:</strong> {player.passingCareer.completions}</p>
-                  <p><strong>Attempts:</strong> {player.passingCareer.attempts}</p>
-                  <p><strong>Yards:</strong> {player.passingCareer.yards}</p>
-                  <p><strong>Touchdowns:</strong> {player.passingCareer.tds}</p>
-                  <p><strong>Interceptions:</strong> {player.passingCareer.ints}</p>
-                </div>
-              )}
+            {/* Career Summaries Carousel */}
+            <div className="overflow-x-auto">
+              <div className="flex space-x-4 pb-2 min-w-full snap-x snap-mandatory">
+                {player.career && (
+                  <div className="bg-white p-4 rounded shadow min-w-[220px] snap-start">
+                    <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Receiving Career</h3>
+                    <p><strong>Games:</strong> {player.career.games}</p>
+                    <p><strong>Yards:</strong> {player.career.yards}</p>
+                    <p><strong>Touchdowns:</strong> {player.career.tds}</p>
+                  </div>
+                )}
+                {player.rushingCareer && (
+                  <div
+                    className={`bg-white p-4 rounded shadow min-w-[220px] snap-start${(player.rushingCareer.yards === 0 && player.rushingCareer.tds === 0) ? ' hidden' : ''}`}
+                  >
+                    <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Rushing Career</h3>
+                    <p><strong>Games:</strong> {player.rushingCareer.games}</p>
+                    <p><strong>Yards:</strong> {player.rushingCareer.yards}</p>
+                    <p><strong>Touchdowns:</strong> {player.rushingCareer.tds}</p>
+                  </div>
+                )}
+                {player.passingCareer && (
+                  <div
+                    className={`bg-white p-4 rounded shadow min-w-[220px] snap-start${(player.passingCareer.yards === 0 && player.passingCareer.tds === 0 && player.passingCareer.completions === 0) ? ' hidden' : ''}`}
+                  >
+                    <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Passing Career</h3>
+                    <p><strong>Games:</strong> {player.passingCareer.games}</p>
+                    <p><strong>Completions:</strong> {player.passingCareer.completions}</p>
+                    <p><strong>Attempts:</strong> {player.passingCareer.attempts}</p>
+                    <p><strong>Yards:</strong> {player.passingCareer.yards}</p>
+                    <p><strong>Touchdowns:</strong> {player.passingCareer.tds}</p>
+                    <p><strong>Interceptions:</strong> {player.passingCareer.ints}</p>
+                  </div>
+                )}
+              </div>
             </div>
+            
             {/* Receiving Stats */}
             {receivingMetrics?.some(g => g.targets > 0 || g.receptions > 0 || g.receiving_yards > 0 || g.rec_touchdowns > 0) && (
               <div>
