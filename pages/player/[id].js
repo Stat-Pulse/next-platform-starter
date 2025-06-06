@@ -118,6 +118,14 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                 <span className="mr-4"><strong>Weight:</strong> {player.weight || 'N/A'}</span>
                 <span><strong>Age:</strong> {player.age || 'N/A'}</span>
               </div>
+              <div className="mt-1 text-sm text-gray-500">
+                <span className="mr-4"><strong>College:</strong> {player.college || 'N/A'}</span>
+                <span className="mr-4"><strong>Draft:</strong> {player.draft_round ? `R${player.draft_round}, P${player.draft_pick}, ${player.draft_team}` : 'N/A'}</span>
+              </div>
+              <div className="text-sm text-gray-500">
+                <span className="mr-4"><strong>Base Salary:</strong> {player.base_salary ? `$${player.base_salary.toLocaleString()}` : 'N/A'}</span>
+                <span className="mr-4"><strong>Cap Hit:</strong> {player.cap_hit ? `$${player.cap_hit.toLocaleString()}` : 'N/A'}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -125,21 +133,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column */}
           <div className="space-y-6">
-            <div className="bg-white p-4 rounded shadow">
-              <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Bio & Draft Info</h2>
-              <p><strong>College:</strong> {player.college || 'N/A'}</p>
-              <p><strong>Draft Team:</strong> {player.draft_team || 'N/A'}</p>
-              <p><strong>Draft Round:</strong> {player.draft_round || 'N/A'}</p>
-              <p><strong>Draft Pick:</strong> {player.draft_pick || 'N/A'}</p>
-              <p><strong>Draft Year:</strong> {player.draft_year || 'N/A'}</p>
-            </div>
-            <div className="bg-white p-4 rounded shadow">
-              <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Contract Info</h2>
-              <p><strong>Base Salary:</strong> {player.base_salary ? `$${player.base_salary.toLocaleString()}` : 'N/A'}</p>
-              <p><strong>Cap Hit:</strong> {player.cap_hit ? `$${player.cap_hit.toLocaleString()}` : 'N/A'}</p>
-              <p><strong>Dead Money:</strong> {player.dead_money ? `$${player.dead_money.toLocaleString()}` : 'N/A'}</p>
-              <p><strong>Cap Savings:</strong> {player.cap_savings ? `$${player.cap_savings.toLocaleString()}` : 'N/A'}</p>
-            </div>
+            {/* (Bio & Draft Info and Contract Info cards removed) */}
           </div>
           {/* Center Column */}
           <div className="space-y-8">
@@ -298,12 +292,30 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
               <div className="w-40 h-40 rounded-full border-8 border-gray-200 flex items-center justify-center mb-6">
                 <span className="text-3xl font-bold text-gray-500">75%</span>
               </div>
-              {/* Placeholder Weekly Bar Graph */}
+            </div>
+            {/* Weekly Bar Graph Card */}
+            <div className="bg-white p-4 rounded shadow flex flex-col items-center">
+              <div className="text-sm font-semibold mb-2 flex justify-between w-full">
+                <span>Weekly Targets vs. Receptions</span>
+                <div className="flex space-x-4 text-xs">
+                  <div className="flex items-center space-x-1">
+                    <span className="w-3 h-3 bg-blue-500 inline-block rounded-sm"></span><span>Targets</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <span className="w-3 h-3 bg-blue-300 inline-block rounded-sm"></span><span>Receptions</span>
+                  </div>
+                </div>
+              </div>
               <div className="w-full space-y-1">
-                {[...Array(10)].map((_, i) => (
+                {(receivingMetrics && receivingMetrics.length > 0 ? receivingMetrics : [...Array(10)].map((_, i) => ({
+                  week: i + 1,
+                  targets: Math.floor(Math.random() * 10),
+                  receptions: Math.floor(Math.random() * 10)
+                }))).map((g, i) => (
                   <div key={i} className="flex items-center space-x-2">
-                    <div className="w-6 text-xs text-gray-600">W{i + 1}</div>
-                    <div className="h-4 bg-blue-500 rounded" style={{ width: `${Math.floor(Math.random() * 100)}%` }}></div>
+                    <div className="w-6 text-xs text-gray-600">W{g.week}</div>
+                    <div className="h-4 bg-blue-500 rounded" style={{ width: `${g.targets || 0}px`, minWidth: '4px' }}></div>
+                    <div className="h-4 bg-blue-300 rounded" style={{ width: `${g.receptions || 0}px`, minWidth: '4px' }}></div>
                   </div>
                 ))}
               </div>
