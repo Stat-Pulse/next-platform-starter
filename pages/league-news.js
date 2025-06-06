@@ -13,7 +13,7 @@ export default function LeagueNews() {
       try {
         const res = await fetch('/api/news')
         const data = await res.json()
-        setNews(data.slice(0, 6))
+        setNews(data)
       } catch (err) {
         console.error('Failed to fetch league news:', err)
       }
@@ -34,6 +34,7 @@ export default function LeagueNews() {
       if (sortBy === 'source') return a.source.localeCompare(b.source)
       return new Date(b.pubDate) - new Date(a.pubDate)
     })
+    .slice(0, 6)
 
   return (
     <>
@@ -74,9 +75,7 @@ export default function LeagueNews() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredNews.length > 0 ? (
-              (() => {
-                const visibleNews = filteredNews.slice(0, 6);
-                return visibleNews.map((item, index) => (
+              filteredNews.map((item, index) => (
                 <article key={index} className="bg-white p-4 rounded shadow space-y-2">
                   <h2 className="text-lg font-semibold text-gray-700">
                     <a
@@ -99,8 +98,7 @@ export default function LeagueNews() {
                     />
                   )}
                 </article>
-                ));
-              })()
+              ))
             ) : (
               <p className="text-sm text-gray-500">No news available.</p>
             )}
