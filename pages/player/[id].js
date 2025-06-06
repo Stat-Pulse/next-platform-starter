@@ -133,7 +133,13 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column */}
           <div className="space-y-6">
-            {/* (Bio & Draft Info and Contract Info cards removed) */}
+            {/* Player Info Card */}
+            <div className="bg-white p-4 rounded shadow">
+              <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Player Summary</h2>
+              <p>
+                This player is currently active and contributing as a <span className="font-semibold">{player.position}</span> for the <span className="font-semibold">{player.recent_team}</span>.
+              </p>
+            </div>
           </div>
           {/* Center Column */}
           <div className="space-y-8">
@@ -147,7 +153,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                   <p><strong>Touchdowns:</strong> {player.career.tds}</p>
                 </div>
               )}
-              {player.rushingCareer && (
+              {player.rushingCareer && (player.rushingCareer.yards > 0 || player.rushingCareer.tds > 0) && (
                 <div className="bg-white p-4 rounded shadow">
                   <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Rushing Career</h3>
                   <p><strong>Games:</strong> {player.rushingCareer.games}</p>
@@ -155,7 +161,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                   <p><strong>Touchdowns:</strong> {player.rushingCareer.tds}</p>
                 </div>
               )}
-              {player.passingCareer && (
+              {player.passingCareer && (player.passingCareer.yards > 0 || player.passingCareer.tds > 0 || player.passingCareer.completions > 0) && (
                 <div className="bg-white p-4 rounded shadow">
                   <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Passing Career</h3>
                   <p><strong>Games:</strong> {player.passingCareer.games}</p>
