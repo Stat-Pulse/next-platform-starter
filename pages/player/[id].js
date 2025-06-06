@@ -101,21 +101,31 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
         <title>{player.player_name} | StatPulse Profile</title>
       </Head>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Sidebar */}
-          <div className="space-y-6">
-            {/* Player Header */}
-            <div className="flex flex-col items-center lg:items-start space-y-4">
-              <img src={player.headshot_url} alt={`${player.player_name} headshot`} className="w-32 h-32 rounded-full object-cover" />
-              <div className="text-center lg:text-left">
-                <h1 className="text-4xl font-extrabold tracking-tight">{player.player_name}</h1>
-                <p className="text-base uppercase tracking-wide font-semibold text-gray-600">{player.position} - {player.recent_team}</p>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header Block */}
+        <div className="bg-white rounded shadow flex flex-col md:flex-row items-center md:items-end md:justify-between px-6 py-6 mb-8">
+          <div className="flex items-center space-x-6 w-full">
+            <img src={player.headshot_url} alt={`${player.player_name} headshot`} className="w-32 h-32 rounded-full object-cover border-4 border-gray-100 shadow" />
+            <div>
+              <h1 className="text-4xl font-extrabold tracking-tight">{player.player_name}</h1>
+              <div className="flex items-center space-x-3 mt-2">
+                <span className="text-base uppercase tracking-wide font-semibold text-gray-600">{player.position}</span>
+                <span className="inline-block w-2 h-2 rounded-full bg-gray-400"></span>
+                <span className="text-base font-semibold text-gray-700">{player.recent_team}</span>
+              </div>
+              <div className="mt-2 text-sm text-gray-500">
+                <span className="mr-4"><strong>Height:</strong> {player.height || 'N/A'}</span>
+                <span className="mr-4"><strong>Weight:</strong> {player.weight || 'N/A'}</span>
+                <span><strong>Age:</strong> {player.age || 'N/A'}</span>
               </div>
             </div>
-
-            {/* Bio and Draft Info */}
-            <div className="bg-slate-50 p-4 rounded shadow">
+          </div>
+        </div>
+        {/* 3-Column Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column */}
+          <div className="space-y-6">
+            <div className="bg-white p-4 rounded shadow">
               <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Bio & Draft Info</h2>
               <p><strong>College:</strong> {player.college || 'N/A'}</p>
               <p><strong>Draft Team:</strong> {player.draft_team || 'N/A'}</p>
@@ -123,9 +133,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
               <p><strong>Draft Pick:</strong> {player.draft_pick || 'N/A'}</p>
               <p><strong>Draft Year:</strong> {player.draft_year || 'N/A'}</p>
             </div>
-
-            {/* Contract Info */}
-            <div className="bg-slate-50 p-4 rounded shadow">
+            <div className="bg-white p-4 rounded shadow">
               <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Contract Info</h2>
               <p><strong>Base Salary:</strong> {player.base_salary ? `$${player.base_salary.toLocaleString()}` : 'N/A'}</p>
               <p><strong>Cap Hit:</strong> {player.cap_hit ? `$${player.cap_hit.toLocaleString()}` : 'N/A'}</p>
@@ -133,13 +141,12 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
               <p><strong>Cap Savings:</strong> {player.cap_savings ? `$${player.cap_savings.toLocaleString()}` : 'N/A'}</p>
             </div>
           </div>
-
-          {/* Center Content */}
+          {/* Center Column */}
           <div className="space-y-8">
             {/* Career Summaries */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {player.career && (
-                <div className="bg-neutral-100 p-4 rounded shadow">
+                <div className="bg-white p-4 rounded shadow">
                   <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Receiving Career</h3>
                   <p><strong>Games:</strong> {player.career.games}</p>
                   <p><strong>Yards:</strong> {player.career.yards}</p>
@@ -147,7 +154,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                 </div>
               )}
               {player.rushingCareer && (
-                <div className="bg-neutral-100 p-4 rounded shadow">
+                <div className="bg-white p-4 rounded shadow">
                   <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Rushing Career</h3>
                   <p><strong>Games:</strong> {player.rushingCareer.games}</p>
                   <p><strong>Yards:</strong> {player.rushingCareer.yards}</p>
@@ -155,7 +162,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                 </div>
               )}
               {player.passingCareer && (
-                <div className="bg-neutral-100 p-4 rounded shadow">
+                <div className="bg-white p-4 rounded shadow">
                   <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Passing Career</h3>
                   <p><strong>Games:</strong> {player.passingCareer.games}</p>
                   <p><strong>Completions:</strong> {player.passingCareer.completions}</p>
@@ -166,7 +173,6 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                 </div>
               )}
             </div>
-
             {/* Receiving Stats */}
             {receivingMetrics?.some(g => g.targets > 0 || g.receptions > 0 || g.receiving_yards > 0 || g.rec_touchdowns > 0) && (
               <div>
@@ -199,7 +205,6 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                 </div>
               </div>
             )}
-
             {/* Rushing Stats */}
             {rushingMetrics?.some(g => g.carries > 0 || g.rushing_yards > 0 || g.rushing_tds > 0) && (
               <div>
@@ -232,7 +237,6 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                 </div>
               </div>
             )}
-
             {/* Passing Stats */}
             {passingMetrics?.some(g => g.completions > 0 || g.attempts > 0 || g.passing_yards > 0 || g.passing_tds > 0 || g.interceptions > 0) && (
               <div>
@@ -269,12 +273,11 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                 </div>
               </div>
             )}
-
             {/* Advanced Passing Metrics */}
             {advancedPassing && (
               <div>
                 <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Advanced Passing Metrics</h2>
-                <div className="bg-neutral-100 p-4 rounded shadow">
+                <div className="bg-white p-4 rounded shadow">
                   <p><strong>Avg Time to Throw:</strong> {typeof advancedPassing.avg_time_to_throw === 'number' ? advancedPassing.avg_time_to_throw.toFixed(2) + ' sec' : 'N/A'}</p>
                   <p><strong>Avg Completed Air Yards:</strong> {typeof advancedPassing.avg_completed_air_yards === 'number' ? advancedPassing.avg_completed_air_yards.toFixed(2) : 'N/A'}</p>
                   <p><strong>Avg Intended Air Yards:</strong> {typeof advancedPassing.avg_intended_air_yards === 'number' ? advancedPassing.avg_intended_air_yards.toFixed(2) : 'N/A'}</p>
@@ -287,13 +290,12 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
               </div>
             )}
           </div>
-
-          {/* Right Sidebar: Snaps Charts */}
+          {/* Right Column */}
           <div className="space-y-8">
-            <div className="bg-slate-50 p-4 rounded shadow flex flex-col items-center">
+            <div className="bg-white p-4 rounded shadow flex flex-col items-center">
               <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Snaps</h2>
               {/* Placeholder Donut Chart */}
-              <div className="w-40 h-40 rounded-full border-8 border-gray-300 flex items-center justify-center mb-6">
+              <div className="w-40 h-40 rounded-full border-8 border-gray-200 flex items-center justify-center mb-6">
                 <span className="text-3xl font-bold text-gray-500">75%</span>
               </div>
               {/* Placeholder Weekly Bar Graph */}
