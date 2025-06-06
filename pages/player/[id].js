@@ -43,15 +43,15 @@ export async function getServerSideProps({ params }) {
     `, [playerId]);
 
     const [advancedReceiving] = await connection.execute(`
-      SELECT * FROM NextGen_Stats_Receiving WHERE player_gsis_id = ? AND season = 2024
+      SELECT * FROM NextGen_Stats_Receiving WHERE player_id = ? AND season = 2024
     `, [playerId]);
 
     const [advancedRushing] = await connection.execute(`
-      SELECT * FROM NextGen_Stats_Rushing WHERE player_gsis_id = ? AND season = 2024
+      SELECT * FROM NextGen_Stats_Rushing WHERE player_id = ? AND season = 2024
     `, [playerId]);
 
     const [advancedPassing] = await connection.execute(`
-      SELECT * FROM NextGen_Stats_Passing WHERE player_gsis_id = ? AND season = 2024
+      SELECT * FROM NextGen_Stats_Passing WHERE player_id = ? AND season = 2024
     `, [playerId]);
 
     const rushingCareer = rushingMetrics.length > 0 ? {
