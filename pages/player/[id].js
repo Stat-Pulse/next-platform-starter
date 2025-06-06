@@ -168,7 +168,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
             </div>
 
             {/* Receiving Stats */}
-            {receivingMetrics?.length > 0 && (
+            {receivingMetrics?.some(g => g.targets > 0 || g.receptions > 0 || g.receiving_yards > 0 || g.rec_touchdowns > 0) && (
               <div>
                 <h2 className="text-2xl font-bold mb-2">2024 Receiving Stats</h2>
                 <div className="overflow-x-auto bg-white p-4 rounded shadow">
@@ -201,7 +201,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
             )}
 
             {/* Rushing Stats */}
-            {rushingMetrics?.length > 0 && (
+            {rushingMetrics?.some(g => g.carries > 0 || g.rushing_yards > 0 || g.rushing_tds > 0) && (
               <div>
                 <h2 className="text-2xl font-bold mb-2">2024 Rushing Stats</h2>
                 <div className="overflow-x-auto bg-white p-4 rounded shadow">
@@ -234,7 +234,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
             )}
 
             {/* Passing Stats */}
-            {passingMetrics?.length > 0 && (
+            {passingMetrics?.some(g => g.completions > 0 || g.attempts > 0 || g.passing_yards > 0 || g.passing_tds > 0 || g.interceptions > 0) && (
               <div>
                 <h2 className="text-2xl font-bold mb-2">2024 Passing Stats</h2>
                 <div className="overflow-x-auto bg-white p-4 rounded shadow">
