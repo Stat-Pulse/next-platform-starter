@@ -109,14 +109,14 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
             <div className="flex flex-col items-center lg:items-start space-y-4">
               <img src={player.headshot_url} alt={`${player.player_name} headshot`} className="w-32 h-32 rounded-full object-cover" />
               <div className="text-center lg:text-left">
-                <h1 className="text-3xl font-bold">{player.player_name}</h1>
-                <p className="text-lg text-gray-600">{player.position} - {player.recent_team}</p>
+                <h1 className="text-4xl font-extrabold tracking-tight">{player.player_name}</h1>
+                <p className="text-base uppercase tracking-wide font-semibold text-gray-600">{player.position} - {player.recent_team}</p>
               </div>
             </div>
 
             {/* Bio and Draft Info */}
-            <div className="bg-white p-4 rounded shadow">
-              <h2 className="text-xl font-semibold mb-2">Bio & Draft Info</h2>
+            <div className="bg-slate-50 p-4 rounded shadow">
+              <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Bio & Draft Info</h2>
               <p><strong>College:</strong> {player.college || 'N/A'}</p>
               <p><strong>Draft Team:</strong> {player.draft_team || 'N/A'}</p>
               <p><strong>Draft Round:</strong> {player.draft_round || 'N/A'}</p>
@@ -125,8 +125,8 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
             </div>
 
             {/* Contract Info */}
-            <div className="bg-white p-4 rounded shadow">
-              <h2 className="text-xl font-semibold mb-2">Contract Info</h2>
+            <div className="bg-slate-50 p-4 rounded shadow">
+              <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Contract Info</h2>
               <p><strong>Base Salary:</strong> {player.base_salary ? `$${player.base_salary.toLocaleString()}` : 'N/A'}</p>
               <p><strong>Cap Hit:</strong> {player.cap_hit ? `$${player.cap_hit.toLocaleString()}` : 'N/A'}</p>
               <p><strong>Dead Money:</strong> {player.dead_money ? `$${player.dead_money.toLocaleString()}` : 'N/A'}</p>
@@ -139,24 +139,24 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
             {/* Career Summaries */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {player.career && (
-                <div className="bg-white p-4 rounded shadow">
-                  <h3 className="font-semibold mb-2">Receiving Career</h3>
+                <div className="bg-neutral-100 p-4 rounded shadow">
+                  <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Receiving Career</h3>
                   <p><strong>Games:</strong> {player.career.games}</p>
                   <p><strong>Yards:</strong> {player.career.yards}</p>
                   <p><strong>Touchdowns:</strong> {player.career.tds}</p>
                 </div>
               )}
               {player.rushingCareer && (
-                <div className="bg-white p-4 rounded shadow">
-                  <h3 className="font-semibold mb-2">Rushing Career</h3>
+                <div className="bg-neutral-100 p-4 rounded shadow">
+                  <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Rushing Career</h3>
                   <p><strong>Games:</strong> {player.rushingCareer.games}</p>
                   <p><strong>Yards:</strong> {player.rushingCareer.yards}</p>
                   <p><strong>Touchdowns:</strong> {player.rushingCareer.tds}</p>
                 </div>
               )}
               {player.passingCareer && (
-                <div className="bg-white p-4 rounded shadow">
-                  <h3 className="font-semibold mb-2">Passing Career</h3>
+                <div className="bg-neutral-100 p-4 rounded shadow">
+                  <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Passing Career</h3>
                   <p><strong>Games:</strong> {player.passingCareer.games}</p>
                   <p><strong>Completions:</strong> {player.passingCareer.completions}</p>
                   <p><strong>Attempts:</strong> {player.passingCareer.attempts}</p>
@@ -170,9 +170,9 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
             {/* Receiving Stats */}
             {receivingMetrics?.some(g => g.targets > 0 || g.receptions > 0 || g.receiving_yards > 0 || g.rec_touchdowns > 0) && (
               <div>
-                <h2 className="text-2xl font-bold mb-2">2024 Receiving Stats</h2>
+                <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Receiving Stats</h2>
                 <div className="overflow-x-auto bg-white p-4 rounded shadow">
-                  <table className="table-auto w-full text-sm">
+                  <table className="table-auto w-full text-xs">
                     <thead>
                       <tr className="border-b">
                         <th className="text-left p-2">Week</th>
@@ -185,7 +185,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                     </thead>
                     <tbody>
                       {receivingMetrics.map((g, idx) => (
-                        <tr key={idx} className="border-b">
+                        <tr key={idx} className="border-b hover:bg-gray-50">
                           <td className="p-2">{g.week}</td>
                           <td className="p-2">{g.opponent_team}</td>
                           <td className="p-2">{g.targets}</td>
@@ -203,9 +203,9 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
             {/* Rushing Stats */}
             {rushingMetrics?.some(g => g.carries > 0 || g.rushing_yards > 0 || g.rushing_tds > 0) && (
               <div>
-                <h2 className="text-2xl font-bold mb-2">2024 Rushing Stats</h2>
+                <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Rushing Stats</h2>
                 <div className="overflow-x-auto bg-white p-4 rounded shadow">
-                  <table className="table-auto w-full text-sm">
+                  <table className="table-auto w-full text-xs">
                     <thead>
                       <tr className="border-b">
                         <th className="text-left p-2">Week</th>
@@ -218,7 +218,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                     </thead>
                     <tbody>
                       {rushingMetrics.map((g, idx) => (
-                        <tr key={idx} className="border-b">
+                        <tr key={idx} className="border-b hover:bg-gray-50">
                           <td className="p-2">{g.week}</td>
                           <td className="p-2">{g.opponent_team}</td>
                           <td className="p-2">{g.carries}</td>
@@ -236,9 +236,9 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
             {/* Passing Stats */}
             {passingMetrics?.some(g => g.completions > 0 || g.attempts > 0 || g.passing_yards > 0 || g.passing_tds > 0 || g.interceptions > 0) && (
               <div>
-                <h2 className="text-2xl font-bold mb-2">2024 Passing Stats</h2>
+                <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Passing Stats</h2>
                 <div className="overflow-x-auto bg-white p-4 rounded shadow">
-                  <table className="table-auto w-full text-sm">
+                  <table className="table-auto w-full text-xs">
                     <thead>
                       <tr className="border-b">
                         <th className="text-left p-2">Week</th>
@@ -253,7 +253,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                     </thead>
                     <tbody>
                       {passingMetrics.map((g, idx) => (
-                        <tr key={idx} className="border-b">
+                        <tr key={idx} className="border-b hover:bg-gray-50">
                           <td className="p-2">{g.week}</td>
                           <td className="p-2">{g.opponent_team}</td>
                           <td className="p-2">{g.completions}</td>
@@ -273,8 +273,8 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
             {/* Advanced Passing Metrics */}
             {advancedPassing && (
               <div>
-                <h2 className="text-2xl font-bold mb-2">2024 Advanced Passing Metrics</h2>
-                <div className="bg-white p-4 rounded shadow">
+                <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Advanced Passing Metrics</h2>
+                <div className="bg-neutral-100 p-4 rounded shadow">
                   <p><strong>Avg Time to Throw:</strong> {typeof advancedPassing.avg_time_to_throw === 'number' ? advancedPassing.avg_time_to_throw.toFixed(2) + ' sec' : 'N/A'}</p>
                   <p><strong>Avg Completed Air Yards:</strong> {typeof advancedPassing.avg_completed_air_yards === 'number' ? advancedPassing.avg_completed_air_yards.toFixed(2) : 'N/A'}</p>
                   <p><strong>Avg Intended Air Yards:</strong> {typeof advancedPassing.avg_intended_air_yards === 'number' ? advancedPassing.avg_intended_air_yards.toFixed(2) : 'N/A'}</p>
@@ -290,8 +290,8 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
 
           {/* Right Sidebar: Snaps Charts */}
           <div className="space-y-8">
-            <div className="bg-white p-4 rounded shadow flex flex-col items-center">
-              <h2 className="text-2xl font-bold mb-4">Snaps</h2>
+            <div className="bg-slate-50 p-4 rounded shadow flex flex-col items-center">
+              <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Snaps</h2>
               {/* Placeholder Donut Chart */}
               <div className="w-40 h-40 rounded-full border-8 border-gray-300 flex items-center justify-center mb-6">
                 <span className="text-3xl font-bold text-gray-500">75%</span>
@@ -300,7 +300,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
               <div className="w-full space-y-1">
                 {[...Array(10)].map((_, i) => (
                   <div key={i} className="flex items-center space-x-2">
-                    <div className="w-6 text-sm text-gray-600">W{i + 1}</div>
+                    <div className="w-6 text-xs text-gray-600">W{i + 1}</div>
                     <div className="h-4 bg-blue-500 rounded" style={{ width: `${Math.floor(Math.random() * 100)}%` }}></div>
                   </div>
                 ))}
