@@ -101,183 +101,213 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
         <title>{player.player_name} | StatPulse Profile</title>
       </Head>
 
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        {/* Player Header */}
-        <div className="flex items-center space-x-6">
-          <img src={player.headshot_url} alt={`${player.player_name} headshot`} className="w-24 h-24 rounded-full object-cover" />
-          <div>
-            <h1 className="text-3xl font-bold">{player.player_name}</h1>
-            <p className="text-lg text-gray-600">{player.position} - {player.recent_team}</p>
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Sidebar */}
+          <div className="space-y-6">
+            {/* Player Header */}
+            <div className="flex flex-col items-center lg:items-start space-y-4">
+              <img src={player.headshot_url} alt={`${player.player_name} headshot`} className="w-32 h-32 rounded-full object-cover" />
+              <div className="text-center lg:text-left">
+                <h1 className="text-3xl font-bold">{player.player_name}</h1>
+                <p className="text-lg text-gray-600">{player.position} - {player.recent_team}</p>
+              </div>
+            </div>
+
+            {/* Bio and Draft Info */}
+            <div className="bg-white p-4 rounded shadow">
+              <h2 className="text-xl font-semibold mb-2">Bio & Draft Info</h2>
+              <p><strong>College:</strong> {player.college || 'N/A'}</p>
+              <p><strong>Draft Team:</strong> {player.draft_team || 'N/A'}</p>
+              <p><strong>Draft Round:</strong> {player.draft_round || 'N/A'}</p>
+              <p><strong>Draft Pick:</strong> {player.draft_pick || 'N/A'}</p>
+              <p><strong>Draft Year:</strong> {player.draft_year || 'N/A'}</p>
+            </div>
+
+            {/* Contract Info */}
+            <div className="bg-white p-4 rounded shadow">
+              <h2 className="text-xl font-semibold mb-2">Contract Info</h2>
+              <p><strong>Base Salary:</strong> {player.base_salary ? `$${player.base_salary.toLocaleString()}` : 'N/A'}</p>
+              <p><strong>Cap Hit:</strong> {player.cap_hit ? `$${player.cap_hit.toLocaleString()}` : 'N/A'}</p>
+              <p><strong>Dead Money:</strong> {player.dead_money ? `$${player.dead_money.toLocaleString()}` : 'N/A'}</p>
+              <p><strong>Cap Savings:</strong> {player.cap_savings ? `$${player.cap_savings.toLocaleString()}` : 'N/A'}</p>
+            </div>
+          </div>
+
+          {/* Center Content */}
+          <div className="space-y-8">
+            {/* Career Summaries */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {player.career && (
+                <div className="bg-white p-4 rounded shadow">
+                  <h3 className="font-semibold mb-2">Receiving Career</h3>
+                  <p><strong>Games:</strong> {player.career.games}</p>
+                  <p><strong>Yards:</strong> {player.career.yards}</p>
+                  <p><strong>Touchdowns:</strong> {player.career.tds}</p>
+                </div>
+              )}
+              {player.rushingCareer && (
+                <div className="bg-white p-4 rounded shadow">
+                  <h3 className="font-semibold mb-2">Rushing Career</h3>
+                  <p><strong>Games:</strong> {player.rushingCareer.games}</p>
+                  <p><strong>Yards:</strong> {player.rushingCareer.yards}</p>
+                  <p><strong>Touchdowns:</strong> {player.rushingCareer.tds}</p>
+                </div>
+              )}
+              {player.passingCareer && (
+                <div className="bg-white p-4 rounded shadow">
+                  <h3 className="font-semibold mb-2">Passing Career</h3>
+                  <p><strong>Games:</strong> {player.passingCareer.games}</p>
+                  <p><strong>Completions:</strong> {player.passingCareer.completions}</p>
+                  <p><strong>Attempts:</strong> {player.passingCareer.attempts}</p>
+                  <p><strong>Yards:</strong> {player.passingCareer.yards}</p>
+                  <p><strong>Touchdowns:</strong> {player.passingCareer.tds}</p>
+                  <p><strong>Interceptions:</strong> {player.passingCareer.ints}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Receiving Stats */}
+            {receivingMetrics?.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold mb-2">2024 Receiving Stats</h2>
+                <div className="overflow-x-auto bg-white p-4 rounded shadow">
+                  <table className="table-auto w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left p-2">Week</th>
+                        <th className="text-left p-2">Opponent</th>
+                        <th className="text-left p-2">Targets</th>
+                        <th className="text-left p-2">Rec</th>
+                        <th className="text-left p-2">Yards</th>
+                        <th className="text-left p-2">TDs</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {receivingMetrics.map((g, idx) => (
+                        <tr key={idx} className="border-b">
+                          <td className="p-2">{g.week}</td>
+                          <td className="p-2">{g.opponent_team}</td>
+                          <td className="p-2">{g.targets}</td>
+                          <td className="p-2">{g.receptions}</td>
+                          <td className="p-2">{g.receiving_yards}</td>
+                          <td className="p-2">{g.rec_touchdowns}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Rushing Stats */}
+            {rushingMetrics?.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold mb-2">2024 Rushing Stats</h2>
+                <div className="overflow-x-auto bg-white p-4 rounded shadow">
+                  <table className="table-auto w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left p-2">Week</th>
+                        <th className="text-left p-2">Opponent</th>
+                        <th className="text-left p-2">Carries</th>
+                        <th className="text-left p-2">Yards</th>
+                        <th className="text-left p-2">TDs</th>
+                        <th className="text-left p-2">EPA</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rushingMetrics.map((g, idx) => (
+                        <tr key={idx} className="border-b">
+                          <td className="p-2">{g.week}</td>
+                          <td className="p-2">{g.opponent_team}</td>
+                          <td className="p-2">{g.carries}</td>
+                          <td className="p-2">{g.rushing_yards}</td>
+                          <td className="p-2">{g.rushing_tds}</td>
+                          <td className="p-2">{typeof g.rushing_epa === 'number' ? g.rushing_epa.toFixed(2) : '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Passing Stats */}
+            {passingMetrics?.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold mb-2">2024 Passing Stats</h2>
+                <div className="overflow-x-auto bg-white p-4 rounded shadow">
+                  <table className="table-auto w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left p-2">Week</th>
+                        <th className="text-left p-2">Opponent</th>
+                        <th className="text-left p-2">Comp</th>
+                        <th className="text-left p-2">Att</th>
+                        <th className="text-left p-2">Yards</th>
+                        <th className="text-left p-2">TDs</th>
+                        <th className="text-left p-2">INTs</th>
+                        <th className="text-left p-2">EPA</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {passingMetrics.map((g, idx) => (
+                        <tr key={idx} className="border-b">
+                          <td className="p-2">{g.week}</td>
+                          <td className="p-2">{g.opponent_team}</td>
+                          <td className="p-2">{g.completions}</td>
+                          <td className="p-2">{g.attempts}</td>
+                          <td className="p-2">{g.passing_yards}</td>
+                          <td className="p-2">{g.passing_tds}</td>
+                          <td className="p-2">{g.interceptions}</td>
+                          <td className="p-2">{typeof g.passing_epa === 'number' ? g.passing_epa.toFixed(2) : '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Advanced Passing Metrics */}
+            {advancedPassing && (
+              <div>
+                <h2 className="text-2xl font-bold mb-2">2024 Advanced Passing Metrics</h2>
+                <div className="bg-white p-4 rounded shadow">
+                  <p><strong>Avg Time to Throw:</strong> {typeof advancedPassing.avg_time_to_throw === 'number' ? advancedPassing.avg_time_to_throw.toFixed(2) + ' sec' : 'N/A'}</p>
+                  <p><strong>Avg Completed Air Yards:</strong> {typeof advancedPassing.avg_completed_air_yards === 'number' ? advancedPassing.avg_completed_air_yards.toFixed(2) : 'N/A'}</p>
+                  <p><strong>Avg Intended Air Yards:</strong> {typeof advancedPassing.avg_intended_air_yards === 'number' ? advancedPassing.avg_intended_air_yards.toFixed(2) : 'N/A'}</p>
+                  <p><strong>Avg Air Yards Differential:</strong> {typeof advancedPassing.avg_air_yards_differential === 'number' ? advancedPassing.avg_air_yards_differential.toFixed(2) : 'N/A'}</p>
+                  <p><strong>Aggressiveness:</strong> {typeof advancedPassing.aggressiveness === 'number' ? advancedPassing.aggressiveness.toFixed(1) + '%' : 'N/A'}</p>
+                  <p><strong>Max Completed Air Distance:</strong> {typeof advancedPassing.max_completed_air_distance === 'number' ? advancedPassing.max_completed_air_distance.toFixed(1) : 'N/A'}</p>
+                  <p><strong>Expected Completion %:</strong> {typeof advancedPassing.expected_completion_percentage === 'number' ? advancedPassing.expected_completion_percentage.toFixed(1) + '%' : 'N/A'}</p>
+                  <p><strong>Completion % Over Expectation:</strong> {typeof advancedPassing.completion_percentage_above_expectation === 'number' ? advancedPassing.completion_percentage_above_expectation.toFixed(1) + '%' : 'N/A'}</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Sidebar: Snaps Charts */}
+          <div className="space-y-8">
+            <div className="bg-white p-4 rounded shadow flex flex-col items-center">
+              <h2 className="text-2xl font-bold mb-4">Snaps</h2>
+              {/* Placeholder Donut Chart */}
+              <div className="w-40 h-40 rounded-full border-8 border-gray-300 flex items-center justify-center mb-6">
+                <span className="text-3xl font-bold text-gray-500">75%</span>
+              </div>
+              {/* Placeholder Weekly Bar Graph */}
+              <div className="w-full space-y-1">
+                {[...Array(10)].map((_, i) => (
+                  <div key={i} className="flex items-center space-x-2">
+                    <div className="w-6 text-sm text-gray-600">W{i + 1}</div>
+                    <div className="h-4 bg-blue-500 rounded" style={{ width: `${Math.floor(Math.random() * 100)}%` }}></div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* Bio and Draft Info */}
-        <div className="mt-6 bg-white p-4 rounded shadow">
-          <h2 className="text-xl font-semibold mb-2">Bio & Draft Info</h2>
-          <p><strong>College:</strong> {player.college || 'N/A'}</p>
-          <p><strong>Draft Team:</strong> {player.draft_team || 'N/A'}</p>
-          <p><strong>Draft Round:</strong> {player.draft_round || 'N/A'}</p>
-          <p><strong>Draft Pick:</strong> {player.draft_pick || 'N/A'}</p>
-          <p><strong>Draft Year:</strong> {player.draft_year || 'N/A'}</p>
-        </div>
-
-        {/* Contract Info */}
-        <div className="mt-6 bg-white p-4 rounded shadow">
-          <h2 className="text-xl font-semibold mb-2">Contract Info</h2>
-          <p><strong>Base Salary:</strong> {player.base_salary ? `$${player.base_salary.toLocaleString()}` : 'N/A'}</p>
-          <p><strong>Cap Hit:</strong> {player.cap_hit ? `$${player.cap_hit.toLocaleString()}` : 'N/A'}</p>
-          <p><strong>Dead Money:</strong> {player.dead_money ? `$${player.dead_money.toLocaleString()}` : 'N/A'}</p>
-          <p><strong>Cap Savings:</strong> {player.cap_savings ? `$${player.cap_savings.toLocaleString()}` : 'N/A'}</p>
-        </div>
-
-        {/* Career Summaries */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-          {player.career && (
-            <div className="bg-white p-4 rounded shadow">
-              <h3 className="font-semibold mb-2">Receiving Career</h3>
-              <p><strong>Games:</strong> {player.career.games}</p>
-              <p><strong>Yards:</strong> {player.career.yards}</p>
-              <p><strong>Touchdowns:</strong> {player.career.tds}</p>
-            </div>
-          )}
-          {player.rushingCareer && (
-            <div className="bg-white p-4 rounded shadow">
-              <h3 className="font-semibold mb-2">Rushing Career</h3>
-              <p><strong>Games:</strong> {player.rushingCareer.games}</p>
-              <p><strong>Yards:</strong> {player.rushingCareer.yards}</p>
-              <p><strong>Touchdowns:</strong> {player.rushingCareer.tds}</p>
-            </div>
-          )}
-          {player.passingCareer && (
-            <div className="bg-white p-4 rounded shadow">
-              <h3 className="font-semibold mb-2">Passing Career</h3>
-              <p><strong>Games:</strong> {player.passingCareer.games}</p>
-              <p><strong>Completions:</strong> {player.passingCareer.completions}</p>
-              <p><strong>Attempts:</strong> {player.passingCareer.attempts}</p>
-              <p><strong>Yards:</strong> {player.passingCareer.yards}</p>
-              <p><strong>Touchdowns:</strong> {player.passingCareer.tds}</p>
-              <p><strong>Interceptions:</strong> {player.passingCareer.ints}</p>
-            </div>
-          )}
-        </div>
-
-        {/* Receiving Stats */}
-        {receivingMetrics?.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-2">2024 Receiving Stats</h2>
-            <div className="overflow-x-auto bg-white p-4 rounded shadow">
-              <table className="table-auto w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-2">Week</th>
-                    <th className="text-left p-2">Opponent</th>
-                    <th className="text-left p-2">Targets</th>
-                    <th className="text-left p-2">Rec</th>
-                    <th className="text-left p-2">Yards</th>
-                    <th className="text-left p-2">TDs</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {receivingMetrics.map((g, idx) => (
-                    <tr key={idx} className="border-b">
-                      <td className="p-2">{g.week}</td>
-                      <td className="p-2">{g.opponent_team}</td>
-                      <td className="p-2">{g.targets}</td>
-                      <td className="p-2">{g.receptions}</td>
-                      <td className="p-2">{g.receiving_yards}</td>
-                      <td className="p-2">{g.rec_touchdowns}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Rushing Stats */}
-        {rushingMetrics?.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-2">2024 Rushing Stats</h2>
-            <div className="overflow-x-auto bg-white p-4 rounded shadow">
-              <table className="table-auto w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-2">Week</th>
-                    <th className="text-left p-2">Opponent</th>
-                    <th className="text-left p-2">Carries</th>
-                    <th className="text-left p-2">Yards</th>
-                    <th className="text-left p-2">TDs</th>
-                    <th className="text-left p-2">EPA</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rushingMetrics.map((g, idx) => (
-                    <tr key={idx} className="border-b">
-                      <td className="p-2">{g.week}</td>
-                      <td className="p-2">{g.opponent_team}</td>
-                      <td className="p-2">{g.carries}</td>
-                      <td className="p-2">{g.rushing_yards}</td>
-                      <td className="p-2">{g.rushing_tds}</td>
-                      <td className="p-2">{typeof g.rushing_epa === 'number' ? g.rushing_epa.toFixed(2) : '—'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {passingMetrics?.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-2">2024 Passing Stats</h2>
-            <div className="overflow-x-auto bg-white p-4 rounded shadow">
-              <table className="table-auto w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-2">Week</th>
-                    <th className="text-left p-2">Opponent</th>
-                    <th className="text-left p-2">Comp</th>
-                    <th className="text-left p-2">Att</th>
-                    <th className="text-left p-2">Yards</th>
-                    <th className="text-left p-2">TDs</th>
-                    <th className="text-left p-2">INTs</th>
-                    <th className="text-left p-2">EPA</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {passingMetrics.map((g, idx) => (
-                    <tr key={idx} className="border-b">
-                      <td className="p-2">{g.week}</td>
-                      <td className="p-2">{g.opponent_team}</td>
-                      <td className="p-2">{g.completions}</td>
-                      <td className="p-2">{g.attempts}</td>
-                      <td className="p-2">{g.passing_yards}</td>
-                      <td className="p-2">{g.passing_tds}</td>
-                      <td className="p-2">{g.interceptions}</td>
-                      <td className="p-2">{typeof g.passing_epa === 'number' ? g.passing_epa.toFixed(2) : '—'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {advancedPassing && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-2">2024 Advanced Passing Metrics</h2>
-            <div className="bg-white p-4 rounded shadow">
-              <p><strong>Avg Time to Throw:</strong> {typeof advancedPassing.avg_time_to_throw === 'number' ? advancedPassing.avg_time_to_throw.toFixed(2) + ' sec' : 'N/A'}</p>
-              <p><strong>Avg Completed Air Yards:</strong> {typeof advancedPassing.avg_completed_air_yards === 'number' ? advancedPassing.avg_completed_air_yards.toFixed(2) : 'N/A'}</p>
-              <p><strong>Avg Intended Air Yards:</strong> {typeof advancedPassing.avg_intended_air_yards === 'number' ? advancedPassing.avg_intended_air_yards.toFixed(2) : 'N/A'}</p>
-              <p><strong>Avg Air Yards Differential:</strong> {typeof advancedPassing.avg_air_yards_differential === 'number' ? advancedPassing.avg_air_yards_differential.toFixed(2) : 'N/A'}</p>
-              <p><strong>Aggressiveness:</strong> {typeof advancedPassing.aggressiveness === 'number' ? advancedPassing.aggressiveness.toFixed(1) + '%' : 'N/A'}</p>
-              <p><strong>Max Completed Air Distance:</strong> {typeof advancedPassing.max_completed_air_distance === 'number' ? advancedPassing.max_completed_air_distance.toFixed(1) : 'N/A'}</p>
-              <p><strong>Expected Completion %:</strong> {typeof advancedPassing.expected_completion_percentage === 'number' ? advancedPassing.expected_completion_percentage.toFixed(1) + '%' : 'N/A'}</p>
-              <p><strong>Completion % Over Expectation:</strong> {typeof advancedPassing.completion_percentage_above_expectation === 'number' ? advancedPassing.completion_percentage_above_expectation.toFixed(1) + '%' : 'N/A'}</p>
-            </div>
-          </div>
-        )}
       </div>
     </>
   );
