@@ -119,6 +119,9 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
     return () => el.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Debug player data for carousel
+  console.log("Player Data for Carousel:", player);
+
   return (
     <>
       <Head>
@@ -167,56 +170,41 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
           </div>
           {/* Center Column */}
           <div className="space-y-8">
-            {/* Career Summaries Carousel */}
-            <div className="overflow-x-auto">
-              <div
-                className="flex space-x-4 pb-2 min-w-full snap-x snap-mandatory"
-                ref={scrollRef}
-                // Remove any unsupported hide-scrollbar classes
-              >
-                {player.career && (
-                  <div className="bg-white p-4 rounded shadow min-w-[220px] snap-start">
+            {/* Career Summary Carousel */}
+            <div className="relative">
+              <div className="overflow-x-auto py-6">
+                <div
+                  className="flex space-x-4 snap-x snap-mandatory px-4"
+                  style={{ scrollPadding: '1rem' }}
+                >
+                  {/* Card 1 */}
+                  <div className="bg-white p-4 rounded shadow-lg min-w-[220px] snap-start flex-shrink-0">
                     <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Receiving Career</h3>
-                    <p><strong>Games:</strong> {player.career.games}</p>
-                    <p><strong>Yards:</strong> {player.career.yards}</p>
-                    <p><strong>Touchdowns:</strong> {player.career.tds}</p>
+                    <p><strong>Games:</strong> {player.career?.games}</p>
+                    <p><strong>Yards:</strong> {player.career?.yards}</p>
+                    <p><strong>Touchdowns:</strong> {player.career?.tds}</p>
                   </div>
-                )}
-                {player.rushingCareer && (
-                  <div
-                    className={`bg-white p-4 rounded shadow min-w-[220px] snap-start${(player.rushingCareer.yards === 0 && player.rushingCareer.tds === 0) ? ' hidden' : ''}`}
-                  >
+
+                  {/* Card 2 */}
+                  <div className="bg-white p-4 rounded shadow-lg min-w-[220px] snap-start flex-shrink-0">
                     <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Rushing Career</h3>
-                    <p><strong>Games:</strong> {player.rushingCareer.games}</p>
-                    <p><strong>Yards:</strong> {player.rushingCareer.yards}</p>
-                    <p><strong>Touchdowns:</strong> {player.rushingCareer.tds}</p>
+                    <p><strong>Games:</strong> {player.rushingCareer?.games}</p>
+                    <p><strong>Yards:</strong> {player.rushingCareer?.yards}</p>
+                    <p><strong>Touchdowns:</strong> {player.rushingCareer?.tds}</p>
                   </div>
-                )}
-                {player.passingCareer && (
-                  <div
-                    className={`bg-white p-4 rounded shadow min-w-[220px] snap-start${(player.passingCareer.yards === 0 && player.passingCareer.tds === 0 && player.passingCareer.completions === 0) ? ' hidden' : ''}`}
-                  >
+
+                  {/* Card 3 */}
+                  <div className="bg-white p-4 rounded shadow-lg min-w-[220px] snap-start flex-shrink-0">
                     <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Passing Career</h3>
-                    <p><strong>Games:</strong> {player.passingCareer.games}</p>
-                    <p><strong>Completions:</strong> {player.passingCareer.completions}</p>
-                    <p><strong>Attempts:</strong> {player.passingCareer.attempts}</p>
-                    <p><strong>Yards:</strong> {player.passingCareer.yards}</p>
-                    <p><strong>Touchdowns:</strong> {player.passingCareer.tds}</p>
-                    <p><strong>Interceptions:</strong> {player.passingCareer.ints}</p>
+                    <p><strong>Games:</strong> {player.passingCareer?.games}</p>
+                    <p><strong>Completions:</strong> {player.passingCareer?.completions}</p>
+                    <p><strong>Attempts:</strong> {player.passingCareer?.attempts}</p>
+                    <p><strong>Yards:</strong> {player.passingCareer?.yards}</p>
+                    <p><strong>Touchdowns:</strong> {player.passingCareer?.tds}</p>
+                    <p><strong>Interceptions:</strong> {player.passingCareer?.ints}</p>
                   </div>
-                )}
-              </div>
-              {/* Dot indicators */}
-              {numDots > 1 && (
-                <div className="flex justify-center mt-4 space-x-2">
-                  {[...Array(numDots)].map((_, i) => (
-                    <span
-                      key={i}
-                      className={`w-2 h-2 rounded-full ${i === activeIndex ? 'bg-blue-500' : 'bg-gray-300'} transition-all`}
-                    />
-                  ))}
                 </div>
-              )}
+              </div>
             </div>
             
             {/* Receiving Stats */}
