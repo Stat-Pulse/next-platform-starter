@@ -14,7 +14,7 @@ export default function LeagueNews() {
       try {
         const res = await fetch('/api/news')
         const data = await res.json()
-        setNews(data)
+        setNews(data.slice(0, 6))
       } catch (err) {
         console.error('Failed to fetch league news:', err)
       }
