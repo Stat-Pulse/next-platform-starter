@@ -4,6 +4,7 @@ import Footer from '../components/Footer'
 
 export default function LeagueNews() {
   const [news, setNews] = useState([])
+  const [visibleCount, setVisibleCount] = useState(6)
   const [query, setQuery] = useState('')
   const [sortBy, setSortBy] = useState('date')
   const [categoryFilter, setCategoryFilter] = useState('')
@@ -34,7 +35,7 @@ export default function LeagueNews() {
       if (sortBy === 'source') return a.source.localeCompare(b.source)
       return new Date(b.pubDate) - new Date(a.pubDate)
     })
-    .slice(0, 6)
+    .slice(0, visibleCount)
 
   return (
     <>
@@ -101,6 +102,16 @@ export default function LeagueNews() {
               ))
             ) : (
               <p className="text-sm text-gray-500">No news available.</p>
+            )}
+            {filteredNews.length < news.length && (
+              <div className="text-center col-span-full">
+                <button
+                  onClick={() => setVisibleCount(visibleCount + 6)}
+                  className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                >
+                  Load More
+                </button>
+              </div>
             )}
           </div>
         </div>
