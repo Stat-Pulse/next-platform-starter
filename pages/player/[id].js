@@ -17,7 +17,7 @@ export async function getServerSideProps({ params }) {
 
     const [profileRows] = await connection.execute(
       `
-      SELECT p.*, d.team AS current_team_abbr, t.primary_color
+      SELECT p.*, d.team AS current_team_abbr, t.primary_color AS team_primary_color
       FROM Active_Player_Profiles p
       LEFT JOIN Depth_Charts d 
         ON p.player_id = d.player_id 
@@ -96,7 +96,7 @@ export async function getServerSideProps({ params }) {
         player: {
           ...player,
           team_abbr: player.current_team_abbr || player.team_abbr || null,
-          primary_color: player.primary_color || '#004C54',
+          primary_color: player.team_primary_color || '#004C54',
           contract_year: player.contract_year || null,
           base_salary: player.base_salary || null,
           cap_hit: player.cap_hit || null,
