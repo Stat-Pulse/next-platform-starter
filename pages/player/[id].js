@@ -174,7 +174,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
 
           {/* Stats Row */}
           <div className="relative bg-white rounded shadow px-4 py-4 -mt-4 z-10">
-            <div className="grid grid-cols-2 md:grid-cols-8 gap-4 text-center text-sm text-gray-700">
+            <div className="grid grid-cols-2 md:grid-cols-9 gap-4 text-center text-sm text-gray-700">
               <div>
                 <span className="block font-semibold">COLLEGE</span>
                 <span>{player.college || 'N/A'}</span>
@@ -196,16 +196,20 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                 <span>{player.draft_pick || 'N/A'}</span>
               </div>
               <div>
-                <span className="block font-semibold">CONTRACT YEAR</span>
-                <span>{player.contract_year || 'N/A'}</span>
+                <span className="block font-semibold">CONTRACT VALUE</span>
+                <span>{player.contract_value ? `$${Number(player.contract_value).toLocaleString()}` : 'N/A'}</span>
               </div>
               <div>
-                <span className="block font-semibold">BASE SALARY</span>
-                <span>{player.base_salary ? `$${Number(player.base_salary).toLocaleString()}` : 'N/A'}</span>
+                <span className="block font-semibold">AVG/YEAR</span>
+                <span>{player.average_per_year ? `$${Number(player.average_per_year).toLocaleString()}` : 'N/A'}</span>
               </div>
               <div>
-                <span className="block font-semibold">CAP HIT</span>
-                <span>{player.cap_hit ? `$${Number(player.cap_hit).toLocaleString()}` : 'N/A'}</span>
+                <span className="block font-semibold">GUARANTEED</span>
+                <span>{player.guaranteed ? `$${Number(player.guaranteed).toLocaleString()}` : 'N/A'}</span>
+              </div>
+              <div>
+                <span className="block font-semibold">CAP %</span>
+                <span>{player.apy_cap_pct ? (Number(player.apy_cap_pct) * 100).toFixed(1) + '%' : 'N/A'}</span>
               </div>
             </div>
           </div>
