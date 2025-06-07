@@ -1,6 +1,5 @@
 // Extend the Player Profile page with rushing and passing stats
 import SeasonStatsTable from '@/components/player/SeasonStatsTable';
-import mysql from 'mysql2/promise';
 import Head from 'next/head';
 import { useRef, useEffect, useState } from 'react';
 
