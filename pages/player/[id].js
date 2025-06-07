@@ -175,10 +175,10 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                 alt={`${player.player_name} headshot`}
                 className="w-40 h-40 rounded-full object-cover border-4 border-white shadow-lg"
               />
-              {player.team_logo && (
+              {typeof player.team_logo === 'string' && player.team_logo.trim() !== '' && (
                 <img
-                  src={player.team_logo}
-                  alt={`${player.team_abbr} logo`}
+                  src={player.team_logo || '/default-logo.png'}
+                  alt={`${player.team_abbr || 'team'} logo`}
                   className="w-12 h-12 object-contain"
                 />
               )}
