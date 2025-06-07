@@ -202,18 +202,14 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                   </div>
                 </div>
               </div>
-              <button
-                onClick={() => scrollRef.current.scrollBy({ left: -scrollRef.current.clientWidth, behavior: 'smooth' })}
-                className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-gray-300 hover:bg-gray-400 px-2 py-1 rounded"
-              >
-                Prev
-              </button>
-              <button
-                onClick={() => scrollRef.current.scrollBy({ left: scrollRef.current.clientWidth, behavior: 'smooth' })}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-300 hover:bg-gray-400 px-2 py-1 rounded"
-              >
-                Next
-              </button>
+              <div className="flex justify-center space-x-2 mt-2">
+                {Array.from({ length: numDots }).map((_, idx) => (
+                  <span
+                    key={idx}
+                    className={`h-2 w-2 rounded-full ${idx === activeIndex ? 'bg-gray-800' : 'bg-gray-300'}`}
+                  />
+                ))}
+              </div>
             </div>
             
             {/* Receiving Stats */}
