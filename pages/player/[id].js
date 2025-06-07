@@ -4,7 +4,8 @@ import Head from 'next/head';
 import { useRef, useEffect, useState } from 'react';
 
 export async function getServerSideProps({ params }) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_SITE_URL}/api/player/${params.id}`);
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_SITE_URL || process.env.URL || 'http://localhost:3000';
+  const res = await fetch(`${baseUrl}/api/player/${params.id}`);
   if (!res.ok) {
     return { notFound: true };
   }
@@ -47,7 +48,7 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
   // Debug player data for carousel
   console.log("Player Data for Carousel:", player);
   // Debug: Log the resolved color
-  console.log("Resolved color:", player.primary_color);
+  console.log("Resolved color:", team.primary_color);
   return (
     <>
       <Head>
