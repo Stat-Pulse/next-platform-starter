@@ -15,8 +15,11 @@ module.exports = {
       },
     ],
   },
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     config.resolve.alias['@'] = path.resolve(__dirname);
+    if (isServer) {
+      config.externals.push({ net: 'commonjs net', tls: 'commonjs tls' });
+    }
     return config;
   },
 };
