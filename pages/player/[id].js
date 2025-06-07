@@ -119,60 +119,6 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
 
   // Debug player data for carousel
   console.log("Player Data for Carousel:", player);
-{/* Career Summary Carousel */}
-<div className="carousel-container relative w-full max-w-xl mx-auto mt-8" ref={containerRef}>
-  <div
-    className="carousel-slides flex transition-transform duration-500 ease-in-out"
-    ref={slideRef}
-  >
-    {/* Receiving Card */}
-    <div className="carousel-slide min-w-full flex-shrink-0 p-4">
-      <div className="bg-white p-4 rounded shadow-lg w-full">
-        <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Receiving Career</h3>
-        <p><strong>Games:</strong> {player.career?.games}</p>
-        <p><strong>Yards:</strong> {player.career?.yards}</p>
-        <p><strong>Touchdowns:</strong> {player.career?.tds}</p>
-      </div>
-    </div>
-
-    {/* Rushing Card */}
-    <div className="carousel-slide min-w-full flex-shrink-0 p-4">
-      <div className="bg-white p-4 rounded shadow-lg w-full">
-        <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Rushing Career</h3>
-        <p><strong>Games:</strong> {player.rushingCareer?.games}</p>
-        <p><strong>Yards:</strong> {player.rushingCareer?.yards}</p>
-        <p><strong>Touchdowns:</strong> {player.rushingCareer?.tds}</p>
-      </div>
-    </div>
-
-    {/* Passing Card */}
-    <div className="carousel-slide min-w-full flex-shrink-0 p-4">
-      <div className="bg-white p-4 rounded shadow-lg w-full">
-        <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Passing Career</h3>
-        <p><strong>Games:</strong> {player.passingCareer?.games}</p>
-        <p><strong>Completions:</strong> {player.passingCareer?.completions}</p>
-        <p><strong>Attempts:</strong> {player.passingCareer?.attempts}</p>
-        <p><strong>Yards:</strong> {player.passingCareer?.yards}</p>
-        <p><strong>Touchdowns:</strong> {player.passingCareer?.tds}</p>
-        <p><strong>Interceptions:</strong> {player.passingCareer?.ints}</p>
-      </div>
-    </div>
-  </div>
-
-  {/* Nav Buttons */}
-  <button
-    onClick={() => setCurrentSlide((prev) => Math.max(0, prev - 1))}
-    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-gray-300 hover:bg-gray-400 px-2 py-1 rounded"
-  >
-    Prev
-  </button>
-  <button
-    onClick={() => setCurrentSlide((prev) => Math.min(2, prev + 1))}
-    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-300 hover:bg-gray-400 px-2 py-1 rounded"
-  >
-    Next
-  </button>
-</div>
   return (
     <>
       <Head>
