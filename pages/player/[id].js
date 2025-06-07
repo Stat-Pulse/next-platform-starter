@@ -14,36 +14,15 @@ export async function getServerSideProps({ params }) {
       database: process.env.DB_NAME
     });
 
-    // Fetch player info and team primary color
-    const [playerRows] = await connection.execute(
-      `SELECT p.player_id,
-              p.player_name,
-              p.position,
-              p.draft_year,
-              p.height_inches,
-              p.weight_pounds,
-              p.team AS team_abbr,
-              t.primary_color
-       FROM Players p
-       LEFT JOIN Teams t ON p.team = t.team_abbr
-       WHERE p.player_id = ?
-       LIMIT 1`,
+    const [profileRows] = await connection.execute(
+      `SELECT * FROM Active_Player_Profiles WHERE player_id = ? LIMIT 1`,
       [playerId]
     );
-    if (playerRows.length === 0) return { notFound: true };
-    const player = playerRows[0];
+    if (profileRows.length === 0) return { notFound: true };
+    const player = profileRows[0];
 
-    // Fetch contract info
-    const [contractRows] = await connection.execute(
-      `SELECT value AS contract_value,
-              apy AS average_per_year,
-              guaranteed,
-              apy_cap_pct
-       FROM Contracts
-       WHERE player_id = ?`,
-      [playerId]
-    );
-    const contract = contractRows[0] || {};
+    // Fetch contract info (example: from a table called Player_Contracts, or add to Active_Player_Profiles if present)
+    // This assumes contract_year, base_salary, cap_hit are columns in Active_Player_Profiles
 
     const [receivingMetrics] = await connection.execute(`
       SELECT week, season, recent_team, opponent_team, targets, receptions, receiving_yards, receiving_tds AS rec_touchdowns
@@ -102,7 +81,9 @@ export async function getServerSideProps({ params }) {
       props: {
         player: {
           ...player,
-          ...contract,
+          contract_year: player.contract_year || null,
+          base_salary: player.base_salary || null,
+          cap_hit: player.cap_hit || null,
           career,
           rushingCareer,
           passingCareer
@@ -155,11 +136,8 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header Section */}
         <div className="relative mb-8">
-          {/* Background Stripe using team color */}
-          <div
-            className="absolute inset-0"
-            style={{ backgroundColor: player.primary_color || '#ccc' }}
-          ></div>
+          {/* Background Stripe */}
+          <div className="absolute inset-0 bg-red-600"></div>
 
           {/* Main Header Content */}
           <div className="relative bg-white bg-opacity-90 rounded shadow px-6 py-6 flex flex-col md:flex-row items-center md:items-end justify-between">
@@ -189,9 +167,9 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
           {/* Extra player details row */}
           <div className="mt-2 text-sm text-gray-600 space-x-4">
             <span><strong>DOB:</strong> {player.dob ? player.dob.split('T')[0] : 'N/A'}</span>
-            <span><strong>Height:</strong> {player.height_inches ? `${player.height_inches} in` : 'N/A'}</span>
-            <span><strong>Weight:</strong> {player.weight_pounds ? `${player.weight_pounds} lbs` : 'N/A'}</span>
-            <span><strong>Team:</strong> {player.team_abbr || 'N/A'}</span>
+            <span><strong>Height:</strong> {player.height || 'N/A'}</span>
+            <span><strong>Weight:</strong> {player.weight || 'N/A'}</span>
+            <span><strong>Team:</strong> {player.recent_team}</span>
           </div>
 
           {/* Stats Row */}
