@@ -138,7 +138,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
         {/* Header Section */}
         <div className="relative mb-8">
           {/* Background Stripe */}
-          <div className="absolute inset-0 bg-red-600"></div>
+          <div className="absolute inset-0" style={{ backgroundColor: '#004C54' }}></div>
 
           {/* Main Header Content */}
           <div className="relative bg-white bg-opacity-90 rounded shadow px-6 py-6 flex flex-col md:flex-row items-center md:items-end justify-between">
@@ -155,6 +155,12 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                 <div className="text-xl font-semibold text-gray-700 mt-1">
                   {player.position} {player.jersey_number ? `#${player.jersey_number}` : ''}
                 </div>
+                <div className="text-sm text-gray-600 mt-1 space-x-4">
+                  <span><strong>DOB:</strong> {player.date_of_birth ? player.date_of_birth.split('T')[0] : 'N/A'}</span>
+                  <span><strong>Height:</strong> {player.height_inches ? `${player.height_inches} in` : 'N/A'}</span>
+                  <span><strong>Weight:</strong> {player.weight_pounds ? `${player.weight_pounds} lbs` : 'N/A'}</span>
+                  <span><strong>Team:</strong> {player.team_abbr || 'N/A'}</span>
+                </div>
               </div>
             </div>
             <div className="mt-4 md:mt-0 flex items-center space-x-2">
@@ -164,13 +170,6 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
               </span>
             </div>
             {/* End team name */}
-          </div>
-          {/* Extra player details row */}
-          <div className="mt-2 text-sm text-gray-600 space-x-4">
-            <span><strong>DOB:</strong> {player.dob ? player.dob.split('T')[0] : 'N/A'}</span>
-            <span><strong>Height:</strong> {player.height || 'N/A'}</span>
-            <span><strong>Weight:</strong> {player.weight || 'N/A'}</span>
-            <span><strong>Team:</strong> {player.recent_team}</span>
           </div>
 
           {/* Stats Row */}
