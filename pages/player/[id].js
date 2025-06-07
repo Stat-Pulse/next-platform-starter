@@ -156,7 +156,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                   {player.position} {player.jersey_number ? `#${player.jersey_number}` : ''}
                 </div>
                 <div className="text-sm text-gray-600 mt-1 space-x-4">
-                  <span><strong>DOB:</strong> {player.date_of_birth ? player.date_of_birth.split('T')[0] : 'N/A'}</span>
+                  <span><strong>DOB:</strong> {player.date_of_birth ? new Date(player.date_of_birth).toISOString().split('T')[0] : 'N/A'}</span>
                   <span><strong>Height:</strong> {player.height_inches ? `${player.height_inches} in` : 'N/A'}</span>
                   <span><strong>Weight:</strong> {player.weight_pounds ? `${player.weight_pounds} lbs` : 'N/A'}</span>
                   <span><strong>Team:</strong> {player.team_abbr || 'N/A'}</span>
