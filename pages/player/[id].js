@@ -17,9 +17,16 @@ export async function getServerSideProps({ params }) {
 
     const [profileRows] = await connection.execute(
       `
-      SELECT p.*, c.team AS current_team_abbr
+      SELECT p.*, d.team AS current_team_abbr
       FROM Active_Player_Profiles p
-      LEFT JOIN Contracts c ON p.player_id = c.player_id
+      LEFT JOIN Depth_Charts d 
+        ON p.player_id = d.player_id 
+        AND (d.season, d.week) = (
+          SELECT season, week FROM Depth_Charts 
+          WHERE player_id = p.player_id 
+          ORDER BY season DESC, week DESC 
+          LIMIT 1
+        )
       WHERE p.player_id = ? LIMIT 1
       `,
       [playerId]
