@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-
 export default function PlayerPage({ player, receivingMetrics }) {
   if (!player) {
     return <div>Player not found</div>;
