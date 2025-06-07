@@ -13,11 +13,33 @@ export default async function handler(req, res) {
       database: process.env.DB_NAME,
     });
 
-    // Step 1: Use the Active_Player_Profiles view
+    // Step 1: Fetch player metadata, roster info, team color, and contract
     const [playerRows] = await connection.execute(`
-      SELECT *
-      FROM Active_Player_Profiles
-      WHERE player_id = ?
+      SELECT
+        p.player_id,
+        p.player_name,
+        p.position,
+        p.draft_year,
+        p.height_inches,
+        p.weight_pounds,
+        p.team AS team_abbr,
+        t.primary_color,
+        r.dob,
+        r.jersey_number,
+        r.college,
+        dp.round            AS draft_round,
+        dp.pick             AS draft_pick,
+        dp.team             AS draft_team,
+        c.value AS contract_value,
+        c.apy AS average_per_year,
+        c.guaranteed,
+        c.apy_cap_pct
+      FROM Players p
+      LEFT JOIN Teams t ON p.team = t.team_abbr
+      LEFT JOIN Rosters_2024 r ON p.player_id = r.player_id
+      LEFT JOIN Draft_Picks dp ON p.player_id = dp.player_id
+      LEFT JOIN Contracts c ON p.player_id = c.player_id
+      WHERE p.player_id = ?
       LIMIT 1
     `, [playerId]);
 
