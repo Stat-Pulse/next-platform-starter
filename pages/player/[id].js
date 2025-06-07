@@ -2,6 +2,10 @@
 import Head from 'next/head';
 import { useRef, useEffect, useState } from 'react';
 
+// Add getServerSideProps wrapper for async server logic
+export async function getServerSideProps({ params }) {
+  const playerId = params.id;
+  let connection;
   try {
     connection = await mysql.createConnection({
       host: process.env.DB_HOST,
