@@ -17,7 +17,7 @@ export async function getServerSideProps({ params }) {
 
     const [profileRows] = await connection.execute(
       `
-      SELECT p.*, d.team AS current_team_abbr
+      SELECT p.*, d.team AS current_team_abbr, t.primary_color
       FROM Active_Player_Profiles p
       LEFT JOIN Depth_Charts d 
         ON p.player_id = d.player_id 
@@ -27,6 +27,7 @@ export async function getServerSideProps({ params }) {
           ORDER BY season DESC, week DESC 
           LIMIT 1
         )
+      LEFT JOIN Teams t ON d.team = t.team_abbr
       WHERE p.player_id = ? LIMIT 1
       `,
       [playerId]
@@ -95,6 +96,7 @@ export async function getServerSideProps({ params }) {
         player: {
           ...player,
           team_abbr: player.current_team_abbr || player.team_abbr || null,
+          primary_color: player.primary_color || '#004C54',
           contract_year: player.contract_year || null,
           base_salary: player.base_salary || null,
           cap_hit: player.cap_hit || null,
@@ -151,7 +153,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
         {/* Header Section */}
         <div className="relative mb-8">
           {/* Background Stripe */}
-          <div className="absolute inset-0" style={{ backgroundColor: '#004C54' }}></div>
+          <div className="absolute inset-0" style={{ backgroundColor: player.primary_color || '#004C54' }}></div>
 
           {/* Main Header Content */}
           <div className="relative bg-white bg-opacity-90 rounded shadow px-6 py-6 flex flex-col md:flex-row items-center md:items-end justify-between">
