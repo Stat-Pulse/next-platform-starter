@@ -1,4 +1,5 @@
 // Extend the Player Profile page with rushing and passing stats
+import SeasonStatsTable from '@/components/player/SeasonStatsTable';
 import mysql from 'mysql2/promise';
 import Head from 'next/head';
 import { useRef, useEffect, useState } from 'react';
@@ -121,7 +122,7 @@ export async function getServerSideProps({ params }) {
   }
 }
 
-export default function PlayerPage({ player, receivingMetrics, rushingMetrics, passingMetrics, advancedMetrics, advancedRushing, advancedPassing }) {
+export default function PlayerPage({ player, receivingMetrics, rushingMetrics, passingMetrics, advancedMetrics, advancedRushing, advancedPassing, seasonStats }) {
   // --- Career Summary Carousel State ---
   const [activeIndex, setActiveIndex] = useState(0);
   const [bgColor, setBgColor] = useState('#004C54');
@@ -205,6 +206,14 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
             </div>
             {/* End team name */}
           </div>
+
+          {/* Season Stats Table */}
+          {seasonStats && seasonStats.length > 0 && (
+            <div className="mt-6">
+              <h2 className="text-xl font-bold mb-2">Season Stats</h2>
+              <SeasonStatsTable stats={seasonStats} />
+            </div>
+          )}
 
           {/* Stats Row */}
           <div className="relative bg-white rounded shadow px-4 py-4 -mt-4 z-10">
@@ -439,6 +448,31 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                   <p><strong>Max Completed Air Distance:</strong> {typeof advancedPassing.max_completed_air_distance === 'number' ? advancedPassing.max_completed_air_distance.toFixed(1) : 'N/A'}</p>
                   <p><strong>Expected Completion %:</strong> {typeof advancedPassing.expected_completion_percentage === 'number' ? advancedPassing.expected_completion_percentage.toFixed(1) + '%' : 'N/A'}</p>
                   <p><strong>Completion % Over Expectation:</strong> {typeof advancedPassing.completion_percentage_above_expectation === 'number' ? advancedPassing.completion_percentage_above_expectation.toFixed(1) + '%' : 'N/A'}</p>
+                </div>
+              </div>
+            )}
+            {/* Advanced Receiving Metrics */}
+            {advancedMetrics && (
+              <div>
+                <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Advanced Receiving Metrics</h2>
+                <div className="bg-white p-4 rounded shadow">
+                  <p><strong>Avg Cushion:</strong> {typeof advancedMetrics.avg_cushion === 'number' ? advancedMetrics.avg_cushion.toFixed(2) + ' yds' : 'N/A'}</p>
+                  <p><strong>Avg Separation:</strong> {typeof advancedMetrics.avg_separation === 'number' ? advancedMetrics.avg_separation.toFixed(2) + ' yds' : 'N/A'}</p>
+                  <p><strong>Air Yards Share:</strong> {typeof advancedMetrics.percent_share_of_intended_air_yards === 'number' ? (advancedMetrics.percent_share_of_intended_air_yards * 100).toFixed(1) + '%' : 'N/A'}</p>
+                  <p><strong>Avg YAC Over Expectation:</strong> {typeof advancedMetrics.avg_yac_above_expectation === 'number' ? advancedMetrics.avg_yac_above_expectation.toFixed(2) : 'N/A'}</p>
+                  <p><strong>Receiving EPA:</strong> {typeof advancedMetrics.receiving_epa === 'number' ? advancedMetrics.receiving_epa.toFixed(2) : 'N/A'}</p>
+                  <p><strong>WOPR:</strong> {typeof advancedMetrics.wopr === 'number' ? advancedMetrics.wopr.toFixed(3) : 'N/A'}</p>
+                </div>
+              </div>
+            )}
+            {/* Advanced Rushing Metrics */}
+            {advancedRushing && (
+              <div>
+                <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Advanced Rushing Metrics</h2>
+                <div className="bg-white p-4 rounded shadow">
+                  <p><strong>Rush Yards Over Expected:</strong> {typeof advancedRushing.rushing_yards_over_expected === 'number' ? advancedRushing.rushing_yards_over_expected.toFixed(1) : 'N/A'}</p>
+                  <p><strong>Rush EPA:</strong> {typeof advancedRushing.rushing_epa === 'number' ? advancedRushing.rushing_epa.toFixed(2) : 'N/A'}</p>
+                  <p><strong>Rush Success Rate:</strong> {typeof advancedRushing.success_rate === 'number' ? (advancedRushing.success_rate * 100).toFixed(1) + '%' : 'N/A'}</p>
                 </div>
               </div>
             )}
