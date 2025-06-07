@@ -31,6 +31,7 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
   const scrollRef = useRef();
   // Count how many career summary cards exist (for dots)
   const numDots = 3;
+  const seasonStats = [];
 
   useEffect(() => {
     if (player?.primary_color) {
