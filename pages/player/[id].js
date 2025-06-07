@@ -351,8 +351,12 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
   );
 }
 
-export async function getServerSideProps({ params }) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_SITE_URL}/api/player/${params.id}`);
+export async function getServerSideProps({ params, req }) {
+  // Construct absolute URL for internal API call
+  const protocol = req.headers['x-forwarded-proto'] || 'http';
+  const host = req.headers['x-forwarded-host'] || req.headers['host'];
+  const baseUrl = `${protocol}://${host}`;
+  const res = await fetch(`${baseUrl}/api/player/${params.id}`);
   if (!res.ok) {
     return { notFound: true };
   }
