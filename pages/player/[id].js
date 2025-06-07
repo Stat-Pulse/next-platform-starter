@@ -34,6 +34,7 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
   const seasonStats = [];
   const rushingMetrics = [];
   const passingMetrics = [];
+  const advancedPassing = null;
 
   useEffect(() => {
     if (player?.primary_color) {
