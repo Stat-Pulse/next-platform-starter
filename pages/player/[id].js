@@ -5,12 +5,23 @@ import { useRef, useEffect, useState } from 'react';
 
 export async function getServerSideProps({ params }) {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_SITE_URL || process.env.URL || 'http://localhost:3000';
-  const res = await fetch(`${baseUrl}/api/player/${params.id}`);
-  if (!res.ok) {
+  const url = `${baseUrl}/api/player/${params.id}`;
+  console.log("Fetching player from:", url);
+
+  try {
+    const res = await fetch(url);
+    console.log("Response status:", res.status);
+    if (!res.ok) {
+      return { notFound: true };
+    }
+
+    const data = await res.json();
+    console.log("Fetched player data successfully");
+    return { props: data };
+  } catch (error) {
+    console.error("Error fetching player:", error.message);
     return { notFound: true };
   }
-  const data = await res.json();
-  return { props: data };
 }
 
 export default function PlayerPage({ player, receivingMetrics, advancedMetrics, advancedRushing }) {
