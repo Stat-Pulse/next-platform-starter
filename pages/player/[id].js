@@ -16,7 +16,12 @@ export async function getServerSideProps({ params }) {
     });
 
     const [profileRows] = await connection.execute(
-      `SELECT * FROM Active_Player_Profiles WHERE player_id = ? LIMIT 1`,
+      `
+      SELECT p.*, c.team AS current_team_abbr
+      FROM Active_Player_Profiles p
+      LEFT JOIN Contracts c ON p.player_id = c.player_id
+      WHERE p.player_id = ? LIMIT 1
+      `,
       [playerId]
     );
     if (profileRows.length === 0) return { notFound: true };
@@ -82,6 +87,7 @@ export async function getServerSideProps({ params }) {
       props: {
         player: {
           ...player,
+          team_abbr: player.current_team_abbr || player.team_abbr || null,
           contract_year: player.contract_year || null,
           base_salary: player.base_salary || null,
           cap_hit: player.cap_hit || null,
