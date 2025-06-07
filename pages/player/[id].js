@@ -156,10 +156,10 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                   {player.position} {player.jersey_number ? `#${player.jersey_number}` : ''}
                 </div>
                 <div className="text-sm text-gray-600 mt-1 space-x-4">
-                  <span><strong>DOB:</strong> {player.date_of_birth ? new Date(player.date_of_birth).toISOString().split('T')[0] : 'N/A'}</span>
+                  <span><strong>DOB:</strong> {player.date_of_birth ? new Date(player.date_of_birth).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}</span>
                   <span><strong>Height:</strong> {player.height_inches ? `${player.height_inches} in` : 'N/A'}</span>
                   <span><strong>Weight:</strong> {player.weight_pounds ? `${player.weight_pounds} lbs` : 'N/A'}</span>
-                  <span><strong>Team:</strong> {player.team_abbr || 'N/A'}</span>
+                  <span><strong>Team:</strong> {player.recent_team || 'N/A'}</span>
                 </div>
               </div>
             </div>
@@ -197,15 +197,15 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
               </div>
               <div>
                 <span className="block font-semibold">CONTRACT VALUE</span>
-                <span>{player.value ? `$${Number(player.value).toLocaleString()}` : 'N/A'}</span>
+                <span>{player.value ? `$${Number(player.value).toLocaleString()}M` : 'N/A'}</span>
               </div>
               <div>
                 <span className="block font-semibold">AVG/YEAR</span>
-                <span>{player.apy ? `$${Number(player.apy).toLocaleString()}` : 'N/A'}</span>
+                <span>{player.apy ? `$${Number(player.apy).toLocaleString()}M` : 'N/A'}</span>
               </div>
               <div>
                 <span className="block font-semibold">GUARANTEED</span>
-                <span>{player.guaranteed ? `$${Number(player.guaranteed).toLocaleString()}` : 'N/A'}</span>
+                <span>{player.guaranteed ? `$${Number(player.guaranteed).toLocaleString()}M` : 'N/A'}</span>
               </div>
               <div>
                 <span className="block font-semibold">CAP %</span>
