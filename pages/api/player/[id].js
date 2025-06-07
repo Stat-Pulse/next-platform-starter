@@ -20,7 +20,7 @@ export default async function handler(req, res) {
     );
 
     console.log("Query complete. Sending response...");
-    res.status(200).json({ player: player[0] });
+    res.status(200).json({ player: player[0], seasonStats: [] });
 
   } catch (err) {
     console.error("API Error:", err);
