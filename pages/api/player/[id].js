@@ -1,37 +1,29 @@
-import React from 'react';
+import mysql from 'mysql2/promise';
 
-export default function PlayerPage(props) {
-  const { player, receivingMetrics, advancedMetrics, advancedRushing } = props;
+export default async function handler(req, res) {
+  console.log("API HIT:", req.query.id);
 
-  if (!player) {
-    return <div>Player not found.</div>;
+  try {
+    console.log("Connecting to DB...");
+    const connection = await mysql.createConnection({
+      host: process.env.MYSQL_HOST,
+      user: process.env.MYSQL_USER,
+      password: process.env.MYSQL_PASSWORD,
+      database: process.env.MYSQL_DATABASE,
+      connectTimeout: 10000  // 10 second timeout
+    });
+
+    console.log("Running player query...");
+    const [player] = await connection.execute(
+      'SELECT * FROM Rosters_2024 WHERE gsis_id = ?',
+      [req.query.id]
+    );
+
+    console.log("Query complete. Sending response...");
+    res.status(200).json({ player: player[0] });
+
+  } catch (err) {
+    console.error("API Error:", err);
+    res.status(500).json({ error: "Server error" });
   }
-
-  return (
-    <div>
-      <h1>{player.name}</h1>
-      {/* Render player info */}
-      <section>
-        <h2>Receiving Metrics</h2>
-        {/* Render receivingMetrics */}
-      </section>
-      <section>
-        <h2>Advanced Metrics</h2>
-        {/* Render advancedMetrics */}
-      </section>
-      <section>
-        <h2>Advanced Rushing</h2>
-        {/* Render advancedRushing */}
-      </section>
-    </div>
-  );
-}
-
-export async function getServerSideProps({ params }) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/player/${params.id}`);
-  if (!res.ok) {
-    return { notFound: true };
-  }
-  const data = await res.json();
-  return { props: data };
 }
