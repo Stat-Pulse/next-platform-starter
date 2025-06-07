@@ -98,10 +98,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = useRef();
   // Count how many career summary cards exist (for dots)
-  const numDots =
-    (player.career ? 1 : 0) +
-    (player.rushingCareer && (player.rushingCareer.yards > 0 || player.rushingCareer.tds > 0) ? 1 : 0) +
-    (player.passingCareer && (player.passingCareer.yards > 0 || player.passingCareer.tds > 0 || player.passingCareer.completions > 0) ? 1 : 0);
+  const numDots = 3;
   // Scroll handler to update activeIndex
   useEffect(() => {
     const el = scrollRef.current;
