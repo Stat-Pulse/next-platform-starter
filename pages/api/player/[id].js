@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
     console.log("Running player query...");
     const [player] = await connection.execute(
-      'SELECT * FROM Players WHERE player_id = ?',
+      'SELECT * FROM Active_Player_Profiles WHERE player_id = ?',
       [req.query.id]
     );
 
