@@ -168,49 +168,61 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
           {/* Center Column */}
           <div className="space-y-8">
             {/* Career Summary Carousel */}
-            <div className="relative">
-              <div className="overflow-x-auto no-scrollbar py-6 relative" ref={scrollRef}>
-                <div
-                  className="flex space-x-4 snap-x snap-mandatory px-4"
-                  style={{ scrollPadding: '1rem' }}
-                >
-                  {/* Card 1 */}
-                  <div className="bg-white p-4 rounded shadow-lg min-w-[220px] snap-start flex-shrink-0">
-                    <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Receiving Career</h3>
-                    <p><strong>Games:</strong> {player.career?.games}</p>
-                    <p><strong>Yards:</strong> {player.career?.yards}</p>
-                    <p><strong>Touchdowns:</strong> {player.career?.tds}</p>
-                  </div>
+<div className="relative">
+  <div
+    className="overflow-x-auto px-0 py-6 relative hide-scrollbar"
+    ref={scrollRef}
+    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+  >
+    <div
+      className="flex snap-x snap-mandatory"
+      style={{ scrollPadding: '1rem' }}
+    >
+      {/* Receiving Career Card */}
+      <div className="bg-white p-4 rounded shadow-lg min-w-full snap-center">
+        <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">
+          Receiving Career
+        </h3>
+        <p><strong>Games:</strong> {player.career?.games}</p>
+        <p><strong>Yards:</strong> {player.career?.yards}</p>
+        <p><strong>Touchdowns:</strong> {player.career?.tds}</p>
+      </div>
 
-                  {/* Card 2 */}
-                  <div className="bg-white p-4 rounded shadow-lg min-w-[220px] snap-start flex-shrink-0">
-                    <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Rushing Career</h3>
-                    <p><strong>Games:</strong> {player.rushingCareer?.games}</p>
-                    <p><strong>Yards:</strong> {player.rushingCareer?.yards}</p>
-                    <p><strong>Touchdowns:</strong> {player.rushingCareer?.tds}</p>
-                  </div>
+      {/* Rushing Career Card */}
+      <div className="bg-white p-4 rounded shadow-lg min-w-full snap-center">
+        <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">
+          Rushing Career
+        </h3>
+        <p><strong>Games:</strong> {player.rushingCareer?.games}</p>
+        <p><strong>Yards:</strong> {player.rushingCareer?.yards}</p>
+        <p><strong>Touchdowns:</strong> {player.rushingCareer?.tds}</p>
+      </div>
 
-                  {/* Card 3 */}
-                  <div className="bg-white p-4 rounded shadow-lg min-w-[220px] snap-start flex-shrink-0">
-                    <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Passing Career</h3>
-                    <p><strong>Games:</strong> {player.passingCareer?.games}</p>
-                    <p><strong>Completions:</strong> {player.passingCareer?.completions}</p>
-                    <p><strong>Attempts:</strong> {player.passingCareer?.attempts}</p>
-                    <p><strong>Yards:</strong> {player.passingCareer?.yards}</p>
-                    <p><strong>Touchdowns:</strong> {player.passingCareer?.tds}</p>
-                    <p><strong>Interceptions:</strong> {player.passingCareer?.ints}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-center space-x-2 mt-2">
-                {Array.from({ length: numDots }).map((_, idx) => (
-                  <span
-                    key={idx}
-                    className={`h-2 w-2 rounded-full ${idx === activeIndex ? 'bg-gray-800' : 'bg-gray-300'}`}
-                  />
-                ))}
-              </div>
-            </div>
+      {/* Passing Career Card */}
+      <div className="bg-white p-4 rounded shadow-lg min-w-full snap-center">
+        <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">
+          Passing Career
+        </h3>
+        <p><strong>Games:</strong> {player.passingCareer?.games}</p>
+        <p><strong>Completions:</strong> {player.passingCareer?.completions}</p>
+        <p><strong>Attempts:</strong> {player.passingCareer?.attempts}</p>
+        <p><strong>Yards:</strong> {player.passingCareer?.yards}</p>
+        <p><strong>Touchdowns:</strong> {player.passingCareer?.tds}</p>
+        <p><strong>Interceptions:</strong> {player.passingCareer?.ints}</p>
+      </div>
+    </div>
+  </div>
+
+  {/* Dot Pagination */}
+  <div className="flex justify-center space-x-2 mt-2">
+    {Array.from({ length: numDots }).map((_, idx) => (
+      <span
+        key={idx}
+        className={`h-2 w-2 rounded-full ${idx === activeIndex ? 'bg-gray-800' : 'bg-gray-300'}`}
+      />
+    ))}
+  </div>
+</div>
             
             {/* Receiving Stats */}
             {receivingMetrics?.some(g => g.targets > 0 || g.receptions > 0 || g.receiving_yards > 0 || g.rec_touchdowns > 0) && (
