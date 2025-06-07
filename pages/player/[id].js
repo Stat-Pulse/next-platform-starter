@@ -4,125 +4,19 @@ import mysql from 'mysql2/promise';
 import Head from 'next/head';
 import { useRef, useEffect, useState } from 'react';
 
-// Add getServerSideProps wrapper for async server logic
 export async function getServerSideProps({ params }) {
-  const playerId = params.id;
-  let connection;
-  try {
-    connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME
-    });
-
-    const [profileRows] = await connection.execute(
-      `
-      SELECT p.*, d.team AS current_team_abbr, t.primary_color AS team_primary_color, t.team_logo_espn
-      FROM Active_Player_Profiles p
-      LEFT JOIN Depth_Charts d 
-        ON p.player_id = d.player_id 
-        AND (d.season, d.week) = (
-          SELECT season, week FROM Depth_Charts 
-          WHERE player_id = p.player_id 
-          ORDER BY season DESC, week DESC 
-          LIMIT 1
-        )
-      LEFT JOIN Teams t ON d.team = t.team_abbr
-      WHERE p.player_id = ? LIMIT 1
-      `,
-      [playerId]
-    );
-    if (profileRows.length === 0) return { notFound: true };
-    const player = profileRows[0];
-
-    // Fetch contract info (example: from a table called Player_Contracts, or add to Active_Player_Profiles if present)
-    // This assumes contract_year, base_salary, cap_hit are columns in Active_Player_Profiles
-
-    const [receivingMetrics] = await connection.execute(`
-      SELECT week, season, recent_team, opponent_team, targets, receptions, receiving_yards, receiving_tds AS rec_touchdowns
-      FROM Player_Stats_Game_All
-      WHERE player_id = ? AND season = 2024 AND receiving_yards IS NOT NULL
-      ORDER BY week
-    `, [playerId]);
-
-    const [passingMetrics] = await connection.execute(`
-      SELECT week, season, recent_team, opponent_team, completions, attempts, passing_yards, passing_tds, interceptions, passing_epa
-      FROM Player_Stats_Game_All
-      WHERE player_id = ? AND season = 2024 AND attempts IS NOT NULL
-      ORDER BY week
-    `, [playerId]);
-
-    const [rushingMetrics] = await connection.execute(`
-      SELECT week, season, recent_team, opponent_team, carries, rushing_yards, rushing_tds, rushing_epa, rushing_fumbles, rushing_fumbles_lost, rushing_first_downs
-      FROM Player_Stats_Game_All
-      WHERE player_id = ? AND season = 2024 AND carries IS NOT NULL
-      ORDER BY week
-    `, [playerId]);
-
-    const [advancedReceiving] = await connection.execute(`
-      SELECT * FROM NextGen_Stats_Receiving WHERE player_gsis_id = ? AND season = 2024
-    `, [playerId]);
-
-    const [advancedRushing] = await connection.execute(`
-      SELECT * FROM NextGen_Stats_Rushing WHERE player_id = ? AND season = 2024
-    `, [playerId]);
-
-    const [advancedPassing] = await connection.execute(`
-      SELECT * FROM NextGen_Stats_Passing WHERE player_id = ? AND season = 2024
-    `, [playerId]);
-
-    const rushingCareer = rushingMetrics.length > 0 ? {
-      games: rushingMetrics.length,
-      yards: rushingMetrics.reduce((sum, g) => sum + (g.rushing_yards || 0), 0),
-      tds: rushingMetrics.reduce((sum, g) => sum + (g.rushing_tds || 0), 0),
-    } : null;
-
-    const passingCareer = passingMetrics.length > 0 ? {
-      games: passingMetrics.length,
-      completions: passingMetrics.reduce((sum, g) => sum + (g.completions || 0), 0),
-      attempts: passingMetrics.reduce((sum, g) => sum + (g.attempts || 0), 0),
-      yards: passingMetrics.reduce((sum, g) => sum + (g.passing_yards || 0), 0),
-      tds: passingMetrics.reduce((sum, g) => sum + (g.passing_tds || 0), 0),
-      ints: passingMetrics.reduce((sum, g) => sum + (g.interceptions || 0), 0)
-    } : null;
-
-    const career = receivingMetrics.length > 0 ? {
-      games: receivingMetrics.length,
-      yards: receivingMetrics.reduce((sum, g) => sum + (g.receiving_yards || 0), 0),
-      tds: receivingMetrics.reduce((sum, g) => sum + (g.rec_touchdowns || 0), 0),
-    } : null;
-    return {
-      props: {
-        player: {
-          ...player,
-          team_abbr: player.current_team_abbr || player.team_abbr || null,
-          primary_color: player.team_primary_color || '#004C54',
-          contract_year: player.contract_year || null,
-          base_salary: player.base_salary || null,
-          cap_hit: player.cap_hit || null,
-          career,
-          rushingCareer,
-          passingCareer,
-          team_logo: player.team_logo_espn || null,
-        },
-        receivingMetrics,
-        rushingMetrics,
-        passingMetrics,
-        advancedMetrics: advancedReceiving[0] || null,
-        advancedRushing: advancedRushing[0] || null,
-        advancedPassing: advancedPassing[0] || null
-      }
-    };
-  } catch (error) {
-    console.error('Database error:', error);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_SITE_URL}/api/player/${params.id}`);
+  if (!res.ok) {
     return { notFound: true };
-  } finally {
-    if (connection) await connection.end();
   }
+  const data = await res.json();
+  return { props: data };
 }
 
-export default function PlayerPage({ player, receivingMetrics, rushingMetrics, passingMetrics, advancedMetrics, advancedRushing, advancedPassing, seasonStats }) {
+export default function PlayerPage({ player, receivingMetrics, advancedMetrics, advancedRushing }) {
+  if (!player) {
+    return <div>Player not found</div>;
+  }
   // --- Career Summary Carousel State ---
   const [activeIndex, setActiveIndex] = useState(0);
   const [bgColor, setBgColor] = useState('#004C54');
@@ -473,6 +367,64 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                   <p><strong>Rush Yards Over Expected:</strong> {typeof advancedRushing.rushing_yards_over_expected === 'number' ? advancedRushing.rushing_yards_over_expected.toFixed(1) : 'N/A'}</p>
                   <p><strong>Rush EPA:</strong> {typeof advancedRushing.rushing_epa === 'number' ? advancedRushing.rushing_epa.toFixed(2) : 'N/A'}</p>
                   <p><strong>Rush Success Rate:</strong> {typeof advancedRushing.success_rate === 'number' ? (advancedRushing.success_rate * 100).toFixed(1) + '%' : 'N/A'}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Advanced Receiving Metrics Table */}
+            {advancedMetrics && advancedMetrics.length > 0 && (
+              <div className="mt-6">
+                <h2 className="text-xl font-semibold mb-2">Advanced Receiving Metrics</h2>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr>
+                        {Object.keys(advancedMetrics[0]).map((col) => (
+                          <th key={col} className="px-4 py-2 text-left border-b">
+                            {col.replace(/_/g, ' ')}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {advancedMetrics.map((row, idx) => (
+                        <tr key={idx}>
+                          {Object.values(row).map((val, i) => (
+                            <td key={i} className="px-4 py-1 border-b">{val}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Advanced Rushing Metrics Table */}
+            {advancedRushing && advancedRushing.length > 0 && (
+              <div className="mt-6">
+                <h2 className="text-xl font-semibold mb-2">Advanced Rushing Metrics</h2>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr>
+                        {Object.keys(advancedRushing[0]).map((col) => (
+                          <th key={col} className="px-4 py-2 text-left border-b">
+                            {col.replace(/_/g, ' ')}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {advancedRushing.map((row, idx) => (
+                        <tr key={idx}>
+                          {Object.values(row).map((val, i) => (
+                            <td key={i} className="px-4 py-1 border-b">{val}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}

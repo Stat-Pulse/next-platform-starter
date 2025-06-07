@@ -20,7 +20,7 @@ const TeamPage = () => {
     if (!teamId) return;
     const fetchData = async () => {
       try {
-        const newsRes = await fetch(`/api/news?team=${teamId.toUpperCase()}`);
+        const newsRes = await fetch(`/api/news?team=${encodeURIComponent(teamId.toUpperCase())}`);
         const newsJson = await newsRes.json();
         if (newsRes.ok) setNews(newsJson.slice(0, 5));
 
