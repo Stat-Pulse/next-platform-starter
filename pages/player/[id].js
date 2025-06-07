@@ -124,6 +124,12 @@ export async function getServerSideProps({ params }) {
 export default function PlayerPage({ player, receivingMetrics, rushingMetrics, passingMetrics, advancedMetrics, advancedRushing, advancedPassing }) {
   // --- Career Summary Carousel State ---
   const [activeIndex, setActiveIndex] = useState(0);
+  const [bgColor, setBgColor] = useState('#004C54');
+  useEffect(() => {
+    if (player?.primary_color) {
+      setBgColor(player.primary_color);
+    }
+  }, [player?.primary_color]);
   const scrollRef = useRef();
   // Count how many career summary cards exist (for dots)
   const numDots = 3;
@@ -158,7 +164,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
           {/* Background Stripe */}
           <div
             className="absolute inset-0"
-            style={{ backgroundColor: player.primary_color || '#004C54' }}
+            style={{ backgroundColor: bgColor }}
           ></div>
 
           {/* Main Header Content */}
