@@ -159,7 +159,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                   <span><strong>DOB:</strong> {player.date_of_birth ? new Date(player.date_of_birth).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}</span>
                   <span><strong>Height:</strong> {player.height_inches ? `${player.height_inches} in` : 'N/A'}</span>
                   <span><strong>Weight:</strong> {player.weight_pounds ? `${player.weight_pounds} lbs` : 'N/A'}</span>
-                  <span><strong>Team:</strong> {player.recent_team || 'N/A'}</span>
+                  <span><strong>Team:</strong> {player.team_abbr || 'N/A'}</span>
                 </div>
               </div>
             </div>
