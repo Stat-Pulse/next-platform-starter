@@ -48,7 +48,7 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
   // Debug player data for carousel
   console.log("Player Data for Carousel:", player);
   // Debug: Log the resolved color
-  console.log("Resolved color:", team.primary_color);
+  console.log("Resolved color:", player.primary_color);
   return (
     <>
       <Head>
