@@ -155,7 +155,7 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
           {/* Background Stripe */}
           <div
             className="absolute inset-0"
-            style={{ backgroundColor: player.primary_color ? `#${player.primary_color.replace('#', '')}` : '#004C54' }}
+            style={{ backgroundColor: player.primary_color || '#004C54' }}
           ></div>
 
           {/* Main Header Content */}
