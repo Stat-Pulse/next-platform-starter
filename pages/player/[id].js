@@ -13,21 +13,19 @@ export async function getServerSideProps({ params }) {
 }
 
 export default function PlayerPage({ player, receivingMetrics, advancedMetrics, advancedRushing }) {
-  if (!player) {
-    return <div>Player not found</div>;
-  }
   // --- Career Summary Carousel State ---
   const [activeIndex, setActiveIndex] = useState(0);
   const [bgColor, setBgColor] = useState('#004C54');
+  const scrollRef = useRef();
+  // Count how many career summary cards exist (for dots)
+  const numDots = 3;
+
   useEffect(() => {
     if (player?.primary_color) {
       setBgColor(player.primary_color);
     }
   }, [player?.primary_color]);
-  const scrollRef = useRef();
-  // Count how many career summary cards exist (for dots)
-  const numDots = 3;
-  // Scroll handler to update activeIndex
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -41,6 +39,10 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
     el.addEventListener('scroll', handleScroll);
     return () => el.removeEventListener('scroll', handleScroll);
   }, []);
+
+  if (!player) {
+    return <div>Player not found</div>;
+  }
 
   // Debug player data for carousel
   console.log("Player Data for Carousel:", player);
