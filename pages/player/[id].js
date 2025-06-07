@@ -123,29 +123,74 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
       </Head>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header Block */}
-        <div className="bg-white rounded shadow flex flex-col md:flex-row items-center md:items-end md:justify-between px-6 py-6 mb-8">
-          <div className="flex items-center space-x-6 w-full">
-            <img src={player.headshot_url} alt={`${player.player_name} headshot`} className="w-32 h-32 rounded-full object-cover border-4 border-gray-100 shadow" />
-            <div>
-              <h1 className="text-4xl font-extrabold tracking-tight">{player.player_name}</h1>
-              <div className="flex items-center space-x-3 mt-2">
-                <span className="text-base uppercase tracking-wide font-semibold text-gray-600">{player.position}</span>
-                <span className="inline-block w-2 h-2 rounded-full bg-gray-400"></span>
-                <span className="text-base font-semibold text-gray-700">{player.recent_team}</span>
+        {/* Header Section */}
+        <div className="relative mb-8">
+          {/* Background Stripe */}
+          <div className="absolute inset-0 bg-red-600"></div>
+
+          {/* Main Header Content */}
+          <div className="relative bg-white bg-opacity-90 rounded shadow px-6 py-6 flex flex-col md:flex-row items-center md:items-end justify-between">
+            <div className="flex items-center space-x-6">
+              <img
+                src={player.headshot_url}
+                alt={`${player.player_name} headshot`}
+                className="w-40 h-40 rounded-full object-cover border-4 border-white shadow-lg"
+              />
+              <div>
+                <h1 className="text-4xl font-extrabold tracking-tight text-gray-900">
+                  {player.player_name}
+                </h1>
+                <div className="text-xl font-semibold text-gray-700 mt-1">
+                  {player.position} {player.jersey_number ? `#${player.jersey_number}` : ''}
+                </div>
               </div>
-              <div className="mt-2 text-sm text-gray-500">
-                <span className="mr-4"><strong>Height:</strong> {player.height || 'N/A'}</span>
-                <span className="mr-4"><strong>Weight:</strong> {player.weight || 'N/A'}</span>
-                <span><strong>Age:</strong> {player.age || 'N/A'}</span>
+            </div>
+            <div className="mt-4 md:mt-0 flex items-center space-x-2">
+              {/* Team Name */}
+              <span className="text-lg font-semibold text-gray-800">
+                {player.recent_team}
+              </span>
+            </div>
+          </div>
+
+          {/* Stats Row */}
+          <div className="relative bg-white rounded shadow px-4 py-4 -mt-4 z-10">
+            <div className="grid grid-cols-2 md:grid-cols-9 gap-4 text-center text-sm text-gray-700">
+              <div>
+                <span className="block font-semibold">DOB</span>
+                <span>{player.dob ? player.dob.split('T')[0] : 'N/A'}</span>
               </div>
-              <div className="mt-1 text-sm text-gray-500">
-                <span className="mr-4"><strong>College:</strong> {player.college || 'N/A'}</span>
-                <span className="mr-4"><strong>Draft:</strong> {player.draft_round ? `R${player.draft_round}, P${player.draft_pick}, ${player.draft_team}` : 'N/A'}</span>
+              <div>
+                <span className="block font-semibold">HEIGHT</span>
+                <span>{player.height || 'N/A'}</span>
               </div>
-              <div className="text-sm text-gray-500">
-                <span className="mr-4"><strong>Base Salary:</strong> {player.base_salary ? `$${player.base_salary.toLocaleString()}` : 'N/A'}</span>
-                <span className="mr-4"><strong>Cap Hit:</strong> {player.cap_hit ? `$${player.cap_hit.toLocaleString()}` : 'N/A'}</span>
+              <div>
+                <span className="block font-semibold">WEIGHT</span>
+                <span>{player.weight || 'N/A'}</span>
+              </div>
+              <div>
+                <span className="block font-semibold">SPEED</span>
+                <span>{player.speed || 'N/A'}</span>
+              </div>
+              <div>
+                <span className="block font-semibold">COLLEGE</span>
+                <span>{player.college || 'N/A'}</span>
+              </div>
+              <div>
+                <span className="block font-semibold">DRAFT YEAR</span>
+                <span>{player.draft_year || 'N/A'}</span>
+              </div>
+              <div>
+                <span className="block font-semibold">DRAFT TEAM</span>
+                <span>{player.draft_team || 'N/A'}</span>
+              </div>
+              <div>
+                <span className="block font-semibold">ROUND</span>
+                <span>{player.draft_round || 'N/A'}</span>
+              </div>
+              <div>
+                <span className="block font-semibold">SELECTION</span>
+                <span>{player.draft_pick || 'N/A'}</span>
               </div>
             </div>
           </div>
