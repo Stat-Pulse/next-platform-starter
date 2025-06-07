@@ -198,11 +198,11 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
               </div>
               <div>
                 <span className="block font-semibold">CONTRACT VALUE</span>
-                <span>{player.contract_value ? `$${Number(player.contract_value).toLocaleString()}` : 'N/A'}</span>
+                <span>{player.value ? `$${Number(player.value).toLocaleString()}` : 'N/A'}</span>
               </div>
               <div>
                 <span className="block font-semibold">AVG/YEAR</span>
-                <span>{player.average_per_year ? `$${Number(player.average_per_year).toLocaleString()}` : 'N/A'}</span>
+                <span>{player.apy ? `$${Number(player.apy).toLocaleString()}` : 'N/A'}</span>
               </div>
               <div>
                 <span className="block font-semibold">GUARANTEED</span>
