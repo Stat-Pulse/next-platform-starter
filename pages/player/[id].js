@@ -21,6 +21,9 @@ export async function getServerSideProps({ params }) {
     if (profileRows.length === 0) return { notFound: true };
     const player = profileRows[0];
 
+    // Fetch contract info (example: from a table called Player_Contracts, or add to Active_Player_Profiles if present)
+    // This assumes contract_year, base_salary, cap_hit are columns in Active_Player_Profiles
+
     const [receivingMetrics] = await connection.execute(`
       SELECT week, season, recent_team, opponent_team, targets, receptions, receiving_yards, receiving_tds AS rec_touchdowns
       FROM Player_Stats_Game_All
@@ -76,7 +79,15 @@ export async function getServerSideProps({ params }) {
     } : null;
     return {
       props: {
-        player: { ...player, career, rushingCareer, passingCareer },
+        player: {
+          ...player,
+          contract_year: player.contract_year || null,
+          base_salary: player.base_salary || null,
+          cap_hit: player.cap_hit || null,
+          career,
+          rushingCareer,
+          passingCareer
+        },
         receivingMetrics,
         rushingMetrics,
         passingMetrics,
@@ -151,27 +162,19 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                 {player.recent_team}
               </span>
             </div>
+            {/* End team name */}
+          </div>
+          {/* Extra player details row */}
+          <div className="mt-2 text-sm text-gray-600 space-x-4">
+            <span><strong>DOB:</strong> {player.dob ? player.dob.split('T')[0] : 'N/A'}</span>
+            <span><strong>Height:</strong> {player.height || 'N/A'}</span>
+            <span><strong>Weight:</strong> {player.weight || 'N/A'}</span>
+            <span><strong>Team:</strong> {player.recent_team}</span>
           </div>
 
           {/* Stats Row */}
           <div className="relative bg-white rounded shadow px-4 py-4 -mt-4 z-10">
-            <div className="grid grid-cols-2 md:grid-cols-9 gap-4 text-center text-sm text-gray-700">
-              <div>
-                <span className="block font-semibold">DOB</span>
-                <span>{player.dob ? player.dob.split('T')[0] : 'N/A'}</span>
-              </div>
-              <div>
-                <span className="block font-semibold">HEIGHT</span>
-                <span>{player.height || 'N/A'}</span>
-              </div>
-              <div>
-                <span className="block font-semibold">WEIGHT</span>
-                <span>{player.weight || 'N/A'}</span>
-              </div>
-              <div>
-                <span className="block font-semibold">SPEED</span>
-                <span>{player.speed || 'N/A'}</span>
-              </div>
+            <div className="grid grid-cols-2 md:grid-cols-8 gap-4 text-center text-sm text-gray-700">
               <div>
                 <span className="block font-semibold">COLLEGE</span>
                 <span>{player.college || 'N/A'}</span>
@@ -191,6 +194,18 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
               <div>
                 <span className="block font-semibold">SELECTION</span>
                 <span>{player.draft_pick || 'N/A'}</span>
+              </div>
+              <div>
+                <span className="block font-semibold">CONTRACT YEAR</span>
+                <span>{player.contract_year || 'N/A'}</span>
+              </div>
+              <div>
+                <span className="block font-semibold">BASE SALARY</span>
+                <span>{player.base_salary ? `$${Number(player.base_salary).toLocaleString()}` : 'N/A'}</span>
+              </div>
+              <div>
+                <span className="block font-semibold">CAP HIT</span>
+                <span>{player.cap_hit ? `$${Number(player.cap_hit).toLocaleString()}` : 'N/A'}</span>
               </div>
             </div>
           </div>
