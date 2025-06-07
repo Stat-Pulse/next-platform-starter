@@ -1,7 +1,104 @@
 // Extend the Player Profile page with rushing and passing stats
-// Fetch data via API in getServerSideProps below
 import Head from 'next/head';
 import { useRef, useEffect, useState } from 'react';
+
+  try {
+    connection = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME
+    });
+
+    const [profileRows] = await connection.execute(
+      `SELECT * FROM Active_Player_Profiles WHERE player_id = ? LIMIT 1`,
+      [playerId]
+    );
+    if (profileRows.length === 0) return { notFound: true };
+    const player = profileRows[0];
+
+    // Fetch contract info (example: from a table called Player_Contracts, or add to Active_Player_Profiles if present)
+    // This assumes contract_year, base_salary, cap_hit are columns in Active_Player_Profiles
+
+    const [receivingMetrics] = await connection.execute(`
+      SELECT week, season, recent_team, opponent_team, targets, receptions, receiving_yards, receiving_tds AS rec_touchdowns
+      FROM Player_Stats_Game_All
+      WHERE player_id = ? AND season = 2024 AND receiving_yards IS NOT NULL
+      ORDER BY week
+    `, [playerId]);
+
+    const [passingMetrics] = await connection.execute(`
+      SELECT week, season, recent_team, opponent_team, completions, attempts, passing_yards, passing_tds, interceptions, passing_epa
+      FROM Player_Stats_Game_All
+      WHERE player_id = ? AND season = 2024 AND attempts IS NOT NULL
+      ORDER BY week
+    `, [playerId]);
+
+    const [rushingMetrics] = await connection.execute(`
+      SELECT week, season, recent_team, opponent_team, carries, rushing_yards, rushing_tds, rushing_epa, rushing_fumbles, rushing_fumbles_lost, rushing_first_downs
+      FROM Player_Stats_Game_All
+      WHERE player_id = ? AND season = 2024 AND carries IS NOT NULL
+      ORDER BY week
+    `, [playerId]);
+
+    const [advancedReceiving] = await connection.execute(`
+      SELECT * FROM NextGen_Stats_Receiving WHERE player_gsis_id = ? AND season = 2024
+    `, [playerId]);
+
+    const [advancedRushing] = await connection.execute(`
+      SELECT * FROM NextGen_Stats_Rushing WHERE player_id = ? AND season = 2024
+    `, [playerId]);
+
+    const [advancedPassing] = await connection.execute(`
+      SELECT * FROM NextGen_Stats_Passing WHERE player_id = ? AND season = 2024
+    `, [playerId]);
+
+    const rushingCareer = rushingMetrics.length > 0 ? {
+      games: rushingMetrics.length,
+      yards: rushingMetrics.reduce((sum, g) => sum + (g.rushing_yards || 0), 0),
+      tds: rushingMetrics.reduce((sum, g) => sum + (g.rushing_tds || 0), 0),
+    } : null;
+
+    const passingCareer = passingMetrics.length > 0 ? {
+      games: passingMetrics.length,
+      completions: passingMetrics.reduce((sum, g) => sum + (g.completions || 0), 0),
+      attempts: passingMetrics.reduce((sum, g) => sum + (g.attempts || 0), 0),
+      yards: passingMetrics.reduce((sum, g) => sum + (g.passing_yards || 0), 0),
+      tds: passingMetrics.reduce((sum, g) => sum + (g.passing_tds || 0), 0),
+      ints: passingMetrics.reduce((sum, g) => sum + (g.interceptions || 0), 0)
+    } : null;
+
+    const career = receivingMetrics.length > 0 ? {
+      games: receivingMetrics.length,
+      yards: receivingMetrics.reduce((sum, g) => sum + (g.receiving_yards || 0), 0),
+      tds: receivingMetrics.reduce((sum, g) => sum + (g.rec_touchdowns || 0), 0),
+    } : null;
+    return {
+      props: {
+        player: {
+          ...player,
+          contract_year: player.contract_year || null,
+          base_salary: player.base_salary || null,
+          cap_hit: player.cap_hit || null,
+          career,
+          rushingCareer,
+          passingCareer
+        },
+        receivingMetrics,
+        rushingMetrics,
+        passingMetrics,
+        advancedMetrics: advancedReceiving[0] || null,
+        advancedRushing: advancedRushing[0] || null,
+        advancedPassing: advancedPassing[0] || null
+      }
+    };
+  } catch (error) {
+    console.error('Database error:', error);
+    return { notFound: true };
+  } finally {
+    if (connection) await connection.end();
+  }
+}
 
 export default function PlayerPage({ player, receivingMetrics, rushingMetrics, passingMetrics, advancedMetrics, advancedRushing, advancedPassing }) {
   // --- Career Summary Carousel State ---
@@ -349,17 +446,4 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
       </div>
     </>
   );
-}
-
-export async function getServerSideProps({ params, req }) {
-  // Construct absolute URL for internal API call
-  const protocol = req.headers['x-forwarded-proto'] || 'http';
-  const host = req.headers['x-forwarded-host'] || req.headers['host'];
-  const baseUrl = `${protocol}://${host}`;
-  const res = await fetch(`${baseUrl}/api/player/${params.id}`);
-  if (!res.ok) {
-    return { notFound: true };
-  }
-  const data = await res.json();
-  return { props: data };
 }
