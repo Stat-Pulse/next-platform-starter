@@ -216,9 +216,16 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
   {/* Dot Pagination */}
   <div className="flex justify-center space-x-2 mt-2">
     {Array.from({ length: numDots }).map((_, idx) => (
-      <span
+      <button
         key={idx}
+        onClick={() => {
+          scrollRef.current.scrollTo({
+            left: idx * scrollRef.current.clientWidth,
+            behavior: 'smooth'
+          });
+        }}
         className={`h-2 w-2 rounded-full ${idx === activeIndex ? 'bg-gray-800' : 'bg-gray-300'}`}
+        aria-label={`Go to slide ${idx + 1}`}
       />
     ))}
   </div>
