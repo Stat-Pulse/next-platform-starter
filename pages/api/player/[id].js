@@ -36,7 +36,7 @@ export default async function handler(req, res) {
         c.apy_cap_pct
       FROM Players p
       LEFT JOIN Teams t ON p.team = t.team_abbr
-      LEFT JOIN Rosters_2024 r ON p.player_id = r.player_id
+      LEFT JOIN Players r ON p.player_id = r.player_id
       LEFT JOIN Draft_Picks dp ON p.player_id = dp.player_id
       LEFT JOIN Contracts c ON p.player_id = c.player_id
       WHERE p.player_id = ?
