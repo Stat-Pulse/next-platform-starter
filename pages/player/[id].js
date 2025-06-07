@@ -17,7 +17,7 @@ export async function getServerSideProps({ params }) {
 
     const [profileRows] = await connection.execute(
       `
-      SELECT p.*, d.team AS current_team_abbr, t.primary_color AS team_primary_color
+      SELECT p.*, d.team AS current_team_abbr, t.primary_color AS team_primary_color, t.team_logo_espn
       FROM Active_Player_Profiles p
       LEFT JOIN Depth_Charts d 
         ON p.player_id = d.player_id 
@@ -102,7 +102,8 @@ export async function getServerSideProps({ params }) {
           cap_hit: player.cap_hit || null,
           career,
           rushingCareer,
-          passingCareer
+          passingCareer,
+          team_logo: player.team_logo_espn || null,
         },
         receivingMetrics,
         rushingMetrics,
@@ -143,6 +144,8 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
 
   // Debug player data for carousel
   console.log("Player Data for Carousel:", player);
+  // Debug: Log the resolved color
+  console.log("Resolved color:", player.primary_color);
   return (
     <>
       <Head>
@@ -166,6 +169,13 @@ export default function PlayerPage({ player, receivingMetrics, rushingMetrics, p
                 alt={`${player.player_name} headshot`}
                 className="w-40 h-40 rounded-full object-cover border-4 border-white shadow-lg"
               />
+              {player.team_logo && (
+                <img
+                  src={player.team_logo}
+                  alt={`${player.team_abbr} logo`}
+                  className="w-12 h-12 object-contain"
+                />
+              )}
               <div>
                 <h1 className="text-4xl font-extrabold tracking-tight text-gray-900">
                   {player.player_name}
