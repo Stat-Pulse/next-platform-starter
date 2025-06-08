@@ -46,6 +46,43 @@ export default async function handler(req, res) {
     const [receivingCareerRows] = await connection.query(receivingCareerQuery, Array(15).fill(playerId));
     player.career = receivingCareerRows[0];
 
+    // Calculate career rushing totals
+    const rushingCareerQuery = `
+      SELECT
+        COUNT(DISTINCT season) AS seasons,
+        SUM(rushing_yards) AS yards,
+        SUM(rushing_tds) AS tds
+      FROM (
+        ${[...Array(15).keys()].map(i => {
+          const year = 2010 + i;
+          return `SELECT season, rushing_yards, rushing_tds
+                  FROM Player_Stats_${year}
+                  WHERE player_id = ? AND rushing_yards IS NOT NULL`;
+        }).join('\nUNION ALL\n')}
+      ) AS combined
+    `;
+    const [rushingCareerRows] = await connection.query(rushingCareerQuery, Array(15).fill(playerId));
+    player.rushingCareer = rushingCareerRows[0];
+
+    // Calculate career passing totals
+    const passingCareerQuery = `
+      SELECT
+        COUNT(DISTINCT season) AS seasons,
+        SUM(passing_yards) AS yards,
+        SUM(passing_tds) AS tds,
+        SUM(passing_interceptions) AS ints
+      FROM (
+        ${[...Array(15).keys()].map(i => {
+          const year = 2010 + i;
+          return `SELECT season, passing_yards, passing_tds, passing_interceptions
+                  FROM Player_Stats_${year}
+                  WHERE player_id = ? AND passing_yards IS NOT NULL`;
+        }).join('\nUNION ALL\n')}
+      ) AS combined
+    `;
+    const [passingCareerRows] = await connection.query(passingCareerQuery, Array(15).fill(playerId));
+    player.passingCareer = passingCareerRows[0];
+
     const seasonStatsQuery = `
       SELECT season, 
              SUM(receiving_yards) AS receiving_yards,
