@@ -76,7 +76,10 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
           {/* Background Stripe */}
           <div
             className="absolute inset-0"
-            style={{ backgroundColor: bgColor }}
+            style={{
+              backgroundColor: player.primary_color || bgColor,
+              borderBottom: `4px solid ${player.secondary_color || '#000'}`
+            }}
           ></div>
 
           {/* Main Header Content */}
@@ -108,6 +111,16 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
                   <span><strong>Team:</strong> {player.team_abbr || 'N/A'}</span>
                 </div>
               </div>
+            </div>
+            {/* Add ESPN team logo in top-right */}
+            <div className="absolute top-4 right-4 flex flex-col items-end">
+              {player.team_logo_espn && (
+                <img
+                  src={player.team_logo_espn}
+                  alt={`${player.team_abbr || 'team'} ESPN logo`}
+                  className="w-10 h-10 object-contain mb-2"
+                />
+              )}
             </div>
             <div className="mt-4 md:mt-0 flex items-center space-x-2">
               {/* Team Name */}
