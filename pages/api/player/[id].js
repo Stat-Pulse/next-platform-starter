@@ -95,11 +95,11 @@ const seasonStatsQuery = `
          SUM(rushing_tds) AS rushing_tds,
          SUM(passing_yards) AS passing_yards,
          SUM(passing_tds) AS passing_tds,
-         SUM(interceptions) AS interceptions
+         SUM(passing_ints) AS interceptions
   FROM (
     ${[...Array(15).keys()].map(i => {
       const year = 2010 + i;
-      return `SELECT season, receiving_yards, receiving_tds, rushing_yards, rushing_tds, passing_yards, passing_tds, interceptions
+      return `SELECT season, receiving_yards, receiving_tds, rushing_yards, rushing_tds, passing_yards, passing_tds, passing_ints
               FROM Player_Stats_${year}
               WHERE player_id = ?`;
     }).join('\nUNION ALL\n')}
