@@ -43,7 +43,7 @@ export default async function handler(req, res) {
       FROM Players p
       LEFT JOIN Rosters_2025 r ON p.player_id = r.gsis_id
       LEFT JOIN Latest_Contracts lc ON p.player_id = lc.player_id
-      LEFT JOIN Teams t ON r.team = t.team_abbr
+      LEFT JOIN Teams t ON r.team COLLATE utf8mb4_0900_ai_ci = t.team_abbr
       WHERE p.player_id = ?
       `,
       [req.query.id]
