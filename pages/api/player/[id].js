@@ -48,10 +48,57 @@ export default async function handler(req, res) {
       `,
       [req.query.id]
     );
+    
+    // Receiving Career Totals
+const [receivingCareer] = await connection.execute(`
+  SELECT
+    COUNT(*) AS games,
+    SUM(receiving_yards) AS yards,
+    SUM(receiving_tds) AS tds
+  FROM Player_Stats_Game_All
+  WHERE player_id = ? AND receiving_yards IS NOT NULL
+`, [req.query.id]);
 
+// Rushing Career Totals
+const [rushingCareer] = await connection.execute(`
+  SELECT
+    COUNT(*) AS games,
+    SUM(rushing_yards) AS yards,
+    SUM(rushing_tds) AS tds
+  FROM Player_Stats_Game_All
+  WHERE player_id = ? AND rushing_yards IS NOT NULL
+`, [req.query.id]);
+
+// Passing Career Totals
+const [passingCareer] = await connection.execute(`
+  SELECT
+    COUNT(*) AS games,
+    SUM(passing_cmp) AS completions,
+    SUM(passing_att) AS attempts,
+    SUM(passing_yards) AS yards,
+    SUM(passing_tds) AS tds,
+    SUM(passing_ints) AS ints
+  FROM Player_Stats_Game_All
+  WHERE player_id = ? AND passing_yards IS NOT NULL
+`, [req.query.id]);
+
+// Attach to player object
+player[0].career = receivingCareer[0];
+player[0].rushingCareer = rushingCareer[0];
+player[0].passingCareer = passingCareer[0];
     console.log("Query complete. Sending response...");
-    res.status(200).json({ player: player[0], seasonStats: [] });
+    res.status(200).json({
+      player: player[0],
+      seasonStats: [],
+      receivingMetrics: [],
+      rushingMetrics: [],
+      passingMetrics: [],
+      advancedMetrics: [],
+      advancedRushing: [],
+      advancedPassing: []
+    });
 
+    
   } catch (err) {
     console.error("API Error:", err);
     res.status(500).json({ error: "Server error" });
