@@ -126,7 +126,7 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
             </div>
           )}
 
-          {/* Stats Row */}
+   {/* Stats Row */}
           <div className="relative bg-white rounded shadow px-4 py-4 -mt-4 z-10">
             <div className="grid grid-cols-2 md:grid-cols-9 gap-4 text-center text-sm text-gray-700">
               <div>
@@ -135,7 +135,7 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
               </div>
               <div>
                 <span className="block font-semibold">DRAFT YEAR</span>
-                <span>{player.draft_year || 'N/A'}</span>
+                <span>{player.draft_year ?? 'N/A'}</span>
               </div>
               <div>
                 <span className="block font-semibold">DRAFT TEAM</span>
@@ -143,27 +143,27 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
               </div>
               <div>
                 <span className="block font-semibold">ROUND</span>
-                <span>{player.draft_round || 'N/A'}</span>
+                <span>{player.draft_round ?? 'N/A'}</span>
               </div>
               <div>
                 <span className="block font-semibold">SELECTION</span>
-                <span>{player.draft_pick || 'N/A'}</span>
+                <span>{player.draft_overall ?? player.draft_pick ?? 'N/A'}</span>
               </div>
               <div>
                 <span className="block font-semibold">CONTRACT VALUE</span>
-                <span>{player.value ? `$${Number(player.value).toLocaleString()}M` : 'N/A'}</span>
+                <span>{player.contract_value ? `$${Number(player.contract_value).toLocaleString()}M` : 'N/A'}</span>
               </div>
               <div>
                 <span className="block font-semibold">AVG/YEAR</span>
-                <span>{player.apy ? `$${Number(player.apy).toLocaleString()}M` : 'N/A'}</span>
+                <span>{player.contract_apy ? `$${Number(player.contract_apy).toLocaleString()}M` : 'N/A'}</span>
               </div>
               <div>
                 <span className="block font-semibold">GUARANTEED</span>
-                <span>{player.guaranteed ? `$${Number(player.guaranteed).toLocaleString()}M` : 'N/A'}</span>
+                <span>{player.contract_guaranteed ? `$${Number(player.contract_guaranteed).toLocaleString()}M` : 'N/A'}</span>
               </div>
               <div>
                 <span className="block font-semibold">CAP %</span>
-                <span>{player.apy_cap_pct ? (Number(player.apy_cap_pct) * 100).toFixed(1) + '%' : 'N/A'}</span>
+                <span>{player.contract_apy_cap_pct ? `${(Number(player.contract_apy_cap_pct) * 100).toFixed(1)}%` : 'N/A'}</span>
               </div>
             </div>
           </div>
