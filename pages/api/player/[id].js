@@ -73,11 +73,11 @@ const [rushingCareer] = await connection.execute(`
 const [passingCareer] = await connection.execute(`
   SELECT
     COUNT(*) AS games,
-    SUM(passing_cmp) AS completions,
-    SUM(passing_att) AS attempts,
+    SUM(completions) AS completions,
+    SUM(attempts) AS attempts,
     SUM(passing_yards) AS yards,
     SUM(passing_tds) AS tds,
-    SUM(passing_ints) AS ints
+    SUM(interceptions) AS ints
   FROM Player_Stats_Game_All
   WHERE player_id = ? AND passing_yards IS NOT NULL
 `, [req.query.id]);
