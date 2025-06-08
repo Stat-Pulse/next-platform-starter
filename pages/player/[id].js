@@ -118,7 +118,7 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
                 <img
                   src={player.team_logo_espn}
                   alt={`${player.team_abbr || 'team'} ESPN logo`}
-                  className="w-16 h-16 object-contain mb-2"
+                  className="w-32 h-32 object-contain mb-2"
                 />
               )}
             </div>
