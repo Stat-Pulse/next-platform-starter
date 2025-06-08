@@ -139,7 +139,28 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
               </div>
               <div>
                 <span className="block font-semibold">DRAFT TEAM</span>
-                <span>{player.draft_team?.toUpperCase() || player.team_abbr || 'N/A'}</span>
+                <span>
+                  {{
+                    Ari: 'ARI', Atl: 'ATL', Bal: 'BAL', Buf: 'BUF', Car: 'CAR',
+                    Chi: 'CHI', Cin: 'CIN', Cle: 'CLE', Dal: 'DAL', Den: 'DEN',
+                    Det: 'DET', GB: 'GB', Hou: 'HOU', Ind: 'IND', Jax: 'JAX',
+                    KC: 'KC', LV: 'LV', LAC: 'LAC', Lar: 'LAR', Mia: 'MIA',
+                    Min: 'MIN', NE: 'NE', NO: 'NO', NYG: 'NYG', NYJ: 'NYJ',
+                    Phi: 'PHI', Pit: 'PIT', SF: 'SF', Sea: 'SEA', TB: 'TB',
+                    Ten: 'TEN', Was: 'WAS', '': 'N/A', 
+                    // Legacy/old codes mapping:
+                    Gnb: 'GB', Kan: 'KC', Nwe: 'NE', Nor: 'NO', Sfo: 'SF', Tam: 'TB', 
+                    Jax: 'JAX', 
+                    // Some common older codes:
+                    Ari: 'ARI', Bal: 'BAL', Buf: 'BUF', Car: 'CAR', Chi: 'CHI', Cin: 'CIN', Cle: 'CLE', Dal: 'DAL', Den: 'DEN', Det: 'DET', 
+                    Hou: 'HOU', Ind: 'IND', Mia: 'MIA', Min: 'MIN', NYG: 'NYG', NYJ: 'NYJ', Oak: 'LV', Phi: 'PHI', Pit: 'PIT', Sea: 'SEA', 
+                    Stl: 'LAR', SD: 'LAC', 
+                    // Common legacy for Titans:
+                    Ten: 'TEN', 
+                    // Handle some legacy abbreviations:
+                    'Tit': 'TEN', 'Jax': 'JAX', 'Gnb': 'GB', 'Nwe': 'NE', 'Nor': 'NO', 'Sfo': 'SF', 'Tam': 'TB', 'Lvr': 'LV', 'Lac': 'LAC', 'Lar': 'LAR'
+                  }[player.draft_team] || player.team_abbr || 'N/A'}
+                </span>
               </div>
               <div>
                 <span className="block font-semibold">ROUND</span>
