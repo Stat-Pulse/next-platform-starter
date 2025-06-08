@@ -211,9 +211,10 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
         <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">
           Receiving Career
         </h3>
-        <p><strong>Games:</strong> {player.career?.games}</p>
-        <p><strong>Yards:</strong> {player.career?.yards}</p>
-        <p><strong>Touchdowns:</strong> {player.career?.tds}</p>
+        <p><strong>Seasons Played:</strong> {player.career?.seasons}</p>
+        <p><strong>Games Played:</strong> {player.career?.games}</p>
+        <p><strong>Receiving Yards:</strong> {player.career?.yards}</p>
+        <p><strong>Receiving Touchdowns:</strong> {player.career?.tds}</p>
       </div>
 
       {/* Rushing Career Card */}
