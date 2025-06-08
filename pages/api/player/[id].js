@@ -60,8 +60,7 @@ export default async function handler(req, res) {
           const year = 2010 + i;
           return `SELECT season, COUNT(*) AS games, SUM(receiving_yards) AS receiving_yards, SUM(receiving_tds) AS receiving_tds
                   FROM Player_Stats_${year}
-                  WHERE player_id = ? AND receiving_yards IS NOT NULL
-                  GROUP BY season`;
+                  WHERE player_id = ? AND receiving_yards IS NOT NULL;
         }).join('\nUNION ALL\n')}
       ) AS combined
     `;
