@@ -77,8 +77,8 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
           <div
             className="absolute inset-0"
             style={{
-              backgroundColor: player.primary_color || bgColor,
-              borderBottom: `4px solid ${player.secondary_color || '#000'}`
+              backgroundColor: player.primary_color ?? bgColor,
+              borderBottom: `4px solid ${player.secondary_color ?? '#000'}`
             }}
           ></div>
 
@@ -118,7 +118,7 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
                 <img
                   src={player.team_logo_espn}
                   alt={`${player.team_abbr || 'team'} ESPN logo`}
-                  className="w-10 h-10 object-contain mb-2"
+                  className="w-16 h-16 object-contain mb-2"
                 />
               )}
             </div>
