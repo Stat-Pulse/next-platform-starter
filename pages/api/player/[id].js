@@ -73,8 +73,8 @@ const [rushingCareer] = await connection.execute(`
 const [passingCareer] = await connection.execute(`
   SELECT
     COUNT(*) AS games,
-    SUM(passing_completions) AS completions,
-    SUM(passing_attempts) AS attempts,
+    SUM(passing_cmp) AS completions,
+    SUM(passing_att) AS attempts,
     SUM(passing_yards) AS yards,
     SUM(passing_tds) AS tds,
     SUM(passing_ints) AS ints
@@ -95,11 +95,11 @@ const seasonStatsQuery = `
          SUM(rushing_tds) AS rushing_tds,
          SUM(passing_yards) AS passing_yards,
          SUM(passing_tds) AS passing_tds,
-         SUM(passing_ints) AS interceptions
+         SUM(interceptions) AS interceptions
   FROM (
     ${[...Array(15).keys()].map(i => {
       const year = 2010 + i;
-      return `SELECT season, receiving_yards, receiving_tds, rushing_yards, rushing_tds, passing_yards, passing_tds, passing_ints
+      return `SELECT season, receiving_yards, receiving_tds, rushing_yards, rushing_tds, passing_yards, passing_tds, interceptions
               FROM Player_Stats_${year}
               WHERE player_id = ?`;
     }).join('\nUNION ALL\n')}
