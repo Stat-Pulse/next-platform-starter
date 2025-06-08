@@ -139,7 +139,7 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
               </div>
               <div>
                 <span className="block font-semibold">DRAFT TEAM</span>
-                <span>{player.draft_team || 'N/A'}</span>
+                <span>{player.draft_team?.toUpperCase() || player.team_abbr || 'N/A'}</span>
               </div>
               <div>
                 <span className="block font-semibold">ROUND</span>
