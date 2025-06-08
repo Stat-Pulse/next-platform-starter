@@ -31,7 +31,6 @@ export default async function handler(req, res) {
     const receivingCareerQuery = `
       SELECT
         COUNT(DISTINCT season) AS seasons,
-        COUNT(*) AS games,
         SUM(receiving_yards) AS yards,
         SUM(receiving_tds) AS tds
       FROM (
