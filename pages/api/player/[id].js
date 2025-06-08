@@ -32,6 +32,22 @@ export default async function handler(req, res) {
 
     const playerId = req.query.id;
 
+    // Fetch player metadata from Active_Player_Profiles
+    const [playerRows] = await connection.execute(
+      `
+      SELECT *
+      FROM Active_Player_Profiles
+      WHERE player_id = ?
+      `,
+      [playerId]
+    );
+
+    if (!playerRows || playerRows.length === 0) {
+      return res.status(404).json({ error: 'Player not found' });
+    }
+
+    const player = playerRows[0];
+
     const seasonStatsQuery = `
       SELECT season, 
              SUM(receiving_yards) AS receiving_yards,
@@ -55,7 +71,7 @@ export default async function handler(req, res) {
 
     const [seasonStats] = await connection.query(seasonStatsQuery, Array(15).fill(playerId));
 
-    res.status(200).json({ seasonStats });
+    res.status(200).json({ player, seasonStats });
   } catch (err) {
     console.error("API Error:", err);
     res.status(500).json({ error: "Server error" });
