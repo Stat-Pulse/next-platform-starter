@@ -48,6 +48,25 @@ export default async function handler(req, res) {
 
     const player = playerRows[0];
 
+    // Calculate career receiving totals from Player_Stats_2010 to Player_Stats_2024
+    const receivingCareerQuery = `
+      SELECT
+        SUM(games) AS games,
+        SUM(receiving_yards) AS yards,
+        SUM(receiving_tds) AS tds
+      FROM (
+        ${[...Array(15).keys()].map(i => {
+          const year = 2010 + i;
+          return `SELECT COUNT(*) AS games, SUM(receiving_yards) AS receiving_yards, SUM(receiving_tds) AS receiving_tds
+                  FROM Player_Stats_${year}
+                  WHERE player_id = ? AND receiving_yards IS NOT NULL`;
+        }).join('\nUNION ALL\n')}
+      ) AS combined
+    `;
+
+    const [receivingCareerRows] = await connection.query(receivingCareerQuery, Array(15).fill(playerId));
+    player.career = receivingCareerRows[0];
+
     const seasonStatsQuery = `
       SELECT season, 
              SUM(receiving_yards) AS receiving_yards,
