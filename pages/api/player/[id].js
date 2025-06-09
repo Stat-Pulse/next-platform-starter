@@ -135,7 +135,20 @@ export default async function handler(req, res) {
     // Attach advanced stats by position
     if (player.position === 'QB') {
       const [advPassing] = await connection.execute(`
-        SELECT *
+        SELECT
+          avg_time_to_throw,
+          avg_completed_air_yards,
+          avg_intended_air_yards,
+          avg_air_yards_differential,
+          aggressiveness,
+          max_completed_air_distance,
+          avg_air_yards_to_sticks,
+          passer_rating,
+          completion_percentage,
+          expected_completion_percentage,
+          completion_percentage_above_expectation,
+          avg_air_distance,
+          max_air_distance
         FROM NextGen_Stats_Passing
         WHERE player_id = ?
       `, [playerId]);
@@ -171,14 +184,15 @@ export default async function handler(req, res) {
           additional: additionalPassingRows[0] || null
         }
       };
-    } else if (player.position === 'RB') {
+      player.passingCareer.additional = additionalPassingRows[0] || null;
+    } else if (player.position === 'RB', 'WR') {
       const [advRushing] = await connection.execute(`
         SELECT *
         FROM NextGen_Stats_Rushing
         WHERE player_id = ?
       `, [playerId]);
       player.advanced = { rushing: advRushing[0] || null };
-    } else if (['WR', 'TE'].includes(player.position)) {
+    } else if (['WR', 'TE', 'RB'].includes(player.position)) {
       const [advReceiving] = await connection.execute(`
         SELECT *
         FROM NextGen_Stats_Receiving
