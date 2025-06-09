@@ -292,6 +292,33 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
                 </div>
               </div>
             )}
+
+            {/* Career Passing Summary Table */}
+            {player.advanced?.passing && (
+              <div className="mt-6">
+                <h2 className="text-xl font-semibold mb-2">Career Passing Summary</h2>
+                <div className="overflow-x-auto bg-white p-4 rounded shadow">
+                  <table className="min-w-full text-sm">
+                    <tbody>
+                      <tr><td className="font-semibold pr-4">Completions:</td><td>{player.advanced.passing.completions}</td></tr>
+                      <tr><td className="font-semibold pr-4">Attempts:</td><td>{player.advanced.passing.attempts}</td></tr>
+                      <tr><td className="font-semibold pr-4">Passing Yards:</td><td>{Number(player.advanced.passing.passing_yards).toLocaleString()}</td></tr>
+                      <tr><td className="font-semibold pr-4">Passing TDs:</td><td>{player.advanced.passing.passing_tds}</td></tr>
+                      <tr><td className="font-semibold pr-4">Interceptions:</td><td>{player.advanced.passing.passing_interceptions}</td></tr>
+                      <tr><td className="font-semibold pr-4">Sacks Suffered:</td><td>{player.advanced.passing.sacks_suffered}</td></tr>
+                      <tr><td className="font-semibold pr-4">Sack Yards Lost:</td><td>{player.advanced.passing.sack_yards_lost}</td></tr>
+                      <tr><td className="font-semibold pr-4">Sack Fumbles:</td><td>{player.advanced.passing.sack_fumbles}</td></tr>
+                      <tr><td className="font-semibold pr-4">Sack Fumbles Lost:</td><td>{player.advanced.passing.sack_fumbles_lost}</td></tr>
+                      <tr><td className="font-semibold pr-4">Air Yards:</td><td>{player.advanced.passing.passing_air_yards}</td></tr>
+                      <tr><td className="font-semibold pr-4">Yards After Catch:</td><td>{player.advanced.passing.passing_yards_after_catch}</td></tr>
+                      <tr><td className="font-semibold pr-4">First Downs:</td><td>{player.advanced.passing.passing_first_downs}</td></tr>
+                      <tr><td className="font-semibold pr-4">Passing EPA:</td><td>{Number(player.advanced.passing.passing_epa).toFixed(2)}</td></tr>
+                      <tr><td className="font-semibold pr-4">CPOE:</td><td>{Number(player.advanced.passing.passing_cpoe).toFixed(2)}%</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
     </div>
   </div>
 
