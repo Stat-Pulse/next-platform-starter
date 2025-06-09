@@ -136,7 +136,7 @@ export default async function handler(req, res) {
     if (player.position === 'QB') {
       const [advPassing] = await connection.execute(`
         SELECT *
-        FROM NextGen_Stats_Passing_2024
+        FROM NextGen_Stats_Passing
         WHERE player_id = ?
       `, [playerId]);
 
@@ -174,14 +174,14 @@ export default async function handler(req, res) {
     } else if (player.position === 'RB') {
       const [advRushing] = await connection.execute(`
         SELECT *
-        FROM NextGen_Stats_Rushing_2024
+        FROM NextGen_Stats_Rushing
         WHERE player_id = ?
       `, [playerId]);
       player.advanced = { rushing: advRushing[0] || null };
     } else if (['WR', 'TE'].includes(player.position)) {
       const [advReceiving] = await connection.execute(`
         SELECT *
-        FROM NextGen_Stats_Receiving_2024
+        FROM NextGen_Stats_Receiving
         WHERE player_id = ?
       `, [playerId]);
       player.advanced = { receiving: advReceiving[0] || null };
