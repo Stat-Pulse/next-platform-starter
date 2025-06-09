@@ -1,311 +1,608 @@
-// pages/teams/[teamId].js
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+// Extend the Player Profile page with rushing and passing statsMore actions
+import SeasonStatsTable from '@/components/player/SeasonStatsTable';
+import Head from 'next/head';
+import { useRef, useEffect, useState } from 'react';
 
-const TeamPage = () => {
-  const router = useRouter();
-  const { teamId } = router.query;
-  const [teamData, setTeamData] = useState(null);
-  const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('overview');
-  const [news, setNews] = useState([]);
-  const [seasonGames, setSeasonGames] = useState([]);
-  const [showAllGames, setShowAllGames] = useState(false);
-  const [upcomingSchedule, setUpcomingSchedule] = useState([]);
-  const [showAllUpcoming, setShowAllUpcoming] = useState(false);
-  const [rushDefense, setRushDefense] = useState(null);
-  const [showRushDef, setShowRushDef] = useState(false);
+export async function getServerSideProps({ params }) {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_SITE_URL || process.env.URL || 'http://localhost:3000';
+  const url = `${baseUrl}/api/player/${params.id}`;
+  console.log("Fetching player from:", url);
+
+  try {
+    const res = await fetch(url);
+    console.log("Response status:", res.status);
+    if (!res.ok) {
+      return { notFound: true };
+    }
+
+    const data = await res.json();
+    console.log("Fetched player data successfully");
+    return { props: data };
+  } catch (error) {
+    console.error("Error fetching player:", error.message);
+    return { notFound: true };
+  }
+}
+
+export default function PlayerPage({ player, receivingMetrics, advancedMetrics, advancedRushing }) {
+  // --- Career Summary Carousel State ---
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [bgColor, setBgColor] = useState('#004C54');
+  const scrollRef = useRef();
+  // Count how many career summary cards exist (for dots)
+  const numDots = 3;
+  const seasonStats = [];
+  const rushingMetrics = [];
+  const passingMetrics = [];
+  const advancedPassing = null;
 
   useEffect(() => {
-    if (!teamId) return;
-    const fetchData = async () => {
-      try {
-        const newsRes = await fetch(`/api/news?team=${encodeURIComponent(teamId.toUpperCase())}`);
-        const newsJson = await newsRes.json();
-        if (newsRes.ok) setNews(newsJson.slice(0, 5));
+    if (player?.primary_color) {
+      setBgColor(player.primary_color);
+    }
+  }, [player?.primary_color]);
 
-        const rushDefRes = await fetch('/api/team-stats/rush-defense');
-        const rushDefJson = await rushDefRes.json();
-        if (rushDefRes.ok) setRushDefense(rushDefJson);
-
-        const teamRes = await fetch(`/api/teams/${teamId}`);
-        const teamJson = await teamRes.json();
-        if (!teamRes.ok) throw new Error(teamJson.error || 'Failed to load team data');
-        setTeamData(teamJson);
-        setSeasonGames(teamJson.seasonGames || []);
-        setUpcomingSchedule(teamJson.upcomingSchedule || []);
-      } catch (err) {
-        setError(err.message);
-      }
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const handleScroll = () => {
+      const scrollLeft = el.scrollLeft;
+      const width = el.clientWidth;
+      // Find the index of the visible card (approx card width 240px)
+      const index = Math.round(scrollLeft / 240);
+      setActiveIndex(index);
     };
-    fetchData();
-  }, [teamId]);
+    el.addEventListener('scroll', handleScroll);
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, []);
 
-  const formatStat = (num, decimals = 0) =>
-    num != null && !isNaN(num) ? Number(num).toLocaleString(undefined, {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    }) : '—';
+  if (!player) {
+    return <div>Player not found</div>;
+  }
 
-  const stadiumImages = {
-    DAL: '/stadiums/att_stadium_DAL.jpg',
-    SEA: '/stadiums/centurylink_field_SEA.jpg',
-    KC: '/stadiums/chiefs_kingdom_KC.jpg',
-    MIA: '/stadiums/hardrock_stadium_MIA.jpg',
-    SF: '/stadiums/levis_stadium_SF.jpg',
-    DEN: '/stadiums/mile_high_DEN.jpg',
-    MIN: '/stadiums/usbank_stadium_MIN.jpg',
-  };
-
-
-  if (error) return <div className="text-red-600 p-4">{error}</div>;
-  if (!teamData || !teamData.team) return <div className="p-4">Loading...</div>;
-
-  const { team, lastGame, upcomingGame, teamLogos, offenseStats, defenseStats } = teamData;
-  const stadiumBg = stadiumImages[team?.team_abbr];
-
+  // Debug player data for carousel
+  console.log("Player Data for Carousel:", player);
+  // Debug: Log the resolved color
+  console.log("Resolved color:", player.primary_color);
   return (
+    <>
+      <Head>
+        <title>{player.player_name} | StatPulse Profile</title>
+      </Head>
+
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header Section */}
+        <div className="relative mb-8">
+          {/* Background Stripe */}
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundColor: player.primary_color ?? bgColor,
+              borderBottom: `4px solid ${player.secondary_color ?? '#000'}`
+            }}
+          ></div>
+
+          {/* Main Header Content */}
+          <div className="relative bg-white bg-opacity-90 rounded shadow px-6 py-6 flex flex-col md:flex-row items-center md:items-end justify-between">
+            <div className="flex items-center space-x-6">
+              <img
+                src={player.headshot_url}
+                alt={`${player.player_name} headshot`}
+                className="w-40 h-40 rounded-full object-cover border-4 border-white shadow-lg"
+              />
+              {typeof player.team_logo === 'string' && player.team_logo.trim() !== '' && (
+                <img
+                  src={player.team_logo || '/default-logo.png'}
+                  alt={`${player.team_abbr || 'team'} logo`}
+                  className="w-12 h-12 object-contain"
+                />
+              )}
+              <div>
+                <h1 className="text-4xl font-extrabold tracking-tight text-gray-900">
+                  {player.player_name}
+                </h1>
+                <div className="text-xl font-semibold text-gray-700 mt-1">
+                  {player.position} {player.jersey_number ? `#${player.jersey_number}` : ''}
+                </div>
+                <div className="text-sm text-gray-600 mt-1 space-x-4">
+                  <span><strong>DOB:</strong> {player.date_of_birth ? new Date(player.date_of_birth).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}</span>
+                  <span><strong>Height:</strong> {player.height_inches ? `${player.height_inches} in` : 'N/A'}</span>
+                  <span><strong>Weight:</strong> {player.weight_pounds ? `${player.weight_pounds} lbs` : 'N/A'}</span>
+                  <span><strong>Team:</strong> {player.team_abbr || 'N/A'}</span>
+                </div>
+              </div>
+            </div>
+            {/* Add ESPN team logo in top-right */}
+            <div className="absolute top-4 right-4 flex flex-col items-end">
+              {player.team_logo_espn && (
+                <img
+                  src={player.team_logo_espn}
+                  alt={`${player.team_abbr || 'team'} ESPN logo`}
+                  className="w-32 h-32 object-contain mb-2"
+                />
+              )}
+            </div>
+            <div className="mt-4 md:mt-0 flex items-center space-x-2">
+              {/* Team Name */}
+              <span className="text-lg font-semibold text-gray-800">
+                {player.recent_team}
+              </span>
+            </div>
+            {/* End team name */}
+          </div>
+
+          {/* Season Stats Table */}
+          {seasonStats && seasonStats.length > 0 && (
+            <div className="mt-6">
+              <h2 className="text-xl font-bold mb-2">Season Stats</h2>
+              <SeasonStatsTable stats={seasonStats} />
+            </div>
+          )}
+
+   {/* Stats Row */}
+          <div className="relative bg-white rounded shadow px-4 py-4 -mt-4 z-10">
+            <div className="grid grid-cols-2 md:grid-cols-9 gap-4 text-center text-sm text-gray-700">
+              <div>
+                <span className="block font-semibold">COLLEGE</span>
+                <span>{player.college || 'N/A'}</span>
+              </div>
+              <div>
+                <span className="block font-semibold">DRAFT YEAR</span>
+                <span>{player.draft_year ?? 'N/A'}</span>
+              </div>
+              <div>
+                <span className="block font-semibold">DRAFT TEAM</span>
+                <span>{player.draft_team || player.team_abbr || 'N/A'}</span>
+              </div>
+              <div>
+                <span className="block font-semibold">ROUND</span>
+                <span>{player.draft_round ?? 'N/A'}</span>
+              </div>
+              <div>
+                <span className="block font-semibold">SELECTION</span>
+                <span>{player.draft_overall ?? player.draft_pick ?? 'N/A'}</span>
+              </div>
+              <div>
+                <span className="block font-semibold">CONTRACT VALUE</span>
+                <span>{player.contract_value ? `$${Number(player.contract_value).toLocaleString()}M` : 'N/A'}</span>
+              </div>
+              <div>
+                <span className="block font-semibold">AVG/YEAR</span>
+                <span>{player.contract_apy ? `$${Number(player.contract_apy).toLocaleString()}M` : 'N/A'}</span>
+              </div>
+              <div>
+                <span className="block font-semibold">GUARANTEED</span>
+                <span>{player.contract_guaranteed ? `$${Number(player.contract_guaranteed).toLocaleString()}M` : 'N/A'}</span>
+              </div>
+              <div>
+                <span className="block font-semibold">CAP %</span>
+                <span>{player.contract_apy_cap_pct ? `${(Number(player.contract_apy_cap_pct) * 100).toFixed(1)}%` : 'N/A'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* 3-Column Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column */}
+          <div className="space-y-6">
+            {/* Player Info Card */}
+            <div className="bg-white p-4 rounded shadow">
+              <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Player Summary</h2>
+              <p>
+                This player is currently active and contributing as a <span className="font-semibold">{player.position}</span> for the <span className="font-semibold">{player.recent_team}</span>.
+              </p>
+            </div>
+          </div>
+          {/* Center Column */}
+          <div className="space-y-8">
+            {/* Career Summary Carousel */}
+<div className="relative">
+  <div
+    className="overflow-x-auto px-0 py-6 relative hide-scrollbar"
+    ref={scrollRef}
+    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+  >
     <div
-      className="min-h-screen p-4 md:p-6 bg-cover bg-center bg-no-repeat bg-fixed filter brightness-110 bg-mobile-contain"
-      style={{
-        backgroundImage: stadiumBg ? `url(${stadiumBg})` : undefined,
-        backgroundColor: stadiumBg ? 'rgba(255, 255, 255, 0.65)' : undefined,
-        backgroundBlendMode: stadiumBg ? 'overlay' : undefined,
-      }}
+      className="flex snap-x snap-mandatory"
+      style={{ scrollPadding: '1rem' }}
     >
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-3 mb-6">
-          {/* Header */}
-          {team && (
-            <div className="flex items-center justify-between bg-gray-100 rounded-lg p-4 shadow-sm">
-              <div className="flex items-center space-x-4">
-                <img src={team.team_logo_espn} alt={`${team.team_name} logo`} className="w-16 h-16 rounded-full" />
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-800">{team.team_name}</h1>
-                  <p className="text-sm text-gray-500">{team.team_division} • Est. {team.founded_year}</p>
-                  <p className="text-sm text-gray-500">Stadium: {team.stadium_name} ({team.stadium_capacity?.toLocaleString() ?? '—'} Capacity)</p>
-                  <p className="text-sm text-gray-500">City: {team.city}</p>
-                </div>
-              </div>
-              <div className="text-right text-sm text-gray-600 space-y-1">
-                <p className="font-semibold">Head Coach: {team.head_coach}</p>
-                <p className="text-sm">Offensive Coord: {team.o_coord ?? '—'}</p>
-                <p className="text-sm">Defensive Coord: {team.d_coord ?? '—'}</p>
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="md:col-span-3">
-          <nav className="flex overflow-x-auto scrollbar-none space-x-4 border-b border-gray-200 pb-2 whitespace-nowrap">
-            {['overview', 'depthChart', 'schedule', 'injuries', 'stats'].map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-all duration-200 ${
-                  activeTab === tab
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-blue-600'
-                }`}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </nav>
-        </div>
-        <div className="md:col-span-2 space-y-6">
-          {/* Team Stats */}
-          {(offenseStats || defenseStats) && (
-            <div className="bg-white rounded-md shadow p-4 border border-gray-200 text-sm">
-              <h2 className="text-base font-bold text-gray-700 uppercase tracking-wide mb-2 border-b pb-1">Team Stats (2024)</h2>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="border-r border-b pr-4 pb-4">
-                  <h3 className="font-semibold text-gray-700 mb-1">Pass Offense</h3>
-                  <p>Yards: {formatStat(offenseStats?.pass_yards)}</p>
-                  <p>TDs: {formatStat(offenseStats?.pass_tds)}</p>
-                  <p>NFL Rank: —</p>
-                </div>
-                <div className="border-b pl-4 pb-4">
-                  <h3 className="font-semibold text-gray-700 mb-1">Pass Defense</h3>
-                  <p>Yards: {formatStat(defenseStats?.pass_yards_allowed)}</p>
-                  <p>TDs: {formatStat(defenseStats?.pass_td_allowed)}</p>
-                  <p>NFL Rank: —</p>
-                </div>
-                <div className="border-r pt-4 pr-4">
-                  <h3 className="font-semibold text-gray-700 mb-1">Total Offense</h3>
-                  <p>Yards: {formatStat(offenseStats?.total_off_yards)}</p>
-                  <p>TDs: {formatStat((offenseStats?.pass_tds ?? 0) + (offenseStats?.rush_tds ?? 0))}</p>
-                  <p>NFL Rank: —</p>
-                </div>
-                <div className="pt-4 pl-4">
-                  <h3 className="font-semibold text-gray-700 mb-1">Total Defense</h3>
-                  <p>Yards: —</p>
-                  <p>TDs: —</p>
-                  <p>NFL Rank: —</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Last Game */}
-          <div className="bg-white rounded-md shadow p-4 border border-gray-200 text-sm">
-            <h2 className="text-base font-bold text-gray-700 uppercase tracking-wide mb-2 border-b pb-1">Last Game{showAllGames && 's'}</h2>
-            <div className="flex items-center justify-between mb-2">
-              {seasonGames.length > 1 && (
-                <button
-                  onClick={() => setShowAllGames(!showAllGames)}
-                  className="text-blue-600 text-sm hover:underline"
-                >
-                  {showAllGames ? 'Hide All' : 'Show All'}
-                </button>
-              )}
-            </div>
-            {seasonGames && seasonGames.length > 0 ? (
-              <div className="space-y-3">
-                {(showAllGames ? seasonGames : [seasonGames[0]]).map((game, idx) => (
-                  <div key={idx} className="flex items-center justify-between border rounded p-2">
-                    <div className="flex items-center space-x-3">
-                      <div className="flex items-center space-x-1">
-                        {teamLogos?.[game.home_team_abbr] && (
-                          <img src={teamLogos[game.home_team_abbr]} className="w-6 h-6" />
-                        )}
-                        <span className="text-sm font-medium">{game.home_team_abbr}</span>
-                        <span className="text-sm">{game.home_score}</span>
-                      </div>
-                      <span className="text-xs text-gray-500">vs</span>
-                      <div className="flex items-center space-x-1">
-                        <span className="text-sm">{game.away_score}</span>
-                        <span className="text-sm font-medium">{game.away_team_abbr}</span>
-                        {teamLogos?.[game.away_team_abbr] && (
-                          <img src={teamLogos[game.away_team_abbr]} className="w-6 h-6" />
-                        )}
-                      </div>
-                    </div>
-                    <span className="text-sm text-gray-500">{new Date(game.game_date).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric'
-                    })}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p>No recent game</p>
-            )}
-          </div>
-
-          {/* Upcoming Games */}
-          <div className="bg-white rounded-md shadow p-4 border border-gray-200 text-sm">
-            <h2 className="text-base font-bold text-gray-700 uppercase tracking-wide mb-2 border-b pb-1">Upcoming Game{showAllUpcoming && 's'}</h2>
-            <div className="flex items-center justify-between mb-2">
-              {upcomingSchedule.length > 1 && (
-                <button
-                  onClick={() => setShowAllUpcoming(!showAllUpcoming)}
-                  className="text-blue-600 text-sm hover:underline"
-                >
-                  {showAllUpcoming ? 'Hide All' : 'Show All'}
-                </button>
-              )}
-            </div>
-            {upcomingSchedule && upcomingSchedule.length > 0 ? (
-              <div className="space-y-3">
-                {(showAllUpcoming ? upcomingSchedule : [upcomingSchedule[0]]).map((game, idx) => (
-                  <div key={idx} className="border rounded p-2 space-y-1">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <img src={teamLogos[game.away_team]} className="w-6 h-6" />
-                        <span className="text-sm font-medium">{game.away_team_name || game.away_team}</span>
-                        <span className="text-xs text-gray-500">at</span>
-                        <span className="text-sm font-medium">{game.home_team_name || game.home_team}</span>
-                        <img src={teamLogos[game.home_team]} className="w-6 h-6" />
-                      </div>
-                      <span className="text-sm text-gray-500">
-                        {new Date(game.gameday).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </span>
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      {game.stadium || 'Stadium TBD'}
-                    </div>
-                    {(game.spread_line != null || game.total_line != null) && (
-                      <div className="text-xs text-gray-700 mt-1">
-                        {game.spread_line != null && (
-                          <span className="mr-4 text-red-600 font-medium">
-                            Spread: {game.spread_line > 0 ? '+' : ''}{game.spread_line} 
-                            <span className="ml-1 text-gray-500">({game.home_spread_odds ?? '—'} / {game.away_spread_odds ?? '—'})</span>
-                          </span>
-                        )}
-                        {game.total_line != null && (
-                          <span className="text-blue-700 font-medium">
-                            O/U: {game.total_line}
-                            <span className="ml-1 text-gray-500">({game.over_odds ?? '—'} / {game.under_odds ?? '—'})</span>
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500">No upcoming games scheduled.</p>
-            )}
-          </div>
-        </div>
-        <div className="space-y-6">
-          {/* Team Overview */}
-          <div className="bg-white rounded-md shadow p-4 border border-gray-200 text-sm">
-            <h2 className="text-base font-bold text-gray-700 uppercase tracking-wide mb-2 border-b pb-1">2024 Season Overview</h2>
-            <div className="space-y-1">
-              <p><strong>Division:</strong> {team.team_division}</p>
-              <p><strong>Record:</strong> {team.record ?? '—'}</p>
-              <p><strong>Points Scored:</strong> {team.points_scored ?? '—'}</p>
-              <p><strong>Points Allowed:</strong> {team.points_allowed ?? '—'}</p>
-            </div>
-          </div>
-
-          {/* Betting Info */}
-          <div className="bg-white rounded-md shadow p-4 border border-gray-200 text-sm">
-            <h2 className="text-base font-bold text-gray-700 uppercase tracking-wide mb-2 border-b pb-1">Betting Info</h2>
-            {upcomingSchedule && upcomingSchedule.length > 0 ? (
-              <div className="space-y-1">
-                <p>
-                  <strong>Spread:</strong> {upcomingSchedule[0].spread_line != null ? `${upcomingSchedule[0].spread_line > 0 ? '+' : ''}${upcomingSchedule[0].spread_line}` : '—'}
-                  <span className="ml-1 text-gray-500 text-xs">({upcomingSchedule[0].home_spread_odds ?? '—'} / {upcomingSchedule[0].away_spread_odds ?? '—'})</span>
-                </p>
-                <p>
-                  <strong>O/U:</strong> {upcomingSchedule[0].total_line ?? '—'}
-                  <span className="ml-1 text-gray-500 text-xs">({upcomingSchedule[0].over_odds ?? '—'} / {upcomingSchedule[0].under_odds ?? '—'})</span>
-                </p>
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500">No upcoming betting data available.</p>
-            )}
-          </div>
-
-          {/* News */}
-          <div className="bg-white rounded-md shadow p-4 border border-gray-200 text-sm">
-            <h2 className="text-base font-bold text-gray-700 uppercase tracking-wide mb-2 border-b pb-1">Latest News</h2>
-            {news.length === 0 ? (
-              <p className="text-sm text-gray-500">No recent news available.</p>
-            ) : (
-              <ul className="space-y-4">
-                {news.map((article, idx) => (
-                  <li key={idx} className="text-sm">
-                    <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-medium hover:underline">
-                      {article.title}
-                    </a>
-                    <p className="text-gray-500 text-xs">{new Date(article.publishedAt).toLocaleDateString()}</p>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
+      {/* Receiving Career Card */}
+      <div className="bg-white p-4 rounded shadow-lg min-w-full snap-center">
+        <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">
+          Receiving Career
+        </h3>
+        <p><strong>Seasons Played:</strong> {player.career?.seasons}</p>
+        <p><strong>Games Played:</strong> {player.career?.games}</p>
+        <p><strong>Receiving Yards:</strong> {player.career?.yards}</p>
+        <p><strong>Receiving Touchdowns:</strong> {player.career?.tds}</p>
       </div>
-    </div>
-  );
-};
 
-export default TeamPage;
+      {/* Rushing Career Card */}
+      <div className="bg-white p-4 rounded shadow-lg min-w-full snap-center">
+        <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">
+          Rushing Career
+        </h3>
+        <p><strong>Games:</strong> {player.rushingCareer?.games}</p>
+        <p><strong>Yards:</strong> {player.rushingCareer?.yards}</p>
+        <p><strong>Touchdowns:</strong> {player.rushingCareer?.tds}</p>
+      </div>
+
+      {/* Passing Career Card */}
+      <div className="bg-white p-4 rounded shadow-lg min-w-full snap-center">
+        <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">
+          Passing Career
+        </h3>
+        <p><strong>Games:</strong> {player.passingCareer?.games}</p>
+        <p><strong>Completions:</strong> {player.passingCareer?.completions}</p>
+        <p><strong>Attempts:</strong> {player.passingCareer?.attempts}</p>
+        <p><strong>Yards:</strong> {player.passingCareer?.yards}</p>
+        <p><strong>Touchdowns:</strong> {player.passingCareer?.tds}</p>
+        <p><strong>Interceptions:</strong> {player.passingCareer?.ints}</p>
+      </div>
+      {/* (Career Advanced Passing Stats removed from carousel) */}
+            {/* Advanced Passing Stats */}
+            {player.advanced?.passing && (
+              <div className="mt-6">
+                <h2 className="text-xl font-semibold mb-2">Advanced Passing Stats</h2>
+                <div className="overflow-x-auto bg-white p-4 rounded shadow">
+                  <table className="min-w-full text-sm">
+                    <tbody>
+                      <tr>
+                        <td className="font-semibold pr-4">Avg Time to Throw:</td>
+                        <td>{player.advanced.passing.avg_time_to_throw?.toFixed(2) ?? 'N/A'} sec</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Avg Completed Air Yards:</td>
+                        <td>{player.advanced.passing.avg_completed_air_yards?.toFixed(2) ?? 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Avg Intended Air Yards:</td>
+                        <td>{player.advanced.passing.avg_intended_air_yards?.toFixed(2) ?? 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Air Yards Differential:</td>
+                        <td>{player.advanced.passing.avg_air_yards_differential?.toFixed(2) ?? 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Aggressiveness:</td>
+                        <td>{player.advanced.passing.aggressiveness?.toFixed(1) ?? 'N/A'}%</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Max Completed Air Distance:</td>
+                        <td>{player.advanced.passing.max_completed_air_distance?.toFixed(1) ?? 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Air Yards to Sticks:</td>
+                        <td>{player.advanced.passing.avg_air_yards_to_sticks?.toFixed(2) ?? 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Passer Rating:</td>
+                        <td>{player.advanced.passing.passer_rating?.toFixed(1) ?? 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Expected Comp %:</td>
+                        <td>{player.advanced.passing.expected_completion_percentage?.toFixed(1) ?? 'N/A'}%</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">CPOE:</td>
+                        <td>{player.advanced.passing.completion_percentage_above_expectation?.toFixed(2) ?? 'N/A'}%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+    </div>
+  </div>
+
+  {/* Dot Pagination */}
+  <div className="flex justify-center space-x-2 mt-2">
+    {Array.from({ length: numDots }).map((_, idx) => (
+      <button
+        key={idx}
+        onClick={() => {
+          scrollRef.current.scrollTo({
+            left: idx * scrollRef.current.clientWidth,
+            behavior: 'smooth'
+          });
+        }}
+        className={`h-2 w-2 rounded-full ${idx === activeIndex ? 'bg-gray-800' : 'bg-gray-300'}`}
+        aria-label={`Go to slide ${idx + 1}`}
+      />
+    ))}
+  </div>
+</div>
+
+            {/* Receiving Stats */}
+            {receivingMetrics?.some(g => g.targets > 0 || g.receptions > 0 || g.receiving_yards > 0 || g.rec_touchdowns > 0) && (
+              <div>
+                <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Receiving Stats</h2>
+                <div className="overflow-x-auto bg-white p-4 rounded shadow">
+                  <table className="table-auto w-full text-xs">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left p-2">Week</th>
+                        <th className="text-left p-2">Opponent</th>
+                        <th className="text-left p-2">Targets</th>
+                        <th className="text-left p-2">Rec</th>
+                        <th className="text-left p-2">Yards</th>
+                        <th className="text-left p-2">TDs</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {receivingMetrics.map((g, idx) => (
+                        <tr key={idx} className="border-b hover:bg-gray-50">
+                          <td className="p-2">{g.week}</td>
+                          <td className="p-2">{g.opponent_team}</td>
+                          <td className="p-2">{g.targets}</td>
+                          <td className="p-2">{g.receptions}</td>
+                          <td className="p-2">{g.receiving_yards}</td>
+                          <td className="p-2">{g.rec_touchdowns}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+            {/* Rushing Stats */}
+            {rushingMetrics?.some(g => g.carries > 0 || g.rushing_yards > 0 || g.rushing_tds > 0) && (
+              <div>
+                <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Rushing Stats</h2>
+                <div className="overflow-x-auto bg-white p-4 rounded shadow">
+                  <table className="table-auto w-full text-xs">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left p-2">Week</th>
+                        <th className="text-left p-2">Opponent</th>
+                        <th className="text-left p-2">Carries</th>
+                        <th className="text-left p-2">Yards</th>
+                        <th className="text-left p-2">TDs</th>
+                        <th className="text-left p-2">EPA</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rushingMetrics.map((g, idx) => (
+                        <tr key={idx} className="border-b hover:bg-gray-50">
+                          <td className="p-2">{g.week}</td>
+                          <td className="p-2">{g.opponent_team}</td>
+                          <td className="p-2">{g.carries}</td>
+                          <td className="p-2">{g.rushing_yards}</td>
+                          <td className="p-2">{g.rushing_tds}</td>
+                          <td className="p-2">{typeof g.rushing_epa === 'number' ? g.rushing_epa.toFixed(2) : '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+            {/* Passing Stats */}
+            {passingMetrics?.some(g => g.completions > 0 || g.attempts > 0 || g.passing_yards > 0 || g.passing_tds > 0 || g.interceptions > 0) && (
+              <div>
+                <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Passing Stats</h2>
+                <div className="overflow-x-auto bg-white p-4 rounded shadow">
+                  <table className="table-auto w-full text-xs">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left p-2">Week</th>
+                        <th className="text-left p-2">Opponent</th>
+                        <th className="text-left p-2">Comp</th>
+                        <th className="text-left p-2">Att</th>
+                        <th className="text-left p-2">Yards</th>
+                        <th className="text-left p-2">TDs</th>
+                        <th className="text-left p-2">INTs</th>
+                        <th className="text-left p-2">EPA</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {passingMetrics.map((g, idx) => (
+                        <tr key={idx} className="border-b hover:bg-gray-50">
+                          <td className="p-2">{g.week}</td>
+                          <td className="p-2">{g.opponent_team}</td>
+                          <td className="p-2">{g.completions}</td>
+                          <td className="p-2">{g.attempts}</td>
+                          <td className="p-2">{g.passing_yards}</td>
+                          <td className="p-2">{g.passing_tds}</td>
+                          <td className="p-2">{g.interceptions}</td>
+                          <td className="p-2">{typeof g.passing_epa === 'number' ? g.passing_epa.toFixed(2) : '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+            {/* Advanced Passing Metrics */}
+            {advancedPassing && (
+              <div>
+                <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Advanced Passing Metrics</h2>
+                <div className="bg-white p-4 rounded shadow">
+                  <p><strong>Avg Time to Throw:</strong> {typeof advancedPassing.avg_time_to_throw === 'number' ? advancedPassing.avg_time_to_throw.toFixed(2) + ' sec' : 'N/A'}</p>
+                  <p><strong>Avg Completed Air Yards:</strong> {typeof advancedPassing.avg_completed_air_yards === 'number' ? advancedPassing.avg_completed_air_yards.toFixed(2) : 'N/A'}</p>
+                  <p><strong>Avg Intended Air Yards:</strong> {typeof advancedPassing.avg_intended_air_yards === 'number' ? advancedPassing.avg_intended_air_yards.toFixed(2) : 'N/A'}</p>
+                  <p><strong>Avg Air Yards Differential:</strong> {typeof advancedPassing.avg_air_yards_differential === 'number' ? advancedPassing.avg_air_yards_differential.toFixed(2) : 'N/A'}</p>
+                  <p><strong>Aggressiveness:</strong> {typeof advancedPassing.aggressiveness === 'number' ? advancedPassing.aggressiveness.toFixed(1) + '%' : 'N/A'}</p>
+                  <p><strong>Max Completed Air Distance:</strong> {typeof advancedPassing.max_completed_air_distance === 'number' ? advancedPassing.max_completed_air_distance.toFixed(1) : 'N/A'}</p>
+                  <p><strong>Expected Completion %:</strong> {typeof advancedPassing.expected_completion_percentage === 'number' ? advancedPassing.expected_completion_percentage.toFixed(1) + '%' : 'N/A'}</p>
+                  <p><strong>Completion % Over Expectation:</strong> {typeof advancedPassing.completion_percentage_above_expectation === 'number' ? advancedPassing.completion_percentage_above_expectation.toFixed(1) + '%' : 'N/A'}</p>
+                </div>
+              </div>
+            )}
+            {/* Advanced Receiving Metrics */}
+            {advancedMetrics && (
+              <div>
+                <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Advanced Receiving Metrics</h2>
+                <div className="bg-white p-4 rounded shadow">
+                  <p><strong>Avg Cushion:</strong> {typeof advancedMetrics.avg_cushion === 'number' ? advancedMetrics.avg_cushion.toFixed(2) + ' yds' : 'N/A'}</p>
+                  <p><strong>Avg Separation:</strong> {typeof advancedMetrics.avg_separation === 'number' ? advancedMetrics.avg_separation.toFixed(2) + ' yds' : 'N/A'}</p>
+                  <p><strong>Air Yards Share:</strong> {typeof advancedMetrics.percent_share_of_intended_air_yards === 'number' ? (advancedMetrics.percent_share_of_intended_air_yards * 100).toFixed(1) + '%' : 'N/A'}</p>
+                  <p><strong>Avg YAC Over Expectation:</strong> {typeof advancedMetrics.avg_yac_above_expectation === 'number' ? advancedMetrics.avg_yac_above_expectation.toFixed(2) : 'N/A'}</p>
+                  <p><strong>Receiving EPA:</strong> {typeof advancedMetrics.receiving_epa === 'number' ? advancedMetrics.receiving_epa.toFixed(2) : 'N/A'}</p>
+                  <p><strong>WOPR:</strong> {typeof advancedMetrics.wopr === 'number' ? advancedMetrics.wopr.toFixed(3) : 'N/A'}</p>
+                </div>
+              </div>
+            )}
+            {/* Advanced Rushing Metrics */}
+            {advancedRushing && (
+              <div>
+                <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Advanced Rushing Metrics</h2>
+                <div className="bg-white p-4 rounded shadow">
+                  <p><strong>Rush Yards Over Expected:</strong> {typeof advancedRushing.rushing_yards_over_expected === 'number' ? advancedRushing.rushing_yards_over_expected.toFixed(1) : 'N/A'}</p>
+                  <p><strong>Rush EPA:</strong> {typeof advancedRushing.rushing_epa === 'number' ? advancedRushing.rushing_epa.toFixed(2) : 'N/A'}</p>
+                  <p><strong>Rush Success Rate:</strong> {typeof advancedRushing.success_rate === 'number' ? (advancedRushing.success_rate * 100).toFixed(1) + '%' : 'N/A'}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Advanced Passing Stats */}
+            {player.advanced?.passing && (
+              <div className="mt-6">
+                <h2 className="text-xl font-semibold mb-2">Advanced Passing Stats</h2>
+                <div className="overflow-x-auto bg-white p-4 rounded shadow">
+                  <table className="min-w-full text-sm">
+                    <tbody>
+                      <tr>
+                        <td className="font-semibold pr-4">Avg Time to Throw:</td>
+                        <td>{player.advanced.passing.avg_time_to_throw?.toFixed(2) ?? 'N/A'} sec</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Avg Completed Air Yards:</td>
+                        <td>{player.advanced.passing.avg_completed_air_yards?.toFixed(2) ?? 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Avg Intended Air Yards:</td>
+                        <td>{player.advanced.passing.avg_intended_air_yards?.toFixed(2) ?? 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Air Yards Differential:</td>
+                        <td>{player.advanced.passing.avg_air_yards_differential?.toFixed(2) ?? 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Aggressiveness:</td>
+                        <td>{player.advanced.passing.aggressiveness?.toFixed(1) ?? 'N/A'}%</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Max Completed Air Distance:</td>
+                        <td>{player.advanced.passing.max_completed_air_distance?.toFixed(1) ?? 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Air Yards to Sticks:</td>
+                        <td>{player.advanced.passing.avg_air_yards_to_sticks?.toFixed(2) ?? 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Passer Rating:</td>
+                        <td>{player.advanced.passing.passer_rating?.toFixed(1) ?? 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Expected Comp %:</td>
+                        <td>{player.advanced.passing.expected_completion_percentage?.toFixed(1) ?? 'N/A'}%</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">CPOE:</td>
+                        <td>{player.advanced.passing.completion_percentage_above_expectation?.toFixed(2) ?? 'N/A'}%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+            {/* Advanced Receiving Metrics Table */}
+            {advancedMetrics && advancedMetrics.length > 0 && (
+              <div className="mt-6">
+                <h2 className="text-xl font-semibold mb-2">Advanced Receiving Metrics</h2>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr>
+                        {Object.keys(advancedMetrics[0]).map((col) => (
+                          <th key={col} className="px-4 py-2 text-left border-b">
+                            {col.replace(/_/g, ' ')}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {advancedMetrics.map((row, idx) => (
+                        <tr key={idx}>
+                          {Object.values(row).map((val, i) => (
+                            <td key={i} className="px-4 py-1 border-b">{val}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Advanced Rushing Metrics Table */}
+            {advancedRushing && advancedRushing.length > 0 && (
+              <div className="mt-6">
+                <h2 className="text-xl font-semibold mb-2">Advanced Rushing Metrics</h2>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr>
+                        {Object.keys(advancedRushing[0]).map((col) => (
+                          <th key={col} className="px-4 py-2 text-left border-b">
+                            {col.replace(/_/g, ' ')}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {advancedRushing.map((row, idx) => (
+                        <tr key={idx}>
+                          {Object.values(row).map((val, i) => (
+                            <td key={i} className="px-4 py-1 border-b">{val}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+          {/* Right Column */}
+          <div className="space-y-8">
+            <div className="bg-white p-4 rounded shadow flex flex-col items-center">
+              <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">Snaps</h2>
+              {/* Placeholder Donut Chart */}
+              <div className="w-40 h-40 rounded-full border-8 border-gray-200 flex items-center justify-center mb-6">
+                <span className="text-3xl font-bold text-gray-500">75%</span>
+              </div>
+            </div>
+            {/* Weekly Bar Graph Card */}
+            <div className="bg-white p-4 rounded shadow flex flex-col items-center">
+              <div className="text-sm font-semibold mb-2 flex justify-between w-full">
+                <span>Weekly Targets vs. Receptions</span>
+                <div className="flex space-x-4 text-xs">
+                  <div className="flex items-center space-x-1">
+                    <span className="w-3 h-3 bg-blue-500 inline-block rounded-sm"></span><span>Targets</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <span className="w-3 h-3 bg-blue-300 inline-block rounded-sm"></span><span>Receptions</span>
+                  </div>
+                </div>
+              </div>
+              <div className="w-full space-y-1">
+                {(receivingMetrics && receivingMetrics.length > 0 ? receivingMetrics : [...Array(10)].map((_, i) => ({
+                  week: i + 1,
+                  targets: Math.floor(Math.random() * 10),
+                  receptions: Math.floor(Math.random() * 10)
+                }))).map((g, i) => (
+                  <div key={i} className="flex items-center space-x-2">
+                    <div className="w-6 text-xs text-gray-600">W{g.week}</div>
+                    <div className="h-4 bg-blue-500 rounded" style={{ width: `${g.targets || 0}px`, minWidth: '4px' }}></div>
+                    <div className="h-4 bg-blue-300 rounded" style={{ width: `${g.receptions || 0}px`, minWidth: '4px' }}></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>More actions
+    </>
+  );
