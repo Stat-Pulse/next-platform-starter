@@ -606,3 +606,4 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
       </div>More actions
     </>
   );
+}
