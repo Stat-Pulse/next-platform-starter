@@ -132,6 +132,32 @@ export default async function handler(req, res) {
       player.passingCareer.seasons = formatNumber(player.passingCareer.seasons);
     }
 
+    // Attach advanced stats by position
+    if (player.position === 'QB') {
+      const [advPassing] = await connection.execute(`
+        SELECT *
+        FROM NextGen_Stats_Passing_2024
+        WHERE player_id = ?
+      `, [playerId]);
+      player.advanced = { passing: advPassing[0] || null };
+    } else if (player.position === 'RB') {
+      const [advRushing] = await connection.execute(`
+        SELECT *
+        FROM NextGen_Stats_Rushing_2024
+        WHERE player_id = ?
+      `, [playerId]);
+      player.advanced = { rushing: advRushing[0] || null };
+    } else if (['WR', 'TE'].includes(player.position)) {
+      const [advReceiving] = await connection.execute(`
+        SELECT *
+        FROM NextGen_Stats_Receiving_2024
+        WHERE player_id = ?
+      `, [playerId]);
+      player.advanced = { receiving: advReceiving[0] || null };
+    } else {
+      player.advanced = null;
+    }
+
     res.status(200).json({ player, seasonStats });
   } catch (err) {
     console.error("API Error:", err);
