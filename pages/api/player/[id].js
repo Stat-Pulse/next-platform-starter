@@ -139,7 +139,38 @@ export default async function handler(req, res) {
         FROM NextGen_Stats_Passing_2024
         WHERE player_id = ?
       `, [playerId]);
-      player.advanced = { passing: advPassing[0] || null };
+
+      // Aggregate additional passing stats from Player_Stats_2010-2024
+      const additionalPassingQuery = `
+        SELECT
+          SUM(sacks_suffered) AS sacks_suffered,
+          SUM(sack_yards_lost) AS sack_yards_lost,
+          SUM(sack_fumbles) AS sack_fumbles,
+          SUM(sack_fumbles_lost) AS sack_fumbles_lost,
+          SUM(passing_air_yards) AS passing_air_yards,
+          SUM(passing_yards_after_catch) AS passing_yac,
+          SUM(passing_first_downs) AS passing_first_downs,
+          AVG(passing_epa) AS avg_passing_epa,
+          AVG(passing_cpoe) AS avg_passing_cpoe
+        FROM (
+          ${[...Array(15).keys()].map(i => {
+            const year = 2010 + i;
+            return `SELECT sacks_suffered, sack_yards_lost, sack_fumbles, sack_fumbles_lost,
+                           passing_air_yards, passing_yards_after_catch, passing_first_downs,
+                           passing_epa, passing_cpoe
+                    FROM Player_Stats_${year}
+                    WHERE player_id = ? AND passing_yards IS NOT NULL`;
+          }).join('\nUNION ALL\n')}
+        ) AS combined
+      `;
+      const [additionalPassingRows] = await connection.query(additionalPassingQuery, Array(15).fill(playerId));
+
+      player.advanced = {
+        passing: {
+          ...(advPassing[0] || {}),
+          additional: additionalPassingRows[0] || null
+        }
+      };
     } else if (player.position === 'RB') {
       const [advRushing] = await connection.execute(`
         SELECT *
