@@ -70,11 +70,13 @@ export default async function handler(req, res) {
         COUNT(DISTINCT season) AS seasons,
         SUM(passing_yards) AS yards,
         SUM(passing_tds) AS tds,
-        SUM(passing_interceptions) AS ints
+        SUM(passing_interceptions) AS ints,
+        SUM(completions) AS completions,
+        SUM(attempts) AS attempts
       FROM (
         ${[...Array(15).keys()].map(i => {
           const year = 2010 + i;
-          return `SELECT season, passing_yards, passing_tds, passing_interceptions
+          return `SELECT season, passing_yards, passing_tds, passing_interceptions, completions, attempts
                   FROM Player_Stats_${year}
                   WHERE player_id = ? AND passing_yards IS NOT NULL`;
         }).join('\nUNION ALL\n')}
@@ -105,6 +107,30 @@ export default async function handler(req, res) {
     `;
 
     const [seasonStats] = await connection.query(seasonStatsQuery, Array(15).fill(playerId));
+
+    // Format large numbers with commas in the final JSON response before sending
+    const formatNumber = (val) => (val !== null && val !== undefined ? Number(val).toLocaleString() : null);
+
+    if (player.career) {
+      player.career.yards = formatNumber(player.career.yards);
+      player.career.tds = formatNumber(player.career.tds);
+      player.career.seasons = formatNumber(player.career.seasons);
+    }
+
+    if (player.rushingCareer) {
+      player.rushingCareer.yards = formatNumber(player.rushingCareer.yards);
+      player.rushingCareer.tds = formatNumber(player.rushingCareer.tds);
+      player.rushingCareer.seasons = formatNumber(player.rushingCareer.seasons);
+    }
+
+    if (player.passingCareer) {
+      player.passingCareer.yards = formatNumber(player.passingCareer.yards);
+      player.passingCareer.tds = formatNumber(player.passingCareer.tds);
+      player.passingCareer.ints = formatNumber(player.passingCareer.ints);
+      player.passingCareer.completions = formatNumber(player.passingCareer.completions);
+      player.passingCareer.attempts = formatNumber(player.passingCareer.attempts);
+      player.passingCareer.seasons = formatNumber(player.passingCareer.seasons);
+    }
 
     res.status(200).json({ player, seasonStats });
   } catch (err) {
