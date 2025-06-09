@@ -239,25 +239,6 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
         <p><strong>Touchdowns:</strong> {player.passingCareer?.tds}</p>
         <p><strong>Interceptions:</strong> {player.passingCareer?.ints}</p>
       </div>
-      {/* Career Advanced Passing Stats */}
-      {player.advanced?.passing && (
-        <div className="bg-white p-4 rounded shadow mt-8">
-          <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">
-            Career Advanced Passing Stats
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-            <div><strong>Avg Time to Throw:</strong> {player.advanced.passing.avg_time_to_throw?.toFixed(2) ?? 'N/A'} sec</div>
-            <div><strong>Avg Completed Air Yards:</strong> {player.advanced.passing.avg_completed_air_yards?.toFixed(2) ?? 'N/A'}</div>
-            <div><strong>Avg Intended Air Yards:</strong> {player.advanced.passing.avg_intended_air_yards?.toFixed(2) ?? 'N/A'}</div>
-            <div><strong>Passer Rating:</strong> {player.advanced.passing.passer_rating?.toFixed(1) ?? 'N/A'}</div>
-            <div><strong>Expected Comp %:</strong> {player.advanced.passing.expected_completion_percentage?.toFixed(1) ?? 'N/A'}%</div>
-            <div><strong>CPOE:</strong> {player.advanced.passing.completion_percentage_above_expectation?.toFixed(2) ?? 'N/A'}%</div>
-            <div><strong>Sacks Suffered:</strong> {player.advanced.passing.additional?.sacks_suffered ?? 'N/A'}</div>
-            <div><strong>Passing EPA (avg):</strong> {player.advanced.passing.additional?.avg_passing_epa?.toFixed(2) ?? 'N/A'}</div>
-            <div><strong>Passing CPOE (avg):</strong> {player.advanced.passing.additional?.avg_passing_cpoe?.toFixed(2) ?? 'N/A'}</div>
-          </div>
-        </div>
-      )}
     </div>
   </div>
 
@@ -421,6 +402,58 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
               </div>
             )}
 
+            {/* Advanced Passing Stats */}
+            {player.advanced?.passing && (
+              <div className="mt-6">
+                <h2 className="text-xl font-semibold mb-2">Advanced Passing Stats</h2>
+                <div className="overflow-x-auto bg-white p-4 rounded shadow">
+                  <table className="min-w-full text-sm">
+                    <tbody>
+                      <tr>
+                        <td className="font-semibold pr-4">Avg Time to Throw:</td>
+                        <td>{player.advanced.passing.avg_time_to_throw?.toFixed(2) ?? 'N/A'} sec</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Avg Completed Air Yards:</td>
+                        <td>{player.advanced.passing.avg_completed_air_yards?.toFixed(2) ?? 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Avg Intended Air Yards:</td>
+                        <td>{player.advanced.passing.avg_intended_air_yards?.toFixed(2) ?? 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Air Yards Differential:</td>
+                        <td>{player.advanced.passing.avg_air_yards_differential?.toFixed(2) ?? 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Aggressiveness:</td>
+                        <td>{player.advanced.passing.aggressiveness?.toFixed(1) ?? 'N/A'}%</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Max Completed Air Distance:</td>
+                        <td>{player.advanced.passing.max_completed_air_distance?.toFixed(1) ?? 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Air Yards to Sticks:</td>
+                        <td>{player.advanced.passing.avg_air_yards_to_sticks?.toFixed(2) ?? 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Passer Rating:</td>
+                        <td>{player.advanced.passing.passer_rating?.toFixed(1) ?? 'N/A'}</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">Expected Comp %:</td>
+                        <td>{player.advanced.passing.expected_completion_percentage?.toFixed(1) ?? 'N/A'}%</td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold pr-4">CPOE:</td>
+                        <td>{player.advanced.passing.completion_percentage_above_expectation?.toFixed(2) ?? 'N/A'}%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
             {/* Advanced Receiving Metrics Table */}
             {advancedMetrics && advancedMetrics.length > 0 && (
               <div className="mt-6">
