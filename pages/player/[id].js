@@ -27,7 +27,7 @@ export async function getServerSideProps({ params }) {
   }
 }
 
-export default function PlayerPage({ player, receivingMetrics, advancedMetrics, advancedRushing }) {
+export default function PlayerPage({ player, seasonStats, receivingMetrics, advancedMetrics, advancedRushing }) {
   // --- Career Summary Carousel State ---
   const [activeIndex, setActiveIndex] = useState(0);
   const [bgColor, setBgColor] = useState('#004C54');
@@ -133,12 +133,14 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
           </div>
 
           {/* Season Stats Table */}
-          {seasonStats && seasonStats.length > 0 && (
-            <div className="mt-6">
-              <h2 className="text-xl font-bold mb-2">Season Stats</h2>
+          <div className="mt-6">
+            <h2 className="text-xl font-bold mb-2">Season Stats</h2>
+            {seasonStats && seasonStats.length > 0 ? (
               <SeasonStatsTable stats={seasonStats} />
-            </div>
-          )}
+            ) : (
+              <p className="text-sm text-gray-500">No season stats available.</p>
+            )}
+          </div>
 
    {/* Stats Row */}
           <div className="relative bg-white rounded shadow px-4 py-4 -mt-4 z-10">

@@ -177,6 +177,16 @@ export default async function handler(req, res) {
         additional: additionalPassingRows[0] || null
       };
       player.career.passing.additional = additionalPassingRows[0] || null;
+
+      // Fetch weekly passing metrics for 2024
+      const [passingMetricsRows] = await connection.execute(`
+        SELECT week, opponent_team, completions, attempts, passing_yards, passing_tds, interceptions, passing_epa
+        FROM Player_Stats_Game_2024
+        WHERE player_id = ?
+      `, [playerId]);
+
+      player.passingMetrics = passingMetricsRows || [];
+      player.advancedPassing = player.advanced.passing || null;
     }
 
     if (['RB', 'WR'].includes(player.position)) {
@@ -197,7 +207,10 @@ export default async function handler(req, res) {
       player.advanced.receiving = advReceiving[0] || null;
     }
 
-    res.status(200).json({ player, seasonStats });
+    res.status(200).json({
+      player,
+      seasonStats
+    });
   } catch (err) {
     console.error("API Error:", err);
     res.status(500).json({ error: "Server error" });
