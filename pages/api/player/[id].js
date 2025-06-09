@@ -1,8 +1,9 @@
 import mysql from 'mysql2/promise';
 
 export default async function handler(req, res) {
+  let connection;
   try {
-    const connection = await mysql.createConnection({
+    connection = await mysql.createConnection({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
@@ -44,7 +45,6 @@ export default async function handler(req, res) {
     `;
 
     const [receivingCareerRows] = await connection.query(receivingCareerQuery, Array(15).fill(playerId));
-    player.career = receivingCareerRows[0];
 
     // Calculate career rushing totals
     const rushingCareerQuery = `
@@ -62,7 +62,6 @@ export default async function handler(req, res) {
       ) AS combined
     `;
     const [rushingCareerRows] = await connection.query(rushingCareerQuery, Array(15).fill(playerId));
-    player.rushingCareer = rushingCareerRows[0];
 
     // Calculate career passing totals
     const passingCareerQuery = `
@@ -83,7 +82,24 @@ export default async function handler(req, res) {
       ) AS combined
     `;
     const [passingCareerRows] = await connection.query(passingCareerQuery, Array(15).fill(playerId));
-    player.passingCareer = passingCareerRows[0];
+
+    player.career = {
+      receiving: receivingCareerRows[0],
+      rushing: rushingCareerRows[0],
+      passing: passingCareerRows[0]
+    };
+
+    // Format large numbers with commas in the final JSON response before sending
+    const formatNumber = (val) => (val !== null && val !== undefined ? Number(val).toLocaleString() : null);
+
+    ['receiving', 'rushing', 'passing'].forEach(key => {
+      const block = player.career[key];
+      if (block) {
+        Object.keys(block).forEach(field => {
+          block[field] = formatNumber(block[field]);
+        });
+      }
+    });
 
     const seasonStatsQuery = `
       SELECT season, 
@@ -108,31 +124,9 @@ export default async function handler(req, res) {
 
     const [seasonStats] = await connection.query(seasonStatsQuery, Array(15).fill(playerId));
 
-    // Format large numbers with commas in the final JSON response before sending
-    const formatNumber = (val) => (val !== null && val !== undefined ? Number(val).toLocaleString() : null);
-
-    if (player.career) {
-      player.career.yards = formatNumber(player.career.yards);
-      player.career.tds = formatNumber(player.career.tds);
-      player.career.seasons = formatNumber(player.career.seasons);
-    }
-
-    if (player.rushingCareer) {
-      player.rushingCareer.yards = formatNumber(player.rushingCareer.yards);
-      player.rushingCareer.tds = formatNumber(player.rushingCareer.tds);
-      player.rushingCareer.seasons = formatNumber(player.rushingCareer.seasons);
-    }
-
-    if (player.passingCareer) {
-      player.passingCareer.yards = formatNumber(player.passingCareer.yards);
-      player.passingCareer.tds = formatNumber(player.passingCareer.tds);
-      player.passingCareer.ints = formatNumber(player.passingCareer.ints);
-      player.passingCareer.completions = formatNumber(player.passingCareer.completions);
-      player.passingCareer.attempts = formatNumber(player.passingCareer.attempts);
-      player.passingCareer.seasons = formatNumber(player.passingCareer.seasons);
-    }
-
     // Attach advanced stats by position
+    player.advanced = {};
+
     if (player.position === 'QB') {
       const [advPassing] = await connection.execute(`
         SELECT
@@ -178,34 +172,36 @@ export default async function handler(req, res) {
       `;
       const [additionalPassingRows] = await connection.query(additionalPassingQuery, Array(15).fill(playerId));
 
-      player.advanced = {
-        passing: {
-          ...(advPassing[0] || {}),
-          additional: additionalPassingRows[0] || null
-        }
+      player.advanced.passing = {
+        ...(advPassing[0] || {}),
+        additional: additionalPassingRows[0] || null
       };
-      player.passingCareer.additional = additionalPassingRows[0] || null;
-    } else if (player.position === 'RB', 'WR') {
+      player.career.passing.additional = additionalPassingRows[0] || null;
+    }
+
+    if (['RB', 'WR'].includes(player.position)) {
       const [advRushing] = await connection.execute(`
         SELECT *
         FROM NextGen_Stats_Rushing
         WHERE player_id = ?
       `, [playerId]);
-      player.advanced = { rushing: advRushing[0] || null };
-    } else if (['WR', 'TE', 'RB'].includes(player.position)) {
+      player.advanced.rushing = advRushing[0] || null;
+    }
+
+    if (['WR', 'TE', 'RB'].includes(player.position)) {
       const [advReceiving] = await connection.execute(`
         SELECT *
         FROM NextGen_Stats_Receiving
         WHERE player_id = ?
       `, [playerId]);
-      player.advanced = { receiving: advReceiving[0] || null };
-    } else {
-      player.advanced = null;
+      player.advanced.receiving = advReceiving[0] || null;
     }
 
     res.status(200).json({ player, seasonStats });
   } catch (err) {
     console.error("API Error:", err);
     res.status(500).json({ error: "Server error" });
+  } finally {
+    if (connection && connection.end) await connection.end();
   }
 }

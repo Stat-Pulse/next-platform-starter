@@ -16,6 +16,9 @@ export async function getServerSideProps({ params }) {
     }
 
     const data = await res.json();
+    // Fetch advanced passing stats from the backend and attach to player object
+    // (Assumes API route already includes advancedPassing in its response)
+    // If not, you could fetch from a separate endpoint here.
     console.log("Fetched player data successfully");
     return { props: data };
   } catch (error) {
@@ -31,10 +34,8 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
   const scrollRef = useRef();
   // Count how many career summary cards exist (for dots)
   const numDots = 3;
-  const seasonStats = [];
-  const rushingMetrics = [];
-  const passingMetrics = [];
-  const advancedPassing = null;
+  // Remove local empty arrays for seasonStats, rushingMetrics, passingMetrics; use props instead
+  const advancedPassing = player?.advancedPassing || null;
 
   useEffect(() => {
     if (player?.primary_color) {
@@ -211,10 +212,10 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
         <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">
           Receiving Career
         </h3>
-        <p><strong>Seasons Played:</strong> {player.career?.seasons}</p>
-        <p><strong>Games Played:</strong> {player.career?.games}</p>
-        <p><strong>Receiving Yards:</strong> {player.career?.yards}</p>
-        <p><strong>Receiving Touchdowns:</strong> {player.career?.tds}</p>
+        <p><strong>Seasons Played:</strong> {player.career?.receiving?.seasons}</p>
+        <p><strong>Games Played:</strong> {player.career?.receiving?.games}</p>
+        <p><strong>Receiving Yards:</strong> {player.career?.receiving?.yards}</p>
+        <p><strong>Receiving Touchdowns:</strong> {player.career?.receiving?.tds}</p>
       </div>
 
       {/* Rushing Career Card */}
@@ -222,9 +223,9 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
         <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">
           Rushing Career
         </h3>
-        <p><strong>Games:</strong> {player.rushingCareer?.games}</p>
-        <p><strong>Yards:</strong> {player.rushingCareer?.yards}</p>
-        <p><strong>Touchdowns:</strong> {player.rushingCareer?.tds}</p>
+        <p><strong>Games:</strong> {player.career?.rushing?.games}</p>
+        <p><strong>Yards:</strong> {player.career?.rushing?.yards}</p>
+        <p><strong>Touchdowns:</strong> {player.career?.rushing?.tds}</p>
       </div>
 
       {/* Passing Career Card */}
@@ -232,12 +233,12 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
         <h3 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">
           Passing Career
         </h3>
-        <p><strong>Games:</strong> {player.passingCareer?.games}</p>
-        <p><strong>Completions:</strong> {player.passingCareer?.completions}</p>
-        <p><strong>Attempts:</strong> {player.passingCareer?.attempts}</p>
-        <p><strong>Yards:</strong> {player.passingCareer?.yards}</p>
-        <p><strong>Touchdowns:</strong> {player.passingCareer?.tds}</p>
-        <p><strong>Interceptions:</strong> {player.passingCareer?.ints}</p>
+        <p><strong>Games:</strong> {player.career?.passing?.games}</p>
+        <p><strong>Completions:</strong> {player.career?.passing?.completions}</p>
+        <p><strong>Attempts:</strong> {player.career?.passing?.attempts}</p>
+        <p><strong>Yards:</strong> {player.career?.passing?.yards}</p>
+        <p><strong>Touchdowns:</strong> {player.career?.passing?.tds}</p>
+        <p><strong>Interceptions:</strong> {player.career?.passing?.ints}</p>
       </div>
     </div>
   </div>
@@ -293,7 +294,7 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
               </div>
             )}
             {/* Rushing Stats */}
-            {rushingMetrics?.some(g => g.carries > 0 || g.rushing_yards > 0 || g.rushing_tds > 0) && (
+            {Array.isArray(advancedRushing) && advancedRushing?.some(g => g.carries > 0 || g.rushing_yards > 0 || g.rushing_tds > 0) && (
               <div>
                 <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Rushing Stats</h2>
                 <div className="overflow-x-auto bg-white p-4 rounded shadow">
@@ -309,7 +310,7 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
                       </tr>
                     </thead>
                     <tbody>
-                      {rushingMetrics.map((g, idx) => (
+                      {advancedRushing.map((g, idx) => (
                         <tr key={idx} className="border-b hover:bg-gray-50">
                           <td className="p-2">{g.week}</td>
                           <td className="p-2">{g.opponent_team}</td>
@@ -325,7 +326,7 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
               </div>
             )}
             {/* Passing Stats */}
-            {passingMetrics?.some(g => g.completions > 0 || g.attempts > 0 || g.passing_yards > 0 || g.passing_tds > 0 || g.interceptions > 0) && (
+            {Array.isArray(player?.passingMetrics) && player.passingMetrics?.some(g => g.completions > 0 || g.attempts > 0 || g.passing_yards > 0 || g.passing_tds > 0 || g.interceptions > 0) && (
               <div>
                 <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Passing Stats</h2>
                 <div className="overflow-x-auto bg-white p-4 rounded shadow">
@@ -343,7 +344,7 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
                       </tr>
                     </thead>
                     <tbody>
-                      {passingMetrics.map((g, idx) => (
+                      {player.passingMetrics.map((g, idx) => (
                         <tr key={idx} className="border-b hover:bg-gray-50">
                           <td className="p-2">{g.week}</td>
                           <td className="p-2">{g.opponent_team}</td>
@@ -360,24 +361,29 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
                 </div>
               </div>
             )}
-            {/* Advanced Passing Metrics */}
-            {advancedPassing && (
+            {/* Advanced Passing Stats */}
+            {advancedPassing && typeof advancedPassing === "object" && !Array.isArray(advancedPassing) && (
               <div>
-                <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Advanced Passing Metrics</h2>
-                <div className="bg-white p-4 rounded shadow">
-                  <p><strong>Avg Time to Throw:</strong> {typeof advancedPassing.avg_time_to_throw === 'number' ? advancedPassing.avg_time_to_throw.toFixed(2) + ' sec' : 'N/A'}</p>
-                  <p><strong>Avg Completed Air Yards:</strong> {typeof advancedPassing.avg_completed_air_yards === 'number' ? advancedPassing.avg_completed_air_yards.toFixed(2) : 'N/A'}</p>
-                  <p><strong>Avg Intended Air Yards:</strong> {typeof advancedPassing.avg_intended_air_yards === 'number' ? advancedPassing.avg_intended_air_yards.toFixed(2) : 'N/A'}</p>
-                  <p><strong>Avg Air Yards Differential:</strong> {typeof advancedPassing.avg_air_yards_differential === 'number' ? advancedPassing.avg_air_yards_differential.toFixed(2) : 'N/A'}</p>
-                  <p><strong>Aggressiveness:</strong> {typeof advancedPassing.aggressiveness === 'number' ? advancedPassing.aggressiveness.toFixed(1) + '%' : 'N/A'}</p>
-                  <p><strong>Max Completed Air Distance:</strong> {typeof advancedPassing.max_completed_air_distance === 'number' ? advancedPassing.max_completed_air_distance.toFixed(1) : 'N/A'}</p>
-                  <p><strong>Expected Completion %:</strong> {typeof advancedPassing.expected_completion_percentage === 'number' ? advancedPassing.expected_completion_percentage.toFixed(1) + '%' : 'N/A'}</p>
-                  <p><strong>Completion % Over Expectation:</strong> {typeof advancedPassing.completion_percentage_above_expectation === 'number' ? advancedPassing.completion_percentage_above_expectation.toFixed(1) + '%' : 'N/A'}</p>
+                <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Advanced Passing Stats</h2>
+                <div className="bg-white p-4 rounded shadow space-y-2">
+                  <p><strong>Avg Time to Throw:</strong> {advancedPassing.avg_time_to_throw?.toFixed(2) ?? 'N/A'} sec</p>
+                  <p><strong>Avg Completed Air Yards:</strong> {advancedPassing.avg_completed_air_yards?.toFixed(2) ?? 'N/A'}</p>
+                  <p><strong>Avg Intended Air Yards:</strong> {advancedPassing.avg_intended_air_yards?.toFixed(2) ?? 'N/A'}</p>
+                  <p><strong>Air Yards Differential:</strong> {advancedPassing.avg_air_yards_differential?.toFixed(2) ?? 'N/A'}</p>
+                  <p><strong>Aggressiveness:</strong> {advancedPassing.aggressiveness?.toFixed(1) ?? 'N/A'}%</p>
+                  <p><strong>Max Completed Air Distance:</strong> {advancedPassing.max_completed_air_distance?.toFixed(1) ?? 'N/A'}</p>
+                  <p><strong>Air Yards to Sticks:</strong> {advancedPassing.avg_air_yards_to_sticks?.toFixed(2) ?? 'N/A'}</p>
+                  <p><strong>Passer Rating:</strong> {advancedPassing.passer_rating?.toFixed(1) ?? 'N/A'}</p>
+                  <p><strong>Completion %:</strong> {advancedPassing.completion_percentage?.toFixed(1) ?? 'N/A'}%</p>
+                  <p><strong>Expected Comp %:</strong> {advancedPassing.expected_completion_percentage?.toFixed(1) ?? 'N/A'}%</p>
+                  <p><strong>CPOE:</strong> {advancedPassing.completion_percentage_above_expectation?.toFixed(2) ?? 'N/A'}%</p>
+                  <p><strong>Avg Air Distance:</strong> {advancedPassing.avg_air_distance?.toFixed(2) ?? 'N/A'}</p>
+                  <p><strong>Max Air Distance:</strong> {advancedPassing.max_air_distance?.toFixed(2) ?? 'N/A'}</p>
                 </div>
               </div>
             )}
             {/* Advanced Receiving Metrics */}
-            {advancedMetrics && (
+            {advancedMetrics && typeof advancedMetrics === "object" && !Array.isArray(advancedMetrics) && (
               <div>
                 <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Advanced Receiving Metrics</h2>
                 <div className="bg-white p-4 rounded shadow">
@@ -391,7 +397,7 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
               </div>
             )}
             {/* Advanced Rushing Metrics */}
-            {advancedRushing && (
+            {advancedRushing && typeof advancedRushing === "object" && !Array.isArray(advancedRushing) && (
               <div>
                 <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Advanced Rushing Metrics</h2>
                 <div className="bg-white p-4 rounded shadow">
@@ -402,60 +408,9 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
               </div>
             )}
 
-            {/* Advanced Passing Stats */}
-            {player.advanced?.passing && (
-              <div className="mt-6">
-                <h2 className="text-xl font-semibold mb-2">Advanced Passing Stats</h2>
-                <div className="overflow-x-auto bg-white p-4 rounded shadow">
-                  <table className="min-w-full text-sm">
-                    <tbody>
-                      <tr>
-                        <td className="font-semibold pr-4">Avg Time to Throw:</td>
-                        <td>{player.advanced.passing.avg_time_to_throw?.toFixed(2) ?? 'N/A'} sec</td>
-                      </tr>
-                      <tr>
-                        <td className="font-semibold pr-4">Avg Completed Air Yards:</td>
-                        <td>{player.advanced.passing.avg_completed_air_yards?.toFixed(2) ?? 'N/A'}</td>
-                      </tr>
-                      <tr>
-                        <td className="font-semibold pr-4">Avg Intended Air Yards:</td>
-                        <td>{player.advanced.passing.avg_intended_air_yards?.toFixed(2) ?? 'N/A'}</td>
-                      </tr>
-                      <tr>
-                        <td className="font-semibold pr-4">Air Yards Differential:</td>
-                        <td>{player.advanced.passing.avg_air_yards_differential?.toFixed(2) ?? 'N/A'}</td>
-                      </tr>
-                      <tr>
-                        <td className="font-semibold pr-4">Aggressiveness:</td>
-                        <td>{player.advanced.passing.aggressiveness?.toFixed(1) ?? 'N/A'}%</td>
-                      </tr>
-                      <tr>
-                        <td className="font-semibold pr-4">Max Completed Air Distance:</td>
-                        <td>{player.advanced.passing.max_completed_air_distance?.toFixed(1) ?? 'N/A'}</td>
-                      </tr>
-                      <tr>
-                        <td className="font-semibold pr-4">Air Yards to Sticks:</td>
-                        <td>{player.advanced.passing.avg_air_yards_to_sticks?.toFixed(2) ?? 'N/A'}</td>
-                      </tr>
-                      <tr>
-                        <td className="font-semibold pr-4">Passer Rating:</td>
-                        <td>{player.advanced.passing.passer_rating?.toFixed(1) ?? 'N/A'}</td>
-                      </tr>
-                      <tr>
-                        <td className="font-semibold pr-4">Expected Comp %:</td>
-                        <td>{player.advanced.passing.expected_completion_percentage?.toFixed(1) ?? 'N/A'}%</td>
-                      </tr>
-                      <tr>
-                        <td className="font-semibold pr-4">CPOE:</td>
-                        <td>{player.advanced.passing.completion_percentage_above_expectation?.toFixed(2) ?? 'N/A'}%</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
+            {/* (Removed duplicate advanced passing block if present) */}
             {/* Advanced Receiving Metrics Table */}
-            {advancedMetrics && advancedMetrics.length > 0 && (
+            {Array.isArray(advancedMetrics) && advancedMetrics.length > 0 && (
               <div className="mt-6">
                 <h2 className="text-xl font-semibold mb-2">Advanced Receiving Metrics</h2>
                 <div className="overflow-x-auto">
@@ -484,7 +439,7 @@ export default function PlayerPage({ player, receivingMetrics, advancedMetrics, 
             )}
 
             {/* Advanced Rushing Metrics Table */}
-            {advancedRushing && advancedRushing.length > 0 && (
+            {Array.isArray(advancedRushing) && advancedRushing.length > 0 && (
               <div className="mt-6">
                 <h2 className="text-xl font-semibold mb-2">Advanced Rushing Metrics</h2>
                 <div className="overflow-x-auto">
