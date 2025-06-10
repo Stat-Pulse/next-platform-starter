@@ -28,15 +28,12 @@ export async function getServerSideProps({ params }) {
 }
 
 export default function PlayerPage({ player, seasonStats, receivingMetrics, advancedMetrics, advancedRushing }) {
+  // Consistent fallback values and robust array checks
+  const rushingMetrics = player.rushingMetrics || [];
+  const receivingMetricsArr = player.receivingMetrics || receivingMetrics || [];
   // Remove duplicates in passingMetrics based on week
   const uniquePassingMetrics = Array.isArray(player.passingMetrics)
     ? player.passingMetrics.filter((value, index, self) =>
-        index === self.findIndex(v => v.week === value.week)
-      )
-    : [];
-  // Remove duplicates in advancedRushing based on week
-  const uniqueRushingMetrics = Array.isArray(advancedRushing)
-    ? advancedRushing.filter((value, index, self) =>
         index === self.findIndex(v => v.week === value.week)
       )
     : [];
@@ -276,7 +273,7 @@ export default function PlayerPage({ player, seasonStats, receivingMetrics, adva
 </div>
             
             {/* Receiving Stats */}
-            {receivingMetrics?.some(g => g.targets > 0 || g.receptions > 0 || g.receiving_yards > 0 || g.rec_touchdowns > 0) && (
+            {Array.isArray(receivingMetricsArr) && receivingMetricsArr?.some(g => g.targets > 0 || g.receptions > 0 || g.receiving_yards > 0 || g.rec_touchdowns > 0) && (
               <div>
                 <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Receiving Stats</h2>
                 <div className="overflow-x-auto bg-white p-4 rounded shadow">
@@ -292,7 +289,7 @@ export default function PlayerPage({ player, seasonStats, receivingMetrics, adva
                       </tr>
                     </thead>
                     <tbody>
-                      {receivingMetrics.map((g, idx) => (
+                      {receivingMetricsArr.map((g, idx) => (
                         <tr key={idx} className="border-b hover:bg-gray-50">
                           <td className="p-2">{g.week}</td>
                           <td className="p-2">{g.opponent_team}</td>
@@ -308,10 +305,10 @@ export default function PlayerPage({ player, seasonStats, receivingMetrics, adva
               </div>
             )}
             {/* Rushing Stats */}
-            {Array.isArray(uniqueRushingMetrics) && uniqueRushingMetrics?.some(g => g.carries > 0 || g.rushing_yards > 0 || g.rushing_tds > 0) && (
+            {Array.isArray(rushingMetrics) && rushingMetrics?.some(g => g.carries > 0 || g.rushing_yards > 0 || g.rushing_tds > 0) && (
               <div>
                 <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">
-                  {uniqueRushingMetrics?.[0]?.season || '2024'} Rushing Stats
+                  {rushingMetrics?.[0]?.season || '2024'} Rushing Stats
                 </h2>
                 <div className="overflow-x-auto bg-white p-4 rounded shadow">
                   <table className="table-auto w-full text-xs">
@@ -326,7 +323,7 @@ export default function PlayerPage({ player, seasonStats, receivingMetrics, adva
                       </tr>
                     </thead>
                     <tbody>
-                      {uniqueRushingMetrics.map((g, idx) => (
+                      {rushingMetrics.map((g, idx) => (
                         <tr key={idx} className="border-b hover:bg-gray-50">
                           <td className="p-2">{g.week}</td>
                           <td className="p-2">{g.opponent_team}</td>
@@ -508,7 +505,7 @@ export default function PlayerPage({ player, seasonStats, receivingMetrics, adva
                 </div>
               </div>
               <div className="w-full space-y-1">
-                {(receivingMetrics && receivingMetrics.length > 0 ? receivingMetrics : [...Array(10)].map((_, i) => ({
+                {(receivingMetricsArr && receivingMetricsArr.length > 0 ? receivingMetricsArr : [...Array(10)].map((_, i) => ({
                   week: i + 1,
                   targets: Math.floor(Math.random() * 10),
                   receptions: Math.floor(Math.random() * 10)

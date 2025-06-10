@@ -231,11 +231,24 @@ export default async function handler(req, res) {
         WHERE player_gsis_id = ?
       `, [playerId]);
       player.advanced.receiving = advReceiving[0] || null;
+
+      const [receivingMetricsRows] = await connection.execute(`
+        SELECT week, opponent_team, targets, receptions, receiving_yards, receiving_tds AS rec_touchdowns
+        FROM Player_Stats_Game_2024
+        WHERE player_id = ?
+        ORDER BY week ASC
+      `, [playerId]);
+
+      player.receivingMetrics = receivingMetricsRows || [];
     }
 
     res.status(200).json({
       player,
-      seasonStats
+      seasonStats,
+      receivingMetrics: player.receivingMetrics || [],
+      rushingMetrics: player.rushingMetrics || [],
+      advancedMetrics: player.advanced.receiving || {},
+      advancedRushing: player.advanced.rushing || {}
     });
   } catch (err) {
     console.error("API Error:", err);
