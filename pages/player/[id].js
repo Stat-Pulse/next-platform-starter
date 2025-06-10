@@ -401,7 +401,7 @@ export default function PlayerPage({ player, seasonStats, receivingMetrics, adva
               </div>
             )}
             {/* Advanced Receiving Metrics */}
-            {advancedMetrics && typeof advancedMetrics === "object" && !Array.isArray(advancedMetrics) && (
+            {advancedMetrics && (typeof advancedMetrics === "object") && (
               <div>
                 <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Advanced Receiving Metrics</h2>
                 <div className="bg-white p-4 rounded shadow">
@@ -415,7 +415,7 @@ export default function PlayerPage({ player, seasonStats, receivingMetrics, adva
               </div>
             )}
             {/* Advanced Rushing Metrics */}
-            {advancedRushing && typeof advancedRushing === "object" && !Array.isArray(advancedRushing) && (
+            {advancedRushing && (typeof advancedRushing === "object") && (
               <div>
                 <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Advanced Rushing Metrics</h2>
                 <div className="bg-white p-4 rounded shadow">
