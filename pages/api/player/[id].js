@@ -179,10 +179,21 @@ export default async function handler(req, res) {
       player.career.passing.additional = additionalPassingRows[0] || null;
 
       // Fetch weekly passing metrics for 2024
+      /*
       const [passingMetricsRows] = await connection.execute(`
         SELECT week, opponent_team, completions, attempts, passing_yards, passing_tds, interceptions, passing_epa
         FROM Player_Stats_Game_2024
         WHERE player_id = ?
+      `, [playerId]);
+      player.passingMetrics = passingMetricsRows || [];
+      */
+
+      const [passingMetricsRows] = await connection.execute(`
+        SELECT week, recent_team AS opponent_team, completions, attempts, passing_yards, passing_tds,
+               passing_interceptions AS interceptions, passing_epa
+        FROM Player_Stats_2024
+        WHERE player_id = ?
+        ORDER BY week ASC
       `, [playerId]);
 
       player.passingMetrics = passingMetricsRows || [];
