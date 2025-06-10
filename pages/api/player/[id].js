@@ -51,11 +51,12 @@ export default async function handler(req, res) {
       SELECT
         COUNT(DISTINCT season) AS seasons,
         SUM(rushing_yards) AS yards,
+        SUM(rushing_epa) AS epa
         SUM(rushing_tds) AS tds
       FROM (
         ${[...Array(15).keys()].map(i => {
           const year = 2010 + i;
-          return `SELECT season, rushing_yards, rushing_tds
+          return `SELECT season, rushing_yards, rushing_epa, rushing_tds
                   FROM Player_Stats_${year}
                   WHERE player_id = ? AND rushing_yards IS NOT NULL`;
         }).join('\nUNION ALL\n')}
@@ -106,6 +107,7 @@ export default async function handler(req, res) {
              SUM(receiving_yards) AS receiving_yards,
              SUM(receiving_tds) AS receiving_tds,
              SUM(rushing_yards) AS rushing_yards,
+             SUM(rushing_epa) AS epa,
              SUM(rushing_tds) AS rushing_tds,
              SUM(passing_yards) AS passing_yards,
              SUM(passing_tds) AS passing_tds,
@@ -113,7 +115,7 @@ export default async function handler(req, res) {
       FROM (
         ${[...Array(15).keys()].map(i => {
           const year = 2010 + i;
-          return `SELECT season, receiving_yards, receiving_tds, rushing_yards, rushing_tds, passing_yards, passing_tds, passing_interceptions
+          return `SELECT season, receiving_yards, receiving_tds, rushing_yards, rushing_epa, rushing_tds, passing_yards, passing_tds, passing_interceptions
                   FROM Player_Stats_${year}
                   WHERE player_id = ?`;
         }).join('\nUNION ALL\n')}
@@ -212,7 +214,7 @@ export default async function handler(req, res) {
       player.advanced.rushing = advRushing[0] || null;
 
       const [rushingMetricsRows] = await connection.execute(`
-        SELECT week, recent_team AS opponent_team, carries, rushing_yards, rushing_tds,
+        SELECT recent_team AS opponent_team, carries, rushing_yards, rushing_tds,
                rushing_fumbles, rushing_fumbles_lost, rushing_first_downs,
                rushing_epa, rushing_2pt_conversions
         FROM Player_Stats_2024
