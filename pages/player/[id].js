@@ -34,6 +34,12 @@ export default function PlayerPage({ player, seasonStats, receivingMetrics, adva
         index === self.findIndex(v => v.week === value.week)
       )
     : [];
+  // Remove duplicates in advancedRushing based on week
+  const uniqueRushingMetrics = Array.isArray(advancedRushing)
+    ? advancedRushing.filter((value, index, self) =>
+        index === self.findIndex(v => v.week === value.week)
+      )
+    : [];
   // --- Career Summary Carousel State ---
   const [activeIndex, setActiveIndex] = useState(0);
   const [bgColor, setBgColor] = useState('#004C54');
@@ -302,9 +308,11 @@ export default function PlayerPage({ player, seasonStats, receivingMetrics, adva
               </div>
             )}
             {/* Rushing Stats */}
-            {Array.isArray(advancedRushing) && advancedRushing?.some(g => g.carries > 0 || g.rushing_yards > 0 || g.rushing_tds > 0) && (
+            {Array.isArray(uniqueRushingMetrics) && uniqueRushingMetrics?.some(g => g.carries > 0 || g.rushing_yards > 0 || g.rushing_tds > 0) && (
               <div>
-                <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Rushing Stats</h2>
+                <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">
+                  {uniqueRushingMetrics?.[0]?.season || '2024'} Rushing Stats
+                </h2>
                 <div className="overflow-x-auto bg-white p-4 rounded shadow">
                   <table className="table-auto w-full text-xs">
                     <thead>
@@ -318,7 +326,7 @@ export default function PlayerPage({ player, seasonStats, receivingMetrics, adva
                       </tr>
                     </thead>
                     <tbody>
-                      {advancedRushing.map((g, idx) => (
+                      {uniqueRushingMetrics.map((g, idx) => (
                         <tr key={idx} className="border-b hover:bg-gray-50">
                           <td className="p-2">{g.week}</td>
                           <td className="p-2">{g.opponent_team}</td>

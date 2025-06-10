@@ -210,6 +210,17 @@ export default async function handler(req, res) {
         WHERE player_id = ?
       `, [playerId]);
       player.advanced.rushing = advRushing[0] || null;
+
+      const [rushingMetricsRows] = await connection.execute(`
+        SELECT week, recent_team AS opponent_team, carries, rushing_yards, rushing_tds,
+               rushing_fumbles, rushing_fumbles_lost, rushing_first_downs,
+               rushing_epa, rushing_2pt_conversions
+        FROM Player_Stats_2024
+        WHERE player_id = ?
+        ORDER BY week ASC
+      `, [playerId]);
+
+      player.rushingMetrics = rushingMetricsRows || [];
     }
 
     if (['WR', 'TE', 'RB'].includes(player.position)) {
