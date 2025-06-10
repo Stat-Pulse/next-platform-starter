@@ -219,7 +219,6 @@ export default async function handler(req, res) {
                rushing_epa, rushing_2pt_conversions
         FROM Player_Stats_2024
         WHERE player_id = ?
-        ORDER BY week ASC
       `, [playerId]);
 
       player.rushingMetrics = rushingMetricsRows || [];
