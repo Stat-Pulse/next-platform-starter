@@ -28,6 +28,12 @@ export async function getServerSideProps({ params }) {
 }
 
 export default function PlayerPage({ player, seasonStats, receivingMetrics, advancedMetrics, advancedRushing }) {
+  // Remove duplicates in passingMetrics based on week
+  const uniquePassingMetrics = Array.isArray(player.passingMetrics)
+    ? player.passingMetrics.filter((value, index, self) =>
+        index === self.findIndex(v => v.week === value.week)
+      )
+    : [];
   // --- Career Summary Carousel State ---
   const [activeIndex, setActiveIndex] = useState(0);
   const [bgColor, setBgColor] = useState('#004C54');
@@ -328,9 +334,11 @@ export default function PlayerPage({ player, seasonStats, receivingMetrics, adva
               </div>
             )}
             {/* Passing Stats */}
-            {Array.isArray(player?.passingMetrics) && player.passingMetrics?.some(g => g.completions > 0 || g.attempts > 0 || g.passing_yards > 0 || g.passing_tds > 0 || g.interceptions > 0) && (
+            {Array.isArray(uniquePassingMetrics) && uniquePassingMetrics?.some(g => g.completions > 0 || g.attempts > 0 || g.passing_yards > 0 || g.passing_tds > 0 || g.interceptions > 0) && (
               <div>
-                <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">2024 Passing Stats</h2>
+                <h2 className="text-sm uppercase tracking-wide font-semibold border-b border-gray-200 pb-2 mb-4">
+                  {uniquePassingMetrics?.[0]?.season || '2024'} Passing Stats
+                </h2>
                 <div className="overflow-x-auto bg-white p-4 rounded shadow">
                   <table className="table-auto w-full text-xs">
                     <thead>
@@ -346,7 +354,7 @@ export default function PlayerPage({ player, seasonStats, receivingMetrics, adva
                       </tr>
                     </thead>
                     <tbody>
-                      {player.passingMetrics.map((g, idx) => (
+                      {uniquePassingMetrics.map((g, idx) => (
                         <tr key={idx} className="border-b hover:bg-gray-50">
                           <td className="p-2">{g.week}</td>
                           <td className="p-2">{g.opponent_team}</td>
