@@ -51,7 +51,7 @@ export default async function handler(req, res) {
       SELECT
         COUNT(DISTINCT season) AS seasons,
         SUM(rushing_yards) AS yards,
-        SUM(rushing_epa) AS epa
+        SUM(rushing_epa) AS epa,
         SUM(rushing_tds) AS tds
       FROM (
         ${[...Array(15).keys()].map(i => {
