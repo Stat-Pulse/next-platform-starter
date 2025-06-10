@@ -228,7 +228,7 @@ export default async function handler(req, res) {
       const [advReceiving] = await connection.execute(`
         SELECT *
         FROM NextGen_Stats_Receiving
-        WHERE player_id = ?
+        WHERE player_gsis_id = ?
       `, [playerId]);
       player.advanced.receiving = advReceiving[0] || null;
     }
