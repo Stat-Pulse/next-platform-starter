@@ -181,7 +181,9 @@ export default async function handler(req, res) {
       // Fetch weekly passing metrics for 2024
       /*
       const [passingMetricsRows] = await connection.execute(`
-        SELECT week, opponent_team, completions, attempts, passing_yards, passing_tds, interceptions, passing_epa
+        SELECT week, completions, attempts, pass_yards AS passing_yards,
+               pass_touchdowns AS passing_tds, interceptions, completion_percentage,
+               expected_completion_percentage, completion_percentage_above_expectation
         FROM Player_Stats_Game_2024
         WHERE player_id = ?
       `, [playerId]);
@@ -189,9 +191,10 @@ export default async function handler(req, res) {
       */
 
       const [passingMetricsRows] = await connection.execute(`
-        SELECT week, recent_team AS opponent_team, completions, attempts, passing_yards, passing_tds,
-               passing_interceptions AS interceptions, passing_epa
-        FROM Player_Stats_2024
+        SELECT week, completions, attempts, pass_yards AS passing_yards,
+               pass_touchdowns AS passing_tds, interceptions, completion_percentage,
+               expected_completion_percentage, completion_percentage_above_expectation
+        FROM NextGen_Stats_Passing
         WHERE player_id = ?
         ORDER BY week ASC
       `, [playerId]);
