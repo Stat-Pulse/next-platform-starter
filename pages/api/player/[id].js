@@ -186,7 +186,7 @@ export default async function handler(req, res) {
         SELECT week, completions, attempts, pass_yards AS passing_yards,
                pass_touchdowns AS passing_tds, interceptions, completion_percentage,
                expected_completion_percentage, completion_percentage_above_expectation
-        FROM Player_Stats_Game_2024
+        FROM Player_Stats
         WHERE player_id = ?
       `, [playerId]);
       player.passingMetrics = passingMetricsRows || [];
@@ -234,7 +234,7 @@ export default async function handler(req, res) {
 
       const [receivingMetricsRows] = await connection.execute(`
         SELECT week, opponent_team, targets, receptions, receiving_yards, receiving_tds AS rec_touchdowns
-        FROM Player_Stats_Game_2024
+        FROM Player_Stats_2024
         WHERE player_id = ?
         ORDER BY week ASC
       `, [playerId]);
