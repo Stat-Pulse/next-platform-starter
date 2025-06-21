@@ -34,10 +34,18 @@ export function FeedbackForm(): JSX.Element {
     }
 
     return (
-        <Card>
+        <Card title="Feedback" value="">
             <form onSubmit={handleFormSubmit} className="space-y-4">
-                {status === 'error' && error && <Alert>{error}</Alert>}
-                {status === 'ok' && <Alert>Thanks for your feedback!</Alert>}
+                {status === 'error' && error && (
+                    <Alert className="" type="error">
+                        {error}
+                    </Alert>
+                )}
+                {status === 'ok' && (
+                    <Alert className="" type="success">
+                        Thanks for your feedback!
+                    </Alert>
+                )}
                 <input type="text" name="message" placeholder="Your feedback..." required className="w-full border px-4 py-2" />
                 <button
                     type="submit"
