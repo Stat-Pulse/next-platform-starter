@@ -1,4 +1,4 @@
-//components/Header.jsx
+import SearchBar from './SearchBar';
 
 'use client'
 
