@@ -1,9 +1,8 @@
-import SearchBar from './SearchBar';
-
 'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
+import SearchBar from './SearchBar';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
