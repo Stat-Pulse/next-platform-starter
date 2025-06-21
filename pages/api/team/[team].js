@@ -1,6 +1,5 @@
 // pages/api/team/[team].js
 import mysql from 'mysql2/promise';
-import teams from '../../../data/teams';
 
 export default async function handler(req, res) {
   const { team } = req.query;
@@ -8,23 +7,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing or invalid team ID' });
   }
 
-  const slugToAbbreviation = {
-    bills: 'BUF', dolphins: 'MIA', patriots: 'NE', jets: 'NYJ',
-    ravens: 'BAL', bengals: 'CIN', browns: 'CLE', steelers: 'PIT',
-    texans: 'HOU', colts: 'IND', jaguars: 'JAX', titans: 'TEN',
-    broncos: 'DEN', chiefs: 'KC', raiders: 'LV', chargers: 'LAC',
-    cowboys: 'DAL', giants: 'NYG', eagles: 'PHI', commanders: 'WSH',
-    bears: 'CHI', lions: 'DET', packers: 'GB', vikings: 'MIN',
-    falcons: 'ATL', panthers: 'CAR', saints: 'NO', buccaneers: 'TB',
-    cardinals: 'ARI', rams: 'LAR', '49ers': 'SF', seahawks: 'SEA',
-  };
-
-  const teamId = slugToAbbreviation[team.toLowerCase()];
-  if (!teamId) {
-    return res.status(404).json({ error: 'Team slug could not be resolved' });
-  }
-
   let connection;
+  let teamId;
   try {
     connection = await mysql.createConnection({
       host: process.env.DB_HOST,
@@ -33,12 +17,42 @@ export default async function handler(req, res) {
       database: process.env.DB_NAME,
     });
 
+    const [abbrRows] = await connection.execute(
+      `SELECT team_abbr FROM Teams WHERE LOWER(nickname) = ? OR LOWER(team_name) LIKE ?`,
+      [team.toLowerCase(), `%${team.toLowerCase()}%`]
+    );
+
+    if (!abbrRows.length) {
+      await connection.end();
+      return res.status(404).json({ error: 'Team slug could not be resolved' });
+    }
+
+    teamId = abbrRows[0].team_abbr;
+
     const [teamRows] = await connection.execute(
-      `SELECT t.team_name, t.team_abbr, t.division, t.conference,
-              b.team_color, b.team_color2, b.team_logo_espn, b.team_logo_wikipedia
-       FROM Teams t
-       LEFT JOIN Teams_2024 b ON t.team_id = b.team_abbr
-       WHERE t.team_id = ?`,
+      `SELECT
+        team_name,
+        team_abbr,
+        nickname,
+        team_conf,
+        team_division,
+        primary_color,
+        secondary_color,
+        tertiary_color,
+        quaternary_color,
+        team_logo_espn,
+        team_logo_wikipedia,
+        team_wordmark,
+        city,
+        stadium_name,
+        head_coach,
+        founded_year,
+        o_coord,
+        d_coord,
+        stadium_capacity,
+        team_id
+       FROM Teams
+       WHERE team_abbr = ?`,
       [teamId]
     );
     if (!teamRows.length) {
@@ -46,18 +60,19 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'Team not found' });
     }
     const teamRow = teamRows[0];
+    const fullTeamId = teamRow.team_id || teamId;
 
     const [roster] = await connection.execute(
       `SELECT gsis_id AS id, full_name AS name, position, headshot_url, years_exp
        FROM Rosters_2024
-       WHERE team = ? AND week = (SELECT MAX(week) FROM Rosters_2024 WHERE team = ?)`,
+       WHERE team = ? AND week = COALESCE((SELECT MAX(week) FROM Rosters_2024 WHERE team = ?), 1)`,
       [teamId, teamId]
     );
 
     const [depthRows] = await connection.execute(
       `SELECT position, full_name, depth_team
        FROM Depth_Charts_2024
-       WHERE club_code = ? AND week = (SELECT MAX(week) FROM Depth_Charts_2024 WHERE club_code = ?)
+       WHERE club_code = ? AND week = COALESCE((SELECT MAX(week) FROM Depth_Charts_2024 WHERE club_code = ?), 1)
        ORDER BY depth_team ASC`,
       [teamId, teamId]
     );
@@ -118,18 +133,33 @@ export default async function handler(req, res) {
     await connection.end();
 
     return res.status(200).json({
-      id: teamId,
+      id: fullTeamId,
       name: teamRow.team_name,
       abbreviation: teamRow.team_abbr,
-      division: teamRow.division,
-      conference: teamRow.conference,
+      nickname: teamRow.nickname,
+      division: teamRow.team_division,
+      conference: teamRow.team_conf,
       branding: {
-        colorPrimary: teamRow.team_color,
-        colorSecondary: teamRow.team_color2,
-        logo: teamRow.team_logo_espn || teamRow.team_logo_wikipedia
+        colorPrimary: teamRow.primary_color,
+        colorSecondary: teamRow.secondary_color,
+        colorTertiary: teamRow.tertiary_color,
+        colorQuaternary: teamRow.quaternary_color,
+        logo: teamRow.team_logo_espn || teamRow.team_logo_wikipedia,
+        logoAlt: teamRow.team_logo_wikipedia,
+        wordmark: teamRow.team_wordmark,
       },
-      roster,
-      depthChart,
+      location: {
+        city: teamRow.city,
+        stadium: teamRow.stadium_name,
+        capacity: teamRow.stadium_capacity
+      },
+      coaching: {
+        headCoach: teamRow.head_coach,
+        offensiveCoordinator: teamRow.o_coord,
+        defensiveCoordinator: teamRow.d_coord
+      },
+      roster: roster || [],
+      depthChart: Object.keys(depthChart).length ? depthChart : {},
       schedule: formattedGames,
       stats,
       recentNews: [
@@ -137,7 +167,8 @@ export default async function handler(req, res) {
           title: `${teamRow.team_name} preparing for upcoming matchup`,
           date: new Date().toISOString().split('T')[0]
         }
-      ]
+      ],
+      lastUpdated: new Date().toISOString()
     });
 
   } catch (err) {
