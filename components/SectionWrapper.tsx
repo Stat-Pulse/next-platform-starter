@@ -5,12 +5,13 @@ import { motion } from 'framer-motion';
 interface SectionWrapperProps {
   title?: string;
   children: React.ReactNode;
+  className?: string;
 }
 
-const SectionWrapper: React.FC<SectionWrapperProps> = ({ title, children }) => {
+const SectionWrapper: React.FC<SectionWrapperProps> = ({ title, children, className = '' }) => {
   return (
     <motion.section
-      className="mb-12"
+      className={`mb-12 ${className}`}
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}

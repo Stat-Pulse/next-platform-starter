@@ -1,13 +1,11 @@
-//pages/league.tsx
 'use client';
 
 import Link from 'next/link';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import SidebarNavigation from '../components/SidebarNavigation.tsx';
+import SidebarNavigation from '../components/SidebarNavigation';
 import SectionWrapper from '../components/SectionWrapper';
 import NFLStandings from '../components/NFLStandings';
-import FantasyStandings from '../components/FantasyStandings';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useEffect, useRef } from 'react';
@@ -20,13 +18,13 @@ const sectionVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: 'easeOut' },
+    transition: { duration: 0.6, ease: "easeOut" as const },
   },
 };
 
 export default function LeagueStandingsPage() {
-  // Parallax background ref (JS‑only – no HTMLDivElement generic)
-  const mainRef = useRef(null);
+  // Parallax background ref (typed as HTMLDivElement)
+  const mainRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,7 +39,6 @@ export default function LeagueStandingsPage() {
 
   // Fade‑in observers
   const [nflRef, nflInView] = useInView({ triggerOnce: true, threshold: 0.2 });
-  const [fantasyRef, fantasyInView] = useInView({ triggerOnce: true, threshold: 0.2 });
 
   return (
     <>
@@ -71,7 +68,7 @@ export default function LeagueStandingsPage() {
               transition={{ duration: 0.5 }}
               className="bg-white/10 backdrop-blur-lg shadow-xl rounded-xl p-6 border border-white/20 sticky top-24"
             >
-              <SidebarNavigation active="league-standings" />
+              <SidebarNavigation current="league-standings" />
             </motion.div>
           </aside>
 
@@ -88,22 +85,7 @@ export default function LeagueStandingsPage() {
                 title="NFL League Standings"
                 className="bg-white/10 backdrop-blur-lg shadow-xl rounded-xl p-8 border border-white/20 hover:shadow-cyan-500/20 transition-shadow duration-300"
               >
-                <NFLStandings />
-              </SectionWrapper>
-            </motion.div>
-
-            {/* Fantasy Football Standings */}
-            <motion.div
-              ref={fantasyRef}
-              variants={sectionVariants}
-              initial="hidden"
-              animate={fantasyInView ? 'visible' : 'hidden'}
-            >
-              <SectionWrapper
-                title="Fantasy Football Standings"
-                className="bg-white/10 backdrop-blur-lg shadow-xl rounded-xl p-8 border border-white/20 hover:shadow-purple-500/20 transition-shadow duration-300"
-              >
-                <FantasyStandings />
+                <NFLStandings standingsData={[]} />
               </SectionWrapper>
             </motion.div>
           </div>
@@ -114,4 +96,3 @@ export default function LeagueStandingsPage() {
     </>
   );
 }
-

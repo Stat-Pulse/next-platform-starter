@@ -1,4 +1,3 @@
-pages/support.tsx
 "use client"; // This component needs client-side interactivity
 
 import { useState } from 'react';
@@ -23,7 +22,7 @@ interface FaqCategory {
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: 'easeOut' } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" as const } },
 };
 
 export default function SupportPage() {
