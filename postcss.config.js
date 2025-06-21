@@ -1,7 +1,7 @@
-// postcss.config.js
+// postcss.config.js  (CommonJS)
 module.exports = {
   plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
+    '@tailwindcss/postcss': {},   // NEW – replaces 'tailwindcss'
+    autoprefixer: {},            // keep if you still target older browsers
   },
 };
