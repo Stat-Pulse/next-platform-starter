@@ -18,7 +18,7 @@ export default function CustomizeMetricsModal({
   if (!isOpen) return null;
 
   return (
-    <Modal onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose}>
       <div className="p-4">
         <h2 className="text-lg font-semibold mb-4">Customize Metrics</h2>
         <pre className="bg-gray-100 p-2 rounded text-sm">
