@@ -6,9 +6,11 @@ import Chart from 'chart.js/auto'
 interface ComparisonSectionsProps {
   players: string[];
   metrics?: any[];
+  viewMode: string;
+  comparisonMode: string;
 }
 
-export default function ComparisonSections({ players = [], metrics = [] }: ComparisonSectionsProps) {
+export default function ComparisonSections({ players = [], metrics = [], viewMode, comparisonMode }: ComparisonSectionsProps) {
   const [data, setData] = useState<any[]>([])
 
   useEffect(() => {
