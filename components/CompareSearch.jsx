@@ -1,77 +1,132 @@
-// components/CompareSearch.jsx
-import { useState, useEffect } from 'react'
+// File: components/CompareSearch.js
+
+import { useEffect, useState } from 'react'
 
 export default function CompareSearch({ selectedPlayers, onUpdate }) {
-  const [input, setInput] = useState('')
-  const [suggestions, setSuggestions] = useState([])
-  const [allPlayers, setAllPlayers] = useState([])
+  const [searchTerms, setSearchTerms] = useState(Array(selectedPlayers.length || 2).fill(''))
+  const [playerOptions, setPlayerOptions] = useState([])
+  const [teamOptions, setTeamOptions] = useState([])
+  const [mode, setMode] = useState('players') // Toggle between 'players' and 'teams'
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    async function loadPlayers() {
-      try {
-        const res = await fetch('/api/players')
-        if (!res.ok) throw new Error('Failed to load players')
-        setAllPlayers(await res.json())
-      } catch (err) {
-        console.error(err)
-      }
-    }
-    loadPlayers()
-  }, [])
+    setLoading(true)
+    const endpoint = mode === 'players' ? '/.netlify/functions/getPlayers' : '/.netlify/functions/getTeams'
+    fetch(endpoint)
+      .then(res => res.json())
+      .then(data => {
+        if (mode === 'players') setPlayerOptions(data)
+        else setTeamOptions(data)
+      })
+      .catch(err => console.error(`Failed to load ${mode} list`, err))
+      .finally(() => setLoading(false))
+  }, [mode])
 
-  useEffect(() => {
-    if (input.length < 2) return setSuggestions([])
-    const filtered = allPlayers
-      .filter(p => p.name.toLowerCase().includes(input.toLowerCase()) && !selectedPlayers.includes(p.name))
-      .slice(0,5)
-    setSuggestions(filtered)
-  }, [input, allPlayers, selectedPlayers])
-
-  const handleSelect = name => {
-    if (selectedPlayers.length < 4) onUpdate([...selectedPlayers, name])
-    setInput('')
-    setSuggestions([])
+  const handleSearchChange = (index, value) => {
+    const updatedTerms = [...searchTerms]
+    updatedTerms[index] = value
+    setSearchTerms(updatedTerms)
   }
 
-  const handleRemove = name => {
-    onUpdate(selectedPlayers.filter(p => p !== name))
+  const handleSelect = (index, id) => {
+    const updatedPlayers = [...selectedPlayers]
+    updatedPlayers[index] = id
+    onUpdate(updatedPlayers, mode) // Pass mode to parent
+  }
+
+  const addSlot = () => {
+    if (selectedPlayers.length >= 6) return
+    onUpdate([...selectedPlayers, null], mode)
+    setSearchTerms([...searchTerms, ''])
+  }
+
+  const filteredOptions = (term) => {
+    const options = mode === 'players' ? playerOptions : teamOptions
+    return options
+      .filter(item =>
+        (mode === 'players' ? item.player_name : item.team_name)
+          ?.toLowerCase()
+          .includes(term.toLowerCase())
+      )
+      .slice(0, 5)
   }
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 mb-6">
-      <div className="flex-1 relative">
-        <input
-          type="text"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          placeholder="Search players..."
-          className="w-full p-2 border rounded-md"
-        />
-        {suggestions.length > 0 && (
-          <div className="absolute w-full bg-white border rounded-md shadow z-10">
-            {suggestions.map(p => (
-              <div
-                key={p.name}
-                className="p-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => handleSelect(p.name)}
+    <div className="bg-white p-4 rounded shadow space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-700">
+          Select {mode === 'players' ? 'Players' : 'Teams'} to Compare
+        </h3>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setMode('players')}
+            className={`px-3 py-1 rounded text-sm font-medium ${
+              mode === 'players' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700'
+            }`}
+          >
+            Players
+          </button>
+          <button
+            onClick={() => setMode('teams')}
+            className={`px-3 py-1 rounded text-sm font-medium ${
+              mode === 'teams' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700'
+            }`}
+          >
+            Teams
+          </button>
+        </div>
+      </div>
+
+      {loading ? (
+        <p className="text-gray-500">Loading options...</p>
+      ) : (
+        <>
+          {selectedPlayers.map((id, index) => (
+            <div key={index} className="space-y-1">
+              <input
+                type="text"
+                placeholder={`Search ${mode === 'players' ? 'player' : 'team'} #${index + 1}`}
+                value={searchTerms[index] || ''}
+                onChange={(e) => handleSearchChange(index, e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+              />
+              {searchTerms[index] && (
+                <ul className="bg-white border rounded shadow-sm max-h-40 overflow-y-auto text-sm">
+                  {filteredOptions(searchTerms[index]).map((item) => (
+                    <li
+                      key={item.player_id || item.team_id}
+                      className="px-3 py-2 hover:bg-red-50 cursor-pointer"
+                      onClick={() => handleSelect(index, item.player_id || item.team_id)}
+                    >
+                      {mode === 'players' ? (
+                        <>
+                          {item.player_name}{' '}
+                          <span className="text-gray-400">
+                            ({item.position} - {item.team})
+                          </span>
+                        </>
+                      ) : (
+                        item.team_name
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+
+          {selectedPlayers.length < 6 && (
+            <div className="text-right">
+              <button
+                onClick={addSlot}
+                className="text-red-600 text-sm hover:underline mt-2"
               >
-                {p.name} ({p.position}, {p.team})
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {selectedPlayers.map(name => (
-          <div key={name} className="bg-gray-200 p-2 rounded flex items-center">
-            <span>{name}</span>
-            <button
-              onClick={() => handleRemove(name)}
-              className="ml-2 text-red-600 hover:text-red-800"
-            >X</button>
-          </div>
-        ))}
-      </div>
+                + Add {mode === 'players' ? 'Player' : 'Team'}
+              </button>
+            </div>
+          )}
+        </>
+      )}
     </div>
-)
+  )
 }
