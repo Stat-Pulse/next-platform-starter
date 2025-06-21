@@ -3,7 +3,7 @@
 import React from 'react';
 import { useState } from 'react';
 import { Alert } from './alert';
-import { Card } from './card';
+import Card from './Card';
 
 export function FeedbackForm(): JSX.Element {
     const [status, setStatus] = useState<'pending' | 'ok' | 'error' | null>(null);
