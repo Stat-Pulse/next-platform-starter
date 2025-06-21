@@ -3,7 +3,7 @@
 
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import SidebarNavigation from '../components/SidebarNavigation';
+import SidebarNavigation from '../components/SidebarNavigation.tsx';
 import { motion } from 'framer-motion';
 
 // ─────────────────────────────────────────────────────────────────────────────
