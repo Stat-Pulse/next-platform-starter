@@ -4,20 +4,8 @@ import { useState, useEffect } from 'react'
 import Chart from 'chart.js/auto'
 
 export default function ComparisonSections({ players = [], metrics = [] }) {
-  // only render once we have at least 2 players
-  if (players.length < 2) {
-    return (
-      <div className="container mx-auto px-6 py-8">
-        <p className="text-gray-600 italic">
-          Select at least two players to compare.
-        </p>
-      </div>
-    )
-  }
-
   const [data, setData] = useState([])
 
-  // Fetch full player data when players[] changes
   useEffect(() => {
     async function load() {
       const results = await Promise.all(
@@ -30,6 +18,17 @@ export default function ComparisonSections({ players = [], metrics = [] }) {
     }
     load()
   }, [players])
+
+  // only render once we have at least 2 players
+  if (players.length < 2) {
+    return (
+      <div className="container mx-auto px-6 py-8">
+        <p className="text-gray-600 italic">
+          Select at least two players to compare.
+        </p>
+      </div>
+    )
+  }
 
   // Show loading if we haven't gotten back all player details yet
   if (data.length < players.length) {
