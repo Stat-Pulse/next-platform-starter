@@ -2,13 +2,11 @@
   command = "npm ci && npm run build"
   publish = ".next"
   functions = "netlify/functions"
+  node_bundler = "esbuild"
 
 [build.environment]
   NODE_VERSION = "18"
   CORS_ORIGIN = "*"
-
-[build.*]
-  node_bundler = "esbuild"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
