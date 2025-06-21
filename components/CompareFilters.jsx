@@ -2,5 +2,11 @@
 import React from 'react'
 
 export default function CompareFilters({ metrics, onOpenCustomize, onSaveComparison }) {
-  // …the code you pasted for CompareFilters.jsx…
+  return (
+    <div>
+      <button onClick={onOpenCustomize}>Customize Metrics</button>
+      <button onClick={onSaveComparison}>Save Comparison</button>
+    </div>
+  );
 }
+
