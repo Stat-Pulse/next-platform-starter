@@ -14,9 +14,9 @@
 [[plugins]]
   package = "@netlify/plugin-lighthouse"
   [plugins.inputs]
-    auditLevels = ["performance", "accessibility", "best-practices", "seo"]
-    outputPath = "lighthouse-reports"
-    uploadToBucket = false
+    audits = ["performance", "accessibility", "best-practices", "seo"]
+    output_path = "lighthouse-reports"
+    thresholds = { performance = 0.5 }
 
 [[redirects]]
   from = "/api/*"
