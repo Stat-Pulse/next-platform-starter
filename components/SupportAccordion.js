@@ -1,7 +1,19 @@
 //components/SupportAccordion.js
 
-import SupportAccordion from './SupportAccordion';
 import { motion } from 'framer-motion';
+
+const SupportAccordion = ({ items }) => {
+  return (
+    <div className="space-y-4">
+      {items.map((item, index) => (
+        <div key={index} className="border border-gray-300 rounded-lg p-4 bg-gray-50">
+          <h4 className="font-semibold text-lg text-red-600">{item.question}</h4>
+          <p className="text-gray-700 mt-2">{item.answer}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const SupportCenter = () => {
   const faqItems = [
@@ -42,3 +54,5 @@ const SupportCenter = () => {
 };
 
 export default SupportCenter;
+
+export { SupportAccordion };

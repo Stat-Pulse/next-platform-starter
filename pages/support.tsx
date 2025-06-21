@@ -7,7 +7,7 @@ import Link from 'next/link';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import SectionWrapper from '../components/SectionWrapper';
-import SupportAccordion from '../components/SupportAccordion';
+import { SupportAccordion } from '../components/SupportAccordion';
 import ContactForm from '../components/ContactForm';
 
 interface FaqItem {
