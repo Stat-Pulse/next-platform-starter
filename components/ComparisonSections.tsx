@@ -3,12 +3,17 @@
 import { useState, useEffect } from 'react'
 import Chart from 'chart.js/auto'
 
-export default function ComparisonSections({ players = [], metrics = [] }) {
-  const [data, setData] = useState([])
+interface ComparisonSectionsProps {
+  players: string[];
+  metrics?: any[];
+}
+
+export default function ComparisonSections({ players = [], metrics = [] }: ComparisonSectionsProps) {
+  const [data, setData] = useState<any[]>([])
 
   useEffect(() => {
     async function load() {
-      const results = await Promise.all(
+      const results: any[] = await Promise.all(
         players.map((name) =>
           fetch(`/api/player?name=${encodeURIComponent(name)}`)
             .then((r) => r.json())
