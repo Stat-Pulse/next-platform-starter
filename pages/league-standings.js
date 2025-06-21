@@ -88,7 +88,11 @@ export default function LeagueStandingsPage() {
                 title="NFL League Standings"
                 className="bg-white/10 backdrop-blur-lg shadow-xl rounded-xl p-8 border border-white/20 hover:shadow-cyan-500/20 transition-shadow duration-300"
               >
-                <NFLStandings />
+                {NFLStandings && typeof NFLStandings === 'function' ? (
+                  <NFLStandings />
+                ) : (
+                  <p className="text-red-500">NFL Standings failed to load.</p>
+                )}
               </SectionWrapper>
             </motion.div>
 
@@ -103,7 +107,11 @@ export default function LeagueStandingsPage() {
                 title="Fantasy Football Standings"
                 className="bg-white/10 backdrop-blur-lg shadow-xl rounded-xl p-8 border border-white/20 hover:shadow-purple-500/20 transition-shadow duration-300"
               >
-                <FantasyStandings />
+                {FantasyStandings && typeof FantasyStandings === 'function' ? (
+                  <FantasyStandings />
+                ) : (
+                  <p className="text-red-500">Fantasy Standings failed to load.</p>
+                )}
               </SectionWrapper>
             </motion.div>
           </div>
@@ -114,4 +122,3 @@ export default function LeagueStandingsPage() {
     </>
   );
 }
-
