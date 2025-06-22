@@ -78,6 +78,10 @@
     > :last-child {
       @apply mb-0;
     }
+    >.nav-link {
+    @apply text-white font-medium transition-colors hover:text-red-600;
+  }
+}
   }
 
   .btn {
@@ -161,15 +165,14 @@
     }
   }
 
-  .diff-item-1,
-  .diff-item-2 {
-    > * {
-      height: 100%;
-      width: 100cqi;
-      position: absolute;
-      top: 0;
-      left: 0;
-      pointer-events: none;
-    }
+.diff-item-1,
+.diff-item-2 {
+  > * {
+    height: 100%;
+    width: 100cqi;
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
   }
 }
