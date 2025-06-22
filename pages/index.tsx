@@ -4,8 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import SectionWrapper from '../components/SectionWrapper';
 import CompareBarChart from '../components/charts/CompareBarChart';
 import { ChartData, ChartOptions } from 'chart.js';
@@ -138,7 +136,6 @@ export default function HomePage({
 
   return (
     <>
-      <Header />
       <noscript>
         <div className="text-center p-6 bg-red-600 text-white">
           <h1 className="text-2xl font-bold">Welcome to StatPulse</h1>
@@ -323,7 +320,6 @@ export default function HomePage({
         </div>
       </SectionWrapper>
 
-      <Footer />
     </>
   );
 }

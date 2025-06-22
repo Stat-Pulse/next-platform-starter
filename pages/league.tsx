@@ -1,8 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import SidebarNavigation from '../components/SidebarNavigation';
 import SectionWrapper from '../components/SectionWrapper';
 import NFLStandings from '../components/NFLStandings';
@@ -42,7 +39,6 @@ export default function LeagueStandingsPage() {
 
   return (
     <>
-      <Header />
 
       <main
         ref={mainRef}
@@ -91,8 +87,6 @@ export default function LeagueStandingsPage() {
           </div>
         </div>
       </main>
-
-      <Footer />
     </>
   );
 }

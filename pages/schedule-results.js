@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
@@ -69,7 +67,6 @@ export default function ScheduleResults() {
   // ───────────────────────────────────────────────────────────────────────────
   return (
     <>
-      <Header />
 
       {/* Hero header – different palette from other pages */}
       <section className="relative isolate overflow-hidden bg-blue-900 pb-24 pt-28 sm:pt-32">
@@ -226,7 +223,6 @@ export default function ScheduleResults() {
         </div>
       </main>
 
-      <Footer />
     </>
   );
 }

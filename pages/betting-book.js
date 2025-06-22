@@ -1,8 +1,6 @@
 //pages/betting-book.js
 'use client';
 
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import SidebarNavigation from '../components/SidebarNavigation.tsx';
 import { motion } from 'framer-motion';
 
@@ -47,7 +45,6 @@ export default function BettingBook() {
 
   return (
     <>
-      <Header />
 
       <main
         className="relative min-h-screen py-10 bg-cover bg-center bg-no-repeat"
@@ -211,8 +208,6 @@ export default function BettingBook() {
           </div>{/* end main col */}
         </div>{/* end container grid */}
       </main>
-
-      <Footer />
     </>
   );
 }

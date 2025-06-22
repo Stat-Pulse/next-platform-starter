@@ -2,8 +2,6 @@
 "use client";
 
 import { useState } from "react";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 import CompareSearch from "../components/CompareSearch";
 import CompareFilters from "../components/CompareFilters";
 import CustomizeMetricsModal from "../components/CustomizeMetricsModal"; // Default import
@@ -31,7 +29,6 @@ export default function Compare() {
 
   return (
     <>
-      <Header />
       <main className="bg-gray-100 py-6">
         <div className="container mx-auto px-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
@@ -66,8 +63,6 @@ export default function Compare() {
         viewMode={viewMode}
         comparisonMode={comparisonMode}
       />
-
-      <Footer />
     </>
   );
 }

@@ -4,8 +4,6 @@
 
 import { useEffect, useState } from 'react'
 import { FaCog, FaStar, FaTrophy, FaChartLine, FaTable } from 'react-icons/fa' // Added more icons for visual richness
-import Header from '../components/Header'
-import Footer from '../components/Footer'
 
 // Helper to format activity timestamps
 const formatRelativeTime = (isoString) => {

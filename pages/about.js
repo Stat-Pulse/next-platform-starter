@@ -1,6 +1,4 @@
 //pages/about.js
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useEffect, useRef } from 'react';
@@ -39,7 +37,6 @@ export default function About() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-red-900 to-black-900 text-white font-sans overflow-hidden">
       {/* Header */}
-      <Header />
 
       {/* Main Content */}
       <main
@@ -174,7 +171,6 @@ export default function About() {
 
       {/* Footer */}
       <footer className="bg-gray-900/50 backdrop-blur-md relative z-10">
-        <Footer />
       </footer>
     </div>
   );
