@@ -159,10 +159,11 @@ export default function PlayerPage({
             {/* Headshot + meta */}
             <div className="flex items-center space-x-6">
               <Image
-                src={player.headshot_url}
+                src={player.headshot_url || '/default-avatar.png'}
                 alt={`${player.player_name} headshot`}
                 width={160} height={160}
                 className="rounded-full border-4 shadow-lg"
+                onError={(e) => { e.currentTarget.src = '/default-avatar.png'; }}
                 style={{ borderColor:primaryColor, boxShadow:`0 0 15px ${primaryColor}` }}
               />
 
