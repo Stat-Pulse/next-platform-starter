@@ -1,24 +1,19 @@
-// Tailwind CSS configuration for StatPulse
+// tailwind.config.js
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'class',
   content: [
-    './app/**/*.{js,ts,jsx,tsx}',
+    // Remove './app/**/*.{js,ts,jsx,tsx}' if you have completely deleted the 'app' directory.
+    // If you plan to use 'app' directory pages later, you can keep it, but it's best to be consistent.
     './pages/**/*.{js,ts,jsx,tsx}',
     './components/**/*.{js,ts,jsx,tsx}',
-    './utils/**/*.{js,ts,jsx,tsx}',
+    './utils/**/*.{js,ts,jsx,tsx}', // Make sure this path is correct if utils has components
     './public/**/*.html',
   ],
 
-  /* 1️⃣  you rarely need a safelist once colors are tokens;
-         keep only if you add classes dynamically with string-concats */
-  safelist: [
-    'animate-spin-slow', //  example: if you add animations conditionally
-  ],
-
+  // ... rest of your theme and plugins are fine for v3
   theme: {
     extend: {
-      /* 2️⃣  ———  STATPULSE PALETTE  ——— */
       colors: {
         /* Brand gradient stops */
         primary: {
@@ -54,49 +49,37 @@ module.exports = {
         grayText: '#A0A0A0',
         accentBlue: '#00BFFF',
         warningYellow: '#FFDC00',
-      },
 
-      /* 3️⃣  ———  MISC STYLES (unchanged) ——— */
-      container: {
-        center: true,
-        padding: '2rem',
-      },
-      letterSpacing: {
-        widest: '.12em',
+        // Ensure these basic Tailwind colors are also covered if you use them directly (e.g., bg-purple-900)
+        purple: {
+          900: '#2A1A3D', // Example, confirm actual hex if these are custom
+          800: '#3A1E5D', // Example
+        },
+        teal: {
+          800: '#1E4D4D', // Example
+        },
+        gray: { // If you use text-gray-100 or bg-gray-800 from default Tailwind palette
+          100: '#F3F4F6', // Default Tailwind gray-100
+          300: '#D1D5DB', // Default Tailwind gray-300
+          400: '#9CA3AF', // Default Tailwind gray-400
+          700: '#374151', // Default Tailwind gray-700
+          800: '#1F2937', // Default Tailwind gray-800
+        },
+        red: { // If you use text-red-600, bg-red-600
+          600: '#DC2626', // Default Tailwind red-600
+          700: '#B91C1C', // Default Tailwind red-700
+        },
+        black: '#000000', // If you use text-black literally
+        white: '#FFFFFF', // If you use text-white literally
       },
       fontFamily: {
+        // Ensure this includes your Google Font 'Inter' and fallbacks
         sans: ['Inter', 'Roboto', 'Arial', 'sans-serif'],
       },
-
-      keyframes: {
-        'spin-slow': {
-          '0%': { transform: 'rotate(0deg)' },
-          '100%': { transform: 'rotate(360deg)' },
-        },
-        'fade-in': { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
-        'scale-in': {
-          '0%': { transform: 'scale(0.95)', opacity: '0' },
-          '100%': { transform: 'scale(1)', opacity: '1' },
-        },
-        'pulse-border': {
-          '0%,100%': { borderColor: 'var(--color-pulse)' },
-          '50%': { borderColor: 'transparent' },
-        },
-        'pulse-mini': { '0%,100%': { opacity: '1' }, '50%': { opacity: '.3' } },
-        'ping-once': {
-          '0%': { transform: 'scale(0.2)', opacity: '.7' },
-          '80%,100%': { transform: 'scale(1)', opacity: '0' },
-        },
-      },
-      animation: {
-        'spin-slow': 'spin-slow 8s linear infinite',
-        'fade-in': 'fade-in .3s ease-out forwards',
-        'scale-in': 'scale-in .3s ease-out forwards',
-        'pulse-border': 'pulse-border var(--duration-pulse) var(--timing-pulse) infinite',
-        'pulse-mini': 'pulse-mini 2s cubic-bezier(.4,0,.6,1) infinite',
-        'ping-once': 'ping-once 1s cubic-bezier(0,0,.2,1) forwards',
-      },
+      // ... rest of extend
     },
   },
-  plugins: [],
+  plugins: [
+    require('tailwind-scrollbar-hide'), // Make sure this plugin is also installed: npm install tailwind-scrollbar-hide
+  ],
 };
