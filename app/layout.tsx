@@ -1,26 +1,25 @@
-// app/layout.tsx
-import '../styles/globals.css'; // Updated to correct path
-import { ReactNode } from 'react';
+import '../styles/globals.css'
+import { ReactNode } from 'react'
 
 export const metadata = {
   title: 'StatPulse Analytics',
   description: 'Fantasy sports and analytics platform',
-};
+}
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="scroll-smooth min-h-screen">
+    <html lang="en" className="scroll-smooth min-h-screen dark">
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{metadata.title}</title>
         <meta name="description" content={metadata.description} />
       </head>
-      <body className="bg-gradient-to-br from-purple-900 via-purple-800 to-teal-800 text-gray-100 font-sans min-h-screen antialiased">
+      <body className="bg-darkBackground text-lightText font-sans min-h-screen antialiased">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
           {children}
         </div>
       </body>
     </html>
-  );
+  )
 }

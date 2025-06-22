@@ -2,13 +2,13 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import SearchBar from './SearchBar';
+import { motion, AnimatePresence } from 'framer-motion'
+import SearchBar from './SearchBar'
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const navItems = ['Home', 'Players', 'Compare', 'Insights', 'League', 'Fantasy', 'Profile', 'Support', 'About']
 
-  // Mock data for SearchBar (to be replaced with real data later)
   const searchData = [
     { label: 'Kyler Murray', type: 'Player', url: '/player/offense-1' },
     { label: 'Arizona Cardinals', type: 'Team', url: '/team/ARI' },
@@ -17,101 +17,91 @@ export default function Header() {
   ]
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50 overflow-x-auto whitespace-nowrap">
-      <nav className="container mx-auto px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        {/* Logo and Title */}
-        <div className="flex items-center justify-between sm:justify-start sm:gap-4">
-          <Link href="/" className="flex-shrink-0 cursor-pointer">
+    <header className="bg-darkBackground text-lightText sticky top-0 z-50 shadow-md">
+      <nav className="container mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
             <img
               src="/assets/logo.png"
               alt="StatPulse Logo"
-              className="h-10 w-auto"
+              className="h-8 w-auto"
               onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/40x40?text=Logo' }}
             />
+            <span className="text-xl font-bold text-primary-600 hidden sm:block">StatPulse</span>
           </Link>
-          <span className="text-xl font-bold text-red-600 hidden sm:block">StatPulse</span>
-
-          {/* Mobile Toggle */}
-          <div className="flex items-center sm:hidden">
-            <button onClick={() => setMenuOpen(!menuOpen)} className="text-gray-800 focus:outline-none p-2">
-              ☰
-            </button>
-          </div>
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="sm:hidden text-lightText text-2xl focus:outline-none"
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? '✕' : '☰'}
+          </button>
         </div>
-
-        {/* SearchBar (Desktop) */}
-        <div className="hidden sm:block flex-1 max-w-md mx-4">
+        <div className="hidden sm:block flex-1 max-w-xs sm:max-w-sm mx-4">
           <SearchBar data={searchData} />
         </div>
-
-        {/* Desktop Nav */}
-        <div className="hidden sm:flex space-x-6 text-sm font-semibold overflow-x-auto">
-          {navItems.map((label) => {
-            const href = label === 'Home' ? '/' : `/${label.toLowerCase()}`
-            const isHome = label === 'Home'
-            return (
-              <Link
-                key={label}
-                href={href}
-                className={isHome ? 'text-red-600 font-bold' : 'hover:text-red-600'}
-              >
-                {label}
-              </Link>
-            )
-          })}
+        <div className="hidden sm:flex items-center gap-2 text-sm font-semibold">
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {navItems.map((label) => {
+              const href = label === 'Home' ? '/' : `/${label.toLowerCase()}`
+              return (
+                <Link
+                  key={label}
+                  href={href}
+                  className="whitespace-nowrap hover:text-primary-600 transition-colors"
+                >
+                  {label}
+                </Link>
+              )
+            })}
+          </div>
+          <Link
+            href="/login"
+            className="btn bg-primary-600 hover:bg-primary-500 text-lightText whitespace-nowrap"
+          >
+            Login
+          </Link>
         </div>
       </nav>
-
-      {/* Mobile Menu Panel */}
-      {menuOpen && (
-        <div className="sm:hidden bg-white shadow-md">
-          <div className="container mx-auto px-6 py-4">
-            {/* Logo & Title */}
-            <div className="flex items-center justify-between mb-4">
-              <Link href="/" className="flex-shrink-0 cursor-pointer">
-                <img
-                  src="/assets/logo.png"
-                  alt="StatPulse Logo"
-                  className="h-8 w-auto"
-                  onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/40x40?text=Logo' }}
-                />
-              </Link>
-              <span className="text-xl font-bold text-red-600">StatPulse</span>
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            className="sm:hidden bg-darkBackground"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="container mx-auto px-4 sm:px-6 py-4">
+              <div className="mb-4">
+                <SearchBar data={searchData} />
+              </div>
+              <div className="flex flex-col gap-3 text-sm font-semibold">
+                {navItems.map((label) => {
+                  const href = label === 'Home' ? '/' : `/${label.toLowerCase()}`
+                  return (
+                    <Link
+                      key={label}
+                      href={href}
+                      onClick={() => setMenuOpen(false)}
+                      className="hover:text-primary-600 transition-colors"
+                    >
+                      {label}
+                    </Link>
+                  )
+                })}
+                <Link
+                  href="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="btn bg-primary-600 hover:bg-primary-500 text-lightText text-center"
+                >
+                  Login
+                </Link>
+              </div>
             </div>
-
-            {/* SearchBar (Mobile) */}
-            <div className="mb-4">
-              <SearchBar data={searchData} />
-            </div>
-
-            {/* Navigation Links */}
-            <div className="flex flex-col space-y-4 text-sm font-semibold">
-              {navItems.map((label) => {
-                const href = label === 'Home' ? '/' : `/${label.toLowerCase()}`
-                const isHome = label === 'Home'
-                return (
-                  <Link
-                    key={label}
-                    href={href}
-                    className={isHome ? 'text-red-600 font-bold' : 'hover:text-red-600'}
-                  >
-                    {label}
-                  </Link>
-                )
-              })}
-
-              {/* Login Link */}
-              <Link
-                href="/login"
-                className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700 text-center"
-              >
-                Login
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   )
 }
-

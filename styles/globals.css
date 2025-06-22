@@ -10,13 +10,13 @@
 :root {
   --background-image-noise: linear-gradient(
           to bottom,
-          color-mix(in oklab, var(--color-neutral-950) 0%, transparent),
-          color-mix(in oklab, var(--color-neutral-950) 100%, transparent)
+          color-mix(in oklab, var(--darkBackground) 0%, transparent),
+          color-mix(in oklab, var(--darkBackground) 100%, transparent)
       ),
       url('/images/noise.png');
-  --color-primary: #2bdcd2;
-  --color-primary-content: #171717;
-  --color-secondary: #016968;
+  --color-primary: var(--primary-600);
+  --color-primary-content: var(--lightText);
+  --color-secondary: var(--accent-600);
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
       'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }
