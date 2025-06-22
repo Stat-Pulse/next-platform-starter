@@ -16,7 +16,9 @@ export async function getServerSideProps({ params, req }) {
     process.env.URL ||
     `http://${req.headers.host}`;
 
-  const res = await fetch(`${baseUrl}/api/player/${params.id}`);
+  const playerId = params.id;
+  if (!playerId) return { notFound: true };
+  const res = await fetch(`${baseUrl}/api/player/${playerId}`);
   if (!res.ok) return { notFound: true };
   const data = await res.json();
   return { props: data };
@@ -39,7 +41,7 @@ export default function PlayerPage({
   const receivingMetricsArr = receivingMetrics.length ? receivingMetrics : (player.receivingMetrics || []);
   const rawPassing          = passingMetrics.length   ? passingMetrics   : (player.passingMetrics   || []);
   const uniquePassingMetrics = Array.isArray(rawPassing)
-    ? rawPassing.filter((v,i,self)=>i===self.findIndex(r=>r.week===v.week))
+    ? rawPassing.filter((v,i,self)=>v?.week && i===self.findIndex(r=>r.week===v.week))
     : [];
 
   /* -------- advanced flags ---------------------------------------- */
@@ -337,7 +339,9 @@ export default function PlayerPage({
             {hasAdvancedReceiving && (
               <AdvancedCard title="2024 Advanced Receiving" rows={[
                 ['Avg Cushion', `${advancedMetrics.avg_cushion?.toFixed(2)||'N/A'} yds`],
-                ['Air Yards Share', `${(advancedMetrics.percent_share_of_intended_air_yards*100).toFixed(1)||'N/A'} %`],
+                ['Air Yards Share', advancedMetrics.percent_share_of_intended_air_yards != null
+                  ? `${(advancedMetrics.percent_share_of_intended_air_yards * 100).toFixed(1)} %`
+                  : 'N/A'],
               ]}/>
             )}
             {hasAdvancedRushing && (
