@@ -22,10 +22,9 @@ export default function Header() {
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <img
-              src="/assets/logo.png"
+              src="/logo.png"
               alt="StatPulse Logo"
               className="h-8 w-auto"
-              onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/40x40?text=Logo' }}
             />
             <span className="text-xl font-bold text-primary-600 hidden sm:block">StatPulse</span>
           </Link>
