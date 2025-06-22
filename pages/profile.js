@@ -65,20 +65,19 @@ export default function ProfilePage() {
     }
   }, [showSettings])
 
-  const {
-    username,
-    avatar,
-    email,
-    favoriteTeams,
-    favoritePlayers,
-    points,
-    badges,
-    leaderboardRank,
-    subscription = 'Free',
-    accuracyRate = 0,
-    engagementScore = 0,
-    gamesAnalyzed = 0,
-  } = user
+  // Safely extract user properties to avoid destructuring from null
+  const username = user?.username ?? null;
+  const avatar = user?.avatar ?? '/images/default-avatar.png';
+  const email = user?.email ?? null;
+  const favoriteTeams = user?.favoriteTeams ?? [];
+  const favoritePlayers = user?.favoritePlayers ?? [];
+  const points = user?.points ?? 0;
+  const badges = user?.badges ?? [];
+  const leaderboardRank = user?.leaderboardRank ?? null;
+  const subscription = user?.subscription ?? 'Free';
+  const accuracyRate = user?.accuracyRate ?? 0;
+  const engagementScore = user?.engagementScore ?? 0;
+  const gamesAnalyzed = user?.gamesAnalyzed ?? 0;
 
   const isPremium = subscription === 'Premium'
 
