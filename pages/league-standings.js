@@ -42,7 +42,6 @@ export default function LeagueStandingsPage() {
 
   return (
     <>
-      <Header />
 
       <main
         ref={mainRef}
@@ -114,8 +113,6 @@ export default function LeagueStandingsPage() {
           </div>
         </div>
       </main>
-
-      <Footer />
     </>
   );
 }

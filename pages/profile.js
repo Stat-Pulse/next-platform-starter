@@ -72,7 +72,6 @@ export default function ProfilePage() {
         <main className="min-h-screen flex items-center justify-center bg-gray-900 text-red-500 font-sans">
           <p className="text-xl animate-pulse">Loading StatPulse profile...</p>
         </main>
-        <Footer />
       </>
     )
   }
@@ -115,7 +114,6 @@ export default function ProfilePage() {
 
   return (
     <>
-      <Header />
       <main className={`py-10 min-h-screen text-[${colors.lightText}] font-sans bg-gradient-to-br from-[${colors.primaryRed}/10] via-[${colors.darkBackground}] to-[${colors.darkBackground}]`}>
         <div className="container mx-auto px-4 space-y-12">
           <section className={`relative bg-[${colors.mediumBackground}] p-8 rounded-3xl shadow-xl overflow-hidden

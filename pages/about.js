@@ -168,10 +168,6 @@ export default function About() {
           ))}
         </motion.section>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-gray-900/50 backdrop-blur-md relative z-10">
-      </footer>
     </div>
   );
 }
