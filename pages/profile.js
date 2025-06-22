@@ -65,17 +65,6 @@ export default function ProfilePage() {
     }
   }, [showSettings])
 
-  if (!user) {
-    return (
-      <>
-        <Header />
-        <main className="min-h-screen flex items-center justify-center bg-gray-900 text-red-500 font-sans">
-          <p className="text-xl animate-pulse">Loading StatPulse profile...</p>
-        </main>
-      </>
-    )
-  }
-
   const {
     username,
     avatar,
@@ -442,7 +431,6 @@ export default function ProfilePage() {
           )}
         </div>
       </main>
-      <Footer />
     </>
   )
 }
