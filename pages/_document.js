@@ -1,11 +1,14 @@
+// pages/_document.js
 import Document, { Html, Head, Main, NextScript } from 'next/document';
-import { ServerStyleSheet } from 'styled-components'; // If using styled-components (optional)
+import { ServerStyleSheet } from 'styled-components'; // Keep if you are actually using styled-components
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
     const originalRenderPage = ctx.renderPage;
 
-    // Optional: If using styled-components
+    // IMPORTANT: Only keep this styled-components setup if you are actually using
+    // styled-components in your project. If not, remove this entire try/finally block
+    // and just use `const initialProps = await Document.getInitialProps(ctx); return initialProps;`
     const sheet = new ServerStyleSheet();
     try {
       ctx.renderPage = () =>
@@ -30,7 +33,12 @@ class MyDocument extends Document {
 
   render() {
     return (
-      <Html lang="en" className="bg-gradient-to-br from-purple-900 via-purple-800 to-teal-800 text-gray-100">
+      // Apply global HTML attributes here.
+      // The background gradient and text color belong in pages/_app.js's wrapper div
+      // or a global body style in globals.css, not on the <html> tag itself in _document.js.
+      // _document.js is for the very base HTML structure.
+      // The 'scroll-smooth dark' classes are fine here.
+      <Html lang="en" className="scroll-smooth dark">
         <Head>
           {/* Meta Tags for SEO and Performance */}
           <meta charSet="UTF-8" />
@@ -51,19 +59,27 @@ class MyDocument extends Document {
           <link rel="icon" href="/favicon.ico" />
 
           {/* Preload Key Assets */}
+          {/* Ensure these paths are correct relative to your /public directory */}
           <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
           <link rel="preload" href="/images/logo.png" as="image" />
 
-          {/* Critical CSS (Inline for Performance) */}
+          {/* Critical CSS (Inline for Performance) - Keep if needed, otherwise move to globals.css */}
+          {/* Note: If these styles conflict with Tailwind or are not truly critical,
+                     it's better to manage them via globals.css.
+                     The `bg-gradient-to-br` will be handled by Tailwind if properly configured. */}
           <style dangerouslySetInnerHTML={{
             __html: `
               body { margin: 0; font-family: 'Inter', sans-serif, system-ui; }
-              .bg-gradient-to-br { background: linear-gradient(to bottom right, #2a1a3d, #1e4d4d); }
+              /* Remove if Tailwind handles this: */
+              /* .bg-gradient-to-br { background: linear-gradient(to bottom right, #2a1a3d, #1e4d4d); } */
               .text-cyan-300 { color: #80deea; }
               .focus-ring-cyan-500:focus { outline: none; ring: 2px solid #00bcd4; }
             `,
           }} />
         </Head>
+        {/* The min-h-screen should be applied to a wrapper div in _app.js,
+            not directly to the <body> in _document.js, unless you're very careful
+            about how content fills the viewport. */}
         <body className="min-h-screen">
           <Main />
           <NextScript />
