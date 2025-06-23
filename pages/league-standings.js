@@ -82,7 +82,7 @@ export default function LeagueStandingsPage() {
             >
               <SectionWrapper
                 title="NFL League Standings"
-                className="bg-white/10 backdrop-blur-lg shadow-xl rounded-xl p-8 border border-white/20 hover:shadow-cyan-500/20 transition-shadow duration-300"
+                className="bg-white/10 backdrop-blur-lg shadow-xl rounded-xl p-8 border border-white/20 hover:shadow-[0_0_12px_4px_rgba(34,211,238,0.4)] transition-shadow duration-300"
               >
                 {Array.isArray(NFLStandings?.data) ? (
                   <NFLStandings />
@@ -101,7 +101,7 @@ export default function LeagueStandingsPage() {
             >
               <SectionWrapper
                 title="Fantasy Football Standings"
-                className="bg-white/10 backdrop-blur-lg shadow-xl rounded-xl p-8 border border-white/20 hover:shadow-purple-500/20 transition-shadow duration-300"
+                className="bg-white/10 backdrop-blur-lg shadow-xl rounded-xl p-8 border border-white/20 hover:shadow-[0_0_12px_4px_rgba(168,85,247,0.4)] transition-shadow duration-300"
               >
                 {Array.isArray(FantasyStandings?.data) ? (
                   <FantasyStandings />
