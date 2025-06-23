@@ -50,16 +50,14 @@ export default function AnalyticsLab() {
 
   // 3D Scene for Cutting-Edge Visualizations
   const ThreeDScene = () => {
-    const sphereRef = useRef<THREE.Mesh>(null!)
-    useEffect(() => {
-      const geometry = new THREE.SphereGeometry(1, 32, 32)
-      const material = new THREE.MeshBasicMaterial({ color: 0xff0000 }) // Red sphere as placeholder
-      sphereRef.current = new THREE.Mesh(geometry, material)
-    }, [])
+    const sphereRef = useRef<THREE.Mesh>(null)
 
     return (
       <group>
-        <primitive object={sphereRef.current} />
+        <mesh ref={sphereRef}>
+          <sphereGeometry args={[1, 32, 32]} />
+          <meshBasicMaterial color={0xff0000} />
+        </mesh>
         <OrbitControls />
       </group>
     )
