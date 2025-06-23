@@ -11,7 +11,7 @@ export default function CompareSearch({ selectedPlayers, onUpdate }) {
 
   useEffect(() => {
     setLoading(true)
-    const endpoint = mode === 'players' ? '/.netlify/functions/getPlayers' : '/.netlify/functions/getTeams'
+    const endpoint = mode === 'players' ? '/api/getPlayers' : '/api/getTeams'
     fetch(endpoint)
       .then(res => res.json())
       .then(data => {
