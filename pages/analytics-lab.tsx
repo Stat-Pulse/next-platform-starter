@@ -65,7 +65,6 @@ export default function AnalyticsLab() {
 
   return (
     <>
-      <Header />
       <main className="min-h-[calc(100vh-20rem)]">
         <SectionWrapper title="Analytics Lab">
           <div className="glass-card p-6 max-w-4xl mx-auto">
@@ -214,7 +213,6 @@ export default function AnalyticsLab() {
           </div>
         </SectionWrapper>
       </main>
-      <Footer />
     </>
   )
 }
