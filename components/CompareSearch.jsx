@@ -41,7 +41,9 @@ export default function CompareSearch({ selectedPlayers, onUpdate }) {
   }
 
   const filteredOptions = (term) => {
-    const options = mode === 'players' ? playerOptions : teamOptions
+    const options = Array.isArray(mode === 'players' ? playerOptions : teamOptions)
+      ? (mode === 'players' ? playerOptions : teamOptions)
+      : []
     return options
       .filter(item =>
         (mode === 'players' ? item.player_name : item.team_name)

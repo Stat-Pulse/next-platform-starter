@@ -7,7 +7,7 @@ import SearchBar from './SearchBar'
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
-  const navItems = ['Home', 'Players', 'Compare', 'Insights', 'League', 'Fantasy', 'Profile', 'Support', 'About']
+  const navItems = ['Home', 'Compare', 'Insights', 'League', 'Fantasy', 'Profile', 'Support', 'About']
 
   const searchData = [
     { label: 'Kyler Murray', type: 'Player', url: '/player/offense-1' },
