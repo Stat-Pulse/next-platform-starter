@@ -6,7 +6,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Theme variables */
+/* Theme variables 
+  NOTE: The variables used below (e.g., --darkBackground, --primary-600) are not defined in this file.
+  Ensure they are defined in your project (e.g., in your tailwind.config.js, another CSS file, or an inline style block)
+  for these styles to work correctly.
+*/
 :root {
   --background-image-noise: linear-gradient(
           to bottom,
@@ -78,10 +82,9 @@
     > :last-child {
       @apply mb-0;
     }
-    >.nav-link {
-    @apply text-white font-medium transition-colors hover:text-red-600;
-  }
-}
+    > .nav-link {
+      @apply text-white font-medium transition-colors hover:text-red-600;
+    }
   }
 
   .btn {
@@ -107,9 +110,17 @@
     --btn-py: 1.125rem;
   }
 
+  /* === UPDATED INPUT STYLES START === */
   .input {
-    @apply px-4 py-3 text-sm border rounded-sm border-neutral-300 text-neutral-900 focus:border-primary focus:outline-3 focus:outline-primary/30;
+    @apply px-4 py-3 text-sm border rounded-sm border-neutral-300 text-neutral-900 transition;
   }
+
+  .input:focus-visible {
+    border-color: var(--color-primary);
+    outline: none; /* Disable default outline to use a custom box-shadow focus ring */
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent);
+  }
+  /* === UPDATED INPUT STYLES END === */
 
   .diff {
     direction: ltr;
@@ -168,14 +179,15 @@
     }
   }
 
-.diff-item-1,
-.diff-item-2 {
-  > * {
-    height: 100%;
-    width: 100cqi;
-    position: absolute;
-    top: 0;
-    left: 0;
-    pointer-events: none;
+  .diff-item-1,
+  .diff-item-2 {
+    > * {
+      height: 100%;
+      width: 100cqi;
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
   }
 }
