@@ -85,14 +85,17 @@
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 font-bold text-center no-underline transition-colors cursor-pointer bg-[color:var(--color-primary)] text-[color:var(--color-primary-content)];
+    @apply inline-flex items-center justify-center gap-2 font-bold text-center no-underline transition-colors cursor-pointer;
+    background-color: var(--color-primary);
+    color: var(--color-primary-content);
     padding: var(--btn-py, 0.875rem) var(--btn-px, 1.25rem);
     font-size: var(--btn-font-size, 0.875rem);
     border-radius: var(--btn-border-radius, 0.25rem);
   }
 
   .btn:hover {
-    @apply bg-[color:var(--color-primary)]/85;
+    background-color: var(--color-primary);
+    opacity: 0.85;
   }
   .btn:disabled {
     @apply cursor-default text-neutral-400 bg-neutral-700;
