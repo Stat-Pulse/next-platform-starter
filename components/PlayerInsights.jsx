@@ -224,7 +224,7 @@ const PlayerInsights = ({ playerId }) => {
                 <p>Yards/Reception: {playerData.efficiency_metrics.ypr}</p>
                 <p>TD Rate: {playerData.efficiency_metrics.td_rate}</p>
               </div>
-              <div>
+              <div className="md:col-span-2 mt-4">
                 <p><strong>Outlook:</strong> {playerData.rest_of_season}</p>
                 <p><strong>News:</strong> {playerData.fantasy_news}</p>
               </div>

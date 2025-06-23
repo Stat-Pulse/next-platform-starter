@@ -98,9 +98,7 @@ export default function SupportPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-700 via-gray-600 to-gray-300 text-gray-800 flex flex-col font-sans">
-      <Header />
-
+    <>
       <main className="flex-grow container mx-auto px-4 sm:px-6 py-10">
         <motion.h1
           className="text-4xl sm:text-5xl font-bold tracking-tight text-silver-500 text-center mb-8"
@@ -263,8 +261,6 @@ export default function SupportPage() {
           </div>
         </SectionWrapper>
       </main>
-
-      <Footer />
-    </div>
+    </>
   );
 }
