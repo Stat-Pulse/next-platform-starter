@@ -92,7 +92,7 @@
   }
 
   .btn:hover {
-    @apply bg-primary/85;
+    @apply bg-[color:var(--color-primary)]/85;
   }
   .btn:disabled {
     @apply cursor-default text-neutral-400 bg-neutral-700;
