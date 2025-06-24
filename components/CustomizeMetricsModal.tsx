@@ -1,4 +1,5 @@
 // components/CustomizeMetricsModal.jsx
+/** @jsxImportSource react */
 import React, { useState, useEffect } from 'react'
 import Modal from './Modal'
 

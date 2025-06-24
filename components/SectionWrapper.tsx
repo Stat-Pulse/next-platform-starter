@@ -1,4 +1,5 @@
 // components/SectionWrapper.tsx
+/** @jsxImportSource react */
 import React from 'react';
 import { motion } from 'framer-motion';
 

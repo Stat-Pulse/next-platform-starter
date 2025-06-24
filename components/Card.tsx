@@ -1,10 +1,11 @@
 // components/Card.tsx
+/** @jsxImportSource react */
 import React, { ReactNode } from 'react';
 import type { ReactElement } from 'react';
 
 interface CardProps {
   title: string;
-  value: string;
+  value?: string;
   children?: ReactNode;
 }
 
