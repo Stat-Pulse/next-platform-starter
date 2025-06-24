@@ -4,6 +4,7 @@ import React from 'react';
 import { useState } from 'react';
 import { Alert } from './alert';
 import Card from './Card';
+import type { JSX } from 'react';
 
 export function FeedbackForm(): JSX.Element {
     const [status, setStatus] = useState<'pending' | 'ok' | 'error' | null>(null);
