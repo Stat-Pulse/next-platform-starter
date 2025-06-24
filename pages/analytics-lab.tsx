@@ -1,12 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/router'
-import Header from '../components/Header'
-import Footer from '../components/Footer'
+/** @jsxImportSource @react-three/fiber */
+import { useState, useRef } from 'react'
 import SectionWrapper from '../components/SectionWrapper'
-import { DndProvider } from 'react-dnd/dist/core/DndProvider';
-import { useDrag } from 'react-dnd/dist/hooks/useDrag';
-import { useDrop } from 'react-dnd/dist/hooks/useDrop';
-import { HTML5Backend } from 'react-dnd-html5-backend'
+import { DndProvider, HTML5toTouch } from 'react-dnd-multi-backend'
+import { useDrag, useDrop } from 'react-dnd'
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js'
 import { Bar } from 'react-chartjs-2'
 import * as THREE from 'three'
@@ -17,8 +13,6 @@ import { OrbitControls } from '@react-three/drei'
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 export default function AnalyticsLab() {
-  const router = useRouter()
-
   // Drag-and-Drop State for Customizable Dashboard
   const [widgets, setWidgets] = useState<string[]>([])
   const handleDrop = (item: { id: string }) => {
@@ -75,7 +69,7 @@ export default function AnalyticsLab() {
             <div className="mb-8">
               <h4 className="text-xl font-semibold text-lightText mb-4">Customizable Dashboard & Workbench</h4>
               <p className="text-grayText mb-4">Build your own analytics experience.</p>
-              <DndProvider backend={HTML5Backend}>
+              <DndProvider options={HTML5toTouch}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-mediumBackground/50 p-4 rounded-lg">
                     <DraggableWidget id="widget1">Stats Widget</DraggableWidget>
