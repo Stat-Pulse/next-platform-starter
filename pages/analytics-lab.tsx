@@ -1,5 +1,3 @@
-/** @jsxImportSource @react-three/fiber */
-/// <reference types="@react-three/fiber" />
 import { useState, useRef } from 'react'
 import SectionWrapper from '../components/SectionWrapper'
 import * as ReactDnd from 'react-dnd'
