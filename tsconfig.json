@@ -11,6 +11,7 @@
     "esModuleInterop": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "types": ["@react-three/fiber", "react", "react-dom", "three", "react-dnd"],
     "isolatedModules": true,
     "jsx": "preserve",
     "forceConsistentCasingInFileNames": true,
@@ -25,6 +26,15 @@
     ],
     "strictNullChecks": true
   },
-  "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx", "components/ContactForm.js"],
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "components/ContactForm.js",
+    "Data/pages/**/*",
+    "Data/components/**/*",
+    "node_modules/@react-three/fiber/types/**/*.d.ts"
+  ],
   "exclude": ["node_modules"]
 }
