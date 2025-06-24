@@ -14,7 +14,7 @@
     "types": ["@react-three/fiber", "react", "react-dom", "three", "react-dnd"],
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "@react-three/fiber",
+    "jsxImportSource": "@react-three/fiber/jsx-runtime",
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
@@ -36,6 +36,6 @@
     "Data/pages/**/*",
     "Data/components/**/*",
     "node_modules/@react-three/fiber/types/**/*.d.ts"
-  ],
+, "pages/analytics-lab.jsx"  ],
   "exclude": ["node_modules"]
 }
