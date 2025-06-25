@@ -224,11 +224,12 @@ const DraggablePreference = ({ id, children }: DraggableProps) => {
       isDragging: !!monitor.isDragging(),
     }),
   }))
-  
+
+  // Cast drag to React.Ref<HTMLDivElement> to satisfy the ref type
   return (
-    <div 
-      ref={drag} 
-      className="cursor-move p-2 bg-gray-700/50 rounded" 
+    <div
+      ref={drag as unknown as React.Ref<HTMLDivElement>}
+      className="cursor-move p-2 bg-gray-700/50 rounded"
       style={{ opacity: isDragging ? 0.5 : 1 }}
     >
       {children}
@@ -249,10 +250,13 @@ const DropZone = ({ onDrop, feedPreferences }: DropZoneProps) => {
       isOver: !!monitor.isOver(),
     }),
   }))
+
+  // Type assertion to satisfy React's ref type
+  const dropRef = drop as unknown as React.Ref<HTMLDivElement>;
   
   return (
     <div
-      ref={drop}
+      ref={dropRef}
       className={`border-dashed border-2 p-4 rounded-lg h-24 flex items-center justify-center transition-colors ${
         isOver ? 'border-primary-500 bg-primary-900/20' : 'border-gray-700'
       }`}
