@@ -35,6 +35,6 @@
     "Data/pages/**/*",
     "Data/components/**/*",
     "node_modules/@react-three/fiber/types/**/*.d.ts"
-, "pages/analytics-lab.jsx"  ],
+, "pages/analytics-lab.jsx", "pages/api/games.js"  ],
   "exclude": ["node_modules"]
 }
