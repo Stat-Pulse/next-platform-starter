@@ -23,7 +23,7 @@ export default function ScheduleResults() {
     }).toString();
 
     setLoading(true);
-    fetch(`/.netlify/functions/getGames?${query}`)
+    fetch(`/api/games?${query}`)
       .then((res) => res.json())
       .then((data) => {
         setGames(data);
@@ -50,7 +50,7 @@ export default function ScheduleResults() {
 
   const filteredGames = selectedTeam
     ? games.filter(
-        (g) => g.home_team_name === selectedTeam || g.away_team_name === selectedTeam,
+        (g) => g.home_team === selectedTeam || g.away_team === selectedTeam,
       )
     : games;
 
@@ -60,7 +60,7 @@ export default function ScheduleResults() {
     return acc;
   }, {});
 
-  const allTeams = Array.from(new Set(games.flatMap((g) => [g.home_team_name, g.away_team_name]))).sort();
+  const allTeams = Array.from(new Set(games.flatMap((g) => [g.home_team, g.away_team]))).sort();
 
   // ───────────────────────────────────────────────────────────────────────────
   // UI
@@ -167,50 +167,95 @@ export default function ScheduleResults() {
                   <table className="min-w-full divide-y divide-gray-200 text-sm">
                     <thead className="bg-blue-50">
                       <tr>
-                        {['Date', 'Matchup', 'Result', 'Stadium'].map((h) => (
-                          <th key={h} className="px-4 py-2 text-left font-semibold text-blue-700">
-                            {h}
-                          </th>
-                        ))}
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Season</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Week</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Weekday</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Away Score</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Home Score</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Location</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Result</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Total</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Overtime</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Away Moneyline</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Home Moneyline</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Spread Line</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Away Spread Odds</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Home Spread Odds</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Total Line</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Under Odds</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Over Odds</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Division Game</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Roof</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Surface</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Temp</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Wind</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Referee</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {gamesByWeek[week].map((game) => {
-                        const gameDate = new Date(`${game.game_date}T${game.game_time || '00:00:00'}`);
+                        // Date/weekday
+                        const gameDate = new Date(`${game.gameday}T${game.gametime || '00:00:00'}`);
                         const isPast = gameDate < today;
-
                         const dateStr = gameDate.toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
                           year: 'numeric',
                         });
-                        const timeStr = game.game_time
+                        const timeStr = game.gametime
                           ? gameDate.toLocaleTimeString('en-US', {
                               hour: 'numeric',
                               minute: '2-digit',
                               timeZone: 'America/Chicago',
                             })
                           : null;
-
+                        const weekdayStr = gameDate.toLocaleDateString('en-US', { weekday: 'short' });
+                        // Helper for missing values
+                        const displayVal = (val) =>
+                          val === null || val === undefined || val === '' ? <span>&mdash;</span> : val;
+                        // Boolean badge
+                        const yesNo = (val) =>
+                          val === true ? (
+                            <span className="inline-block px-2 py-0.5 rounded bg-green-100 text-green-800">Yes</span>
+                          ) : val === false ? (
+                            <span className="inline-block px-2 py-0.5 rounded bg-gray-100 text-gray-600">No</span>
+                          ) : (
+                            <span>&mdash;</span>
+                          );
                         return (
                           <tr key={game.game_id} className="hover:bg-blue-50/60">
+                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.season)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.week)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{weekdayStr}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.away_score)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.home_score)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.location || game.stadium)}</td>
                             <td className="px-4 py-2 whitespace-nowrap">
-                              {dateStr}
-                              {timeStr && <span className="block text-xs text-gray-500">{timeStr} CST</span>}
-                            </td>
-                            <td className="px-4 py-2 whitespace-nowrap">
-                              {game.home_team_name} vs {game.away_team_name}
-                            </td>
-                            <td className="px-4 py-2 whitespace-nowrap font-medium">
+                              {/* Result: show home_score – away_score or em dash */}
                               {game.home_score !== null && game.away_score !== null ? (
                                 <span className={isPast ? 'text-green-600' : 'text-gray-500'}>
                                   {game.home_score} – {game.away_score}
                                 </span>
                               ) : (
-                                <span className="text-gray-500">Scheduled</span>
+                                <span className="text-gray-500">&mdash;</span>
                               )}
                             </td>
-                            <td className="px-4 py-2 whitespace-nowrap">{game.stadium_name}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.total)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{yesNo(game.overtime)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.away_moneyline)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.home_moneyline)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.spread_line)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.away_spread_odds)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.home_spread_odds)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.total_line)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.under_odds)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.over_odds)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{yesNo(game.div_game)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.roof)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.surface)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.temp)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.wind)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.referee)}</td>
                           </tr>
                         );
                       })}
