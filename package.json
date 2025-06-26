@@ -48,6 +48,7 @@
     "sharp": "^0.34.2",
     "socket.io-client": "^4.8.1",
     "styled-components": "^6.1.19",
+    "swr": "^2.3.3",
     "tailwind-scrollbar-hide": "^4.0.0",
     "three": "^0.177.0",
     "tsparticles": "^3.8.1",
