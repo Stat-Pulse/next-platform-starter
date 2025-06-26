@@ -79,13 +79,14 @@ export default function DraftHQ() {
 
   // Live Draft Tracking (Future Enhancement Placeholder)
   useEffect(() => {
-    // Initialize Socket.io client (to be implemented)
-    const socket = io('http://localhost:3000') // Replace with your draft API endpoint
+    const socket = io('http://localhost:3000')
     socket.on('draftUpdate', (data) => {
       console.log('Draft update received:', data)
       // Update state with real-time picks (e.g., setMockDraft, animate 3D board)
     })
-    return () => socket.disconnect()
+    return () => {
+      socket.disconnect()
+    }
   }, [])
 
   return (
@@ -278,7 +279,7 @@ const DraggablePick = ({ id, children }) => {
     collect: (monitor) => ({ isDragging: monitor.isDragging() }),
   }))
   return (
-    <div ref={drag as React.Ref<HTMLDivElement>} className="cursor-move p-2 bg-gray-700/50 rounded" style={{ opacity: isDragging ? 0.5 : 1 }}>
+    <div ref={drag as unknown as React.Ref<HTMLDivElement>} className="cursor-move p-2 bg-gray-700/50 rounded" style={{ opacity: isDragging ? 0.5 : 1 }}>
       {children}
     </div>
   )
@@ -292,7 +293,7 @@ const DropZone = ({ onDrop, mockDraft }) => {
   }))
   return (
     <div
-      ref={drop as React.Ref<HTMLDivElement>}
+      ref={drop as unknown as React.Ref<HTMLDivElement>}
       className="border-dashed border-2 border-gray-700 p-4 rounded-lg h-24 flex items-center justify-center"
       style={{ borderColor: '#A0A0A0' }}
     >

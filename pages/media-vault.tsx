@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import SectionWrapper from '../components/SectionWrapper'
@@ -51,8 +51,9 @@ export default function MediaVault() {
 
   // 3D Scene for Player Tracking Data
   const PlayerTracking3D = () => {
-    const [groupRef] = useState(() => new THREE.Group())
+    const groupRef = useRef<THREE.Group>(null)
     useEffect(() => {
+      if (!groupRef.current) return
       const sphereGeometry = new THREE.SphereGeometry(0.3, 32, 32)
       const material = new THREE.MeshBasicMaterial({ color: 0xff0000 }) // Red for player
       const sphere = new THREE.Mesh(sphereGeometry, material)
@@ -70,7 +71,7 @@ export default function MediaVault() {
     }, [])
 
     return (
-      <group ref={groupRef}>
+      <group ref={groupRef as unknown as React.Ref<THREE.Group>}>
         <OrbitControls />
       </group>
     )
@@ -174,7 +175,7 @@ export default function MediaVault() {
                       <DraggableClip key={clip} id={clip}>{clip}</DraggableClip>
                     ))}
                   </div>
-                  <DropZone onDrop={handleDrop} />
+                  <DropZone onDrop={handleDrop} playlists={playlists} />
                 </div>
                 <div className="mt-4">
                   <p className="text-grayText">Your Playlist: {playlists.join(', ')}</p>
@@ -246,20 +247,34 @@ export default function MediaVault() {
 }
 
 // Drag-and-Drop Components
+
 const DraggableClip = ({ id, children }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'clip',
     item: { id },
     collect: (monitor) => ({ isDragging: monitor.isDragging() }),
-  }))
+  }));
+
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      drag(ref.current);
+    }
+  }, [drag]);
+
   return (
-    <div ref={drag} className="cursor-move p-2 bg-gray-700/50 rounded" style={{ opacity: isDragging ? 0.5 : 1 }}>
+    <div
+      ref={ref}
+      className="cursor-move p-2 bg-gray-700/50 rounded"
+      style={{ opacity: isDragging ? 0.5 : 1 }}
+    >
       {children}
     </div>
-  )
+  );
 }
 
-const DropZone = ({ onDrop }) => {
+const DropZone = ({ onDrop, playlists }) => {
   const [, drop] = useDrop(() => ({
     accept: 'clip',
     drop: (item) => onDrop(item),
@@ -267,7 +282,7 @@ const DropZone = ({ onDrop }) => {
   }))
   return (
     <div
-      ref={drop}
+      ref={drop as unknown as React.Ref<HTMLDivElement>}
       className="border-dashed border-2 border-gray-700 p-4 rounded-lg h-24 flex items-center justify-center"
       style={{ borderColor: '#A0A0A0' }}
     >
@@ -278,8 +293,9 @@ const DropZone = ({ onDrop }) => {
 
 // 3D Component for Player Tracking Data
 const PlayerTracking3D = () => {
-  const [groupRef] = useState(() => new THREE.Group())
+  const groupRef = useRef<THREE.Group>(null)
   useEffect(() => {
+    if (!groupRef.current) return
     const sphereGeometry = new THREE.SphereGeometry(0.3, 32, 32)
     const material = new THREE.MeshBasicMaterial({ color: 0xff0000 }) // Red for player
     const sphere = new THREE.Mesh(sphereGeometry, material)
@@ -297,7 +313,7 @@ const PlayerTracking3D = () => {
   }, [])
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef as unknown as React.Ref<THREE.Group>}>
       <OrbitControls />
     </group>
   )
