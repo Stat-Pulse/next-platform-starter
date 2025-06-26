@@ -68,11 +68,19 @@ export default async function handler(req, res) {
      *  5)  Fetch weekly rows for selected season         *
      * -------------------------------------------------- */
     const [weekly] = await conn.execute(
-      `SELECT season, week, opponent_team,
-              completions, attempts, passing_yards, passing_tds,
-              passing_interceptions, passing_epa,
-              carries, rushing_yards, rushing_tds, rushing_epa,
-              targets, receptions, receiving_yards, receiving_tds
+      `SELECT
+        season, week, team, opponent_team,
+        completions, attempts,
+        passing_yards, passing_tds, passing_interceptions,
+        sacks_suffered   AS sacks,
+        sack_yards_lost  AS sack_yards,
+        passing_air_yards,
+        passing_yards_after_catch,
+        passing_first_downs,
+        passing_epa, passing_cpoe, pacr,
+        carries, rushing_yards, rushing_tds, rushing_epa,
+        targets, receptions, receiving_yards, receiving_tds, receiving_epa,
+        fantasy_points, fantasy_points_ppr
          FROM ${weeklyView}
         WHERE player_id   = ?
           AND season      = ?
@@ -83,7 +91,11 @@ export default async function handler(req, res) {
 
     const passingMetrics   = weekly
       .filter(r => +r.attempts  > 0)
-      .map (r => ({ ...r, interceptions: r.passing_interceptions }));
+      .map(r => ({
+        ...r,
+        interceptions : r.passing_interceptions,
+        sacks         : r.sacks,
+      }));
 
     const rushingMetrics   = weekly
       .filter(r => +r.carries   > 0);
@@ -196,11 +208,13 @@ export default async function handler(req, res) {
     res.status(200).json({
       player,
       seasonStats,
+      weekly,              // raw weekly logs – handy for “last 3 games” views
       passingMetrics,
       rushingMetrics,
       receivingMetrics,
-      advancedMetrics : player.advanced.receiving || {},
-      advancedRushing : player.advanced.rushing   || {},
+      advancedPassing   : player.advanced.passing   || {},
+      advancedRushing   : player.advanced.rushing   || {},
+      advancedReceiving : player.advanced.receiving || {},
     });
   } catch (err) {
     console.error('API error:', err);
