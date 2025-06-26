@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import SectionWrapper from '../components/SectionWrapper'
@@ -48,7 +48,7 @@ export default function SimulationsLab() {
 
   // 3D Scene for Path to Championship Visualizer
   const ChampionshipPath3D = () => {
-    const [groupRef] = useState(() => new THREE.Group())
+    const groupRef = useRef<THREE.Group>(null)
     useEffect(() => {
       const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 32)
       const material = new THREE.MeshBasicMaterial({ color: 0xff0000 }) // Red for teams
@@ -59,13 +59,66 @@ export default function SimulationsLab() {
       const lineGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-2, 1, 0), new THREE.Vector3(0, 0, 0), new THREE.Vector3(2, 1, 0)])
       const lineMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 }) // Green for path
       const line = new THREE.Line(lineGeometry, lineMaterial)
-      groupRef.current.add(sphere1, sphere2, line)
+      if (groupRef.current) {
+        groupRef.current.add(sphere1, sphere2, line)
+      }
     }, [])
 
     return (
       <group ref={groupRef}>
         <OrbitControls />
       </group>
+    )
+  }
+
+  // Simulation Controls Component
+  const [variables, setVariables] = useState({ efficiency: 0, injury: 0, homeAdv: 0 })
+  const SimulationControls = ({ variables, setVariables, onChange }) => {
+    const handleChange = (e) => {
+      const { name, value } = e.target
+      const newValue = parseInt(value)
+      setVariables((prev) => {
+        const updated = { ...prev, [name]: newValue }
+        if (onChange) {
+          onChange(updated)
+        }
+        return updated
+      })
+    }
+
+    return (
+      <div className="bg-mediumBackground/50 p-4 rounded-lg mb-4">
+        <label className="block text-grayText mb-2">Efficiency Boost (%): {variables.efficiency}</label>
+        <input
+          type="range"
+          name="efficiency"
+          min="-20"
+          max="20"
+          value={variables.efficiency}
+          onChange={handleChange}
+          className="w-full accent-primary-600"
+        />
+        <label className="block text-grayText mb-2 mt-4">Injury Impact (%): {variables.injury}</label>
+        <input
+          type="range"
+          name="injury"
+          min="0"
+          max="100"
+          value={variables.injury}
+          onChange={handleChange}
+          className="w-full accent-primary-600"
+        />
+        <label className="block text-grayText mb-2 mt-4">Home Advantage (%): {variables.homeAdv}</label>
+        <input
+          type="range"
+          name="homeAdv"
+          min="0"
+          max="10"
+          value={variables.homeAdv}
+          onChange={handleChange}
+          className="w-full accent-primary-600"
+        />
+      </div>
     )
   }
 
@@ -76,20 +129,25 @@ export default function SimulationsLab() {
         <SectionWrapper title="Simulations Lab: Model the Game. Predict the Future">
           <div className="glass-card p-6 max-w-4xl mx-auto">
             <h3 className="text-3xl font-semibold text-lightText mb-6">Simulations Lab</h3>
-            <p className="text-grayText mb-8">Your ultimate 'What-If' engine as of 6:15 PM CDT, June 25, 2025.</p>
+            <p className="text-grayText mb-8">Your ultimate 'What-If' engine as of 7:54 PM CDT, June 25, 2025.</p>
 
             {/* 1. Game Outcome Simulator */}
             <div className="mb-8">
               <h4 className="text-xl font-semibold text-lightText mb-4">Game Outcome Simulator</h4>
+              <SimulationControls
+                variables={variables}
+                setVariables={setVariables}
+                onChange={(vars) => console.log('Simulation variables updated:', vars)}
+              />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-mediumBackground/50 p-4 rounded-lg">
                   <p className="text-grayText">Matchup: Eagles vs. Chiefs</p>
                 </div>
                 <div className="bg-mediumBackground/50 p-4 rounded-lg">
-                  <p className="text-grayText">Adjustments: Jalen Hurts +20% Efficiency</p>
+                  <p className="text-grayText">Adjustments: Jalen Hurts +{variables.efficiency}% Efficiency</p>
                 </div>
                 <div className="bg-mediumBackground/50 p-4 rounded-lg">
-                  <p className="text-grayText">Situational Bias: Home Advantage</p>
+                  <p className="text-grayText">Situational Bias: Home Advantage +{variables.homeAdv}%</p>
                 </div>
                 <div className="bg-mediumBackground/50 p-4 rounded-lg">
                   <p className="text-grayText">Randomness: Realistic</p>
@@ -189,7 +247,7 @@ export default function SimulationsLab() {
                       <DraggableTrade key={trade} id={trade}>{trade}</DraggableTrade>
                     ))}
                   </div>
-                  <DropZone onDrop={handleDrop} />
+                  <DropZone onDrop={handleDrop} tradeComponents={tradeComponents} />
                 </div>
                 <div className="mt-4">
                   <p className="text-grayText">Proposed Trade: {tradeComponents.join(' for ')}</p>
@@ -263,13 +321,13 @@ const DraggableTrade = ({ id, children }) => {
     collect: (monitor) => ({ isDragging: monitor.isDragging() }),
   }))
   return (
-    <div ref={drag} className="cursor-move p-2 bg-gray-700/50 rounded" style={{ opacity: isDragging ? 0.5 : 1 }}>
+    <div ref={drag as unknown as React.Ref<HTMLDivElement>} className="cursor-move p-2 bg-gray-700/50 rounded" style={{ opacity: isDragging ? 0.5 : 1 }}>
       {children}
     </div>
   )
 }
 
-const DropZone = ({ onDrop }) => {
+const DropZone = ({ onDrop, tradeComponents }) => {
   const [, drop] = useDrop(() => ({
     accept: 'trade',
     drop: (item) => onDrop(item),
@@ -277,34 +335,11 @@ const DropZone = ({ onDrop }) => {
   }))
   return (
     <div
-      ref={drop}
+      ref={drop as unknown as React.Ref<HTMLDivElement>}
       className="border-dashed border-2 border-gray-700 p-4 rounded-lg h-24 flex items-center justify-center"
       style={{ borderColor: '#A0A0A0' }}
     >
       {tradeComponents.length === 0 ? 'Drop trade components here' : 'Trade Proposal: ' + tradeComponents.join(' for ')}
     </div>
-  )
-}
-
-// 3D Component for Path to Championship Visualizer
-const ChampionshipPath3D = () => {
-  const [groupRef] = useState(() => new THREE.Group())
-  useEffect(() => {
-    const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 32)
-    const material = new THREE.MeshBasicMaterial({ color: 0xff0000 }) // Red for teams
-    const sphere1 = new THREE.Mesh(sphereGeometry, material)
-    sphere1.position.set(-2, 1, 0)
-    const sphere2 = new THREE.Mesh(sphereGeometry, material.clone())
-    sphere2.position.set(2, 1, 0)
-    const lineGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-2, 1, 0), new THREE.Vector3(0, 0, 0), new THREE.Vector3(2, 1, 0)])
-    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 }) // Green for path
-    const line = new THREE.Line(lineGeometry, lineMaterial)
-    groupRef.current.add(sphere1, sphere2, line)
-  }, [])
-
-  return (
-    <group ref={groupRef}>
-      <OrbitControls />
-    </group>
   )
 }
