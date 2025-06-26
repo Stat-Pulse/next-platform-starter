@@ -18,11 +18,11 @@
     output_path = "lighthouse-reports"
     thresholds = { performance = 0.5 }
 
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-  force = true
+#[[redirects]]
+  #from = "/api/*"
+  #to = "/.netlify/functions/:splat"
+  #status = 200
+  #force = true
 
 [[redirects]]
   from = "/player/*"
