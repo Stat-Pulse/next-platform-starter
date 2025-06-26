@@ -13,10 +13,16 @@ export default async function handler(req, res) {
     });
 
     const [rows] = await conn.execute(
-      `SELECT player_id AS id, player_name
+      `SELECT
+          player_id      AS id,
+          player_name    AS name,
+          position,
+          team_abbr      AS team,
+          headshot_url
          FROM Active_Player_Profiles
+        WHERE is_active = 1
         ORDER BY player_name
-        LIMIT 100`
+        LIMIT 500`
     );
 
     res.status(200).json(rows);
