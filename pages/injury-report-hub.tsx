@@ -49,8 +49,6 @@ export default function InjuryReportHub() {
   }
 
   return (
-    <>
-      <Header />
       <main className="min-h-[calc(100vh-20rem)]">
         <SectionWrapper title="Injury Report Hub: Predictive Health & Performance Analytics">
           <div className="glass-card p-6 max-w-4xl mx-auto">
@@ -197,7 +195,5 @@ export default function InjuryReportHub() {
           </div>
         </SectionWrapper>
       </main>
-      <Footer />
-    </>
-  )
+    )
 }

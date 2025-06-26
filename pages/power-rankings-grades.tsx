@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import SectionWrapper from '../components/SectionWrapper'
-import { DndProvider, useDrag, useDrop } from 'react-dnd'
+import { DndProvider } from 'react-dnd'
+import { useDrag, useDrop } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { Chart as ChartJS, CategoryScale, LinearScale, LineElement, PointElement, Title, Tooltip, Legend } from 'chart.js'
 import { Line } from 'react-chartjs-2'
@@ -251,16 +252,16 @@ type DropZoneProps = {
   customMetrics: string[]
 }
 const DropZone: React.FC<DropZoneProps> = ({ onDrop, customMetrics }) => {
-  const [, drop] = useDrop(() => ({
+  const [, drop] = useDrop({
     accept: 'metric',
-    drop: (item) => onDrop(item),
-  }))
-  const ref = useRef<HTMLDivElement>(null)
+    drop: (item: { id: string }) => onDrop(item),
+  });
+  const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (ref.current) {
-      drop(ref.current)
+      drop(ref.current);
     }
-  }, [drop])
+  }, [drop]);
   return (
     <div
       ref={ref}
@@ -271,7 +272,7 @@ const DropZone: React.FC<DropZoneProps> = ({ onDrop, customMetrics }) => {
         ? 'Drop metrics here'
         : 'Selected Metrics: ' + customMetrics.join(', ')}
     </div>
-  )
+  );
 }
 
 // 3D Team Tree

@@ -9,6 +9,7 @@ import { Bar } from 'react-chartjs-2'
 import * as THREE from 'three'
 
 import { Canvas } from '@react-three/fiber'
+import useSWR from 'swr'
 
 import type { ThreeElements } from '@react-three/fiber'
 
@@ -27,6 +28,18 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 export default function AnalyticsLab() {
   // Drag-and-Drop State for Customizable Dashboard
   const [widgets, setWidgets] = useState<string[]>([])
+
+  // ----------------------------------------------
+  // 🔌  API → QB weekly efficiency (completion %)
+  // ----------------------------------------------
+  const fetcher = (url: string) => fetch(url).then((res) => res.json())
+
+  // Pull weekly QB efficiency for the selected season (default 2024)
+  const {
+    data: efficiencyData,
+    error: efficiencyError,
+  } = useSWR<{ week: number; efficiency: number }[]>('/api/analytics/qb-efficiency?season=2024', fetcher)
+
   const handleDrop = (item: { id: string }) => {
     if (!widgets.includes(item.id)) {
       setWidgets([...widgets, item.id])
@@ -34,25 +47,28 @@ export default function AnalyticsLab() {
   }
 
   // Chart Data for Advanced Statistical Explorers
-  const trendData = {
-    labels: ['Week 1', 'Week 5', 'Week 10', 'Week 15'],
-    datasets: [
-      {
-        label: 'QB Efficiency',
-        data: [75, 82, 90, 88],
-        backgroundColor: 'rgba(200, 32, 32, 0.8)', // primary-600
-        borderColor: 'rgba(200, 32, 32, 1)',
-        borderWidth: 1,
-      },
-    ],
-  }
-
   const trendOptions = {
     responsive: true,
     maintainAspectRatio: false,
     scales: { y: { title: { display: true, text: 'Efficiency (%)', color: '#E0E0E0' }, ticks: { color: '#E0E0E0' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } }, x: { ticks: { color: '#E0E0E0' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } } },
     plugins: { title: { display: true, text: 'Performance Trends', color: '#E0E0E0' }, legend: { labels: { color: '#E0E0E0' } } },
   }
+
+  // Convert fetched data → Chart.js format
+  const trendData = efficiencyData
+    ? {
+        labels: efficiencyData.map((d) => `Week ${d.week}`),
+        datasets: [
+          {
+            label: 'QB Efficiency',
+            data: efficiencyData.map((d) => d.efficiency),
+            backgroundColor: 'rgba(200, 32, 32, 0.8)', // primary‑600
+            borderColor: 'rgba(200, 32, 32, 1)',
+            borderWidth: 1,
+          },
+        ],
+      }
+    : null
 
   // 3D Scene for Cutting-Edge Visualizations
   const ThreeDScene = () => {
@@ -111,7 +127,13 @@ export default function AnalyticsLab() {
                   <p className="text-grayText">Situational Splits: By down, quarter, etc.</p>
                 </div>
                 <div className="bg-mediumBackground/50 p-4 rounded-lg h-64">
-                  <Bar data={trendData} options={trendOptions} />
+                  {efficiencyError && (
+                    <p className="text-red-500">Failed to load trend data.</p>
+                  )}
+                  {!trendData && !efficiencyError && (
+                    <p className="text-grayText">Loading trends…</p>
+                  )}
+                  {trendData && <Bar data={trendData} options={trendOptions} />}
                 </div>
                 <div className="bg-mediumBackground/50 p-4 rounded-lg">
                   <p className="text-grayText">Player Archetype Analysis: e.g., 'Dual-threat QB'.</p>
