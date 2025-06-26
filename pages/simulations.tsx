@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import Header from '../components/Header'
-import Footer from '../components/Footer'
+import SidebarNavigation from '../components/SidebarNavigation'
 import SectionWrapper from '../components/SectionWrapper'
 import { DndProvider, useDrag, useDrop } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
@@ -123,9 +122,9 @@ export default function SimulationsLab() {
   }
 
   return (
-    <>
-      <Header />
-      <main className="min-h-[calc(100vh-20rem)]">
+    <div className="flex min-h-screen bg-mainBackground">
+      <SidebarNavigation />
+      <main className="flex-1 min-h-screen p-0">
         <SectionWrapper title="Simulations Lab: Model the Game. Predict the Future">
           <div className="glass-card p-6 max-w-4xl mx-auto">
             <h3 className="text-3xl font-semibold text-lightText mb-6">Simulations Lab</h3>
@@ -308,8 +307,7 @@ export default function SimulationsLab() {
           </div>
         </SectionWrapper>
       </main>
-      <Footer />
-    </>
+    </div>
   )
 }
 

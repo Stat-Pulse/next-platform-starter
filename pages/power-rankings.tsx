@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import Header from '../components/Header'
-import Footer from '../components/Footer'
 import SectionWrapper from '../components/SectionWrapper'
+import SidebarNavigation from '../components/SidebarNavigation'
 import { DndProvider } from 'react-dnd'
 import { useDrag, useDrop } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
@@ -56,8 +55,11 @@ export default function PowerRankingsGrades() {
 
   return (
     <>
-      <Header />
-      <main className="min-h-[calc(100vh-20rem)]">
+      <main className="min-h-[calc(100vh-20rem)] flex">
+        <aside className="hidden md:block w-64 flex-shrink-0">
+          <SidebarNavigation />
+        </aside>
+        <div className="flex-1">
         <SectionWrapper title="Power Rankings & Grades: The Definitive Strength Assessment">
           <div className="glass-card p-6 max-w-4xl mx-auto">
             <h3 className="text-3xl font-semibold text-lightText mb-6">Power Rankings & Grades</h3>
@@ -210,8 +212,8 @@ export default function PowerRankingsGrades() {
             </div>
           </div>
         </SectionWrapper>
+        </div>
       </main>
-      <Footer />
     </>
   )
 }

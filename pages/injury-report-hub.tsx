@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import Header from '../components/Header'
-import Footer from '../components/Footer'
+import SidebarNavigation from '../components/SidebarNavigation'
 import SectionWrapper from '../components/SectionWrapper'
 
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js'
@@ -49,7 +48,9 @@ export default function InjuryReportHub() {
   }
 
   return (
-      <main className="min-h-[calc(100vh-20rem)]">
+    <div className="flex min-h-[calc(100vh-20rem)]">
+      <SidebarNavigation />
+      <main className="flex-1 flex flex-col">
         <SectionWrapper title="Injury Report Hub: Predictive Health & Performance Analytics">
           <div className="glass-card p-6 max-w-4xl mx-auto">
             <h3 className="text-3xl font-semibold text-lightText mb-6">Injury Report Hub</h3>
@@ -195,5 +196,6 @@ export default function InjuryReportHub() {
           </div>
         </SectionWrapper>
       </main>
-    )
+    </div>
+  )
 }
