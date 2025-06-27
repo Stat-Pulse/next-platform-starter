@@ -8,15 +8,54 @@ export default function ScheduleResults() {
   const [games, setGames] = useState([]);
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [seasonsLoading, setSeasonsLoading] = useState(true); // New loading state for seasons
 
-  const [season, setSeason] = useState('2024');
+  // Initialize season to an empty string or null initially,
+  // then set it to the latest season fetched from the API.
+  // This prevents an immediate fetch for '2024' if the API returns something else.
+  const [season, setSeason] = useState('');
+  const [availableSeasons, setAvailableSeasons] = useState([]); // New state for available seasons
   const [selectedTeam, setSelectedTeam] = useState('');
   const [selectedPlayer, setSelectedPlayer] = useState('');
 
   // ───────────────────────────────────────────────────────────────────────────
   // Data fetching
   // ───────────────────────────────────────────────────────────────────────────
+
+  // Fetch available seasons first
   useEffect(() => {
+    setSeasonsLoading(true);
+    fetch('/api/seasons')
+      .then((res) => res.json())
+      .then((data) => {
+        // Ensure data is an array of strings (e.g., ['2024', '2023'])
+        const fetchedSeasons = data.map(String);
+        setAvailableSeasons(fetchedSeasons);
+
+        // Set the default season to the latest one available if not already set
+        if (fetchedSeasons.length > 0 && !season) {
+          setSeason(fetchedSeasons[0]); // Assumes API returns seasons in descending order
+        }
+        setSeasonsLoading(false);
+      })
+      .catch((err) => {
+        console.error('Failed to load seasons:', err);
+        setSeasonsLoading(false);
+        // Optionally set a fallback season if API fails
+        setAvailableSeasons(['2024']);
+        setSeason('2024');
+      });
+  }, []); // Runs only once on component mount
+
+  // Fetch games when season or selectedPlayer changes
+  useEffect(() => {
+    // Only fetch games if a season has been selected/loaded
+    if (!season) {
+      setGames([]); // Clear games if no season is selected yet
+      setLoading(false);
+      return;
+    }
+
     const query = new URLSearchParams({
       season,
       ...(selectedPlayer && { player: selectedPlayer }),
@@ -24,7 +63,12 @@ export default function ScheduleResults() {
 
     setLoading(true);
     fetch(`/api/games?${query}`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then((data) => {
         setGames(data);
         setLoading(false);
@@ -32,13 +76,19 @@ export default function ScheduleResults() {
       .catch((err) => {
         console.error('Error loading schedule:', err);
         setLoading(false);
+        setGames([]); // Clear games on error
       });
-  }, [season, selectedPlayer]);
+  }, [season, selectedPlayer]); // Re-runs when season or selectedPlayer changes
 
-  // players list
+  // Fetch players list
   useEffect(() => {
     fetch('/.netlify/functions/getPlayers')
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then((data) => setPlayers(data))
       .catch((err) => console.error('Failed to load players:', err));
   }, []);
@@ -48,18 +98,21 @@ export default function ScheduleResults() {
   // ───────────────────────────────────────────────────────────────────────────
   const today = new Date();
 
+  // Filter games based on selectedTeam (client-side filter)
   const filteredGames = selectedTeam
     ? games.filter(
         (g) => g.home_team === selectedTeam || g.away_team === selectedTeam,
       )
     : games;
 
+  // Group filtered games by week
   const gamesByWeek = filteredGames.reduce((acc, game) => {
     acc[game.week] = acc[game.week] || [];
     acc[game.week].push(game);
     return acc;
   }, {});
 
+  // Get all unique teams from the currently fetched games
   const allTeams = Array.from(new Set(games.flatMap((g) => [g.home_team, g.away_team]))).sort();
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -67,13 +120,13 @@ export default function ScheduleResults() {
   // ───────────────────────────────────────────────────────────────────────────
   return (
     <>
-
       {/* Hero header – different palette from other pages */}
       <section className="relative isolate overflow-hidden bg-blue-900 pb-24 pt-28 sm:pt-32">
         <img
           src="https://source.unsplash.com/random/1600x800?football-night"
           alt="stadium night background"
-          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-30" />
+          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-30"
+        />
 
         <div className="mx-auto max-w-4xl px-6 text-center">
           <motion.h1
@@ -98,14 +151,26 @@ export default function ScheduleResults() {
               <label htmlFor="season" className="block text-sm font-medium text-gray-700 mb-1">
                 Season
               </label>
-              <select
-                id="season"
-                value={season}
-                onChange={(e) => setSeason(e.target.value)}
-                className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-sm focus:border-blue-500 focus:ring-blue-500"
-              >
-                <option value="2024">2024</option>
-              </select>
+              {seasonsLoading ? (
+                <p className="text-gray-500 text-sm py-2">Loading seasons...</p>
+              ) : (
+                <select
+                  id="season"
+                  value={season}
+                  onChange={(e) => setSeason(e.target.value)}
+                  className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-sm focus:border-blue-500 focus:ring-blue-500"
+                >
+                  {availableSeasons.length > 0 ? (
+                    availableSeasons.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="">No seasons available</option>
+                  )}
+                </select>
+              )}
             </div>
 
             <div>
@@ -158,6 +223,8 @@ export default function ScheduleResults() {
           {/* Schedule */}
           {loading ? (
             <p className="text-gray-600">Loading schedule…</p>
+          ) : Object.keys(gamesByWeek).length === 0 ? (
+            <p className="text-gray-600">No games found for the selected filters.</p>
           ) : (
             Object.keys(gamesByWeek).map((week) => (
               <div key={week} className="space-y-2">
@@ -170,6 +237,8 @@ export default function ScheduleResults() {
                         <th className="px-4 py-2 text-left font-semibold text-blue-700">Season</th>
                         <th className="px-4 py-2 text-left font-semibold text-blue-700">Week</th>
                         <th className="px-4 py-2 text-left font-semibold text-blue-700">Weekday</th>
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Away Team</th> {/* Added */}
+                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Home Team</th> {/* Added */}
                         <th className="px-4 py-2 text-left font-semibold text-blue-700">Away Score</th>
                         <th className="px-4 py-2 text-left font-semibold text-blue-700">Home Score</th>
                         <th className="px-4 py-2 text-left font-semibold text-blue-700">Location</th>
@@ -210,6 +279,7 @@ export default function ScheduleResults() {
                             })
                           : null;
                         const weekdayStr = gameDate.toLocaleDateString('en-US', { weekday: 'short' });
+
                         // Helper for missing values
                         const displayVal = (val) =>
                           val === null || val === undefined || val === '' ? <span>&mdash;</span> : val;
@@ -227,6 +297,8 @@ export default function ScheduleResults() {
                             <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.season)}</td>
                             <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.week)}</td>
                             <td className="px-4 py-2 whitespace-nowrap">{weekdayStr}</td>
+                            <td className="px-4 py-2 whitespace-nowrap font-medium text-gray-900">{displayVal(game.away_team)}</td> {/* Added */}
+                            <td className="px-4 py-2 whitespace-nowrap font-medium text-gray-900">{displayVal(game.home_team)}</td> {/* Added */}
                             <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.away_score)}</td>
                             <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.home_score)}</td>
                             <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.location || game.stadium)}</td>
@@ -267,7 +339,6 @@ export default function ScheduleResults() {
           )}
         </div>
       </main>
-
     </>
   );
 }
