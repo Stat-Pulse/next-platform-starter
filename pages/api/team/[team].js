@@ -62,12 +62,21 @@ export default async function handler(req, res) {
     const teamRow = teamRows[0];
     const fullTeamId = teamRow.team_id || teamId;
 
-    const [roster] = await connection.execute(
-      `SELECT gsis_id AS id, full_name AS name, position, headshot_url, years_exp
-       FROM Rosters_2025
-       WHERE team = ? AND week = COALESCE((SELECT MAX(week) FROM Rosters_2025 WHERE team = ?), 1)`,
-      [teamId, teamId]
-    );
+  const [roster] = await connection.execute(
+    `SELECT
+       gsis_id      AS id,
+       full_name    AS name,
+       position,
+       headshot_url
+     FROM Rosters_2025
+     WHERE team = ?
+      AND week = (
+         SELECT MAX(week)
+           FROM Rosters_2025
+          WHERE team = ?
+       )`,
+  [teamId, teamId]
+);
 
     const [depthRows] = await connection.execute(
       `SELECT position, full_name, depth_team
