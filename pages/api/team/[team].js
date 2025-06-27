@@ -82,6 +82,9 @@ export default async function handler(req, res) {
 /* -------------------------------------------------- *
  *  Depth chart (2025, latest week)                   *
  * -------------------------------------------------- */
+/* -------------------------------------------------- *
+ *  Depth chart (2025, latest week)                   *
+ * -------------------------------------------------- */
 const [depthRows] = await connection.execute(
   `SELECT
        dc.position,
@@ -89,7 +92,7 @@ const [depthRows] = await connection.execute(
        dc.depth_rank
      FROM Depth_Charts dc
      JOIN Rosters_2025 r
-       ON r.gsis_id = dc.player_id
+       ON r.gsis_id COLLATE utf8mb4_unicode_ci = dc.player_id   -- 🔹 force same collation
       AND r.season  = 2025
      WHERE dc.team   = ?
        AND dc.season = 2025
