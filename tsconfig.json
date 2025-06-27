@@ -13,7 +13,7 @@
     "resolveJsonModule": true,
     "types": ["react", "react-dom", "three", "react-dnd"],
     "isolatedModules": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
