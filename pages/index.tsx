@@ -268,11 +268,19 @@ export default function HomePage({
                       {news.title}
                     </h3>
                   </a>
-                  {news.description && (
-                    <p className="text-sm text-gray-300 line-clamp-3">{news.description}</p>
+                  {typeof news.description === 'string' && news.description.trim() !== '' && (
+                    <p className="text-sm text-gray-300 line-clamp-3">
+                      {news.description}
+                    </p>
                   )}
                   <div className="text-xs text-gray-400 flex justify-between items-center mt-2">
-                    <span>{news.source}</span>
+                    {news.source && (
+                      <span>
+                        {typeof news.source === 'string'
+                          ? news.source
+                          : (news.source as any)?.name ?? ''}
+                      </span>
+                    )}
                     <span>{new Date(news.pubDate).toLocaleDateString()}</span>
                   </div>
                 </div>
