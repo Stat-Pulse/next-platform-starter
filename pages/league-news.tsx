@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
-import Header from '../components/Header'
-import Footer from '../components/Footer'
+import Sidebar from '../components/SidebarNavigation'
 import SectionWrapper from '../components/SectionWrapper'
 import { DndProvider } from 'react-dnd'
 import { useDrag, useDrop } from 'react-dnd'
@@ -66,7 +65,7 @@ export default function LeagueNewsHub() {
 
   return (
     <>
-      <Header />
+      <Sidebar />
       <main className="min-h-[calc(100vh-20rem)]">
         <SectionWrapper title="League News Hub: Beyond the Headlines">
           <div className="glass-card p-6 max-w-4xl mx-auto">
@@ -204,8 +203,8 @@ export default function LeagueNewsHub() {
             </div>
           </div>
         </SectionWrapper>
+        <NewsFeedSection />
       </main>
-      <Footer />
     </>
   )
 }
@@ -309,5 +308,54 @@ const TransactionFlow3D = () => {
       <group ref={groupRef} />
       <OrbitControls enableZoom={true} enablePan={false} />
     </>
+  )
+}
+// News Feed Section Component
+import React from 'react'
+
+function NewsFeedSection() {
+  const [articles, setArticles] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setLoading(true)
+    setError(null)
+    fetch('/api/news')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch news')
+        return res.json()
+      })
+      .then(data => {
+        setArticles(Array.isArray(data?.articles) ? data.articles : [])
+        setLoading(false)
+      })
+      .catch(e => {
+        setError(e.message || 'Error loading news')
+        setLoading(false)
+      })
+  }, [])
+
+  return (
+    <section className="my-10">
+      <h2 className="text-2xl font-bold mb-4">Latest League Headlines</h2>
+      {loading ? (
+        <p>Loading news…</p>
+      ) : error ? (
+        <p className="text-red-500">{error}</p>
+      ) : (
+        <div className="space-y-6">
+          {articles.map((article: any) => (
+            <div key={article.url} className="p-4 bg-mediumBackground/50 rounded-lg">
+              <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-lg font-semibold text-primary-500 hover:underline">
+                {article.title}
+              </a>
+              <div className="text-grayText mt-1">{article.source?.name} &middot; {article.publishedAt?.slice(0, 10)}</div>
+              <div className="mt-2">{article.description}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   )
 }
