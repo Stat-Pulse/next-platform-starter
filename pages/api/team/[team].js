@@ -77,7 +77,7 @@ export default async function handler(req, res) {
 );
 
     const [depthRows] = await connection.execute(
-      `SELECT position, full_name, depth_team
+      `SELECT position, player_id, team, position,
          FROM Depth_Charts
         WHERE club_code = ?
           AND season_year = 2025
@@ -94,8 +94,9 @@ export default async function handler(req, res) {
     }
 
     const [schedule] = await connection.execute(
-      `SELECT game_id, week, game_date AS date,
-              home_team_id, away_team_id, home_score, away_score, is_final
+      `SELECT game_id, week, game_date AS date, game_time,
+              home_team_id, away_team_id, home_score, away_score, is_final,
+              stadium_name, spread_line, total_line, referee, weather_summary
        FROM Games
        WHERE home_team_id = ? OR away_team_id = ?
        ORDER BY game_date ASC`,
@@ -127,8 +128,12 @@ export default async function handler(req, res) {
     const [upcomingRows] = await connection.execute(
       `SELECT game_id,
               gameday,
+              weekday,
+              week,
+              gametime,
               home_team,
               away_team,
+              location,
               stadium,
               spread_line,
               total_line,
