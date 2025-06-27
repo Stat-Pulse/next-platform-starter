@@ -64,11 +64,11 @@ export default async function handler(req, res) {
 
   const [roster] = await connection.execute(
   `SELECT
-       gsis_id   AS id,
-       full_name AS name,
+       gsis_id        AS id,
+       full_name      AS name,
        position,
-       jersey_number AS number,
-       rookie_year
+       jersey_number  AS number,
+       rookie_year,
        headshot_url
      FROM Rosters_2025
      WHERE team   = ?
@@ -76,12 +76,6 @@ export default async function handler(req, res) {
   [teamId]
 );
 
-/* -------------------------------------------------- *
- *  Depth chart (2025, most-recent week)              *
- * -------------------------------------------------- */
-/* -------------------------------------------------- *
- *  Depth chart (2025, latest week)                   *
- * -------------------------------------------------- */
 /* -------------------------------------------------- *
  *  Depth chart (2025, latest week)                   *
  * -------------------------------------------------- */
@@ -109,7 +103,7 @@ const [depthRows] = await connection.execute(
     const depthChart = {};
     for (const row of depthRows) {
       if (!depthChart[row.position]) depthChart[row.position] = [];
-      depthChart[row.position].push({ name: row.full_name, depth: row.depth_team });
+      depthChart[row.position].push({ name: row.name, depth: row.depth_rank });
     }
 
     const [schedule] = await connection.execute(
@@ -187,6 +181,19 @@ const [depthRows] = await connection.execute(
       teamLogos[r.team_abbr] = r.team_logo_espn;
     });
 
+    // Fallback: ensure all logos are full URLs
+    Object.keys(teamLogos).forEach(abbr => {
+      const src = teamLogos[abbr] || '';
+      if (!src.startsWith('http')) {
+        teamLogos[abbr] = `https://a.espncdn.com/i/teamlogos/nfl/500/${abbr.toLowerCase()}.png`;
+      }
+    });
+
+    // Make sure primary team logo is absolute
+    if (teamRow.team_logo_espn && !teamRow.team_logo_espn.startsWith('http')) {
+      teamRow.team_logo_espn = `https://a.espncdn.com/i/teamlogos/nfl/500/${teamId.toLowerCase()}.png`;
+    }
+
     await connection.end();
 
     return res.status(200).json({
@@ -220,7 +227,6 @@ const [depthRows] = await connection.execute(
       upcomingSchedule: upcomingRows,
       roster: roster || [],
       depthChart: Object.keys(depthChart).length ? depthChart : {},
-      schedule: formattedGames,
       recentNews: [
         {
           title: `${teamRow.team_name} preparing for upcoming matchup`,
