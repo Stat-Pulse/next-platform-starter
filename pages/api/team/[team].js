@@ -64,16 +64,20 @@ export default async function handler(req, res) {
 
     const [roster] = await connection.execute(
       `SELECT gsis_id AS id, full_name AS name, position, headshot_url, years_exp
-       FROM Rosters_2024
-       WHERE team = ? AND week = COALESCE((SELECT MAX(week) FROM Rosters_2024 WHERE team = ?), 1)`,
+       FROM Rosters_2025
+       WHERE team = ? AND week = COALESCE((SELECT MAX(week) FROM Rosters_2025 WHERE team = ?), 1)`,
       [teamId, teamId]
     );
 
     const [depthRows] = await connection.execute(
       `SELECT position, full_name, depth_team
-       FROM Depth_Charts_2024
-       WHERE club_code = ? AND week = COALESCE((SELECT MAX(week) FROM Depth_Charts_2024 WHERE club_code = ?), 1)
-       ORDER BY depth_team ASC`,
+         FROM Depth_Charts
+        WHERE club_code = ?
+          AND season_year = 2025
+          AND week = (SELECT MAX(week)
+                        FROM Depth_Charts
+                       WHERE club_code = ?
+                         AND season_year = 2025)`,
       [teamId, teamId]
     );
     const depthChart = {};
@@ -110,25 +114,47 @@ export default async function handler(req, res) {
       };
     });
 
-    const [statsRows] = await connection.execute(
-      `SELECT * FROM Team_Defense_Stats_2024 WHERE team_id = ?`,
-      [teamId]
+    /* -------------------------------------------------- *
+     *  Upcoming 2025 schedule                            *
+     * -------------------------------------------------- */
+    const [upcomingRows] = await connection.execute(
+      `SELECT game_id,
+              gameday,
+              home_team,
+              away_team,
+              stadium,
+              spread_line,
+              total_line,
+              home_spread_odds,
+              away_spread_odds,
+              over_odds,
+              under_odds
+         FROM Schedules_2025
+        WHERE (home_team = ? OR away_team = ?)
+          AND gameday >= CURDATE()
+        ORDER BY gameday ASC`,
+      [teamId, teamId]
     );
-    const statsRow = statsRows[0] || {};
-    const stats = {
-      gamesPlayed: statsRow.games_played || 0,
-      pointsAllowed: statsRow.points_allowed || 0,
-      totalYardsAllowed: statsRow.total_yards_allowed || 0,
-      passYardsAllowed: statsRow.pass_yards_allowed || 0,
-      rushYardsAllowed: statsRow.rush_yards_allowed || 0,
-      turnovers: statsRow.turnovers || 0,
-      interceptions: statsRow.interceptions || 0,
-      sacks: statsRow.sacks || 0,
-      redZonePct: statsRow.red_zone_pct || 0,
-      thirdDownPct: statsRow.third_down_pct || 0,
-      epaPerPlayAllowed: statsRow.epa_per_play_allowed || 0,
-      dvoaRank: statsRow.dvoa_rank || null
-    };
+
+    /* -------------------------------------------------- *
+     *  Build logo map for all referenced teams           *
+     * -------------------------------------------------- */
+    const teamSet = new Set([teamId]);
+    upcomingRows.forEach(r => {
+      if (r.home_team) teamSet.add(r.home_team);
+      if (r.away_team) teamSet.add(r.away_team);
+    });
+    formattedGames.forEach(g => {
+      if (g.opponent) teamSet.add(g.opponent);
+    });
+    const [logoRows] = await connection.execute(
+      `SELECT team_abbr, team_logo_espn FROM Teams WHERE team_abbr IN (?)`,
+      [Array.from(teamSet)]
+    );
+    const teamLogos = {};
+    logoRows.forEach(r => {
+      teamLogos[r.team_abbr] = r.team_logo_espn;
+    });
 
     await connection.end();
 
@@ -158,10 +184,12 @@ export default async function handler(req, res) {
         offensiveCoordinator: teamRow.o_coord,
         defensiveCoordinator: teamRow.d_coord
       },
+      teamLogos,
+      seasonGames: formattedGames,
+      upcomingSchedule: upcomingRows,
       roster: roster || [],
       depthChart: Object.keys(depthChart).length ? depthChart : {},
       schedule: formattedGames,
-      stats,
       recentNews: [
         {
           title: `${teamRow.team_name} preparing for upcoming matchup`,

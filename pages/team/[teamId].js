@@ -27,7 +27,7 @@ const TeamPage = () => {
         const rushDefJson = await rushDefRes.json();
         if (rushDefRes.ok) setRushDefense(rushDefJson);
 
-        const teamRes = await fetch(`/api/teams/${teamId}`);
+        const teamRes = await fetch(`/api/team/${teamId}`);
         const teamJson = await teamRes.json();
         if (!teamRes.ok) throw new Error(teamJson.error || 'Failed to load team data');
         setTeamData(teamJson);
@@ -49,9 +49,18 @@ const TeamPage = () => {
       : '—';
 
   if (error) return <div className="text-red-600 p-4">{error}</div>;
-  if (!teamData || !teamData.team) return <div className="p-4">Loading...</div>;
+  if (!teamData || Object.keys(teamData).length === 0) return <div className="p-4">Loading...</div>;
 
-  const { team, teamLogos, offenseStats, defenseStats } = teamData;
+  const {
+    name: teamName,
+    division,
+    location: teamLoc,
+    branding,
+    coaching,
+    teamLogos,
+    offenseStats,
+    defenseStats,
+  } = teamData;
 
   return (
     <div className="bg-gradient-to-r from-blue-50 via-white to-gray-50 min-h-screen p-6">
@@ -59,18 +68,18 @@ const TeamPage = () => {
         {/* Header */}
         <div className="flex items-center justify-between bg-gray-100 rounded-lg p-4 shadow-sm mb-6">
           <div className="flex items-center space-x-4">
-            <img src={team.team_logo_espn} alt={`${team.team_name} logo`} className="w-16 h-16 rounded-full" />
+            <img src={branding.logo} alt={`${teamName} logo`} className="w-16 h-16 rounded-full" />
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">{team.team_name}</h1>
-              <p className="text-sm text-gray-500">{team.team_division} • Est. {team.founded_year}</p>
-              <p className="text-sm text-gray-500">Stadium: {team.stadium_name} ({team.stadium_capacity?.toLocaleString() ?? '—'} Capacity)</p>
-              <p className="text-sm text-gray-500">City: {team.city}</p>
+              <h1 className="text-2xl font-bold text-gray-800">{teamName}</h1>
+              <p className="text-sm text-gray-500">{division} • Est. {teamLoc.foundedYear}</p>
+              <p className="text-sm text-gray-500">Stadium: {teamLoc.stadium} ({teamLoc.stadiumCapacity?.toLocaleString() ?? '—'} Capacity)</p>
+              <p className="text-sm text-gray-500">City: {teamLoc.city}</p>
             </div>
           </div>
           <div className="text-right text-sm text-gray-600 space-y-1">
-            <p className="font-semibold">Head Coach: {team.head_coach}</p>
-            <p>Offensive Coord: {team.o_coord ?? '—'}</p>
-            <p>Defensive Coord: {team.d_coord ?? '—'}</p>
+            <p className="font-semibold">Head Coach: {coaching.headCoach}</p>
+            <p>Offensive Coord: {coaching.offensiveCoordinator ?? '—'}</p>
+            <p>Defensive Coord: {coaching.defensiveCoordinator ?? '—'}</p>
           </div>
         </div>
 
@@ -98,8 +107,8 @@ const TeamPage = () => {
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="border-r border-b pr-4 pb-4">
                 <h3 className="font-semibold text-gray-700 mb-1">Pass Offense</h3>
-                <p>Yards: {formatStat(offenseStats?.pass_yards)}</p>
-                <p>TDs: {formatStat(offenseStats?.pass_tds)}</p>
+                <p>Yards: {formatStat(offense_weekly_stats?.passing_yards)}</p>
+                <p>TDs: {formatStat(offense_weekly_stats?.passing_tds)}</p>
                 <p>NFL Rank: —</p>
               </div>
               <div className="border-b pl-4 pb-4">
@@ -155,7 +164,7 @@ const TeamPage = () => {
                     </div>
                   </div>
                   <span className="text-sm text-gray-500">
-                    {new Date(game.game_date).toLocaleDateString('en-US', {
+                    {new Date(game.game_date || game.date).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'short',
                       day: 'numeric',
@@ -188,11 +197,11 @@ const TeamPage = () => {
                 <div key={idx} className="border rounded p-2 space-y-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <img src={teamLogos?.[game.away_team]} className="w-6 h-6" />
-                      <span className="text-sm font-medium">{game.away_team_name || game.away_team}</span>
+                      <img src={teamLogos?.[game.away_team_abbr]} className="w-6 h-6" />
+                      <span className="text-sm font-medium">{game.away_team_abbr}</span>
                       <span className="text-xs text-gray-500">at</span>
-                      <span className="text-sm font-medium">{game.home_team_name || game.home_team}</span>
-                      <img src={teamLogos?.[game.home_team]} className="w-6 h-6" />
+                      <span className="text-sm font-medium">{game.home_team_abbr}</span>
+                      <img src={teamLogos?.[game.home_team_abbr]} className="w-6 h-6" />
                     </div>
                     <span className="text-sm text-gray-500">
                       {new Date(game.gameday).toLocaleDateString('en-US', {
