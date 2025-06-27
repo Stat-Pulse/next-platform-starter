@@ -79,23 +79,30 @@ export default async function handler(req, res) {
 /* -------------------------------------------------- *
  *  Depth chart (2025, most-recent week)              *
  * -------------------------------------------------- */
+/* -------------------------------------------------- *
+ *  Depth chart (2025, latest week)                   *
+ * -------------------------------------------------- */
 const [depthRows] = await connection.execute(
   `SELECT
-       position,
-       full_name,
-       depth_team
-     FROM Depth_Charts
-     WHERE club_code   = ?
-       AND season_year = 2025
-       AND week = (
+       dc.position,
+       r.full_name AS name,
+       dc.depth_rank
+     FROM Depth_Charts dc
+     JOIN Rosters_2025 r
+       ON r.gsis_id = dc.player_id
+      AND r.season  = 2025
+     WHERE dc.team   = ?
+       AND dc.season = 2025
+       AND dc.week   = (
          SELECT MAX(week)
            FROM Depth_Charts
-          WHERE club_code   = ?
-            AND season_year = 2025
+          WHERE team   = ?
+            AND season = 2025
        )
-     ORDER BY depth_team ASC`,
+     ORDER BY dc.depth_rank ASC`,
   [teamId, teamId]
 );
+
     const depthChart = {};
     for (const row of depthRows) {
       if (!depthChart[row.position]) depthChart[row.position] = [];
