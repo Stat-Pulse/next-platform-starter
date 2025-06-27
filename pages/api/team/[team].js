@@ -178,7 +178,10 @@ const [depthRows] = await connection.execute(
     );
     const teamLogos = {};
     logoRows.forEach(r => {
-      teamLogos[r.team_abbr] = r.team_logo_espn;
+      const src = r.team_logo_espn || '';
+      teamLogos[r.team_abbr] = src.startsWith('http')
+        ? src
+        : `https://a.espncdn.com/i/teamlogos/nfl/500/${r.team_abbr.toLowerCase()}.png`;
     });
 
     // Fallback: ensure all logos are full URLs
@@ -192,6 +195,11 @@ const [depthRows] = await connection.execute(
     // Make sure primary team logo is absolute
     if (teamRow.team_logo_espn && !teamRow.team_logo_espn.startsWith('http')) {
       teamRow.team_logo_espn = `https://a.espncdn.com/i/teamlogos/nfl/500/${teamId.toLowerCase()}.png`;
+    }
+
+    // Make sure alt logo is absolute too
+    if (teamRow.team_logo_wikipedia && !teamRow.team_logo_wikipedia.startsWith('http')) {
+      teamRow.team_logo_wikipedia = `https://a.espncdn.com/i/teamlogos/nfl/500/${teamId.toLowerCase()}.png`;
     }
 
     await connection.end();
