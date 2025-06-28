@@ -13,6 +13,9 @@ export default function ScheduleResults() {
   const [selectedTeam, setSelectedTeam] = useState('');
   const [allAvailableTeams, setAllAvailableTeams] = useState([]); // To store all teams for the dropdown
 
+  // ───────────────────────────────────────────────────────────────────────────
+  // Data fetching
+  // ───────────────────────────────────────────────────────────────────────────
 
   // Fetch available seasons first
   useEffect(() => {
@@ -22,7 +25,6 @@ export default function ScheduleResults() {
       .then((data) => {
         const fetchedSeasons = data.map(String).sort((a, b) => b - a); // Sort seasons descending
         setAvailableSeasons(fetchedSeasons);
-        // Do NOT set a default season here. Let it be initially blank for "All Seasons" option
         setSeasonsLoading(false);
       })
       .catch((err) => {
@@ -30,29 +32,57 @@ export default function ScheduleResults() {
         setSeasonsLoading(false);
         setAvailableSeasons(['2024', '2023']); // Fallback
       });
-  }, []);
+  }, []); // Runs only once on mount
+
+  // Fetch all available teams for the dropdown when the component mounts
+  // This ensures the team filter is always populated.
+  useEffect(() => {
+    fetch('/api/teams') // Assuming you have this endpoint
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setAllAvailableTeams(data.sort()); // Assuming data is an array of team names
+      })
+      .catch((err) => {
+        console.error('Failed to load all teams:', err);
+        // Fallback if the /api/teams endpoint doesn't exist or fails
+        setAllAvailableTeams([
+          'Arizona Cardinals', 'Atlanta Falcons', 'Baltimore Ravens', 'Buffalo Bills',
+          'Carolina Panthers', 'Chicago Bears', 'Cincinnati Bengals', 'Cleveland Browns',
+          'Dallas Cowboys', 'Denver Broncos', 'Detroit Lions', 'Green Bay Packers',
+          'Houston Texans', 'Indianapolis Colts', 'Jacksonville Jaguars', 'Kansas City Chiefs',
+          'Las Vegas Raiders', 'Los Angeles Chargers', 'Los Angeles Rams', 'Miami Dolphins',
+          'Minnesota Vikings', 'New England Patriots', 'New Orleans Saints', 'New York Giants',
+          'New York Jets', 'Philadelphia Eagles', 'Pittsburgh Steelers', 'San Francisco 49ers',
+          'Seattle Seahawks', 'Tampa Bay Buccaneers', 'Tennessee Titans', 'Washington Commanders'
+        ].sort());
+      });
+  }, []); // Runs only once on mount
 
   // Fetch games based on selected season and team
   useEffect(() => {
-    // Only fetch if a filter is active, or if we want to load initial data (e.g., all games from latest season)
-    // For initial load, if no team/season selected, we might want to show nothing or a default set.
-    // Given the request, we want to fetch if *either* season or team is selected.
-    // If both are empty, we can choose to display nothing until a selection is made.
+    // Determine if a fetch is needed.
+    // Fetch if:
+    // 1. A season is selected (even if no team)
+    // 2. A team is selected (even if no season, i.e., "All Seasons")
+    // If both are empty, we don't fetch and simply clear the games list.
     if (!season && !selectedTeam) {
       setGames([]);
       setLoading(false);
-      // Potentially fetch initial data (e.g., all teams) here if not already done
-      // For now, let's assume `allAvailableTeams` is populated through `games` or `seasons` later.
       return;
     }
 
     const queryParams = new URLSearchParams();
 
-    // Append season only if it's not "All Seasons" (empty string)
+    // Only append season if it's not "All Seasons" (empty string)
     if (season) {
       queryParams.append('season', season);
     }
-    // Append team only if it's not "All Teams" (empty string)
+    // Only append team if it's not "All Teams" (empty string)
     if (selectedTeam) {
       queryParams.append('team', selectedTeam);
     }
@@ -67,24 +97,19 @@ export default function ScheduleResults() {
       })
       .then((data) => {
         setGames(data);
-        // Update allAvailableTeams based on fetched games
-        const uniqueTeams = Array.from(new Set(data.flatMap((g) => [g.home_team, g.away_team]))).sort();
-        setAllAvailableTeams(uniqueTeams);
         setLoading(false);
       })
       .catch((err) => {
         console.error('Error loading schedule:', err);
         setLoading(false);
         setGames([]);
-        setAllAvailableTeams([]); // Clear teams on error
       });
   }, [season, selectedTeam]); // Re-run when season or selectedTeam changes
 
   // ───────────────────────────────────────────────────────────────────────────
   // Derived state
   // ───────────────────────────────────────────────────────────────────────────
-  // No need for a 'filteredGames' state here, as filtering is done by API now.
-  // 'games' state already holds the filtered results.
+  // 'games' state already holds the filtered results from the API.
 
   // Group games for display
   const gamesDisplay = selectedTeam
@@ -137,7 +162,12 @@ export default function ScheduleResults() {
                 <select
                   id="season"
                   value={season}
-                  onChange={(e) => setSeason(e.target.value)}
+                  onChange={(e) => {
+                    setSeason(e.target.value);
+                    // When season changes, we might want to clear team if "All Seasons" is chosen
+                    // or if the previous team doesn't exist in the new season's data.
+                    // For simplicity, we'll just let the `useEffect` handle re-fetching.
+                  }}
                   className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-gray-900 text-md focus:border-blue-500 focus:ring-blue-500"
                 >
                   <option value="">All Seasons</option> {/* Blank option */}
@@ -165,7 +195,6 @@ export default function ScheduleResults() {
                 className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-gray-900 text-md focus:border-blue-500 focus:ring-blue-500"
               >
                 <option value="">All Teams</option>
-                {/* Use allAvailableTeams here, which is updated after each game fetch */}
                 {allAvailableTeams.map((team) => (
                   <option key={team} value={team}>
                     {team}
@@ -212,7 +241,6 @@ export default function ScheduleResults() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {/* Iterate over the games in the current group */}
                       {gamesDisplay[groupKey].map((game) => {
                         const gameDate = new Date(`${game.game_date}T${game.game_time || '00:00:00'}`);
                         const weekdayStr = game.weekday && typeof game.weekday === 'string'

@@ -18,22 +18,8 @@ export default async function handler(req, res) {
     });
 
     let depthData = {};
-    let playersFetched = new Set(); // To avoid fetching player info multiple times
-
-    // Helper to fetch player details from Rosters_2025
-    // This helper might not be strictly necessary if player details are directly joined in the main query
-    const fetchPlayerDetails = async (playerId) => {
-      if (playersFetched.has(playerId)) return null; // Already fetched
-      playersFetched.add(playerId);
-
-      const [playerRows] = await connection.execute(
-        `SELECT full_name, jersey_number, headshot_url
-         FROM Rosters_2025
-         WHERE gsis_id = ?`,
-        [playerId]
-      );
-      return playerRows[0] || null;
-    };
+    // Note: The fetchPlayerDetails helper is not strictly needed anymore as player data is joined directly in the main query.
+    // Kept here for context, but it's not being called in the primary switch cases.
 
     switch (viewMode) {
       case 'current':
@@ -47,10 +33,10 @@ export default async function handler(req, res) {
              r.jersey_number,
              r.headshot_url
            FROM Depth_Charts dc
-           JOIN Rosters_2025 r ON r.gsis_id = dc.player_id AND r.season = dc.season
-           WHERE dc.team = ?
+           JOIN Rosters_2025 r ON r.gsis_id COLLATE utf8mb4_unicode_ci = dc.player_id AND r.season = dc.season
+           WHERE dc.team COLLATE utf8mb4_unicode_ci = ?
              AND dc.season = 2025 -- Assuming current depth chart is for 2025
-             AND dc.week = (SELECT MAX(week) FROM Depth_Charts WHERE team = ? AND season = 2025)
+             AND dc.week = (SELECT MAX(week) FROM Depth_Charts WHERE team COLLATE utf8mb4_unicode_ci = ? AND season = 2025)
            ORDER BY dc.position, dc.depth_rank ASC`,
           [team, team]
         );
@@ -70,14 +56,7 @@ export default async function handler(req, res) {
 
       case 'projected':
         // Placeholder for projected depth chart logic
-        // This would require a database table or a sophisticated projection model.
-        // For now, return an empty object or a specific message.
         depthData = { message: "Projected depth chart data is not yet available." };
-        // Example:
-        // const [projectedDepthRows] = await connection.execute(
-        //   `SELECT ... FROM Projected_Depth_Charts WHERE team = ? AND season = ?`,
-        //   [team, season_for_projection]
-        // );
         break;
 
       case 'historical':
@@ -95,10 +74,10 @@ export default async function handler(req, res) {
              r.jersey_number,
              r.headshot_url
            FROM Depth_Charts dc
-           JOIN Rosters_2025 r ON r.gsis_id = dc.player_id AND r.season = dc.season -- Assuming Rosters_2025 has all player data
-           WHERE dc.team = ?
+           JOIN Rosters_2025 r ON r.gsis_id COLLATE utf8mb4_unicode_ci = dc.player_id AND r.season = dc.season
+           WHERE dc.team COLLATE utf8mb4_unicode_ci = ?
              AND dc.season = ?
-             AND dc.week = (SELECT MAX(week) FROM Depth_Charts WHERE team = ? AND season = ?)
+             AND dc.week = (SELECT MAX(week) FROM Depth_Charts WHERE team COLLATE utf8mb4_unicode_ci = ? AND season = ?)
            ORDER BY dc.position, dc.depth_rank ASC`,
           [team, season, team, season]
         );
@@ -121,7 +100,6 @@ export default async function handler(req, res) {
     }
 
     // Add a mock unit_strength for chart display if not available from your DB.
-    // Ideally, this would also come from your database or be calculated.
     if (Object.keys(depthData).length > 0 && !depthData.unit_strength) {
       depthData.unit_strength = {
           QB: 85, RB: 75, WR: 90, OL: 80, DL: 70, LB: 65, DB: 85, ST: 70
