@@ -18,45 +18,59 @@ export default async function handler(req, res) {
     });
 
     let depthData = {};
-    // Note: The fetchPlayerDetails helper is not strictly needed anymore as player data is joined directly in the main query.
-    // Kept here for context, but it's not being called in the primary switch cases.
 
     switch (viewMode) {
       case 'current':
-        // Fetch current depth chart (latest week of 2025 season)
-        const [currentDepthRows] = await connection.execute(
-          `SELECT
-             dc.position,
-             dc.player_id,
-             dc.depth_rank,
-             r.full_name AS player_name,
-             r.jersey_number,
-             r.headshot_url
-           FROM Depth_Charts dc
-           JOIN Rosters_2025 r ON r.gsis_id COLLATE utf8mb4_unicode_ci = dc.player_id AND r.season = dc.season
-           WHERE dc.team COLLATE utf8mb4_unicode_ci = ?
-             AND dc.season = 2025 -- Assuming current depth chart is for 2025
-             AND dc.week = (SELECT MAX(week) FROM Depth_Charts WHERE team COLLATE utf8mb4_unicode_ci = ? AND season = 2025)
-           ORDER BY dc.position, dc.depth_rank ASC`,
-          [team, team]
+        const currentDataSeason = 2024; // *** FIX: Changed to 2024 as per DB data ***
+        
+        // Step 1: Find the maximum week for the current team and season
+        const [maxWeekRowsCurrent] = await connection.execute(
+          `SELECT MAX(week) AS max_week FROM Depth_Charts WHERE team COLLATE utf8mb4_unicode_ci = ? AND season = ?`,
+          [team, currentDataSeason]
         );
+        const maxWeekCurrent = maxWeekRowsCurrent[0].max_week;
 
-        for (const row of currentDepthRows) {
-          if (!depthData[row.position]) depthData[row.position] = [];
-          depthData[row.position].push({
-            player_id: row.player_id,
-            player_name: row.player_name,
-            jersey_number: row.jersey_number,
-            headshot_url: row.headshot_url,
-            depth_rank: row.depth_rank,
-            // Add other relevant player details here if available and needed
-          });
+        console.log(`Backend Log: Current View - Max week for ${team} (Season ${currentDataSeason}): ${maxWeekCurrent}`);
+
+        if (maxWeekCurrent === null) {
+          depthData = { message: `No depth chart data found for ${team} in Season ${currentDataSeason}.` };
+        } else {
+          // Step 2: Fetch depth chart data using the found max week
+          const [currentDepthRows] = await connection.execute(
+            `SELECT
+               dc.position,
+               dc.player_id,
+               dc.depth_rank,
+               r.full_name AS player_name,
+               r.jersey_number,
+               r.headshot_url
+             FROM Depth_Charts dc
+             JOIN Rosters_2025 r ON r.gsis_id COLLATE utf8mb4_unicode_ci = dc.player_id -- *** FIX: Removed AND r.season = dc.season ***
+             WHERE dc.team COLLATE utf8mb4_unicode_ci = ?
+               AND dc.season = ?
+               AND dc.week = ?
+             ORDER BY dc.position, dc.depth_rank ASC`,
+            [team, currentDataSeason, maxWeekCurrent]
+          );
+
+          console.log(`Backend Log: Current View - Raw depth rows fetched for ${team} (Week ${maxWeekCurrent}, Season ${currentDataSeason}):`, currentDepthRows);
+
+          for (const row of currentDepthRows) {
+            if (!depthData[row.position]) depthData[row.position] = [];
+            depthData[row.position].push({
+              player_id: row.player_id,
+              player_name: row.player_name,
+              jersey_number: row.jersey_number,
+              headshot_url: row.headshot_url,
+              depth_rank: row.depth_rank,
+            });
+          }
         }
         break;
 
       case 'projected':
-        // Placeholder for projected depth chart logic
         depthData = { message: "Projected depth chart data is not yet available." };
+        console.log(`Backend Log: Projected View requested for ${team}. Returning placeholder.`);
         break;
 
       case 'historical':
@@ -64,33 +78,48 @@ export default async function handler(req, res) {
           await connection.end();
           return res.status(400).json({ error: 'Missing season parameter for historical view.' });
         }
-        // Fetch historical depth chart for a specific season (latest week of that season)
-        const [historicalDepthRows] = await connection.execute(
-          `SELECT
-             dc.position,
-             dc.player_id,
-             dc.depth_rank,
-             r.full_name AS player_name,
-             r.jersey_number,
-             r.headshot_url
-           FROM Depth_Charts dc
-           JOIN Rosters_2025 r ON r.gsis_id COLLATE utf8mb4_unicode_ci = dc.player_id AND r.season = dc.season
-           WHERE dc.team COLLATE utf8mb4_unicode_ci = ?
-             AND dc.season = ?
-             AND dc.week = (SELECT MAX(week) FROM Depth_Charts WHERE team COLLATE utf8mb4_unicode_ci = ? AND season = ?)
-           ORDER BY dc.position, dc.depth_rank ASC`,
-          [team, season, team, season]
+        
+        // Step 1: Find the maximum week for the historical team and season
+        const [maxWeekRowsHistorical] = await connection.execute(
+          `SELECT MAX(week) AS max_week FROM Depth_Charts WHERE team COLLATE utf8mb4_unicode_ci = ? AND season = ?`,
+          [team, season]
         );
+        const maxWeekHistorical = maxWeekRowsHistorical[0].max_week;
 
-        for (const row of historicalDepthRows) {
-          if (!depthData[row.position]) depthData[row.position] = [];
-          depthData[row.position].push({
-            player_id: row.player_id,
-            player_name: row.player_name,
-            jersey_number: row.jersey_number,
-            headshot_url: row.headshot_url,
-            depth_rank: row.depth_rank,
-          });
+        console.log(`Backend Log: Historical View - Max week for ${team} (Season ${season}): ${maxWeekHistorical}`);
+
+        if (maxWeekHistorical === null) {
+          depthData = { message: `No depth chart data found for ${team} in Season ${season}.` };
+        } else {
+          // Step 2: Fetch historical depth chart data using the found max week
+          const [historicalDepthRows] = await connection.execute(
+            `SELECT
+               dc.position,
+               dc.player_id,
+               dc.depth_rank,
+               r.full_name AS player_name,
+               r.jersey_number,
+               r.headshot_url
+             FROM Depth_Charts dc
+             JOIN Rosters_2025 r ON r.gsis_id COLLATE utf8mb4_unicode_ci = dc.player_id -- *** FIX: Removed AND r.season = dc.season ***
+             WHERE dc.team COLLATE utf8mb4_unicode_ci = ?
+               AND dc.season = ?
+               AND dc.week = ?
+             ORDER BY dc.position, dc.depth_rank ASC`,
+            [team, season, maxWeekHistorical]
+          );
+          console.log(`Backend Log: Historical View - Raw depth rows fetched for ${team} (Week ${maxWeekHistorical}, Season ${season}):`, historicalDepthRows);
+
+          for (const row of historicalDepthRows) {
+            if (!depthData[row.position]) depthData[row.position] = [];
+            depthData[row.position].push({
+              player_id: row.player_id,
+              player_name: row.player_name,
+              jersey_number: row.jersey_number,
+              headshot_url: row.headshot_url,
+              depth_rank: row.depth_rank,
+            });
+          }
         }
         break;
 
@@ -100,18 +129,23 @@ export default async function handler(req, res) {
     }
 
     // Add a mock unit_strength for chart display if not available from your DB.
-    if (Object.keys(depthData).length > 0 && !depthData.unit_strength) {
+    if (Object.keys(depthData).filter(key => key !== 'message').length > 0 && !depthData.unit_strength) {
       depthData.unit_strength = {
           QB: 85, RB: 75, WR: 90, OL: 80, DL: 70, LB: 65, DB: 85, ST: 70
       };
+      console.log(`Backend Log: Added mock unit_strength.`);
+    } else if (Object.keys(depthData).filter(key => key !== 'message').length === 0 && !depthData.message) {
+        // If depthData is empty and there's no specific message, set a generic "no data" message
+        depthData.message = `No depth chart data found for ${team} in the selected view/season.`;
+        console.log(`Backend Log: Set generic "no data" message for ${team}.`);
     }
 
     await connection.end();
     res.status(200).json(depthData);
 
   } catch (error) {
-    console.error('Error fetching depth chart:', error);
+    console.error('❌ API Error fetching depth chart:', error);
     if (connection) await connection.end();
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
   }
 }

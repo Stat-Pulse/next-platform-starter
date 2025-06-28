@@ -1,36 +1,51 @@
-// pages/api/games.ts (or games.js if you want plain JS)
+// pages/api/games.js
 import mysql from 'mysql2/promise';
 
 export default async function handler(req, res) {
-  // Optionally get the season from the query string
-  const { season } = req.query;
-  if (!season) {
-    // This error will be returned if the frontend does not send a 'season' parameter
-    return res.status(400).json({ error: "Missing season parameter" });
-  }
+  // Get season and team from the query string
+  // They will be undefined or empty strings ("") if not selected or if "All" option is chosen
+  const { season, team } = req.query;
 
-  let conn;
+  let connection;
   try {
-    conn = await mysql.createConnection({
+    connection = await mysql.createConnection({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
     });
 
-    // Fetch games for the given season
-    // This is the filter: only rows where the 'season' column matches the provided season
-    const [rows] = await conn.execute(
-      `SELECT * FROM nfl_game_results WHERE season = ?`,
-      [season]
-    );
+    // Start with a base query that selects all games
+    let query = `SELECT * FROM nfl_game_results WHERE 1=1`; // 1=1 is always true, allows easy appending of AND clauses
+    const params = []; // Array to hold parameters for the SQL query
 
-    // If 'rows' is empty, it means no games were found for that season in the database.
+    // Add season filter if 'season' is provided and is NOT an empty string
+    // An empty string for 'season' means "All Seasons" for the backend
+    if (season && season !== '') {
+      query += ` AND season = ?`;
+      params.push(season);
+    }
+
+    // Add team filter if 'team' is provided and is NOT an empty string
+    // An empty string for 'team' means "All Teams" for the backend
+    if (team && team !== '') {
+      // Filter where the selected team is either the home_team or the away_team
+      query += ` AND (home_team = ? OR away_team = ?)`;
+      params.push(team); // Parameter for home_team
+      params.push(team); // Parameter for away_team (needs to be pushed twice for OR condition)
+    }
+
+    // Add ordering for consistent results, e.g., by season, then week, then game_date
+    query += ` ORDER BY season DESC, week ASC, game_date ASC, game_time ASC`;
+
+    // Execute the query with the dynamically built conditions and parameters
+    const [rows] = await connection.execute(query, params);
+
     res.status(200).json(rows);
   } catch (error) {
     console.error('Error fetching games:', error);
     res.status(500).json({ error: "Internal Server Error" });
   } finally {
-    if (conn) await conn.end();
+    if (connection) await connection.end(); // Ensure connection is closed
   }
 }
