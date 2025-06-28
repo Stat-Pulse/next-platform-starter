@@ -31,13 +31,18 @@ const TeamPage = () => {
 
     const fetchData = async () => {
       try {
+        // Construct absolute URLs using window.location.origin to avoid "URL not valid" errors
+        const newsUrl = `${window.location.origin}/api/news?team=${teamId.toUpperCase()}`;
+        const teamUrl = `${window.location.origin}/api/team/${teamId}`;
+
         // Fetch news for the team
-        const newsRes = await fetch(`/api/news?team=${teamId.toUpperCase()}`);
+        const newsRes = await fetch(newsUrl);
         const newsJson = await newsRes.json();
         if (newsRes.ok) setNews(newsJson.slice(0, 5)); // Limit to 5 articles
+        else throw new Error(newsJson.error || 'Failed to load news data'); // Better error handling for news API
 
         // Fetch main team data from our backend API
-        const teamRes = await fetch(`/api/team/${teamId}`);
+        const teamRes = await fetch(teamUrl);
         const teamJson = await teamRes.json();
         if (!teamRes.ok) throw new Error(teamJson.error || 'Failed to load team data');
         setTeamData(teamJson);
@@ -204,7 +209,7 @@ const TeamPage = () => {
               </button>
             )}
           </div>
-          {seasonGames.length === 0 ? (
+          {lastGame === null ? ( // Check if lastGame is null
             <p className="text-sm text-black">No recent games available.</p>
           ) : (
             <div className="space-y-3 mt-2">
@@ -220,7 +225,6 @@ const TeamPage = () => {
                         className="w-6 h-6 object-contain"
                         onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.home_team_abbr}`; }}
                       />
-                      <span className="text-sm font-medium">{game.home_team_abbr}</span> {/* Keeping abbr for clarity next to logo */}
                       <span className={`text-sm font-bold ${game.home_score > game.away_score ? 'text-blue-600' : 'text-gray-700'}`}>
                         {game.home_score}
                       </span>
@@ -231,7 +235,6 @@ const TeamPage = () => {
                       <span className={`text-sm font-bold ${game.away_score > game.home_score ? 'text-blue-600' : 'text-gray-700'}`}>
                         {game.away_score}
                       </span>
-                      <span className="text-sm font-medium">{game.away_team_abbr}</span> {/* Keeping abbr for clarity next to logo */}
                       <img
                         src={teamLogos?.[game.away_team_abbr] || `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.away_team_abbr}`}
                         alt={`${game.away_team_abbr} logo`}
@@ -282,10 +285,8 @@ const TeamPage = () => {
                         className="w-6 h-6 object-contain"
                         onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.away_team_abbr}`; }}
                       />
-                      <span className="text-sm font-medium">{game.away_team_abbr}</span> {/* Keeping abbr for clarity next to logo */}
                       <span className="text-xs text-gray-500">at</span>
                       {/* Home Team */}
-                      <span className="text-sm font-medium">{game.home_team_abbr}</span> {/* Keeping abbr for clarity next to logo */}
                       <img
                         src={teamLogos?.[game.home_team_abbr] || `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.home_team_abbr}`}
                         alt={`${game.home_team_abbr} logo`}
