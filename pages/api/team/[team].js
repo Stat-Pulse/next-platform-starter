@@ -8,7 +8,8 @@ export default async function handler(req, res) {
   }
 
   let connection;
-  let teamId;
+  const currentSeason = 2024; // Explicitly define the season for stats aggregation
+
   try {
     connection = await mysql.createConnection({
       host: process.env.DB_HOST,
@@ -28,7 +29,7 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'Team slug could not be resolved' });
     }
 
-    teamId = abbrRows[0].team_abbr;
+    const teamId = abbrRows[0].team_abbr;
 
     // Fetch core team information
     const [teamRows] = await connection.execute(
@@ -62,9 +63,9 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'Team not found' });
     }
     const teamRow = teamRows[0];
-    const fullTeamId = teamRow.team_id || teamId; // Use team_id if available, otherwise team_abbr
+    const fullTeamId = teamRow.team_id || teamId;
 
-    // Fetch roster (2025 season)
+    // Fetch roster (2025 season) - This query remains as is based on previous context.
     const [roster] = await connection.execute(
       `SELECT
          gsis_id        AS id,
@@ -79,7 +80,7 @@ export default async function handler(req, res) {
       [teamId]
     );
 
-    // Fetch depth chart (2025 season, latest week)
+    // Fetch depth chart (2025 season, latest week) - This query remains as is.
     const [depthRows] = await connection.execute(
       `SELECT
          dc.position,
@@ -107,21 +108,22 @@ export default async function handler(req, res) {
       depthChart[row.position].push({ name: row.name, depth: row.depth_rank });
     }
 
-    // Fetch past season games (all games where the team played)
+    // Fetch past season games for the defined 'currentSeason'
     const [seasonGamesRaw] = await connection.execute(
       `SELECT game_id, week, game_date AS date, game_time,
               home_team_id, away_team_id, home_score, away_score, is_final,
               stadium_name, spread_line, total_line, referee, weather_summary
        FROM Games
-       WHERE home_team_id = ? OR away_team_id = ?
-       ORDER BY game_date DESC`, // Order by descending to get most recent first
-      [teamId, teamId]
+       WHERE (home_team_id = ? OR away_team_id = ?)
+         AND season = ?
+       ORDER BY game_date ASC`,
+      [teamId, teamId, currentSeason]
     );
 
     const formattedSeasonGames = seasonGamesRaw.map(g => ({
       gameId: g.game_id,
       week: g.week,
-      game_date: g.date, // Use game_date for consistency with upcomingSchedule
+      game_date: g.date,
       home_team_abbr: g.home_team_id,
       away_team_abbr: g.away_team_id,
       home_score: g.home_score,
@@ -129,15 +131,15 @@ export default async function handler(req, res) {
       is_final: g.is_final,
     }));
 
-    // Fetch upcoming schedule for 2025 season
+    // Fetch upcoming schedule for 2025 season (assuming Schedules_2025 is for future games)
     const [upcomingSchedule] = await connection.execute(
       `SELECT game_id,
               gameday,
               weekday,
               week,
               gametime,
-              home_team AS home_team_abbr, -- Renamed for consistency
-              away_team AS away_team_abbr, -- Renamed for consistency
+              home_team AS home_team_abbr,
+              away_team AS away_team_abbr,
               location,
               stadium,
               spread_line,
@@ -149,48 +151,54 @@ export default async function handler(req, res) {
          FROM Schedules_2025
         WHERE (home_team = ? OR away_team = ?)
           AND gameday >= CURDATE()
-        ORDER BY gameday ASC`,
+        ORDER BY gameday ASC, gametime ASC`,
       [teamId, teamId]
     );
 
     /* -------------------------------------------------- *
-     * Fetch Season Stats (assuming tables exist)        *
-     * These are hypothetical tables for demonstration.  *
-     * You might need to adjust table/column names.      *
+     * Aggregated Offensive Season Stats (from team_weekly_stats)
      * -------------------------------------------------- */
     let offenseStats = null;
-    let defenseStats = null;
-
     try {
       const [offenseStatsRows] = await connection.execute(
         `SELECT
-           total_off_yards,
-           pass_tds,
-           rush_tds,
-           passing_yards AS pass_yards,  -- Added for 'Pass Offense'
-           rushing_yards AS rush_yards   -- Added for 'Rush Offense'
-         FROM Team_Offense_Season_Stats_2024 -- Placeholder table name
-         WHERE team_abbr = ? AND season = 2024`,
-        [teamId]
+           SUM(passing_yards) AS pass_yards,
+           SUM(passing_tds) AS pass_tds,
+           SUM(rushing_yards) AS rush_yards,
+           SUM(rushing_tds) AS rush_tds,
+           SUM(passing_yards + rushing_yards) AS total_off_yards
+         FROM team_weekly_stats
+         WHERE team = ? AND season = ?
+         GROUP BY team, season`,
+        [teamId, currentSeason]
       );
       offenseStats = offenseStatsRows.length ? offenseStatsRows[0] : null;
+    } catch (statErr) {
+      console.warn(`Could not fetch offensive season stats for ${teamId} (Season ${currentSeason}):`, statErr.message);
+    }
 
+    /* -------------------------------------------------- *
+     * Aggregated Defensive Season Stats (from team_weekly_stats, based on opponent)
+     * To get yards allowed BY teamId, we sum the offensive stats of teams that played AGAINST teamId.
+     * -------------------------------------------------- */
+    let defenseStats = null;
+    try {
       const [defenseStatsRows] = await connection.execute(
         `SELECT
-           pass_yards_allowed,
-           pass_td_allowed,
-           rush_yards_allowed,
-           rush_td_allowed,
-           total_defense_yards_allowed, -- Added for 'Total Defense'
-           total_defense_td_allowed     -- Added for 'Total Defense'
-         FROM Team_Defense_Season_Stats_2024 -- Placeholder table name
-         WHERE team_abbr = ? AND season = 2024`,
-        [teamId]
+           SUM(tws.passing_yards) AS pass_yards_allowed,
+           SUM(tws.passing_tds) AS pass_td_allowed,
+           SUM(tws.rushing_yards) AS rush_yards_allowed,
+           SUM(tws.rushing_tds) AS rush_td_allowed,
+           SUM(tws.passing_yards + tws.rushing_yards) AS total_defense_yards_allowed,
+           SUM(tws.passing_tds + tws.rushing_tds) AS total_defense_td_allowed
+         FROM team_weekly_stats tws
+         WHERE tws.opponent_team = ? AND tws.season = ?
+         GROUP BY tws.opponent_team, tws.season`,
+        [teamId, currentSeason]
       );
       defenseStats = defenseStatsRows.length ? defenseStatsRows[0] : null;
     } catch (statErr) {
-      console.warn(`Could not fetch season stats for ${teamId}. Tables might not exist:`, statErr.message);
-      // Stats will remain null if tables don't exist
+      console.warn(`Could not fetch defensive season stats for ${teamId} (Season ${currentSeason}):`, statErr.message);
     }
 
 
@@ -211,7 +219,6 @@ export default async function handler(req, res) {
     );
     const teamLogos = {};
     logoRows.forEach(r => {
-      // Ensure logos are absolute URLs
       const src = r.team_logo_espn || '';
       teamLogos[r.team_abbr] = src.startsWith('http')
         ? src
@@ -248,7 +255,7 @@ export default async function handler(req, res) {
       location: {
         city: teamRow.city,
         stadium: teamRow.stadium_name,
-        capacity: teamRow.stadium_capacity, // Corrected to use 'capacity'
+        capacity: teamRow.stadium_capacity,
         foundedYear: teamRow.founded_year,
       },
       coaching: {
@@ -259,12 +266,11 @@ export default async function handler(req, res) {
       teamLogos,
       seasonGames: formattedSeasonGames,
       upcomingSchedule: upcomingSchedule,
-      roster: roster || [], // Roster and Depth Chart are not used in frontend provided
+      roster: roster || [],
       depthChart: Object.keys(depthChart).length ? depthChart : {},
-      // Example news, frontend fetches its own
-      recentNews: [], // Frontend will fetch from /api/news
-      offenseStats: offenseStats, // Added offenseStats
-      defenseStats: defenseStats, // Added defenseStats
+      recentNews: [],
+      offenseStats: offenseStats, // Now populated from team_weekly_stats aggregation
+      defenseStats: defenseStats, // Now populated from team_weekly_stats aggregation
       lastUpdated: new Date().toISOString()
     });
 
