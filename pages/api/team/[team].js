@@ -17,6 +17,7 @@ export default async function handler(req, res) {
       database: process.env.DB_NAME,
     });
 
+    // Resolve team abbreviation from nickname or full team name
     const [abbrRows] = await connection.execute(
       `SELECT team_abbr FROM Teams WHERE LOWER(nickname) = ? OR LOWER(team_name) LIKE ?`,
       [team.toLowerCase(), `%${team.toLowerCase()}%`]
@@ -29,6 +30,7 @@ export default async function handler(req, res) {
 
     teamId = abbrRows[0].team_abbr;
 
+    // Fetch core team information
     const [teamRows] = await connection.execute(
       `SELECT
         team_name,
@@ -60,45 +62,44 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'Team not found' });
     }
     const teamRow = teamRows[0];
-    const fullTeamId = teamRow.team_id || teamId;
+    const fullTeamId = teamRow.team_id || teamId; // Use team_id if available, otherwise team_abbr
 
-  const [roster] = await connection.execute(
-  `SELECT
-       gsis_id        AS id,
-       full_name      AS name,
-       position,
-       jersey_number  AS number,
-       rookie_year,
-       headshot_url
-     FROM Rosters_2025
-     WHERE team   = ?
-       AND season = 2025`,
-  [teamId]
-);
+    // Fetch roster (2025 season)
+    const [roster] = await connection.execute(
+      `SELECT
+         gsis_id        AS id,
+         full_name      AS name,
+         position,
+         jersey_number  AS number,
+         rookie_year,
+         headshot_url
+       FROM Rosters_2025
+       WHERE team   = ?
+         AND season = 2025`,
+      [teamId]
+    );
 
-/* -------------------------------------------------- *
- *  Depth chart (2025, latest week)                   *
- * -------------------------------------------------- */
-const [depthRows] = await connection.execute(
-  `SELECT
-       dc.position,
-       r.full_name AS name,
-       dc.depth_rank
-     FROM Depth_Charts dc
-     JOIN Rosters_2025 r
-       ON r.gsis_id COLLATE utf8mb4_unicode_ci = dc.player_id   -- 🔹 force same collation
-      AND r.season  = 2025
-     WHERE dc.team   = ?
-       AND dc.season = 2025
-       AND dc.week   = (
-         SELECT MAX(week)
-           FROM Depth_Charts
-          WHERE team   = ?
-            AND season = 2025
-       )
-     ORDER BY dc.depth_rank ASC`,
-  [teamId, teamId]
-);
+    // Fetch depth chart (2025 season, latest week)
+    const [depthRows] = await connection.execute(
+      `SELECT
+         dc.position,
+         r.full_name AS name,
+         dc.depth_rank
+       FROM Depth_Charts dc
+       JOIN Rosters_2025 r
+         ON r.gsis_id COLLATE utf8mb4_unicode_ci = dc.player_id
+        AND r.season  = 2025
+       WHERE dc.team   = ?
+         AND dc.season = 2025
+         AND dc.week   = (
+           SELECT MAX(week)
+             FROM Depth_Charts
+            WHERE team   = ?
+              AND season = 2025
+         )
+       ORDER BY dc.depth_rank ASC`,
+      [teamId, teamId]
+    );
 
     const depthChart = {};
     for (const row of depthRows) {
@@ -106,46 +107,37 @@ const [depthRows] = await connection.execute(
       depthChart[row.position].push({ name: row.name, depth: row.depth_rank });
     }
 
-    const [schedule] = await connection.execute(
+    // Fetch past season games (all games where the team played)
+    const [seasonGamesRaw] = await connection.execute(
       `SELECT game_id, week, game_date AS date, game_time,
               home_team_id, away_team_id, home_score, away_score, is_final,
               stadium_name, spread_line, total_line, referee, weather_summary
        FROM Games
        WHERE home_team_id = ? OR away_team_id = ?
-       ORDER BY game_date ASC`,
+       ORDER BY game_date DESC`, // Order by descending to get most recent first
       [teamId, teamId]
     );
 
-    const formattedGames = schedule.map(g => {
-      const isHome = g.home_team_id === teamId;
-      const opponent = isHome ? g.away_team_id : g.home_team_id;
-      const score = g.is_final ? `${g.home_score} - ${g.away_score}` : 'TBD';
-      const result = g.is_final
-        ? (isHome && g.home_score > g.away_score) || (!isHome && g.away_score > g.home_score)
-          ? 'W' : 'L'
-        : '';
-      return {
-        gameId: g.game_id,
-        week: g.week,
-        date: g.date,
-        opponent: opponent || 'TBD',
-        homeAway: isHome ? 'H' : 'A',
-        score,
-        result
-      };
-    });
+    const formattedSeasonGames = seasonGamesRaw.map(g => ({
+      gameId: g.game_id,
+      week: g.week,
+      game_date: g.date, // Use game_date for consistency with upcomingSchedule
+      home_team_abbr: g.home_team_id,
+      away_team_abbr: g.away_team_id,
+      home_score: g.home_score,
+      away_score: g.away_score,
+      is_final: g.is_final,
+    }));
 
-    /* -------------------------------------------------- *
-     *  Upcoming 2025 schedule                            *
-     * -------------------------------------------------- */
-    const [upcomingRows] = await connection.execute(
+    // Fetch upcoming schedule for 2025 season
+    const [upcomingSchedule] = await connection.execute(
       `SELECT game_id,
               gameday,
               weekday,
               week,
               gametime,
-              home_team,
-              away_team,
+              home_team AS home_team_abbr, -- Renamed for consistency
+              away_team AS away_team_abbr, -- Renamed for consistency
               location,
               stadium,
               spread_line,
@@ -162,42 +154,75 @@ const [depthRows] = await connection.execute(
     );
 
     /* -------------------------------------------------- *
-     *  Build logo map for all referenced teams           *
+     * Fetch Season Stats (assuming tables exist)        *
+     * These are hypothetical tables for demonstration.  *
+     * You might need to adjust table/column names.      *
      * -------------------------------------------------- */
+    let offenseStats = null;
+    let defenseStats = null;
+
+    try {
+      const [offenseStatsRows] = await connection.execute(
+        `SELECT
+           total_off_yards,
+           pass_tds,
+           rush_tds,
+           passing_yards AS pass_yards,  -- Added for 'Pass Offense'
+           rushing_yards AS rush_yards   -- Added for 'Rush Offense'
+         FROM Team_Offense_Season_Stats_2024 -- Placeholder table name
+         WHERE team_abbr = ? AND season = 2024`,
+        [teamId]
+      );
+      offenseStats = offenseStatsRows.length ? offenseStatsRows[0] : null;
+
+      const [defenseStatsRows] = await connection.execute(
+        `SELECT
+           pass_yards_allowed,
+           pass_td_allowed,
+           rush_yards_allowed,
+           rush_td_allowed,
+           total_defense_yards_allowed, -- Added for 'Total Defense'
+           total_defense_td_allowed     -- Added for 'Total Defense'
+         FROM Team_Defense_Season_Stats_2024 -- Placeholder table name
+         WHERE team_abbr = ? AND season = 2024`,
+        [teamId]
+      );
+      defenseStats = defenseStatsRows.length ? defenseStatsRows[0] : null;
+    } catch (statErr) {
+      console.warn(`Could not fetch season stats for ${teamId}. Tables might not exist:`, statErr.message);
+      // Stats will remain null if tables don't exist
+    }
+
+
+    // Build logo map for all referenced teams (current team, opponents in past/upcoming games)
     const teamSet = new Set([teamId]);
-    upcomingRows.forEach(r => {
-      if (r.home_team) teamSet.add(r.home_team);
-      if (r.away_team) teamSet.add(r.away_team);
+    upcomingSchedule.forEach(r => {
+      if (r.home_team_abbr) teamSet.add(r.home_team_abbr);
+      if (r.away_team_abbr) teamSet.add(r.away_team_abbr);
     });
-    formattedGames.forEach(g => {
-      if (g.opponent) teamSet.add(g.opponent);
+    formattedSeasonGames.forEach(g => {
+      if (g.home_team_abbr) teamSet.add(g.home_team_abbr);
+      if (g.away_team_abbr) teamSet.add(g.away_team_abbr);
     });
+
     const [logoRows] = await connection.execute(
       `SELECT team_abbr, team_logo_espn FROM Teams WHERE team_abbr IN (?)`,
       [Array.from(teamSet)]
     );
     const teamLogos = {};
     logoRows.forEach(r => {
+      // Ensure logos are absolute URLs
       const src = r.team_logo_espn || '';
       teamLogos[r.team_abbr] = src.startsWith('http')
         ? src
         : `https://a.espncdn.com/i/teamlogos/nfl/500/${r.team_abbr.toLowerCase()}.png`;
     });
 
-    // Fallback: ensure all logos are full URLs
-    Object.keys(teamLogos).forEach(abbr => {
-      const src = teamLogos[abbr] || '';
-      if (!src.startsWith('http')) {
-        teamLogos[abbr] = `https://a.espncdn.com/i/teamlogos/nfl/500/${abbr.toLowerCase()}.png`;
-      }
-    });
-
-    // Make sure primary team logo is absolute
+    // Ensure the primary team logo is an absolute URL
     if (teamRow.team_logo_espn && !teamRow.team_logo_espn.startsWith('http')) {
       teamRow.team_logo_espn = `https://a.espncdn.com/i/teamlogos/nfl/500/${teamId.toLowerCase()}.png`;
     }
-
-    // Make sure alt logo is absolute too
+    // Ensure the alt logo is an absolute URL
     if (teamRow.team_logo_wikipedia && !teamRow.team_logo_wikipedia.startsWith('http')) {
       teamRow.team_logo_wikipedia = `https://a.espncdn.com/i/teamlogos/nfl/500/${teamId.toLowerCase()}.png`;
     }
@@ -223,7 +248,8 @@ const [depthRows] = await connection.execute(
       location: {
         city: teamRow.city,
         stadium: teamRow.stadium_name,
-        capacity: teamRow.stadium_capacity
+        capacity: teamRow.stadium_capacity, // Corrected to use 'capacity'
+        foundedYear: teamRow.founded_year,
       },
       coaching: {
         headCoach: teamRow.head_coach,
@@ -231,16 +257,14 @@ const [depthRows] = await connection.execute(
         defensiveCoordinator: teamRow.d_coord
       },
       teamLogos,
-      seasonGames: formattedGames,
-      upcomingSchedule: upcomingRows,
-      roster: roster || [],
+      seasonGames: formattedSeasonGames,
+      upcomingSchedule: upcomingSchedule,
+      roster: roster || [], // Roster and Depth Chart are not used in frontend provided
       depthChart: Object.keys(depthChart).length ? depthChart : {},
-      recentNews: [
-        {
-          title: `${teamRow.team_name} preparing for upcoming matchup`,
-          date: new Date().toISOString().split('T')[0]
-        }
-      ],
+      // Example news, frontend fetches its own
+      recentNews: [], // Frontend will fetch from /api/news
+      offenseStats: offenseStats, // Added offenseStats
+      defenseStats: defenseStats, // Added defenseStats
       lastUpdated: new Date().toISOString()
     });
 
