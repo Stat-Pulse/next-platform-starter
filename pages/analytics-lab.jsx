@@ -1,364 +1,262 @@
-// pages/teams/[teamId].js
-// Removed Next.js specific imports as they are not supported in this environment.
-// import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react'
+import SectionWrapper from '../components/SectionWrapper'
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js'
+import { Bar } from 'react-chartjs-2'
 
-const TeamPage = () => {
-  // Replace useRouter with a method to get teamId from window.location.pathname
-  // In a typical Next.js app, useRouter would handle dynamic routes like /teams/[teamId]
-  // For this standalone React code, we'll parse it from the URL.
-  const [teamId, setTeamId] = useState(null);
+// Register Chart.js components
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
-  const [teamData, setTeamData] = useState(null);
-  const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('overview');
-  const [news, setNews] = useState([]);
-  const [seasonGames, setSeasonGames] = useState([]);
-  const [showAllGames, setShowAllGames] = useState(false);
-  const [upcomingSchedule, setUpcomingSchedule] = useState([]);
-  const [showAllUpcoming, setShowAllUpcoming] = useState(false);
+export default function AnalyticsLab() {
+  // Simple state for widget management (without drag-and-drop for now)
+  const [selectedWidgets, setSelectedWidgets] = useState([])
+  
+  const toggleWidget = (widgetId) => {
+    setSelectedWidgets(prev => 
+      prev.includes(widgetId) 
+        ? prev.filter(id => id !== widgetId)
+        : [...prev, widgetId]
+    )
+  }
 
-  useEffect(() => {
-    // Extract teamId from the URL pathname.
-    // Assuming the URL format is /teams/{teamId}
-    const pathSegments = window.location.pathname.split('/');
-    const currentTeamId = pathSegments[pathSegments.length - 1];
-    setTeamId(currentTeamId);
-  }, []); // Run once on component mount to get the initial teamId
+  // Chart Data for Advanced Statistical Explorers
+  const trendData = {
+    labels: ['Week 1', 'Week 5', 'Week 10', 'Week 15'],
+    datasets: [
+      {
+        label: 'QB Efficiency',
+        data: [75, 82, 90, 88],
+        backgroundColor: 'rgba(200, 32, 32, 0.8)',
+        borderColor: 'rgba(200, 32, 32, 1)',
+        borderWidth: 1,
+      },
+    ],
+  }
 
-  useEffect(() => {
-    if (!teamId) return; // Ensure teamId is available before fetching
+  const trendOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: { 
+      y: { 
+        title: { display: true, text: 'Efficiency (%)', color: '#E0E0E0' }, 
+        ticks: { color: '#E0E0E0' }, 
+        grid: { color: 'rgba(255, 255, 255, 0.1)' } 
+      }, 
+      x: { 
+        ticks: { color: '#E0E0E0' }, 
+        grid: { color: 'rgba(255, 255, 255, 0.1)' } 
+      } 
+    },
+    plugins: { 
+      title: { display: true, text: 'Performance Trends', color: '#E0E0E0' }, 
+      legend: { labels: { color: '#E0E0E0' } } 
+    },
+  }
 
-    const fetchData = async () => {
-      try {
-        // Fetch news for the team
-        const newsRes = await fetch(`/api/news?team=${teamId.toUpperCase()}`);
-        const newsJson = await newsRes.json();
-        if (newsRes.ok) setNews(newsJson.slice(0, 5)); // Limit to 5 articles
-
-        // Fetch main team data from our backend API
-        const teamRes = await fetch(`/api/team/${teamId}`);
-        const teamJson = await teamRes.json();
-        if (!teamRes.ok) throw new Error(teamJson.error || 'Failed to load team data');
-        setTeamData(teamJson);
-        setSeasonGames(teamJson.seasonGames || []);
-        setUpcomingSchedule(teamJson.upcomingSchedule || []);
-      } catch (err) {
-        console.error("Error fetching team data:", err);
-        setError(err.message); // Set error state if fetch fails
-      }
-    };
-    fetchData();
-  }, [teamId]); // Re-run effect when teamId changes
-
-  // Helper function to format numbers or display a dash
-  const formatStat = (num, decimals = 0) =>
-    num != null && !isNaN(num)
-      ? Number(num).toLocaleString(undefined, {
-          minimumFractionDigits: decimals,
-          maximumFractionDigits: decimals,
-        })
-      : '—';
-
-  // Display error message if there's an error
-  if (error) return <div className="text-red-600 p-4">Error: {error}</div>;
-  // Display loading message until teamData is fetched
-  if (!teamData || Object.keys(teamData).length === 0) return <div className="p-4">Loading team data...</div>;
-
-  // Destructure teamData for easier access
-  const {
-    name: teamName,
-    division,
-    location: teamLoc,
-    branding,
-    coaching,
-    teamLogos, // Logos for all teams involved in games
-    offenseStats, // Added from backend
-    defenseStats, // Added from backend
-  } = teamData;
-
-  // Get the last game (most recent) from the seasonGames array, which is sorted ASC by date
-  const lastGame = seasonGames.length > 0 ? seasonGames[seasonGames.length - 1] : null;
-
-
-  return (
-    <div className="bg-gradient-to-r from-blue-50 via-white to-gray-50 min-h-screen p-6 font-sans text-black"> {/* General text color change */}
-      <div className="max-w-6xl mx-auto">
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row items-center justify-between bg-gray-100 rounded-lg p-4 shadow-sm mb-6">
-          <div className="flex items-center space-x-4 mb-4 sm:mb-0">
-            {/* Team Logo */}
-            <img
-              src={branding.logo || `https://placehold.co/64x64/E2E8F0/1A202C?text=${teamName.substring(0,2).toUpperCase()}`}
-              alt={`${teamName} logo`}
-              className="w-16 h-16 rounded-full object-contain bg-white p-1 shadow-sm"
-              onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/64x64/E2E8F0/1A202C?text=${teamName.substring(0,2).toUpperCase()}`; }}
-            />
-            {/* Team Info */}
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">{teamName}</h1> {/* Darker text */}
-              <p className="text-sm text-black">{division} • Est. {teamLoc.foundedYear ?? '—'}</p>
-              <p className="text-sm text-black">
-                Stadium: {teamLoc.stadium ?? '—'} ({formatStat(teamLoc.capacity) ?? '—'} Capacity)
-              </p>
-              <p className="text-sm text-black">City: {teamLoc.city ?? '—'}</p>
-            </div>
+  // Simple 3D visualization placeholder
+  const ThreeDVisualization = () => {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-red-900/20 to-red-600/20 rounded-lg">
+        <div className="text-center">
+          <div className="relative">
+            <div className="w-20 h-20 bg-red-500 rounded-full mx-auto mb-4 animate-pulse shadow-lg"></div>
+            <div className="absolute -top-2 -right-2 w-8 h-8 bg-red-400 rounded-full animate-bounce"></div>
+            <div className="absolute -bottom-2 -left-2 w-6 h-6 bg-red-600 rounded-full animate-ping"></div>
           </div>
-          {/* Coaching Staff */}
-          <div className="text-right text-sm text-black space-y-1">
-            <p className="font-semibold">Head Coach: {coaching.headCoach ?? '—'}</p>
-            <p>Offensive Coord: {coaching.offensiveCoordinator ?? '—'}</p>
-            <p>Defensive Coord: {coaching.defensiveCoordinator ?? '—'}</p>
-          </div>
-        </div>
-
-        {/* Navigation Tabs */}
-        <nav className="flex overflow-x-auto scrollbar-none space-x-4 border-b border-gray-200 mb-6 pb-2 whitespace-nowrap">
-          {['overview', 'depthChart', 'schedule', 'injuries', 'stats'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors duration-200 ${
-                activeTab === tab
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-700 hover:text-blue-600 hover:border-gray-300' // Darker non-active tab text
-              }`}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </nav>
-
-        {/* Team Stats Section (Visible when activeTab is 'overview' or 'stats') */}
-        {(offenseStats || defenseStats) && (activeTab === 'overview' || activeTab === 'stats') && (
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 className="text-xl font-bold mb-4 text-gray-900">Team Stats (2024 Season)</h2> {/* Darker text */}
-            {/* Offense Stats */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-blue-800 mb-3">Offense</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-black text-sm"> {/* Changed grid layout, text-black */}
-                {/* Pass Offense */}
-                <div className="border rounded-lg p-3 bg-blue-50 shadow-sm">
-                  <h4 className="font-semibold text-blue-700 mb-1">Pass Offense</h4>
-                  <p>Yards: {formatStat(offenseStats?.pass_yards)}</p>
-                  <p>TDs: {formatStat(offenseStats?.pass_tds)}</p>
-                  <p>NFL Rank: —</p>
-                </div>
-                {/* Rush Offense */}
-                <div className="border rounded-lg p-3 bg-green-50 shadow-sm">
-                  <h4 className="font-semibold text-green-700 mb-1">Rush Offense</h4>
-                  <p>Yards: {formatStat(offenseStats?.rush_yards)}</p>
-                  <p>TDs: {formatStat(offenseStats?.rush_tds)}</p>
-                  <p>NFL Rank: —</p>
-                </div>
-                {/* Total Offense */}
-                <div className="border rounded-lg p-3 bg-purple-50 shadow-sm">
-                  <h4 className="font-semibold text-purple-700 mb-1">Total Offense</h4>
-                  <p>Yards: {formatStat(offenseStats?.total_off_yards)}</p>
-                  <p>TDs: {formatStat((offenseStats?.pass_tds ?? 0) + (offenseStats?.rush_tds ?? 0))}</p>
-                  <p>NFL Rank: —</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Defense Stats */}
-            <div>
-              <h3 className="text-lg font-semibold text-red-800 mb-3">Defense</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-black text-sm"> {/* Changed grid layout, text-black */}
-                {/* Pass Defense */}
-                <div className="border rounded-lg p-3 bg-red-50 shadow-sm">
-                  <h4 className="font-semibold text-red-700 mb-1">Pass Defense</h4>
-                  <p>Yards Allowed: {formatStat(defenseStats?.pass_yards_allowed)}</p>
-                  <p>TDs Allowed: {formatStat(defenseStats?.pass_td_allowed)}</p>
-                  <p>NFL Rank: —</p>
-                </div>
-                {/* Rush Defense */}
-                <div className="border rounded-lg p-3 bg-yellow-50 shadow-sm">
-                  <h4 className="font-semibold text-yellow-700 mb-1">Rush Defense</h4>
-                  <p>Yards Allowed: {formatStat(defenseStats?.rush_yards_allowed)}</p>
-                  <p>TDs Allowed: {formatStat(defenseStats?.rush_td_allowed)}</p>
-                  <p>NFL Rank: —</p>
-                </div>
-                {/* Total Defense */}
-                <div className="border rounded-lg p-3 bg-teal-50 shadow-sm">
-                  <h4 className="font-semibold text-teal-700 mb-1">Total Defense</h4>
-                  <p>Yards Allowed: {formatStat(defenseStats?.total_defense_yards_allowed)}</p>
-                  <p>TDs Allowed: {formatStat(defenseStats?.total_defense_td_allowed)}</p>
-                  <p>NFL Rank: —</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Last Games Section */}
-        <div className="bg-white p-4 rounded-lg shadow mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-semibold text-gray-900">Last Game</h2> {/* Always show "Last Game" singular */}
-            {seasonGames.length > 1 && (
-              <button
-                onClick={() => setShowAllGames(!showAllGames)}
-                className="text-blue-600 text-sm hover:underline"
-              >
-                {showAllGames ? 'Hide All' : 'Show All Past Games'} {/* Clarified button text */}
-              </button>
-            )}
-          </div>
-          {seasonGames.length === 0 ? (
-            <p className="text-sm text-black">No recent games available.</p>
-          ) : (
-            <div className="space-y-3 mt-2">
-              {/* Conditional rendering for "Last Game" vs "Show All Past Games" */}
-              {(showAllGames ? seasonGames : [lastGame]).map((game, idx) => (
-                <div key={idx} className="flex flex-col sm:flex-row items-center justify-between border rounded p-3 bg-gray-50 text-black">
-                  <div className="flex items-center space-x-3 mb-2 sm:mb-0">
-                    {/* Home Team */}
-                    <div className="flex items-center space-x-1">
-                      <img
-                        src={teamLogos?.[game.home_team_abbr] || `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.home_team_abbr}`}
-                        alt={`${game.home_team_abbr} logo`}
-                        className="w-6 h-6 object-contain"
-                        onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.home_team_abbr}`; }}
-                      />
-                      <span className="text-sm font-medium">{game.home_team_abbr}</span> {/* Keeping abbr for clarity next to logo */}
-                      <span className={`text-sm font-bold ${game.home_score > game.away_score ? 'text-blue-600' : 'text-gray-700'}`}>
-                        {game.home_score}
-                      </span>
-                    </div>
-                    <span className="text-xs text-gray-500">vs</span>
-                    {/* Away Team */}
-                    <div className="flex items-center space-x-1">
-                      <span className={`text-sm font-bold ${game.away_score > game.home_score ? 'text-blue-600' : 'text-gray-700'}`}>
-                        {game.away_score}
-                      </span>
-                      <span className="text-sm font-medium">{game.away_team_abbr}</span> {/* Keeping abbr for clarity next to logo */}
-                      <img
-                        src={teamLogos?.[game.away_team_abbr] || `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.away_team_abbr}`}
-                        alt={`${game.away_team_abbr} logo`}
-                        className="w-6 h-6 object-contain"
-                        onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.away_team_abbr}`; }}
-                      />
-                    </div>
-                  </div>
-                  {/* Game Date */}
-                  <span className="text-sm text-black">
-                    {new Date(game.game_date).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Upcoming Games Section */}
-        <div className="bg-white p-4 rounded-lg shadow mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-semibold text-gray-900">Upcoming Game{showAllUpcoming ? 's' : ''}</h2> {/* Darker text */}
-            {upcomingSchedule.length > 1 && (
-              <button
-                onClick={() => setShowAllUpcoming(!showAllUpcoming)}
-                className="text-blue-600 text-sm hover:underline"
-              >
-                {showAllUpcoming ? 'Hide All' : 'Show All Upcoming Games'} {/* Clarified button text */}
-              </button>
-            )}
-          </div>
-          {upcomingSchedule.length === 0 ? (
-            <p className="text-sm text-black">No upcoming games scheduled.</p>
-          ) : (
-            <div className="space-y-3">
-              {(showAllUpcoming ? upcomingSchedule : [upcomingSchedule[0]]).map((game, idx) => (
-                <div key={idx} className="border rounded p-3 space-y-1 bg-blue-50 text-black">
-                  <div className="flex flex-col sm:flex-row items-center justify-between">
-                    <div className="flex items-center space-x-3 mb-2 sm:mb-0">
-                      {/* Away Team */}
-                      <img
-                        src={teamLogos?.[game.away_team_abbr] || `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.away_team_abbr}`}
-                        alt={`${game.away_team_abbr} logo`}
-                        className="w-6 h-6 object-contain"
-                        onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.away_team_abbr}`; }}
-                      />
-                      <span className="text-sm font-medium">{game.away_team_abbr}</span> {/* Keeping abbr for clarity next to logo */}
-                      <span className="text-xs text-gray-500">at</span>
-                      {/* Home Team */}
-                      <span className="text-sm font-medium">{game.home_team_abbr}</span> {/* Keeping abbr for clarity next to logo */}
-                      <img
-                        src={teamLogos?.[game.home_team_abbr] || `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.home_team_abbr}`}
-                        alt={`${game.home_team_abbr} logo`}
-                        className="w-6 h-6 object-contain"
-                        onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.home_team_abbr}`; }}
-                      />
-                    </div>
-                    {/* Game Date */}
-                    <span className="text-sm text-black">
-                      {new Date(game.gameday).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </span>
-                  </div>
-                  <div className="text-xs text-black">{game.stadium || 'Stadium TBD'}</div>
-                  {/* Betting Lines */}
-                  {(game.spread_line != null || game.total_line != null) && (
-                    <div className="text-xs text-black mt-1 flex flex-wrap gap-x-4">
-                      {game.spread_line != null && (
-                        <span className="text-red-600 font-medium">
-                          Spread: {game.spread_line > 0 ? '+' : ''}
-                          {formatStat(game.spread_line, 1)}{' '}
-                          <span className="ml-1 text-gray-500">
-                            ({game.home_spread_odds ?? '—'} / {game.away_spread_odds ?? '—'})
-                          </span>
-                        </span>
-                      )}
-                      {game.total_line != null && (
-                        <span className="text-blue-700 font-medium">
-                          O/U: {formatStat(game.total_line, 1)}
-                          <span className="ml-1 text-gray-500">
-                            ({game.over_odds ?? '—'} / {game.under_odds ?? '—'})
-                          </span>
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Latest News Section */}
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4 text-gray-900">Latest News</h2> {/* Darker text */}
-          {news.length === 0 ? (
-            <p className="text-sm text-black">No recent news available.</p>
-          ) : (
-            <ul className="space-y-4">
-              {news.map((article, idx) => (
-                <li key={idx} className="text-sm border-b pb-2 last:border-b-0 text-black">
-                  <a
-                    href={article.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 font-medium hover:underline block mb-1"
-                  >
-                    {article.title}
-                  </a>
-                  <p className="text-black text-xs">
-                    {new Date(article.publishedAt).toLocaleDateString()}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
+          <p className="text-white font-semibold">3D Player Movement</p>
+          <p className="text-gray-300 text-sm">Interactive visualization</p>
         </div>
       </div>
-    </div>
-  );
-};
+    )
+  }
 
-export default TeamPage;
+  return (
+    <main className="min-h-[calc(100vh-20rem)]">
+      <SectionWrapper title="Analytics Lab">
+        <div className="glass-card p-6 max-w-4xl mx-auto">
+          <h3 className="text-3xl font-semibold text-lightText mb-6">Analytics Lab</h3>
+          <p className="text-grayText mb-8">Advanced tools and data for NFL analysis as of 12:02 PM EDT, June 23, 2025.</p>
+
+          {/* 1. Customizable Dashboard & Workbench */}
+          <div className="mb-8">
+            <h4 className="text-xl font-semibold text-lightText mb-4">Customizable Dashboard & Workbench</h4>
+            <p className="text-grayText mb-4">Build your own analytics experience.</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <button 
+                  onClick={() => toggleWidget('stats')}
+                  className={`w-full p-3 rounded cursor-pointer transition-all ${
+                    selectedWidgets.includes('stats') 
+                      ? 'bg-primary-600 text-white' 
+                      : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
+                  }`}
+                >
+                  📊 Stats Widget
+                </button>
+              </div>
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <button 
+                  onClick={() => toggleWidget('metrics')}
+                  className={`w-full p-3 rounded cursor-pointer transition-all ${
+                    selectedWidgets.includes('metrics') 
+                      ? 'bg-primary-600 text-white' 
+                      : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
+                  }`}
+                >
+                  📈 Metrics Widget
+                </button>
+              </div>
+            </div>
+
+            <div className="border-dashed border-2 border-gray-700 p-4 rounded-lg h-32 flex items-center justify-center">
+              <div className="text-center">
+                <p className="text-grayText">
+                  {selectedWidgets.length === 0 
+                    ? 'Select widgets above to add them to your dashboard' 
+                    : `Active widgets: ${selectedWidgets.join(', ')}`
+                  }
+                </p>
+              </div>
+            </div>
+            
+            <button className="btn bg-primary-600 hover:bg-primary-500 text-lightText mt-4">
+              Customize Dashboard
+            </button>
+          </div>
+
+          {/* 2. Advanced Statistical Explorers */}
+          <div className="mb-8">
+            <h4 className="text-xl font-semibold text-lightText mb-4">Advanced Statistical Explorers</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <h5 className="text-lightText font-semibold mb-2">Player DNA Profiler</h5>
+                <p className="text-grayText text-sm">Average time to throw under pressure, pocket presence metrics</p>
+              </div>
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <h5 className="text-lightText font-semibold mb-2">Situational Splits</h5>
+                <p className="text-grayText text-sm">Performance by down, quarter, field position</p>
+              </div>
+              <div className="bg-mediumBackground/50 p-4 rounded-lg h-64">
+                <Bar data={trendData} options={trendOptions} />
+              </div>
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <h5 className="text-lightText font-semibold mb-2">Player Archetype Analysis</h5>
+                <p className="text-grayText text-sm">Dual-threat QB, pocket passer classification</p>
+              </div>
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <h5 className="text-lightText font-semibold mb-2">Team Synergy Visualizer</h5>
+                <p className="text-grayText text-sm">Unit performance and chemistry metrics</p>
+              </div>
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <h5 className="text-lightText font-semibold mb-2">Game Flow Analyzer</h5>
+                <p className="text-grayText text-sm">Win Probability Added (WPA) and EPA tracking</p>
+              </div>
+            </div>
+            <button className="btn bg-primary-600 hover:bg-primary-500 text-lightText mt-4">
+              Explore Advanced Stats
+            </button>
+          </div>
+
+          {/* 3. Predictive Analytics Suite */}
+          <div className="mb-8">
+            <h4 className="text-xl font-semibold text-lightText mb-4">Predictive Analytics Suite</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <h5 className="text-lightText font-semibold mb-2">🔮 Prediction Models</h5>
+                <p className="text-grayText text-sm">Game outcomes, injury risk, performance forecasts</p>
+              </div>
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <h5 className="text-lightText font-semibold mb-2">🎯 Scenario Generator</h5>
+                <p className="text-grayText text-sm">What-if analysis with adjustable variables</p>
+              </div>
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <h5 className="text-lightText font-semibold mb-2">⚡ Fantasy Optimizer</h5>
+                <p className="text-grayText text-sm">Optimal lineup generation and player projections</p>
+              </div>
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <h5 className="text-lightText font-semibold mb-2">💰 Betting Calculator</h5>
+                <p className="text-grayText text-sm">Data-driven betting insights and edge analysis</p>
+              </div>
+            </div>
+            <button className="btn bg-primary-600 hover:bg-primary-500 text-lightText mt-4">
+              Run Predictions
+            </button>
+          </div>
+
+          {/* 4. Cutting-Edge Visualizations */}
+          <div className="mb-8">
+            <h4 className="text-xl font-semibold text-lightText mb-4">Cutting-Edge Visualizations</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <h5 className="text-lightText font-semibold mb-2">🗺️ Interactive Heatmaps</h5>
+                <p className="text-grayText text-sm">Field zones, efficiency maps, target areas</p>
+              </div>
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <h5 className="text-lightText font-semibold mb-2">🌊 Play Flow Diagrams</h5>
+                <p className="text-grayText text-sm">Sankey diagrams showing decision points</p>
+              </div>
+              <div className="bg-mediumBackground/50 p-4 rounded-lg h-64">
+                <ThreeDVisualization />
+              </div>
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <h5 className="text-lightText font-semibold mb-2">🕸️ Network Graphs</h5>
+                <p className="text-grayText text-sm">Player interaction patterns and connections</p>
+              </div>
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <h5 className="text-lightText font-semibold mb-2">📊 Custom Infographics</h5>
+                <p className="text-grayText text-sm">Export-ready data visualizations</p>
+              </div>
+            </div>
+            <button className="btn bg-primary-600 hover:bg-primary-500 text-lightText mt-4">
+              Explore Visualizations
+            </button>
+          </div>
+
+          {/* 5. Data Playground & API Access */}
+          <div className="mb-8">
+            <h4 className="text-xl font-semibold text-lightText mb-4">Data Playground & API Access</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <h5 className="text-lightText font-semibold mb-2">📥 Raw Data Access</h5>
+                <p className="text-grayText text-sm">Download clean, structured datasets</p>
+              </div>
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <h5 className="text-lightText font-semibold mb-2">🔧 API Integration</h5>
+                <p className="text-grayText text-sm">Build custom applications with our API</p>
+              </div>
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <h5 className="text-lightText font-semibold mb-2">📚 Data Dictionary</h5>
+                <p className="text-grayText text-sm">Complete methodology and field explanations</p>
+              </div>
+            </div>
+            <button className="btn bg-primary-600 hover:bg-primary-500 text-lightText mt-4">
+              Access Developer Tools
+            </button>
+          </div>
+
+          {/* 6. Community & Collaboration Features */}
+          <div className="mb-8">
+            <h4 className="text-xl font-semibold text-lightText mb-4">Community & Collaboration</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <h5 className="text-lightText font-semibold mb-2">🔗 Shareable Insights</h5>
+                <p className="text-grayText text-sm">Export and share custom dashboards</p>
+              </div>
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <h5 className="text-lightText font-semibold mb-2">💬 Community Forums</h5>
+                <p className="text-grayText text-sm">Discuss findings with other analysts</p>
+              </div>
+              <div className="bg-mediumBackground/50 p-4 rounded-lg">
+                <h5 className="text-lightText font-semibold mb-2">🎓 Expert Commentary</h5>
+                <p className="text-grayText text-sm">Professional analyst deep dives and insights</p>
+              </div>
+            </div>
+            <button className="btn bg-primary-600 hover:bg-primary-500 text-lightText mt-4">
+              Join the Community
+            </button>
+          </div>
+        </div>
+      </SectionWrapper>
+    </main>
+  )
+}
