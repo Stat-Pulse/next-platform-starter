@@ -133,7 +133,7 @@ export default function ScheduleResults() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl"
+            className="text-4xl font-extrabold tracking-tight text-black sm:text-5xl"
           >
             NFL Schedule &amp; Results
           </motion.h1>
