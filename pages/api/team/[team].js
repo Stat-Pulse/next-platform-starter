@@ -18,6 +18,7 @@ export default async function handler(req, res) {
       database: process.env.DB_NAME,
     });
 
+    // --- PULLING FROM: Teams table ---
     // Resolve team abbreviation from nickname or full team name
     const [abbrRows] = await connection.execute(
       `SELECT team_abbr FROM Teams WHERE LOWER(nickname) = ? OR LOWER(team_name) LIKE ?`,
@@ -31,6 +32,7 @@ export default async function handler(req, res) {
 
     const teamId = abbrRows[0].team_abbr;
 
+    // --- PULLING FROM: Teams table ---
     // Fetch core team information
     const [teamRows] = await connection.execute(
       `SELECT
@@ -65,7 +67,8 @@ export default async function handler(req, res) {
     const teamRow = teamRows[0];
     const fullTeamId = teamRow.team_id || teamId;
 
-    // Fetch roster (2025 season) - This query remains as is based on previous context.
+    // --- PULLING FROM: Rosters_2025 table ---
+    // Fetch roster (2025 season)
     const [roster] = await connection.execute(
       `SELECT
          gsis_id        AS id,
@@ -80,7 +83,8 @@ export default async function handler(req, res) {
       [teamId]
     );
 
-    // Fetch depth chart (2025 season, latest week) - This query remains as is.
+    // --- PULLING FROM: Depth_Charts and Rosters_2025 tables ---
+    // Fetch depth chart (2025 season, latest week)
     const [depthRows] = await connection.execute(
       `SELECT
          dc.position,
@@ -108,16 +112,16 @@ export default async function handler(req, res) {
       depthChart[row.position].push({ name: row.name, depth: row.depth_rank });
     }
 
-    // Fetch past season games for the defined 'currentSeason'
+    // --- PULLING FROM: Games table ---
+    // Fetch past season games.
     const [seasonGamesRaw] = await connection.execute(
       `SELECT game_id, week, game_date AS date, game_time,
               home_team_id, away_team_id, home_score, away_score, is_final,
               stadium_name, spread_line, total_line, referee, weather_summary
        FROM Games
-       WHERE (home_team_id = ? OR away_team_id = ?)
-         AND season = ?
+       WHERE home_team_id = ? OR away_team_id = ?
        ORDER BY game_date ASC`,
-      [teamId, teamId, currentSeason]
+      [teamId, teamId]
     );
 
     const formattedSeasonGames = seasonGamesRaw.map(g => ({
@@ -131,7 +135,8 @@ export default async function handler(req, res) {
       is_final: g.is_final,
     }));
 
-    // Fetch upcoming schedule for 2025 season (assuming Schedules_2025 is for future games)
+    // --- PULLING FROM: Schedules_2025 table ---
+    // Fetch upcoming schedule for 2025 season
     const [upcomingSchedule] = await connection.execute(
       `SELECT game_id,
               gameday,
@@ -156,7 +161,8 @@ export default async function handler(req, res) {
     );
 
     /* -------------------------------------------------- *
-     * Aggregated Offensive Season Stats (from team_weekly_stats)
+     * --- PULLING FROM: team_weekly_stats table (for offense) ---
+     * Aggregated Offensive Season Stats
      * -------------------------------------------------- */
     let offenseStats = null;
     try {
@@ -178,8 +184,8 @@ export default async function handler(req, res) {
     }
 
     /* -------------------------------------------------- *
-     * Aggregated Defensive Season Stats (from team_weekly_stats, based on opponent)
-     * To get yards allowed BY teamId, we sum the offensive stats of teams that played AGAINST teamId.
+     * --- PULLING FROM: team_weekly_stats table (for defense, based on opponent) ---
+     * Aggregated Defensive Season Stats
      * -------------------------------------------------- */
     let defenseStats = null;
     try {
@@ -201,7 +207,7 @@ export default async function handler(req, res) {
       console.warn(`Could not fetch defensive season stats for ${teamId} (Season ${currentSeason}):`, statErr.message);
     }
 
-
+    // --- PULLING FROM: Teams table (again, for logos of all relevant teams) ---
     // Build logo map for all referenced teams (current team, opponents in past/upcoming games)
     const teamSet = new Set([teamId]);
     upcomingSchedule.forEach(r => {
@@ -269,8 +275,8 @@ export default async function handler(req, res) {
       roster: roster || [],
       depthChart: Object.keys(depthChart).length ? depthChart : {},
       recentNews: [],
-      offenseStats: offenseStats, // Now populated from team_weekly_stats aggregation
-      defenseStats: defenseStats, // Now populated from team_weekly_stats aggregation
+      offenseStats: offenseStats,
+      defenseStats: defenseStats,
       lastUpdated: new Date().toISOString()
     });
 
