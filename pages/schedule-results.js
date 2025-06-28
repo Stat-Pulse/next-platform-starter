@@ -234,31 +234,31 @@ export default function ScheduleResults() {
                   <table className="min-w-full divide-y divide-gray-200 text-sm">
                     <thead className="bg-blue-50">
                       <tr>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Season</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Week</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Weekday</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Away Team</th> {/* Added */}
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Home Team</th> {/* Added */}
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Away Score</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Home Score</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Location</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Result</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Total</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Overtime</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Away Moneyline</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Home Moneyline</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Spread Line</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Away Spread Odds</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Home Spread Odds</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Total Line</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Under Odds</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Over Odds</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Division Game</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Roof</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Surface</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Temp</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Wind</th>
-                        <th className="px-4 py-2 text-left font-semibold text-blue-700">Referee</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Season</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Week</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Weekday</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Away Team</th> {/* Added */}
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Home Team</th> {/* Added */}
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Away Score</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Home Score</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Location</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Result</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Total</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Overtime</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Away Moneyline</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Home Moneyline</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Spread Line</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Away Spread Odds</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Home Spread Odds</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Total Line</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Under Odds</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Over Odds</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Division Game</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Roof</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Surface</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Temp</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Wind</th>
+                        <th className="px-4 py-2 text-left font-semibold text-black-900">Referee</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -301,7 +301,7 @@ export default function ScheduleResults() {
                             <td className="px-4 py-2 whitespace-nowrap font-medium text-gray-900">{displayVal(game.home_team)}</td> {/* Added */}
                             <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.away_score)}</td>
                             <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.home_score)}</td>
-                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.location || game.stadium)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">{displayVal(game.location || game.stadium_name)}</td>
                             <td className="px-4 py-2 whitespace-nowrap">
                               {/* Result: show home_score – away_score or em dash */}
                               {game.home_score !== null && game.away_score !== null ? (
