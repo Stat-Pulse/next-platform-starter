@@ -18,11 +18,22 @@ export default async function handler(req, res) {
       database: process.env.DB_NAME,
     });
 
-    // --- PULLING FROM: Teams table ---
-    // Resolve team abbreviation from nickname or full team name
+    // Prioritize matching the incoming 'team' slug to an official team_abbr
     const [abbrRows] = await connection.execute(
-      `SELECT team_abbr FROM Teams WHERE LOWER(nickname) = ? OR LOWER(team_name) LIKE ?`,
-      [team.toLowerCase(), `%${team.toLowerCase()}%`]
+      `SELECT team_abbr FROM Teams
+       WHERE LOWER(team_abbr) = ?
+          OR LOWER(nickname) = ?
+          OR LOWER(team_name) = ?
+       ORDER BY
+           CASE
+               WHEN LOWER(team_abbr) = ? THEN 1
+               WHEN LOWER(nickname) = ? THEN 2
+               WHEN LOWER(team_name) = ? THEN 3
+               ELSE 4
+           END
+       LIMIT 1`,
+      [team.toLowerCase(), team.toLowerCase(), team.toLowerCase(),
+       team.toLowerCase(), team.toLowerCase(), team.toLowerCase()]
     );
 
     if (!abbrRows.length) {
@@ -30,9 +41,8 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'Team slug could not be resolved' });
     }
 
-    const teamId = abbrRows[0].team_abbr;
+    const teamId = abbrRows[0].team_abbr; // This is the resolved, canonical team_abbr
 
-    // --- PULLING FROM: Teams table ---
     // Fetch core team information
     const [teamRows] = await connection.execute(
       `SELECT
@@ -62,12 +72,11 @@ export default async function handler(req, res) {
     );
     if (!teamRows.length) {
       await connection.end();
-      return res.status(404).json({ error: 'Team not found' });
+      return res.status(404).json({ error: 'Team not found after resolution' });
     }
     const teamRow = teamRows[0];
     const fullTeamId = teamRow.team_id || teamId;
 
-    // --- PULLING FROM: Rosters_2025 table ---
     // Fetch roster (2025 season)
     const [roster] = await connection.execute(
       `SELECT
@@ -83,7 +92,6 @@ export default async function handler(req, res) {
       [teamId]
     );
 
-    // --- PULLING FROM: Depth_Charts and Rosters_2025 tables ---
     // Fetch depth chart (2025 season, latest week)
     const [depthRows] = await connection.execute(
       `SELECT
@@ -112,7 +120,6 @@ export default async function handler(req, res) {
       depthChart[row.position].push({ name: row.name, depth: row.depth_rank });
     }
 
-    // --- PULLING FROM: Games table ---
     // Fetch past season games.
     const [seasonGamesRaw] = await connection.execute(
       `SELECT game_id, week, game_date AS date, game_time,
@@ -135,7 +142,6 @@ export default async function handler(req, res) {
       is_final: g.is_final,
     }));
 
-    // --- PULLING FROM: Schedules_2025 table ---
     // Fetch upcoming schedule for 2025 season
     const [upcomingSchedule] = await connection.execute(
       `SELECT game_id,
@@ -161,21 +167,25 @@ export default async function handler(req, res) {
     );
 
     /* -------------------------------------------------- *
-     * --- PULLING FROM: team_weekly_stats table (for offense) ---
-     * Aggregated Offensive Season Stats
+     * Aggregated Offensive Season Stats (from team_weekly_stats)
+     * Using DISTINCT in a subquery to avoid potential doubling if weekly stats are duplicated.
      * -------------------------------------------------- */
     let offenseStats = null;
     try {
       const [offenseStatsRows] = await connection.execute(
         `SELECT
-           SUM(passing_yards) AS pass_yards,
-           SUM(passing_tds) AS pass_tds,
-           SUM(rushing_yards) AS rush_yards,
-           SUM(rushing_tds) AS rush_tds,
-           SUM(passing_yards + rushing_yards) AS total_off_yards
-         FROM team_weekly_stats
-         WHERE team = ? AND season = ?
-         GROUP BY team, season`,
+           SUM(sub.passing_yards) AS pass_yards,
+           SUM(sub.passing_tds) AS pass_tds,
+           SUM(sub.rushing_yards) AS rush_yards,
+           SUM(sub.rushing_tds) AS rush_tds,
+           SUM(sub.passing_yards + sub.rushing_yards) AS total_off_yards
+         FROM (
+             SELECT DISTINCT season, week, team,
+                             passing_yards, passing_tds, rushing_yards, rushing_tds
+             FROM team_weekly_stats
+             WHERE team = ? AND season = ?
+         ) AS sub
+         GROUP BY sub.team, sub.season`,
         [teamId, currentSeason]
       );
       offenseStats = offenseStatsRows.length ? offenseStatsRows[0] : null;
@@ -184,22 +194,26 @@ export default async function handler(req, res) {
     }
 
     /* -------------------------------------------------- *
-     * --- PULLING FROM: team_weekly_stats table (for defense, based on opponent) ---
-     * Aggregated Defensive Season Stats
+     * Aggregated Defensive Season Stats (from team_weekly_stats, based on opponent)
+     * Using DISTINCT in a subquery to avoid potential doubling.
      * -------------------------------------------------- */
     let defenseStats = null;
     try {
       const [defenseStatsRows] = await connection.execute(
         `SELECT
-           SUM(tws.passing_yards) AS pass_yards_allowed,
-           SUM(tws.passing_tds) AS pass_td_allowed,
-           SUM(tws.rushing_yards) AS rush_yards_allowed,
-           SUM(tws.rushing_tds) AS rush_td_allowed,
-           SUM(tws.passing_yards + tws.rushing_yards) AS total_defense_yards_allowed,
-           SUM(tws.passing_tds + tws.rushing_tds) AS total_defense_td_allowed
-         FROM team_weekly_stats tws
-         WHERE tws.opponent_team = ? AND tws.season = ?
-         GROUP BY tws.opponent_team, tws.season`,
+           SUM(sub.passing_yards) AS pass_yards_allowed,
+           SUM(sub.passing_tds) AS pass_td_allowed,
+           SUM(sub.rushing_yards) AS rush_yards_allowed,
+           SUM(sub.rushing_tds) AS rush_td_allowed,
+           SUM(sub.passing_yards + sub.rushing_yards) AS total_defense_yards_allowed,
+           SUM(sub.passing_tds + sub.rushing_tds) AS total_defense_td_allowed
+         FROM (
+             SELECT DISTINCT season, week, opponent_team,
+                             passing_yards, passing_tds, rushing_yards, rushing_tds
+             FROM team_weekly_stats
+             WHERE opponent_team = ? AND season = ?
+         ) AS sub
+         GROUP BY sub.opponent_team, sub.season`,
         [teamId, currentSeason]
       );
       defenseStats = defenseStatsRows.length ? defenseStatsRows[0] : null;
@@ -207,8 +221,7 @@ export default async function handler(req, res) {
       console.warn(`Could not fetch defensive season stats for ${teamId} (Season ${currentSeason}):`, statErr.message);
     }
 
-    // --- PULLING FROM: Teams table (again, for logos of all relevant teams) ---
-    // Build logo map for all referenced teams (current team, opponents in past/upcoming games)
+    // Build logo map for all referenced teams
     const teamSet = new Set([teamId]);
     upcomingSchedule.forEach(r => {
       if (r.home_team_abbr) teamSet.add(r.home_team_abbr);
@@ -239,6 +252,8 @@ export default async function handler(req, res) {
     if (teamRow.team_logo_wikipedia && !teamRow.team_logo_wikipedia.startsWith('http')) {
       teamRow.team_logo_wikipedia = `https://a.espncdn.com/i/teamlogos/nfl/500/${teamId.toLowerCase()}.png`;
     }
+
+    console.log("Backend: teamLogos being sent:", teamLogos);
 
     await connection.end();
 
