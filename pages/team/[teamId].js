@@ -1,6 +1,6 @@
 // pages/teams/[teamId].js
-import { useEffect, useState, useRef } from 'react';
-import Chart from 'chart.js/auto'; // For Chart.js integration
+import { useEffect, useState } from 'react';
+import Chart from 'chart.js/auto'; // Still needed for stats section if you re-add charts there
 
 const TeamPage = () => {
   const [teamId, setTeamId] = useState(null);
@@ -38,6 +38,7 @@ const TeamPage = () => {
         setTeamData(teamJson);
         setSeasonGames(teamJson.seasonGames || []);
         setUpcomingSchedule(teamJson.upcomingSchedule || []);
+
       } catch (err) {
         console.error("Error fetching team data:", err);
         setError(err.message);
@@ -66,155 +67,9 @@ const TeamPage = () => {
     teamLogos,
     offenseStats,
     defenseStats,
-    roster, // Access roster data for DepthChartSection
-    depthChart, // Access depthChart data for DepthChartSection
   } = teamData;
 
   const lastGame = seasonGames.length > 0 ? seasonGames[seasonGames.length - 1] : null;
-
-  // Helper to get player's number and headshot from roster
-  const getPlayerInfo = (playerName) => {
-    const player = roster.find(p => p.name === playerName);
-    return {
-      number: player?.jersey_number ?? '—', // Use jersey_number from roster
-      headshot: player?.headshot_url || 'https://placehold.co/40x40/E2E8F0/1A202C?text=Player'
-    };
-  };
-
-  // Depth Chart Display Component (Integrated directly here)
-  const DepthChartSection = ({ depthChart, roster, branding }) => {
-    const chartRefs = useRef({});
-
-    // Define categories for positions
-    const offensivePositions = ['QB', 'RB', 'WR', 'TE', 'LT', 'LG', 'C', 'RG', 'RT'];
-    const defensivePositions = ['DE', 'DT', 'LB', 'CB', 'S', 'NT'];
-    const specialTeamsPositions = ['K', 'P', 'LS'];
-
-    // Effect to initialize/update unit strength charts
-    useEffect(() => {
-      // Cleanup function to destroy existing Chart instances
-      return () => {
-        Object.values(chartRefs.current).forEach(ref => {
-          if (ref && ref.chartInstance) {
-            ref.chartInstance.destroy();
-            ref.chartInstance = null;
-          }
-        });
-      };
-    }, []); // Run cleanup on unmount
-
-    useEffect(() => {
-      // Re-initialize charts only when depthChart data changes
-      // Ensure data is loaded
-      if (!depthChart || Object.keys(depthChart).length === 0) {
-        return;
-      }
-
-      // Prepare data for unit strengths from depthChart.unit_strength
-      const availableUnitStrengths = depthChart.unit_strength || {};
-
-      [...offensivePositions, ...defensivePositions, ...specialTeamsPositions].forEach((pos) => {
-        if (availableUnitStrengths[pos] != null && chartRefs.current[pos]) { // Check for null/undefined as well
-          // Ensure old chart is destroyed before creating new one
-          if (chartRefs.current[pos].chartInstance) {
-            chartRefs.current[pos].chartInstance.destroy();
-          }
-
-          const newChart = new Chart(chartRefs.current[pos].getContext('2d'), {
-            type: 'bar',
-            data: {
-              labels: [pos],
-              datasets: [{
-                label: 'Unit Strength',
-                data: [availableUnitStrengths[pos]],
-                backgroundColor: branding.secondaryColor || '#DBEAFE', // Use team secondary color
-                borderColor: branding.primaryColor || '#2563EB',
-                borderWidth: 1,
-              }],
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false, // Allow charts to resize more freely
-              plugins: {
-                legend: { display: false },
-                tooltip: { enabled: true, mode: 'index', intersect: false } // Improved tooltip
-              },
-              scales: {
-                y: { beginAtZero: true, max: 100, ticks: { color: 'black' } },
-                x: { ticks: { color: 'black' } }
-              }
-            },
-          });
-          chartRefs.current[pos].chartInstance = newChart;
-        }
-      });
-    }, [depthChart, branding.primaryColor, branding.secondaryColor]); // Dependencies for chart re-render
-
-    const renderPositionGroup = (positions, title) => (
-      <div className="mb-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-3">{title}</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"> {/* Adjusted grid for more columns */}
-          {positions.map(position => {
-            const players = depthChart[position] || [];
-            if (players.length === 0) return null;
-
-            return (
-              <div key={position} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
-                <h4 className="font-semibold text-lg text-blue-700 mb-2">{position}</h4>
-                <ul className="space-y-2 text-black">
-                  {players.map(player => {
-                    const playerInfo = getPlayerInfo(player.name);
-                    return (
-                      <li key={player.name} className="flex items-center space-x-2">
-                        <img
-                          src={playerInfo.headshot}
-                          alt={`${player.name} headshot`}
-                          className="w-8 h-8 rounded-full object-cover bg-white border border-gray-300"
-                          onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/40x40/E2E8F0/1A202C?text=Player'; }}
-                        />
-                        <span className="font-medium">#{playerInfo.number} {player.name}</span>
-                        <span className="text-gray-600 text-sm">({player.depth_rank})</span> {/* Ensure depth_rank is used */}
-                      </li>
-                    );
-                  })}
-                </ul>
-                {/* Render Chart.js canvas if unit strength data exists for this position */}
-                {depthChart.unit_strength?.[position] != null && ( // Check for null/undefined
-                  <div className="h-24 w-full mt-4"> {/* Fixed height for chart */}
-                    <canvas ref={(ref) => (chartRefs.current[position] = ref)} />
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-
-    return (
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-2xl font-bold mb-6 text-gray-900">Depth Chart</h2>
-        {Object.keys(depthChart).filter(key => key !== 'unit_strength').length === 0 ? (
-          <p className="text-black">No depth chart data available.</p>
-        ) : (
-          <div>
-            {renderPositionGroup(offensivePositions, 'Offense')}
-            {renderPositionGroup(defensivePositions, 'Defense')}
-            {renderPositionGroup(specialTeamsPositions, 'Special Teams')}
-            {/* Render any other positions not categorized above */}
-            {Object.keys(depthChart)
-              .filter(pos => ![...offensivePositions, ...defensivePositions, ...specialTeamsPositions, 'unit_strength'].includes(pos))
-              .length > 0 && (
-                renderPositionGroup(
-                  Object.keys(depthChart).filter(pos => ![...offensivePositions, ...defensivePositions, ...specialTeamsPositions, 'unit_strength'].includes(pos)),
-                  'Other Positions'
-                )
-            )}
-          </div>
-        )}
-      </div>
-    );
-  };
 
 
   return (
@@ -222,8 +77,7 @@ const TeamPage = () => {
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
         <div
-          className="flex flex-col sm:flex-row items-center justify-between bg-gray-100 rounded-lg p-4 shadow-sm mb-6 border-l-4 border-r-4"
-          // Removed background color for transparency, using primary color for border
+          className="flex flex-col sm:flex-row items-center justify-between rounded-lg p-4 shadow-sm mb-6 border-l-4 border-r-4"
           style={{ borderColor: branding.colorPrimary || '#F3F4F6' }}
         >
           <div className="flex items-center space-x-4 mb-4 sm:mb-0">
@@ -257,7 +111,14 @@ const TeamPage = () => {
           {['overview', 'depthChart', 'schedule', 'injuries', 'stats'].map(tab => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => {
+                if (tab === 'depthChart') {
+                  // Navigate to the separate depth chart page, passing teamId
+                  window.location.href = `${window.location.origin}/depth_chart?team=${teamId}`;
+                } else {
+                  setActiveTab(tab);
+                }
+              }}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors duration-200 ${
                 activeTab === tab
                   ? 'border-blue-600 text-blue-600'
@@ -361,7 +222,7 @@ const TeamPage = () => {
                             className="w-6 h-6 object-contain"
                             onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.home_team_abbr}`; }}
                           />
-                          <span className="text-sm font-medium">{game.home_team_abbr}</span> {/* Kept abbr for clarity */}
+                          <span className="text-sm font-medium">{game.home_team_abbr}</span>
                           <span className={`text-sm font-bold ${game.home_score > game.away_score ? 'text-blue-600' : 'text-gray-700'}`}>
                             {game.home_score}
                           </span>
@@ -372,7 +233,7 @@ const TeamPage = () => {
                           <span className={`text-sm font-bold ${game.away_score > game.home_score ? 'text-blue-600' : 'text-gray-700'}`}>
                             {game.away_score}
                           </span>
-                          <span className="text-sm font-medium">{game.away_team_abbr}</span> {/* Kept abbr for clarity */}
+                          <span className="text-sm font-medium">{game.away_team_abbr}</span>
                           <img
                             src={teamLogos?.[game.away_team_abbr] || `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.away_team_abbr}`}
                             alt={`${game.away_team_abbr} logo`}
@@ -423,10 +284,10 @@ const TeamPage = () => {
                             className="w-6 h-6 object-contain"
                             onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.away_team_abbr}`; }}
                           />
-                          <span className="text-sm font-medium">{game.away_team_abbr}</span> {/* Kept abbr for clarity */}
+                          <span className="text-sm font-medium">{game.away_team_abbr}</span>
                           <span className="text-xs text-gray-500">at</span>
                           {/* Home Team */}
-                          <span className="text-sm font-medium">{game.home_team_abbr}</span> {/* Kept abbr for clarity */}
+                          <span className="text-sm font-medium">{game.home_team_abbr}</span>
                           <img
                             src={teamLogos?.[game.home_team_abbr] || `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.home_team_abbr}`}
                             alt={`${game.home_team_abbr} logo`}
@@ -500,12 +361,7 @@ const TeamPage = () => {
           </>
         )}
 
-        {/* Render Depth Chart Section when activeTab is 'depthChart' */}
-        {activeTab === 'depthChart' && (
-          <DepthChartSection depthChart={depthChart} roster={roster} branding={branding} />
-        )}
-
-        {/* Placeholder Sections for other tabs */}
+        {/* The 'depthChart' tab now navigates to a new page, no content rendered here */}
         {activeTab === 'schedule' && (
           <div className="bg-white rounded-lg shadow p-6 mb-6">
             <h2 className="text-2xl font-bold mb-4 text-gray-900">Full Schedule</h2>
@@ -519,7 +375,6 @@ const TeamPage = () => {
           </div>
         )}
         {activeTab === 'stats' && (
-          // Re-using the stats section, ensuring it's the ONLY thing shown
           (offenseStats || defenseStats) && (
             <div className="bg-white rounded-lg shadow p-6 mb-6">
               <h2 className="text-xl font-bold mb-4 text-gray-900">Team Stats (2024 Season)</h2>

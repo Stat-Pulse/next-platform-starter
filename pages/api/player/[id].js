@@ -3,7 +3,7 @@ import mysql from 'mysql2/promise';
 
 export default async function handler(req, res) {
   const playerId = req.query.id;
-  const season   = req.query.season || '2024';
+  const season = req.query.season || '2024';
   let conn;
 
   try {
@@ -18,11 +18,13 @@ export default async function handler(req, res) {
     if (!playerRows.length) return res.status(404).json({ error: 'Player not found' });
     const player = playerRows[0];
 
-    const [weekly] = await conn.execute(`SELECT * FROM offense_weekly_stats WHERE player_id = ? AND season = ? AND season_type = 'REG' ORDER BY CAST(week AS UNSIGNED)`, [playerId, season]);
+    const [weekly] = await conn.execute(`SELECT * FROM offense_weekly_stats WHERE player_id = ? AND season_type = 'REG' ORDER BY season, CAST(week AS UNSIGNED)`, [playerId]);
 
     const passingMetrics = weekly.filter(r => +r.attempts > 0);
     const rushingMetrics = weekly.filter(r => +r.carries > 0);
     const receivingMetrics = weekly.filter(r => +r.targets > 0);
+
+    const [seasonStats] = await conn.execute(`SELECT season, SUM(passing_yards) AS passing_yards, SUM(passing_tds) AS passing_tds, SUM(rushing_yards) AS rushing_yards, SUM(rushing_tds) AS rushing_tds, SUM(receiving_yards) AS receiving_yards, SUM(receiving_tds) AS receiving_tds FROM offense_weekly_stats WHERE player_id = ? GROUP BY season ORDER BY season`, [playerId]);
 
     const [career] = await conn.execute(`SELECT COUNT(DISTINCT season) as seasons, SUM(passing_yards) as pass_yards, SUM(passing_tds) as pass_tds, SUM(rushing_yards) as rush_yards, SUM(rushing_tds) as rush_tds, SUM(receiving_yards) as rec_yards, SUM(receiving_tds) as rec_tds FROM offense_weekly_stats WHERE player_id = ?`, [playerId]);
 
@@ -32,7 +34,7 @@ export default async function handler(req, res) {
       receiving: { seasons: career[0].seasons, yards: career[0].rec_yards, tds: career[0].rec_tds },
     };
 
-    res.status(200).json({ player, passingMetrics, rushingMetrics, receivingMetrics });
+    res.status(200).json({ player, weekly, passingMetrics, rushingMetrics, receivingMetrics, seasonStats });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
