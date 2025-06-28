@@ -17,8 +17,6 @@ const TeamPage = () => {
   const [showAllGames, setShowAllGames] = useState(false);
   const [upcomingSchedule, setUpcomingSchedule] = useState([]);
   const [showAllUpcoming, setShowAllUpcoming] = useState(false);
-  // rushDefense is fetched but not used in the provided JSX for team stats
-  // const [rushDefense, setRushDefense] = useState(null);
 
   useEffect(() => {
     // Extract teamId from the URL pathname.
@@ -34,18 +32,11 @@ const TeamPage = () => {
     const fetchData = async () => {
       try {
         // Fetch news for the team
-        // Note: This fetch assumes a local API proxy or a direct access to the news API.
-        // For a full application, you might need to adjust the news API endpoint.
         const newsRes = await fetch(`/api/news?team=${teamId.toUpperCase()}`);
         const newsJson = await newsRes.json();
         if (newsRes.ok) setNews(newsJson.slice(0, 5)); // Limit to 5 articles
 
-        // Example for fetching specific stats, if you have a separate API for it
-        // const rushDefRes = await fetch('/api/team-stats/rush-defense');
-        // const rushDefJson = await rushDefRes.json();
-        // if (rushDefRes.ok) setRushDefense(rushDefJson);
-
-        // Fetch main team data from our new backend API
+        // Fetch main team data from our backend API
         const teamRes = await fetch(`/api/team/${teamId}`);
         const teamJson = await teamRes.json();
         if (!teamRes.ok) throw new Error(teamJson.error || 'Failed to load team data');
@@ -86,8 +77,12 @@ const TeamPage = () => {
     defenseStats, // Added from backend
   } = teamData;
 
+  // Get the last game (most recent) from the seasonGames array, which is sorted ASC by date
+  const lastGame = seasonGames.length > 0 ? seasonGames[seasonGames.length - 1] : null;
+
+
   return (
-    <div className="bg-gradient-to-r from-blue-50 via-white to-gray-50 min-h-screen p-6 font-sans">
+    <div className="bg-gradient-to-r from-blue-50 via-white to-gray-50 min-h-screen p-6 font-sans text-black"> {/* General text color change */}
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row items-center justify-between bg-gray-100 rounded-lg p-4 shadow-sm mb-6">
@@ -101,16 +96,16 @@ const TeamPage = () => {
             />
             {/* Team Info */}
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">{teamName}</h1>
-              <p className="text-sm text-gray-500">{division} • Est. {teamLoc.foundedYear ?? '—'}</p>
-              <p className="text-sm text-gray-500">
+              <h1 className="text-2xl font-bold text-gray-900">{teamName}</h1> {/* Darker text */}
+              <p className="text-sm text-black">{division} • Est. {teamLoc.foundedYear ?? '—'}</p>
+              <p className="text-sm text-black">
                 Stadium: {teamLoc.stadium ?? '—'} ({formatStat(teamLoc.capacity) ?? '—'} Capacity)
               </p>
-              <p className="text-sm text-gray-500">City: {teamLoc.city ?? '—'}</p>
+              <p className="text-sm text-black">City: {teamLoc.city ?? '—'}</p>
             </div>
           </div>
           {/* Coaching Staff */}
-          <div className="text-right text-sm text-gray-600 space-y-1">
+          <div className="text-right text-sm text-black space-y-1">
             <p className="font-semibold">Head Coach: {coaching.headCoach ?? '—'}</p>
             <p>Offensive Coord: {coaching.offensiveCoordinator ?? '—'}</p>
             <p>Defensive Coord: {coaching.defensiveCoordinator ?? '—'}</p>
@@ -126,7 +121,7 @@ const TeamPage = () => {
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors duration-200 ${
                 activeTab === tab
                   ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-blue-600 hover:border-gray-300'
+                  : 'border-transparent text-gray-700 hover:text-blue-600 hover:border-gray-300' // Darker non-active tab text
               }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -135,53 +130,62 @@ const TeamPage = () => {
         </nav>
 
         {/* Team Stats Section (Visible when activeTab is 'overview' or 'stats') */}
-        {/* Adjusted to use offenseStats and defenseStats from backend */}
         {(offenseStats || defenseStats) && (activeTab === 'overview' || activeTab === 'stats') && (
           <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 className="text-xl font-bold mb-4 text-gray-800">Team Stats (2024 Season)</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-              {/* Pass Offense */}
-              <div className="border rounded p-3 bg-blue-50">
-                <h3 className="font-semibold text-blue-700 mb-1">Pass Offense</h3>
-                <p>Yards: {formatStat(offenseStats?.pass_yards)}</p>
-                <p>TDs: {formatStat(offenseStats?.pass_tds)}</p>
-                <p>NFL Rank: —</p> {/* Rank data would need another API/DB field */}
+            <h2 className="text-xl font-bold mb-4 text-gray-900">Team Stats (2024 Season)</h2> {/* Darker text */}
+            {/* Offense Stats */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-blue-800 mb-3">Offense</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-black text-sm"> {/* Changed grid layout, text-black */}
+                {/* Pass Offense */}
+                <div className="border rounded-lg p-3 bg-blue-50 shadow-sm">
+                  <h4 className="font-semibold text-blue-700 mb-1">Pass Offense</h4>
+                  <p>Yards: {formatStat(offenseStats?.pass_yards)}</p>
+                  <p>TDs: {formatStat(offenseStats?.pass_tds)}</p>
+                  <p>NFL Rank: —</p>
+                </div>
+                {/* Rush Offense */}
+                <div className="border rounded-lg p-3 bg-green-50 shadow-sm">
+                  <h4 className="font-semibold text-green-700 mb-1">Rush Offense</h4>
+                  <p>Yards: {formatStat(offenseStats?.rush_yards)}</p>
+                  <p>TDs: {formatStat(offenseStats?.rush_tds)}</p>
+                  <p>NFL Rank: —</p>
+                </div>
+                {/* Total Offense */}
+                <div className="border rounded-lg p-3 bg-purple-50 shadow-sm">
+                  <h4 className="font-semibold text-purple-700 mb-1">Total Offense</h4>
+                  <p>Yards: {formatStat(offenseStats?.total_off_yards)}</p>
+                  <p>TDs: {formatStat((offenseStats?.pass_tds ?? 0) + (offenseStats?.rush_tds ?? 0))}</p>
+                  <p>NFL Rank: —</p>
+                </div>
               </div>
-              {/* Rush Offense */}
-              <div className="border rounded p-3 bg-green-50">
-                <h3 className="font-semibold text-green-700 mb-1">Rush Offense</h3>
-                <p>Yards: {formatStat(offenseStats?.rush_yards)}</p>
-                <p>TDs: {formatStat(offenseStats?.rush_tds)}</p>
-                <p>NFL Rank: —</p>
-              </div>
-              {/* Total Offense */}
-              <div className="border rounded p-3 bg-purple-50">
-                <h3 className="font-semibold text-purple-700 mb-1">Total Offense</h3>
-                <p>Yards: {formatStat(offenseStats?.total_off_yards)}</p>
-                <p>TDs: {formatStat((offenseStats?.pass_tds ?? 0) + (offenseStats?.rush_tds ?? 0))}</p>
-                <p>NFL Rank: —</p>
-              </div>
+            </div>
 
-              {/* Pass Defense */}
-              <div className="border rounded p-3 bg-red-50">
-                <h3 className="font-semibold text-red-700 mb-1">Pass Defense</h3>
-                <p>Yards Allowed: {formatStat(defenseStats?.pass_yards_allowed)}</p>
-                <p>TDs Allowed: {formatStat(defenseStats?.pass_td_allowed)}</p>
-                <p>NFL Rank: —</p>
-              </div>
-              {/* Rush Defense */}
-              <div className="border rounded p-3 bg-yellow-50">
-                <h3 className="font-semibold text-yellow-700 mb-1">Rush Defense</h3>
-                <p>Yards Allowed: {formatStat(defenseStats?.rush_yards_allowed)}</p>
-                <p>TDs Allowed: {formatStat(defenseStats?.rush_td_allowed)}</p>
-                <p>NFL Rank: —</p>
-              </div>
-              {/* Total Defense */}
-              <div className="border rounded p-3 bg-teal-50">
-                <h3 className="font-semibold text-teal-700 mb-1">Total Defense</h3>
-                <p>Yards Allowed: {formatStat(defenseStats?.total_defense_yards_allowed)}</p>
-                <p>TDs Allowed: {formatStat(defenseStats?.total_defense_td_allowed)}</p>
-                <p>NFL Rank: —</p>
+            {/* Defense Stats */}
+            <div>
+              <h3 className="text-lg font-semibold text-red-800 mb-3">Defense</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-black text-sm"> {/* Changed grid layout, text-black */}
+                {/* Pass Defense */}
+                <div className="border rounded-lg p-3 bg-red-50 shadow-sm">
+                  <h4 className="font-semibold text-red-700 mb-1">Pass Defense</h4>
+                  <p>Yards Allowed: {formatStat(defenseStats?.pass_yards_allowed)}</p>
+                  <p>TDs Allowed: {formatStat(defenseStats?.pass_td_allowed)}</p>
+                  <p>NFL Rank: —</p>
+                </div>
+                {/* Rush Defense */}
+                <div className="border rounded-lg p-3 bg-yellow-50 shadow-sm">
+                  <h4 className="font-semibold text-yellow-700 mb-1">Rush Defense</h4>
+                  <p>Yards Allowed: {formatStat(defenseStats?.rush_yards_allowed)}</p>
+                  <p>TDs Allowed: {formatStat(defenseStats?.rush_td_allowed)}</p>
+                  <p>NFL Rank: —</p>
+                </div>
+                {/* Total Defense */}
+                <div className="border rounded-lg p-3 bg-teal-50 shadow-sm">
+                  <h4 className="font-semibold text-teal-700 mb-1">Total Defense</h4>
+                  <p>Yards Allowed: {formatStat(defenseStats?.total_defense_yards_allowed)}</p>
+                  <p>TDs Allowed: {formatStat(defenseStats?.total_defense_td_allowed)}</p>
+                  <p>NFL Rank: —</p>
+                </div>
               </div>
             </div>
           </div>
@@ -190,22 +194,23 @@ const TeamPage = () => {
         {/* Last Games Section */}
         <div className="bg-white p-4 rounded-lg shadow mb-6">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-semibold text-gray-800">Last Game{showAllGames ? 's' : ''}</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Last Game</h2> {/* Always show "Last Game" singular */}
             {seasonGames.length > 1 && (
               <button
                 onClick={() => setShowAllGames(!showAllGames)}
                 className="text-blue-600 text-sm hover:underline"
               >
-                {showAllGames ? 'Hide All' : 'Show All'}
+                {showAllGames ? 'Hide All' : 'Show All Past Games'} {/* Clarified button text */}
               </button>
             )}
           </div>
           {seasonGames.length === 0 ? (
-            <p className="text-sm text-gray-500">No recent games available.</p>
+            <p className="text-sm text-black">No recent games available.</p>
           ) : (
             <div className="space-y-3 mt-2">
-              {(showAllGames ? seasonGames : [seasonGames[0]]).map((game, idx) => (
-                <div key={idx} className="flex flex-col sm:flex-row items-center justify-between border rounded p-3 bg-gray-50">
+              {/* Conditional rendering for "Last Game" vs "Show All Past Games" */}
+              {(showAllGames ? seasonGames : [lastGame]).map((game, idx) => (
+                <div key={idx} className="flex flex-col sm:flex-row items-center justify-between border rounded p-3 bg-gray-50 text-black">
                   <div className="flex items-center space-x-3 mb-2 sm:mb-0">
                     {/* Home Team */}
                     <div className="flex items-center space-x-1">
@@ -215,7 +220,7 @@ const TeamPage = () => {
                         className="w-6 h-6 object-contain"
                         onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.home_team_abbr}`; }}
                       />
-                      <span className="text-sm font-medium">{game.home_team_abbr}</span>
+                      <span className="text-sm font-medium">{game.home_team_abbr}</span> {/* Keeping abbr for clarity next to logo */}
                       <span className={`text-sm font-bold ${game.home_score > game.away_score ? 'text-blue-600' : 'text-gray-700'}`}>
                         {game.home_score}
                       </span>
@@ -226,7 +231,7 @@ const TeamPage = () => {
                       <span className={`text-sm font-bold ${game.away_score > game.home_score ? 'text-blue-600' : 'text-gray-700'}`}>
                         {game.away_score}
                       </span>
-                      <span className="text-sm font-medium">{game.away_team_abbr}</span>
+                      <span className="text-sm font-medium">{game.away_team_abbr}</span> {/* Keeping abbr for clarity next to logo */}
                       <img
                         src={teamLogos?.[game.away_team_abbr] || `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.away_team_abbr}`}
                         alt={`${game.away_team_abbr} logo`}
@@ -236,7 +241,7 @@ const TeamPage = () => {
                     </div>
                   </div>
                   {/* Game Date */}
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-black">
                     {new Date(game.game_date).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'short',
@@ -252,22 +257,22 @@ const TeamPage = () => {
         {/* Upcoming Games Section */}
         <div className="bg-white p-4 rounded-lg shadow mb-6">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-semibold text-gray-800">Upcoming Game{showAllUpcoming ? 's' : ''}</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Upcoming Game{showAllUpcoming ? 's' : ''}</h2> {/* Darker text */}
             {upcomingSchedule.length > 1 && (
               <button
                 onClick={() => setShowAllUpcoming(!showAllUpcoming)}
                 className="text-blue-600 text-sm hover:underline"
               >
-                {showAllUpcoming ? 'Hide All' : 'Show All'}
+                {showAllUpcoming ? 'Hide All' : 'Show All Upcoming Games'} {/* Clarified button text */}
               </button>
             )}
           </div>
           {upcomingSchedule.length === 0 ? (
-            <p className="text-sm text-gray-500">No upcoming games scheduled.</p>
+            <p className="text-sm text-black">No upcoming games scheduled.</p>
           ) : (
             <div className="space-y-3">
               {(showAllUpcoming ? upcomingSchedule : [upcomingSchedule[0]]).map((game, idx) => (
-                <div key={idx} className="border rounded p-3 space-y-1 bg-blue-50">
+                <div key={idx} className="border rounded p-3 space-y-1 bg-blue-50 text-black">
                   <div className="flex flex-col sm:flex-row items-center justify-between">
                     <div className="flex items-center space-x-3 mb-2 sm:mb-0">
                       {/* Away Team */}
@@ -277,10 +282,10 @@ const TeamPage = () => {
                         className="w-6 h-6 object-contain"
                         onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.away_team_abbr}`; }}
                       />
-                      <span className="text-sm font-medium">{game.away_team_abbr}</span>
+                      <span className="text-sm font-medium">{game.away_team_abbr}</span> {/* Keeping abbr for clarity next to logo */}
                       <span className="text-xs text-gray-500">at</span>
                       {/* Home Team */}
-                      <span className="text-sm font-medium">{game.home_team_abbr}</span>
+                      <span className="text-sm font-medium">{game.home_team_abbr}</span> {/* Keeping abbr for clarity next to logo */}
                       <img
                         src={teamLogos?.[game.home_team_abbr] || `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.home_team_abbr}`}
                         alt={`${game.home_team_abbr} logo`}
@@ -289,7 +294,7 @@ const TeamPage = () => {
                       />
                     </div>
                     {/* Game Date */}
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-black">
                       {new Date(game.gameday).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'short',
@@ -297,10 +302,10 @@ const TeamPage = () => {
                       })}
                     </span>
                   </div>
-                  <div className="text-xs text-gray-600">{game.stadium || 'Stadium TBD'}</div>
+                  <div className="text-xs text-black">{game.stadium || 'Stadium TBD'}</div>
                   {/* Betting Lines */}
                   {(game.spread_line != null || game.total_line != null) && (
-                    <div className="text-xs text-gray-700 mt-1 flex flex-wrap gap-x-4">
+                    <div className="text-xs text-black mt-1 flex flex-wrap gap-x-4">
                       {game.spread_line != null && (
                         <span className="text-red-600 font-medium">
                           Spread: {game.spread_line > 0 ? '+' : ''}
@@ -328,13 +333,13 @@ const TeamPage = () => {
 
         {/* Latest News Section */}
         <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4 text-gray-800">Latest News</h2>
+          <h2 className="text-lg font-semibold mb-4 text-gray-900">Latest News</h2> {/* Darker text */}
           {news.length === 0 ? (
-            <p className="text-sm text-gray-500">No recent news available.</p>
+            <p className="text-sm text-black">No recent news available.</p>
           ) : (
             <ul className="space-y-4">
               {news.map((article, idx) => (
-                <li key={idx} className="text-sm border-b pb-2 last:border-b-0">
+                <li key={idx} className="text-sm border-b pb-2 last:border-b-0 text-black">
                   <a
                     href={article.url}
                     target="_blank"
@@ -343,7 +348,7 @@ const TeamPage = () => {
                   >
                     {article.title}
                   </a>
-                  <p className="text-gray-500 text-xs">
+                  <p className="text-black text-xs">
                     {new Date(article.publishedAt).toLocaleDateString()}
                   </p>
                 </li>
