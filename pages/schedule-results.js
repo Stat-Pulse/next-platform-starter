@@ -24,22 +24,20 @@ export default function ScheduleResults() {
       .then((data) => {
         const fetchedSeasons = data.map(String);
         setAvailableSeasons(fetchedSeasons);
-        if (fetchedSeasons.length > 0 && !season) {
-          setSeason(fetchedSeasons[0]);
-        }
+        // Do NOT set a default season here. Let it be initially blank for "All Seasons" option
         setSeasonsLoading(false);
       })
       .catch((err) => {
         console.error('Failed to load seasons:', err);
         setSeasonsLoading(false);
-        setAvailableSeasons(['2024']);
-        setSeason('2024');
+        setAvailableSeasons(['2024']); // Fallback
       });
   }, []);
 
   // Fetch games when season or selectedTeam changes
   useEffect(() => {
-    // Only fetch games if a team is selected or if a season is selected with no team
+    // Only fetch if a team is selected, OR if a season is selected (even if no team)
+    // If neither is selected, clear games and set loading to false.
     if (!selectedTeam && !season) {
       setGames([]);
       setLoading(false);
@@ -47,10 +45,10 @@ export default function ScheduleResults() {
     }
 
     const queryParams = new URLSearchParams();
-    if (season) {
+
+    if (season) { // Only append season if it's not an empty string (i.e., not "All Seasons")
       queryParams.append('season', season);
     }
-    // Only add team to query if a team is selected
     if (selectedTeam) {
       queryParams.append('team', selectedTeam);
     }
@@ -72,7 +70,7 @@ export default function ScheduleResults() {
         setLoading(false);
         setGames([]);
       });
-  }, [season, selectedTeam]);
+  }, [season, selectedTeam]); // Dependencies now correctly include both
 
   // ───────────────────────────────────────────────────────────────────────────
   // Derived state
@@ -91,6 +89,10 @@ export default function ScheduleResults() {
         return acc;
       }, {});
 
+  // Get all unique teams from the currently fetched games
+  // This needs to be populated from a broader set of games if "All Teams" is selected initially.
+  // For a robust solution, you might consider fetching all teams initially, or from the 'seasons' API if it supports it.
+  // For now, we'll ensure it captures all teams from *any* loaded games.
   const allTeams = Array.from(new Set(games.flatMap((g) => [g.home_team, g.away_team]))).sort();
 
   // ───────────────────────────────────────────────────────────────────────────

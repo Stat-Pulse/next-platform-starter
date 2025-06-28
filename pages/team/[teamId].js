@@ -1,5 +1,6 @@
 // pages/teams/[teamId].js
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react'; // Added useRef for Chart.js
+import Chart from 'chart.js/auto'; // For Chart.js integration
 
 const TeamPage = () => {
   const [teamId, setTeamId] = useState(null);
@@ -65,8 +66,8 @@ const TeamPage = () => {
     teamLogos,
     offenseStats,
     defenseStats,
-    roster, // Access roster data
-    depthChart, // Access depthChart data
+    roster,
+    depthChart,
   } = teamData;
 
   const lastGame = seasonGames.length > 0 ? seasonGames[seasonGames.length - 1] : null;
@@ -75,16 +76,82 @@ const TeamPage = () => {
   const getPlayerInfo = (playerName) => {
     const player = roster.find(p => p.name === playerName);
     return {
-      number: player?.number ?? '—',
+      number: player?.jersey_number ?? '—', // Corrected to jersey_number
       headshot: player?.headshot_url || 'https://placehold.co/40x40/E2E8F0/1A202C?text=Player'
     };
   };
 
-  // Depth Chart Display Component
+  // Depth Chart Display Component (Moved inside TeamPage)
   const DepthChartSection = ({ depthChart, roster }) => {
+    const chartRefs = useRef({});
+
     const offensivePositions = ['QB', 'RB', 'WR', 'TE', 'LT', 'LG', 'C', 'RG', 'RT'];
     const defensivePositions = ['DE', 'DT', 'LB', 'CB', 'S', 'NT'];
     const specialTeamsPositions = ['K', 'P', 'LS'];
+
+    // Effect to initialize/update unit strength charts
+    useEffect(() => {
+      // Destroy existing charts before creating new ones on data change
+      Object.values(chartRefs.current).forEach(ref => {
+        if (ref && ref.chartInstance && ref.chartInstance.destroy) {
+          ref.chartInstance.destroy();
+          ref.chartInstance = null; // Clear the reference
+        }
+      });
+
+      if (!depthChart || Object.keys(depthChart).length === 0) {
+        return; // Do not draw charts if data is not yet loaded or empty
+      }
+
+      // Prepare data for unit strengths (if available in depthChart.unit_strength)
+      const unitStrengthData = {};
+      // Assuming depthChart might contain a 'unit_strength' property if available from backend
+      // Otherwise, you'd need to calculate it or remove this part.
+      // For now, let's assume `depthChart.unit_strength` exists if you want these charts.
+      // If it doesn't, these charts will just not render.
+      const availableUnitStrengths = depthChart.unit_strength || {};
+
+      [...offensivePositions, ...defensivePositions, ...specialTeamsPositions].forEach((pos) => {
+        if (availableUnitStrengths[pos] && chartRefs.current[pos]) {
+          const newChart = new Chart(chartRefs.current[pos].getContext('2d'), {
+            type: 'bar',
+            data: {
+              labels: [pos],
+              datasets: [{
+                label: 'Unit Strength',
+                data: [availableUnitStrengths[pos]],
+                backgroundColor: branding.secondaryColor || '#DBEAFE', // Use team secondary color
+                borderColor: branding.primaryColor || '#2563EB',
+                borderWidth: 1,
+              }],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false, // Allow charts to resize more freely
+              plugins: {
+                legend: { display: false },
+                tooltip: { enabled: true }
+              },
+              scales: {
+                y: { beginAtZero: true, max: 100, ticks: { color: 'black' } }, // Black ticks
+                x: { ticks: { color: 'black' } } // Black ticks
+              }
+            },
+          });
+          chartRefs.current[pos].chartInstance = newChart; // Store chart instance for cleanup
+        }
+      });
+
+      // Cleanup function for charts when component unmounts or effect re-runs
+      return () => {
+        Object.values(chartRefs.current).forEach(ref => {
+          if (ref && ref.chartInstance && ref.chartInstance.destroy) {
+            ref.chartInstance.destroy();
+            ref.chartInstance = null;
+          }
+        });
+      };
+    }, [depthChart, branding.primaryColor, branding.secondaryColor]); // Re-run when depthData or colors change
 
     const renderPositionGroup = (positions, title) => (
       <div className="mb-6">
@@ -92,7 +159,7 @@ const TeamPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {positions.map(position => {
             const players = depthChart[position] || [];
-            if (players.length === 0) return null; // Don't show position if no players
+            if (players.length === 0) return null;
 
             return (
               <div key={position} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
@@ -109,11 +176,15 @@ const TeamPage = () => {
                           onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/40x40/E2E8F0/1A202C?text=Player'; }}
                         />
                         <span>#{playerInfo.number} {player.name}</span>
-                        <span className="text-gray-500 text-sm">({player.depth})</span>
+                        <span className="text-gray-500 text-sm">({player.depth_rank})</span> {/* Assuming depth_rank from backend */}
                       </li>
                     );
                   })}
                 </ul>
+                {/* Render Chart.js canvas if unit strength data exists for this position */}
+                {depthChart.unit_strength?.[position] && (
+                  <canvas ref={(ref) => (chartRefs.current[position] = ref)} className="w-full h-16 mt-2" />
+                )}
               </div>
             );
           })}
@@ -133,10 +204,10 @@ const TeamPage = () => {
             {renderPositionGroup(specialTeamsPositions, 'Special Teams')}
             {/* Render any other positions not categorized above */}
             {Object.keys(depthChart)
-              .filter(pos => ![...offensivePositions, ...defensivePositions, ...specialTeamsPositions].includes(pos))
+              .filter(pos => ![...offensivePositions, ...defensivePositions, ...specialTeamsPositions, 'unit_strength'].includes(pos))
               .length > 0 && (
                 renderPositionGroup(
-                  Object.keys(depthChart).filter(pos => ![...offensivePositions, ...defensivePositions, ...specialTeamsPositions].includes(pos)),
+                  Object.keys(depthChart).filter(pos => ![...offensivePositions, ...defensivePositions, ...specialTeamsPositions, 'unit_strength'].includes(pos)),
                   'Other Positions'
                 )
             )}
@@ -146,11 +217,15 @@ const TeamPage = () => {
     );
   };
 
+
   return (
     <div className="bg-gradient-to-r from-blue-50 via-white to-gray-50 min-h-screen p-6 font-sans text-black">
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
-        <div className="flex flex-col sm:flex-row items-center justify-between bg-gray-100 rounded-lg p-4 shadow-sm mb-6">
+        <div
+          className="flex flex-col sm:flex-row items-center justify-between rounded-lg p-4 shadow-sm mb-6"
+          style={{ backgroundColor: branding.colorPrimary || '#F3F4F6' }} // Dynamic primary color
+        >
           <div className="flex items-center space-x-4 mb-4 sm:mb-0">
             {/* Team Logo */}
             <img
@@ -173,7 +248,7 @@ const TeamPage = () => {
           <div className="text-right text-sm text-black space-y-1">
             <p className="font-semibold">Head Coach: {coaching.headCoach ?? '—'}</p>
             <p>Offensive Coord: {coaching.offensiveCoordinator ?? '—'}</p>
-            <p>Defensive Coord: {coaching.defensiveCoordinator ?? '—'}</p>
+            <p>Defensive Coord: {coaching.d_coord ?? '—'}</p> {/* Corrected to d_coord */}
           </div>
         </div>
 
@@ -194,7 +269,7 @@ const TeamPage = () => {
           ))}
         </nav>
 
-        {/* Main Content Area based on activeTab */}
+        {/* Conditional Rendering of Content Sections */}
         {activeTab === 'overview' && (
           <>
             {/* Team Stats Section */}
@@ -206,22 +281,22 @@ const TeamPage = () => {
                   <h3 className="text-lg font-semibold text-blue-800 mb-3">Offense</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-black text-sm">
                     {/* Pass Offense */}
-                    <div className="border rounded-lg p-3 bg-blue-50 shadow-sm">
-                      <h4 className="font-semibold text-blue-700 mb-1">Pass Offense</h4>
+                    <div className="border rounded-lg p-3 shadow-sm" style={{ backgroundColor: branding.secondaryColor || '#DBEAFE' }}>
+                      <h4 className="font-semibold text-blue-900 mb-1">Pass Offense</h4> {/* Darker text for header for contrast */}
                       <p>Yards: {formatStat(offenseStats?.pass_yards)}</p>
                       <p>TDs: {formatStat(offenseStats?.pass_tds)}</p>
                       <p>NFL Rank: —</p>
                     </div>
                     {/* Rush Offense */}
-                    <div className="border rounded-lg p-3 bg-green-50 shadow-sm">
-                      <h4 className="font-semibold text-green-700 mb-1">Rush Offense</h4>
+                    <div className="border rounded-lg p-3 shadow-sm" style={{ backgroundColor: branding.secondaryColor || '#DBEAFE' }}>
+                      <h4 className="font-semibold text-green-900 mb-1">Rush Offense</h4>
                       <p>Yards: {formatStat(offenseStats?.rush_yards)}</p>
                       <p>TDs: {formatStat(offenseStats?.rush_tds)}</p>
                       <p>NFL Rank: —</p>
                     </div>
                     {/* Total Offense */}
-                    <div className="border rounded-lg p-3 bg-purple-50 shadow-sm">
-                      <h4 className="font-semibold text-purple-700 mb-1">Total Offense</h4>
+                    <div className="border rounded-lg p-3 shadow-sm" style={{ backgroundColor: branding.secondaryColor || '#DBEAFE' }}>
+                      <h4 className="font-semibold text-purple-900 mb-1">Total Offense</h4>
                       <p>Yards: {formatStat(offenseStats?.total_off_yards)}</p>
                       <p>TDs: {formatStat((offenseStats?.pass_tds ?? 0) + (offenseStats?.rush_tds ?? 0))}</p>
                       <p>NFL Rank: —</p>
@@ -234,22 +309,22 @@ const TeamPage = () => {
                   <h3 className="text-lg font-semibold text-red-800 mb-3">Defense</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-black text-sm">
                     {/* Pass Defense */}
-                    <div className="border rounded-lg p-3 bg-red-50 shadow-sm">
-                      <h4 className="font-semibold text-red-700 mb-1">Pass Defense</h4>
+                    <div className="border rounded-lg p-3 shadow-sm" style={{ backgroundColor: branding.secondaryColor || '#DBEAFE' }}>
+                      <h4 className="font-semibold text-red-900 mb-1">Pass Defense</h4>
                       <p>Yards Allowed: {formatStat(defenseStats?.pass_yards_allowed)}</p>
                       <p>TDs Allowed: {formatStat(defenseStats?.pass_td_allowed)}</p>
                       <p>NFL Rank: —</p>
                     </div>
                     {/* Rush Defense */}
-                    <div className="border rounded-lg p-3 bg-yellow-50 shadow-sm">
-                      <h4 className="font-semibold text-yellow-700 mb-1">Rush Defense</h4>
+                    <div className="border rounded-lg p-3 shadow-sm" style={{ backgroundColor: branding.secondaryColor || '#DBEAFE' }}>
+                      <h4 className="font-semibold text-yellow-900 mb-1">Rush Defense</h4>
                       <p>Yards Allowed: {formatStat(defenseStats?.rush_yards_allowed)}</p>
                       <p>TDs Allowed: {formatStat(defenseStats?.rush_td_allowed)}</p>
                       <p>NFL Rank: —</p>
                     </div>
                     {/* Total Defense */}
-                    <div className="border rounded-lg p-3 bg-teal-50 shadow-sm">
-                      <h4 className="font-semibold text-teal-700 mb-1">Total Defense</h4>
+                    <div className="border rounded-lg p-3 shadow-sm" style={{ backgroundColor: branding.secondaryColor || '#DBEAFE' }}>
+                      <h4 className="font-semibold text-teal-900 mb-1">Total Defense</h4>
                       <p>Yards Allowed: {formatStat(defenseStats?.total_defense_yards_allowed)}</p>
                       <p>TDs Allowed: {formatStat(defenseStats?.total_defense_td_allowed)}</p>
                       <p>NFL Rank: —</p>
@@ -286,6 +361,7 @@ const TeamPage = () => {
                             className="w-6 h-6 object-contain"
                             onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.home_team_abbr}`; }}
                           />
+                          <span className="text-sm font-medium">{game.home_team_abbr}</span> {/* Kept abbr for clarity */}
                           <span className={`text-sm font-bold ${game.home_score > game.away_score ? 'text-blue-600' : 'text-gray-700'}`}>
                             {game.home_score}
                           </span>
@@ -296,6 +372,7 @@ const TeamPage = () => {
                           <span className={`text-sm font-bold ${game.away_score > game.home_score ? 'text-blue-600' : 'text-gray-700'}`}>
                             {game.away_score}
                           </span>
+                          <span className="text-sm font-medium">{game.away_team_abbr}</span> {/* Kept abbr for clarity */}
                           <img
                             src={teamLogos?.[game.away_team_abbr] || `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.away_team_abbr}`}
                             alt={`${game.away_team_abbr} logo`}
@@ -346,8 +423,10 @@ const TeamPage = () => {
                             className="w-6 h-6 object-contain"
                             onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.away_team_abbr}`; }}
                           />
+                          <span className="text-sm font-medium">{game.away_team_abbr}</span> {/* Kept abbr for clarity */}
                           <span className="text-xs text-gray-500">at</span>
                           {/* Home Team */}
+                          <span className="text-sm font-medium">{game.home_team_abbr}</span> {/* Kept abbr for clarity */}
                           <img
                             src={teamLogos?.[game.home_team_abbr] || `https://placehold.co/24x24/E2E8F0/1A202C?text=${game.home_team_abbr}`}
                             alt={`${game.home_team_abbr} logo`}
@@ -421,11 +500,12 @@ const TeamPage = () => {
           </>
         )}
 
+        {/* Depth Chart Section */}
         {activeTab === 'depthChart' && (
           <DepthChartSection depthChart={depthChart} roster={roster} />
         )}
 
-        {/* You can add more conditional renders for 'schedule', 'injuries', 'stats' here */}
+        {/* Placeholder Sections for other tabs */}
         {activeTab === 'schedule' && (
           <div className="bg-white rounded-lg shadow p-6 mb-6">
             <h2 className="text-2xl font-bold mb-4 text-gray-900">Full Schedule</h2>
@@ -446,20 +526,20 @@ const TeamPage = () => {
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-blue-800 mb-3">Offense</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-black text-sm">
-                  <div className="border rounded-lg p-3 bg-blue-50 shadow-sm">
-                    <h4 className="font-semibold text-blue-700 mb-1">Pass Offense</h4>
+                  <div className="border rounded-lg p-3 shadow-sm" style={{ backgroundColor: branding.secondaryColor || '#DBEAFE' }}>
+                    <h4 className="font-semibold text-blue-900 mb-1">Pass Offense</h4>
                     <p>Yards: {formatStat(offenseStats?.pass_yards)}</p>
                     <p>TDs: {formatStat(offenseStats?.pass_tds)}</p>
                     <p>NFL Rank: —</p>
                   </div>
-                  <div className="border rounded-lg p-3 bg-green-50 shadow-sm">
-                    <h4 className="font-semibold text-green-700 mb-1">Rush Offense</h4>
+                  <div className="border rounded-lg p-3 shadow-sm" style={{ backgroundColor: branding.secondaryColor || '#DBEAFE' }}>
+                    <h4 className="font-semibold text-green-900 mb-1">Rush Offense</h4>
                     <p>Yards: {formatStat(offenseStats?.rush_yards)}</p>
                     <p>TDs: {formatStat(offenseStats?.rush_tds)}</p>
                     <p>NFL Rank: —</p>
                   </div>
-                  <div className="border rounded-lg p-3 bg-purple-50 shadow-sm">
-                    <h4 className="font-semibold text-purple-700 mb-1">Total Offense</h4>
+                  <div className="border rounded-lg p-3 shadow-sm" style={{ backgroundColor: branding.secondaryColor || '#DBEAFE' }}>
+                    <h4 className="font-semibold text-purple-900 mb-1">Total Offense</h4>
                     <p>Yards: {formatStat(offenseStats?.total_off_yards)}</p>
                     <p>TDs: {formatStat((offenseStats?.pass_tds ?? 0) + (offenseStats?.rush_tds ?? 0))}</p>
                     <p>NFL Rank: —</p>
@@ -469,20 +549,20 @@ const TeamPage = () => {
               <div>
                 <h3 className="text-lg font-semibold text-red-800 mb-3">Defense</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-black text-sm">
-                  <div className="border rounded-lg p-3 bg-red-50 shadow-sm">
-                    <h4 className="font-semibold text-red-700 mb-1">Pass Defense</h4>
+                  <div className="border rounded-lg p-3 shadow-sm" style={{ backgroundColor: branding.secondaryColor || '#DBEAFE' }}>
+                    <h4 className="font-semibold text-red-900 mb-1">Pass Defense</h4>
                     <p>Yards Allowed: {formatStat(defenseStats?.pass_yards_allowed)}</p>
                     <p>TDs Allowed: {formatStat(defenseStats?.pass_td_allowed)}</p>
                     <p>NFL Rank: —</p>
                   </div>
-                  <div className="border rounded-lg p-3 bg-yellow-50 shadow-sm">
-                    <h4 className="font-semibold text-yellow-700 mb-1">Rush Defense</h4>
+                  <div className="border rounded-lg p-3 shadow-sm" style={{ backgroundColor: branding.secondaryColor || '#DBEAFE' }}>
+                    <h4 className="font-semibold text-yellow-900 mb-1">Rush Defense</h4>
                     <p>Yards Allowed: {formatStat(defenseStats?.rush_yards_allowed)}</p>
                     <p>TDs Allowed: {formatStat(defenseStats?.rush_td_allowed)}</p>
                     <p>NFL Rank: —</p>
                   </div>
-                  <div className="border rounded-lg p-3 bg-teal-50 shadow-sm">
-                    <h4 className="font-semibold text-teal-700 mb-1">Total Defense</h4>
+                  <div className="border rounded-lg p-3 shadow-sm" style={{ backgroundColor: branding.secondaryColor || '#DBEAFE' }}>
+                    <h4 className="font-semibold text-teal-900 mb-1">Total Defense</h4>
                     <p>Yards Allowed: {formatStat(defenseStats?.total_defense_yards_allowed)}</p>
                     <p>TDs Allowed: {formatStat(defenseStats?.total_defense_td_allowed)}</p>
                     <p>NFL Rank: —</p>
