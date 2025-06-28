@@ -294,34 +294,24 @@ export default function ScheduleResults() {
                           );
                         return (
                           <tr key={game.game_id} className="hover:bg-blue-50/60">
-                            <td className="px-4 py-2 whitespace-nowrap text-gray-900">{displayVal(game.season)}</td>
-                            <td className="px-4 py-2 whitespace-nowrap text-gray-900">{displayVal(game.week)}</td>
-                            <td className="px-4 py-2 whitespace-nowrap text-gray-900">{weekdayStr}</td>
-                            <td className="px-4 py-2 whitespace-nowrap font-medium text-gray-900">{displayVal(game.home_team)}</td> {/* Added */}
-                            <td className="px-4 py-2 whitespace-nowrap text-gray-900">{displayVal(game.home_score)}</td>
-                            <td className="px-4 py-2 whitespace-nowrap text-gray-900">{displayVal(game.away_score)}</td>
-                            <td className="px-4 py-2 whitespace-nowrap font-medium text-gray-900">{displayVal(game.away_team)}</td> {/* Added */}
-                            <td className="px-4 py-2 whitespace-nowrap text-gray-900">{displayVal(game.location || game.stadium_name)}</td>
-                            <td className="px-4 py-2 whitespace-nowrap text-gray-900">
-                              {/* Result: show home_score – away_score or em dash */}
-                              {game.home_score !== null && game.away_score !== null ? (
-                                <span className={isPast ? 'text-green-600' : 'text-gray-500'}>
-                                  {game.home_score} – {game.away_score}
-                                </span>
-                              ) : (
-                                <span className="text-gray-500">&mdash;</span>
-                              )}
-                            </td>
-                            <td className="px-4 py-2 whitespace-nowrap text-gray-900">{displayVal(game.total)}</td>
-                            <td className="px-4 py-2 whitespace-nowrap text-gray-900">{yesNo(game.overtime)}</td>
-                            <td className="px-4 py-2 whitespace-nowrap text-gray-900">{displayVal(game.away_moneyline)}</td>
-                            <td className="px-4 py-2 whitespace-nowrap text-gray-900">{displayVal(game.home_moneyline)}</td>
-                            <td className="px-4 py-2 whitespace-nowrap text-gray-900">{displayVal(game.total_line)}</td>
-                            <td className="px-4 py-2 whitespace-nowrap text-gray-900">{displayVal(game.under_odds)}</td>
-                            <td className="px-4 py-2 whitespace-nowrap text-gray-900">{displayVal(game.over_odds)}</td>
-                            <td className="px-4 py-2 whitespace-nowrap text-gray-900">{displayVal(game.temp)}</td>
-                            <td className="px-4 py-2 whitespace-nowrap text-gray-900">{displayVal(game.wind)}</td>
-                            <td className="px-4 py-2 whitespace-nowrap text-gray-900">{displayVal(game.referee)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap text-black-900">{displayVal(game.season)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap text-black-900">{displayVal(game.week)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap text-black-900">{weekdayStr}</td>
+                            <td className="px-4 py-2 whitespace-nowrap font-medium text-black-900">{displayVal(game.home_team)}</td> {/* Added */}
+                            <td className="px-4 py-2 whitespace-nowrap text-black-900">{displayVal(game.home_score)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap text-black-900">{displayVal(game.away_score)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap font-medium text-black-900">{displayVal(game.away_team)}</td> {/* Added */}
+                            <td className="px-4 py-2 whitespace-nowrap text-black-900">{displayVal(game.total)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap text-black-900">{displayVal(game.location || game.stadium_name)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap text-black-900">{yesNo(game.overtime)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap text-black-900">{displayVal(game.away_moneyline)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap text-black-900">{displayVal(game.home_moneyline)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap text-black-900">{displayVal(game.total_line)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap text-black-900">{displayVal(game.under_odds)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap text-black-900">{displayVal(game.over_odds)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap text-black-900">{displayVal(game.temp)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap text-black-900">{displayVal(game.wind)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap text-black-900">{displayVal(game.referee)}</td>
                           </tr>
                         );
                       })}
