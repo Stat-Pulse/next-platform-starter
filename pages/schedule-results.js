@@ -174,7 +174,7 @@ export default function ScheduleResults() {
             </div>
 
             <div>
-              <label htmlFor="team-filter" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="team-filter" className="block text-sm font-medium text-gray-900 mb-1">
                 Team
               </label>
               <select
@@ -193,7 +193,7 @@ export default function ScheduleResults() {
             </div>
 
             <div>
-              <label htmlFor="player-filter" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="player-filter" className="block text-sm font-medium text-gray-900 mb-1">
                 Player
               </label>
               <select
@@ -222,9 +222,9 @@ export default function ScheduleResults() {
 
           {/* Schedule */}
           {loading ? (
-            <p className="text-gray-600">Loading schedule…</p>
+            <p className="text-gray-900">Loading schedule…</p>
           ) : Object.keys(gamesByWeek).length === 0 ? (
-            <p className="text-gray-600">No games found for the selected filters.</p>
+            <p className="text-gray-900">No games found for the selected filters.</p>
           ) : (
             Object.keys(gamesByWeek).map((week) => (
               <div key={week} className="space-y-2">
@@ -264,7 +264,7 @@ export default function ScheduleResults() {
                     <tbody className="divide-y divide-gray-100">
                       {gamesByWeek[week].map((game) => {
                         // Date/weekday
-                        const gameDate = new Date(`${game.gameday}T${game.gametime || '00:00:00'}`);
+                        const gameDate = new Date(`${game.game_date}T${game.gametime || '00:00:00'}`);
                         const isPast = gameDate < today;
                         const dateStr = gameDate.toLocaleDateString('en-US', {
                           month: 'short',
@@ -278,7 +278,14 @@ export default function ScheduleResults() {
                               timeZone: 'America/Chicago',
                             })
                           : null;
-                        const weekdayStr = gameDate.toLocaleDateString('en-US', { weekday: 'short' });
+                        // New weekdayStr calculation
+                        let weekdayStr = "—";
+                        if (game.weekday && typeof game.weekday === 'string') {
+                          weekdayStr = game.weekday;
+                        } else if (game.game_date) {
+                          const parsedDate = new Date(game.game_date);
+                          weekdayStr = isNaN(parsedDate) ? "—" : parsedDate.toLocaleDateString('en-US', { weekday: 'short' });
+                        }
 
                         // Helper for missing values
                         const displayVal = (val) =>
@@ -286,9 +293,9 @@ export default function ScheduleResults() {
                         // Boolean badge
                         const yesNo = (val) =>
                           val === true ? (
-                            <span className="inline-block px-2 py-0.5 rounded bg-green-100 text-green-800">Yes</span>
+                            <span className="inline-block px-2 py-0.5 rounded bg-green-100 text-black-900">Yes</span>
                           ) : val === false ? (
-                            <span className="inline-block px-2 py-0.5 rounded bg-gray-100 text-gray-600">No</span>
+                            <span className="inline-block px-2 py-0.5 rounded bg-gray-100 text-gray-900">No</span>
                           ) : (
                             <span>&mdash;</span>
                           );
