@@ -148,7 +148,7 @@ export default function ScheduleResults() {
           {/* Filters bar */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 bg-white shadow rounded-xl p-6 ring-1 ring-gray-200">
             <div>
-              <label htmlFor="season" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="season" className="block text-sm font-medium text-gray-900 mb-1">
                 Season
               </label>
               {seasonsLoading ? (
@@ -158,7 +158,7 @@ export default function ScheduleResults() {
                   id="season"
                   value={season}
                   onChange={(e) => setSeason(e.target.value)}
-                  className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-md focus:border-blue-500 focus:ring-blue-500"
                 >
                   {availableSeasons.length > 0 ? (
                     availableSeasons.map((s) => (
@@ -181,7 +181,7 @@ export default function ScheduleResults() {
                 id="team-filter"
                 value={selectedTeam}
                 onChange={(e) => setSelectedTeam(e.target.value)}
-                className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-sm focus:border-blue-500 focus:ring-blue-500"
+                className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-md focus:border-blue-500 focus:ring-blue-500"
               >
                 <option value="">All Teams</option>
                 {allTeams.map((team) => (
@@ -200,7 +200,7 @@ export default function ScheduleResults() {
                 id="player-filter"
                 value={selectedPlayer}
                 onChange={(e) => setSelectedPlayer(e.target.value)}
-                className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-sm focus:border-blue-500 focus:ring-blue-500"
+                className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-md focus:border-blue-500 focus:ring-blue-500"
               >
                 <option value="">All Players</option>
                 {players.map((p) => (
@@ -231,7 +231,7 @@ export default function ScheduleResults() {
                 <h2 className="text-xl font-semibold text-blue-800">Week {week}</h2>
 
                 <div className="overflow-x-auto rounded-xl shadow ring-1 ring-gray-200 bg-white">
-                  <table className="min-w-full divide-y divide-gray-200 text-sm">
+                  <table className="min-w-full divide-y divide-gray-900 text-sm">
                     <thead className="bg-blue-50">
                       <tr>
                         <th className="px-4 py-2 text-left font-semibold text-black-900">Season</th>
