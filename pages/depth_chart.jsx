@@ -18,6 +18,7 @@ const DepthChart = () => {
   const [depthData, setDepthData] = useState({});
   const [viewMode, setViewMode] = useState('current'); // 'current', 'projected', 'historical'
   const [selectedSeason, setSelectedSeason] = useState(2024); // Default to 2024 as per current data
+  const [activeUnit, setActiveUnit] = useState('offense'); // 'offense', 'defense', 'specialTeams' - This is the variable in question.
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const chartRefs = useRef({}); // Ref for Chart.js canvases (if used for consolidated charts later)
@@ -136,7 +137,7 @@ const DepthChart = () => {
 
   const years = Array.from({ length: 2024 - 1999 + 1 }, (_, i) => 1999 + i).reverse();
 
-  // Combine offense and defense players in one view, arranged to face off
+  // Combined offense and defense players in one view, arranged to face off
   const renderCombinedPlayersOnField = () => {
     if (Object.keys(depthData).filter(key => key !== 'unit_strength' && key !== 'message').length === 0) {
       return (
@@ -364,11 +365,10 @@ const DepthChart = () => {
           <div
             className="relative w-full mx-auto rounded-lg shadow-inner border border-gray-300"
             style={{
-                // Explicit height for a more contained layout, adjust as needed
                 height: '800px', // Example fixed height
                 overflow: 'hidden', // Hide overflow from player cards if they go out of bounds
                 // Base64 encoded SVG for vertical field: 7 segments, steel gray endzones, gray middle, black lines
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 200'%3E%3C!-- Background Rectangles (7 even segments) --%3E%3Crect x='0' y='0' width='100%25' height='14.2857%25' fill='%234682B4'/%3E%3C!-- Steel Gray Endzone --%3E%3Crect x='0' y='14.2857%25' width='100%25' height='14.2857%25' fill='%236B7280'/%3E%3Crect x='0' y='28.5714%25' width='100%25' height='14.2857%25' fill='%236B7280'/%3E%3Crect x='0' y='42.8571%25' width='100%25' height='14.2857%25' fill='%236B7280'/%3E%3Crect x='0' y='57.1428%25' width='100%25' height='14.2857%25' fill='%236B7280'/%3E%3Crect x='0' y='71.4285%25' width='100%25' height='14.2857%25' fill='%236B7280'/%3E%3Crect x='0' y='85.7142%25' width='100%25' height='14.2857%25' fill='%234682B4'/%3E%3C!-- Steel Gray Endzone --%3E%3C!-- Black Lines between segments --%3E%3Cline x1='0' y1='14.2857%25' x2='100%25' y2='14.2857%25' stroke='%23000' stroke-width='1'/%3E%3Cline x1='0' y1='28.5714%25' x2='100%25' y2='28.5714%25' stroke='%23000' stroke-width='1'/%3E%3Cline x1='0' y1='42.8571%25' x2='100%25' y2='42.8571%25' stroke='%23000' stroke-width='1'/%3E%3Cline x1='0' y1='57.1428%25' x2='100%25' y2='57.1428%25' stroke='%23000' stroke-width='1'/%3E%3Cline x1='0' y1='71.4285%25' x2='100%25' y2='71.4285%25' stroke='%23000' stroke-width='1'/%3E%3Cline x1='0' y1='85.7142%25' x2='100%25' y2='85.7142%25' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E")`,
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 200'%3E%3C!-- Steel Gray Endzones --%3E%3Crect x='0' y='0' width='100%25' height='14.2857%25' fill='%234682B4'/%3E%3Crect x='0' y='85.7142%25' width='100%25' height='14.2857%25' fill='%234682B4'/%3E%3C!-- Gray middle segments --%3E%3Crect x='0' y='14.2857%25' width='100%25' height='14.2857%25' fill='%236B7280'/%3E%3Crect x='0' y='28.5714%25' width='100%25' height='14.2857%25' fill='%236B7280'/%3E%3Crect x='0' y='42.8571%25' width='100%25' height='14.2857%25' fill='%236B7280'/%3E%3Crect x='0' y='57.1428%25' width='100%25' height='14.2857%25' fill='%236B7280'/%3E%3Crect x='0' y='71.4285%25' width='100%25' height='14.2857%25' fill='%236B7280'/%3E%3C!-- Black Lines between segments --%3E%3Cline x1='0' y1='14.2857%25' x2='100%25' y2='14.2857%25' stroke='%23000' stroke-width='1'/%3E%3Cline x1='0' y1='28.5714%25' x2='100%25' y2='28.5714%25' stroke='%23000' stroke-width='1'/%3E%3Cline x1='0' y1='42.8571%25' x2='100%25' y2='42.8571%25' stroke='%23000' stroke-width='1'/%3E%3Cline x1='0' y1='57.1428%25' x2='100%25' y2='57.1428%25' stroke='%23000' stroke-width='1'/%3E%3Cline x1='0' y1='71.4285%25' x2='100%25' y2='71.4285%25' stroke='%23000' stroke-width='1'/%3E%3Cline x1='0' y1='85.7142%25' x2='100%25' y2='85.7142%25' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E")`,
                 backgroundSize: '100% 100%',
                 backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'center center'
