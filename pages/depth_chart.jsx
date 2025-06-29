@@ -196,7 +196,9 @@ const DepthChart = () => {
                 <div style={{ height: '14%', background: 'linear-gradient(145deg, #A47B1B, #E6C66E, #A47B1B)' }}></div>
                 <div className="relative flex-grow">
                     <div className="absolute inset-0 flex flex-col justify-between py-4">
-                        <div key={i} className="w-full h-[1px] bg-gray-200"></div>
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <div key={i} className="w-full h-[1px] bg-gray-200"></div>
+                        ))}
                     </div>
                 </div>
                 <div style={{ height: '14%', background: 'linear-gradient(145deg, #A47B1B, #E6C66E, #A47B1B)' }}></div>
