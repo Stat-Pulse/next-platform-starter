@@ -18,9 +18,10 @@ const DepthChart = () => {
   const [depthData, setDepthData] = useState({});
   const [viewMode, setViewMode] = useState('current'); // 'current', 'projected', 'historical'
   const [selectedSeason, setSelectedSeason] = useState(2024); // Default to 2024 as per current data
+  const [activeUnit, setActiveUnit] = useState('offense'); // 'offense', 'defense', 'specialTeams' - This is the variable in question.
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const chartRefs = useRef({}); // Ref for Chart.js canvases
+  const chartRefs = useRef({}); // Ref for Chart.js canvases (if used for consolidated charts later)
 
   // --- Effect to parse teamId from URL query on initial load ---
   useEffect(() => {
@@ -94,7 +95,8 @@ const DepthChart = () => {
     const mockInjuryStatus = player.injury_status; // Use real injury status if available
 
     return (
-      <div key={player.player_id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-2 text-gray-800 text-sm h-full flex flex-col justify-between">
+      <div key={player.player_id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-2 text-gray-800 text-sm h-full flex flex-col justify-between flex-shrink-0"
+           style={{ minWidth: '80px', maxWidth: '120px' }}> {/* Adjusted fixed width for player cards */}
         <div className="flex items-center mb-1">
           <img
             src={player.headshot_url || `https://placehold.co/40x40/E2E8F0/1A202C?text=${primaryPositionAbbr}`}
@@ -139,7 +141,7 @@ const DepthChart = () => {
   const renderCombinedPlayers = () => {
     if (Object.keys(depthData).filter(key => key !== 'unit_strength' && key !== 'message').length === 0) {
       return (
-        <div className="flex items-center justify-center p-8">
+        <div className="flex items-center justify-center p-8 h-full"> {/* Ensure it takes full height */}
           <p className="text-gray-700 p-5 bg-yellow-50 border border-yellow-200 rounded-lg text-center font-medium">
               {depthData.message || `No specific depth chart data available for ${teamId || 'the selected team'} for ${viewMode} view ${viewMode === 'historical' ? `in ${selectedSeason}` : ''}.`}
           </p>
@@ -148,111 +150,127 @@ const DepthChart = () => {
     }
 
     return (
-      <div className="p-4"> {/* Padding inside the main field container */}
+      <div className="flex flex-col h-full justify-around py-4"> {/* Use flex-col to stack offense/defense, justify-around for vertical spacing */}
         {/* Defensive Side (Top) */}
-        <div className="grid grid-cols-5 gap-x-2 gap-y-4 justify-center items-end text-center">
-            {/* Top Row: FS / SS */}
-            <div className="col-span-2">
-                <span className="text-sm font-semibold text-gray-700 mb-1 block">FS</span>
-                {getStartersForPosition('S',1).map(player => renderPlayerCard(player, 'FS', true))}
-            </div>
-            <div className="col-span-1"></div> {/* Spacer */}
-            <div className="col-span-2">
-                <span className="text-sm font-semibold text-gray-700 mb-1 block">SS</span>
-                {getStartersForPosition('S',2).map(player => renderPlayerCard(player, 'SS', true))}
-            </div>
-
-            {/* Middle Row: CB / D-Line / Edge / CB */}
-            <div className="col-span-1">
-                <span className="text-sm font-semibold text-gray-700 mb-1 block">CB</span>
-                {getStartersForPosition('CB',1).map(player => renderPlayerCard(player, 'CB', true))}
-            </div>
-            <div className="col-span-1">
-                <span className="text-sm font-semibold text-gray-700 mb-1 block">DRE</span>
-                {getStartersForPosition('DE',1).map(player => renderPlayerCard(player, 'DRE', true))}
-            </div>
-            <div className="col-span-1">
-                <span className="text-sm font-semibold text-gray-700 mb-1 block">DRT</span>
-                {getStartersForPosition('DT',1).map(player => renderPlayerCard(player, 'DRT', true))}
-            </div>
-            <div className="col-span-1">
-                <span className="text-sm font-semibold text-gray-700 mb-1 block">DLT</span>
-                {getStartersForPosition('DT',2).map(player => renderPlayerCard(player, 'DLT', true))}
-            </div>
-            <div className="col-span-1">
-                <span className="text-sm font-semibold text-gray-700 mb-1 block">DLE</span>
-                {getStartersForPosition('DE',2).map(player => renderPlayerCard(player, 'DLE', true))}
-            </div>
-
-            {/* Bottom Row: LBs */}
-            <div className="col-span-5 grid grid-cols-3 gap-x-4 justify-center items-end mt-4">
+        <div className="flex flex-col items-center w-full"> {/* Container for defense, centered */}
+            {/* FS & SS */}
+            <div className="flex justify-center w-full max-w-[500px] mx-auto gap-x-12 mb-6"> {/* Adjusted gap-x and max-width for centering */}
                 <div className="flex flex-col items-center">
-                    <span className="text-sm font-semibold text-gray-700 mb-1 block">WILL</span>
+                    <span className="text-sm font-semibold text-gray-700 mb-1">FS</span>
+                    {getStartersForPosition('S',1).map(player => renderPlayerCard(player, 'FS', true))}
+                </div>
+                <div className="flex flex-col items-center">
+                    <span className="text-sm font-semibold text-gray-700 mb-1">SS</span>
+                    {getStartersForPosition('S',2).map(player => renderPlayerCard(player, 'SS', true))}
+                </div>
+            </div>
+
+            {/* CBs and D-Line/Edge */}
+            <div className="flex justify-center w-full max-w-[700px] mx-auto gap-x-4"> {/* Adjusted gap-x and max-width */}
+                <div className="flex flex-col items-center">
+                    <span className="text-sm font-semibold text-gray-700 mb-1">CB</span>
+                    {getStartersForPosition('CB',1).map(player => renderPlayerCard(player, 'CB', true))}
+                </div>
+                <div className="flex flex-col items-center">
+                    <span className="text-sm font-semibold text-gray-700 mb-1">DRE</span>
+                    {getStartersForPosition('DE',1).map(player => renderPlayerCard(player, 'DRE', true))}
+                </div>
+                <div className="flex flex-col items-center">
+                    <span className="text-sm font-semibold text-gray-700 mb-1">DRT</span>
+                    {getStartersForPosition('DT',1).map(player => renderPlayerCard(player, 'DRT', true))}
+                </div>
+                <div className="flex flex-col items-center">
+                    <span className="text-sm font-semibold text-gray-700 mb-1">DLT</span>
+                    {getStartersForPosition('DT',2).map(player => renderPlayerCard(player, 'DLT', true))}
+                </div>
+                <div className="flex flex-col items-center">
+                    <span className="text-sm font-semibold text-gray-700 mb-1">DLE</span>
+                    {getStartersForPosition('DE',2).map(player => renderPlayerCard(player, 'DLE', true))}
+                </div>
+                 <div className="flex flex-col items-center">
+                    <span className="text-sm font-semibold text-gray-700 mb-1">CB</span>
+                    {getStartersForPosition('CB',2).map(player => renderPlayerCard(player, 'CB', true))}
+                </div>
+            </div>
+
+            {/* LBs */}
+            <div className="flex justify-center w-full max-w-[500px] mx-auto gap-x-8 mt-6"> {/* Adjusted margin-top */}
+                <div className="flex flex-col items-center">
+                    <span className="text-sm font-semibold text-gray-700 mb-1">WILL</span>
                     {getStartersForPosition('LB',1).map(player => renderPlayerCard(player, 'WILL', true))}
                 </div>
                 <div className="flex flex-col items-center">
-                    <span className="text-sm font-semibold text-gray-700 mb-1 block">MIKE</span>
+                    <span className="text-sm font-semibold text-gray-700 mb-1">MIKE</span>
                     {getStartersForPosition('LB',2).map(player => renderPlayerCard(player, 'MIKE', true))}
                 </div>
                 <div className="flex flex-col items-center">
-                    <span className="text-sm font-semibold text-gray-700 mb-1 block">SAM</span>
+                    <span className="text-sm font-semibold text-gray-700 mb-1">SAM</span>
                     {getStartersForPosition('LB',3).map(player => renderPlayerCard(player, 'SAM', true))}
                 </div>
             </div>
         </div>
 
         {/* Offensive Side (Bottom) */}
-        <div className="grid grid-cols-5 gap-x-2 gap-y-4 justify-center items-start text-center mt-8"> {/* Adjusted margin-top */}
-            {/* Top Row (Offensive Line + WRs) */}
-            <div className="col-span-1">
-                <span className="text-sm font-semibold text-gray-700 mb-1 block">WR</span>
-                {getStartersForPosition('WR',1).map(player => renderPlayerCard(player, 'WR'))}
-            </div>
-            <div className="col-span-1">
-                <span className="text-sm font-semibold text-gray-700 mb-1 block">LT</span>
-                {getStartersForPosition('LT').map(player => renderPlayerCard(player, 'LT'))}
-            </div>
-            <div className="col-span-1">
-                <span className="text-sm font-semibold text-gray-700 mb-1 block">LG</span>
-                {getStartersForPosition('LG').map(player => renderPlayerCard(player, 'LG'))}
-            </div>
-            <div className="col-span-1">
-                <span className="text-sm font-semibold text-gray-700 mb-1 block">C</span>
-                {getStartersForPosition('C').map(player => renderPlayerCard(player, 'C'))}
-            </div>
-            <div className="col-span-1">
-                <span className="text-sm font-semibold text-gray-700 mb-1 block">RG</span>
-                {getStartersForPosition('RG').map(player => renderPlayerCard(player, 'RG'))}
-            </div>
-            <div className="col-span-1">
-                <span className="text-sm font-semibold text-gray-700 mb-1 block">RT</span>
-                {getStartersForPosition('RT').map(player => renderPlayerCard(player, 'RT'))}
-            </div>
-            <div className="col-span-1">
-                <span className="text-sm font-semibold text-gray-700 mb-1 block">WR</span>
-                {getStartersForPosition('WR',2).map(player => renderPlayerCard(player, 'WR'))}
+        <div className="flex flex-col items-center w-full mt-8"> {/* Container for offense, centered, adjusted mt */}
+            {/* WRs, TEs, O-Line */}
+            <div className="flex justify-center w-full max-w-[700px] mx-auto gap-x-4"> {/* Adjusted max-width and gap-x */}
+                 <div className="flex flex-col items-center">
+                    <span className="text-sm font-semibold text-gray-700 mb-1">WR</span>
+                    {getStartersForPosition('WR',1).map(player => renderPlayerCard(player, 'WR'))}
+                </div>
+                <div className="flex flex-col items-center">
+                    <span className="text-sm font-semibold text-gray-700 mb-1">LT</span>
+                    {getStartersForPosition('LT').map(player => renderPlayerCard(player, 'LT'))}
+                </div>
+                <div className="flex flex-col items-center">
+                    <span className="text-sm font-semibold text-gray-700 mb-1">LG</span>
+                    {getStartersForPosition('LG').map(player => renderPlayerCard(player, 'LG'))}
+                </div>
+                <div className="flex flex-col items-center">
+                    <span className="text-sm font-semibold text-gray-700 mb-1">C</span>
+                    {getStartersForPosition('C').map(player => renderPlayerCard(player, 'C'))}
+                </div>
+                <div className="flex flex-col items-center">
+                    <span className="text-sm font-semibold text-gray-700 mb-1">RG</span>
+                    {getStartersForPosition('RG').map(player => renderPlayerCard(player, 'RG'))}
+                </div>
+                <div className="flex flex-col items-center">
+                    <span className="text-sm font-semibold text-gray-700 mb-1">RT</span>
+                    {getStartersForPosition('RT').map(player => renderPlayerCard(player, 'RT'))}
+                </div>
+                <div className="flex flex-col items-center">
+                    <span className="text-sm font-semibold text-gray-700 mb-1">WR</span>
+                    {getStartersForPosition('WR',2).map(player => renderPlayerCard(player, 'WR'))}
+                </div>
             </div>
 
-            {/* Bottom Row (SLOT, TE, QB, HB) */}
-            <div className="col-span-5 grid grid-cols-4 gap-x-4 justify-center items-start mt-6"> {/* Adjusted margin-top */}
+            {/* Slot & TE */}
+            <div className="flex justify-center w-full max-w-[400px] mx-auto gap-x-8 mt-6"> {/* Adjusted margin-top and max-width */}
                 <div className="flex flex-col items-center">
-                    <span className="text-sm font-semibold text-gray-700 mb-1 block">SLOT</span>
+                    <span className="text-sm font-semibold text-gray-700 mb-1">SLOT</span>
                     {getStartersForPosition('WR',3).map(player => renderPlayerCard(player, 'SLOT'))}
                 </div>
                 <div className="flex flex-col items-center">
-                    <span className="text-sm font-semibold text-gray-700 mb-1 block">TE</span>
+                    <span className="text-sm font-semibold text-gray-700 mb-1">TE</span>
                     {getStartersForPosition('TE').map(player => renderPlayerCard(player, 'TE'))}
                 </div>
+            </div>
+
+            {/* QB & HB */}
+            <div className="flex justify-center w-full max-w-[300px] mx-auto gap-x-12 mt-6"> {/* Adjusted margin-top and max-width */}
                 <div className="flex flex-col items-center">
-                    <span className="text-sm font-semibold text-gray-700 mb-1 block">QB</span>
+                    <span className="text-sm font-semibold text-gray-700 mb-1">QB</span>
                     {getStartersForPosition('QB').map(player => renderPlayerCard(player, 'QB'))}
                 </div>
                 <div className="flex flex-col items-center">
-                    <span className="text-sm font-semibold text-gray-700 mb-1 block">HB</span>
+                    <span className="text-sm font-semibold text-gray-700 mb-1">HB</span>
                     {getStartersForPosition('RB').map(player => renderPlayerCard(player, 'HB'))}
                 </div>
             </div>
         </div>
+
+        {/* Special Teams (simplified, can be expanded) */}
+        {/* Render this somewhere else or conditionally if you want to swap units */}
       </div>
     );
   };
@@ -316,10 +334,10 @@ const DepthChart = () => {
                 overflow: 'hidden', // Hide overflow from player cards if they go out of bounds
             }}
           >
-            {/* Background Grid - mimicking lines from screenshot with gold endzones */}
+            {/* Background Grid - mimicking lines from screenshot with steel gray endzones */}
             <div className="absolute inset-0 grid grid-rows-7 z-0">
                 {Array.from({ length: 7 }).map((_, i) => (
-                    <div key={i} className={`h-full ${i === 0 || i === 6 ? 'bg-yellow-500' : (i % 2 === 0 ? 'bg-gray-50' : 'bg-white')} border-b border-gray-200 last:border-b-0`}></div>
+                    <div key={i} className={`h-full ${i === 0 || i === 6 ? 'bg-[#4682B4]' : (i % 2 === 0 ? 'bg-gray-50' : 'bg-white')} border-b border-gray-200 last:border-b-0`}></div>
                 ))}
             </div>
             <div className="relative z-10"> {/* Content wrapper to sit on top of background */}

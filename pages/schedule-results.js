@@ -1,3 +1,4 @@
+// pages/schedule-results.js
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -6,38 +7,32 @@ import { motion } from 'framer-motion';
 
 export default function ScheduleResults() {
   const [games, setGames] = useState([]);
-  const [loading, setLoading] = useState(false); // Set to false initially, as we wait for user input or default fetch
+  const [loading, setLoading] = useState(false);
   const [seasonsLoading, setSeasonsLoading] = useState(true);
-  const [season, setSeason] = useState(''); // Default to empty string for "All Seasons"
+  const [season, setSeason] = useState('');
   const [availableSeasons, setAvailableSeasons] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState('');
-  const [allAvailableTeams, setAllAvailableTeams] = useState([]); // To store all teams for the dropdown
+  const [allAvailableTeams, setAllAvailableTeams] = useState([]);
 
-  // ───────────────────────────────────────────────────────────────────────────
-  // Data fetching
-  // ───────────────────────────────────────────────────────────────────────────
-
-  // Fetch available seasons first
+  // Fetch available seasons
   useEffect(() => {
     setSeasonsLoading(true);
     fetch('/api/seasons')
       .then((res) => res.json())
       .then((data) => {
-        const fetchedSeasons = data.map(String).sort((a, b) => b - a); // Sort seasons descending
+        const fetchedSeasons = data.map(String).sort((a, b) => b - a);
         setAvailableSeasons(fetchedSeasons);
         setSeasonsLoading(false);
       })
       .catch((err) => {
         console.error('Failed to load seasons:', err);
         setSeasonsLoading(false);
-        setAvailableSeasons(['2024', '2023']); // Fallback
+        setAvailableSeasons(['2024', '2023']);
       });
-  }, []); // Runs only once on mount
+  }, []);
 
-  // Fetch all available teams for the dropdown when the component mounts
+  // Fetch all available teams
   useEffect(() => {
-    // This assumes your /api/teams endpoint exists and returns an array of all team names
-    // If you don't have it, uncomment the fallback hardcoded list below.
     fetch('/api/teams')
       .then((res) => {
         if (!res.ok) {
@@ -46,11 +41,10 @@ export default function ScheduleResults() {
         return res.json();
       })
       .then((data) => {
-        setAllAvailableTeams(data.sort()); // Assuming data is an array of team names
+        setAllAvailableTeams(data.sort());
       })
       .catch((err) => {
         console.error('Failed to load all teams for dropdown:', err);
-        // Fallback: A comprehensive list of NFL teams if /api/teams is not available or fails
         setAllAvailableTeams([
           'Arizona Cardinals', 'Atlanta Falcons', 'Baltimore Ravens', 'Buffalo Bills',
           'Carolina Panthers', 'Chicago Bears', 'Cincinnati Bengals', 'Cleveland Browns',
@@ -62,12 +56,10 @@ export default function ScheduleResults() {
           'Seattle Seahawks', 'Tampa Bay Buccaneers', 'Tennessee Titans', 'Washington Commanders'
         ].sort());
       });
-  }, []); // Runs only once on mount
+  }, []);
 
-  // Fetch games based on selected season and team
+  // Fetch games based on filters
   useEffect(() => {
-    // Only fetch if a filter is active, or if we want to load initial data (e.g., all games from latest season)
-    // If both season and selectedTeam are empty, we don't fetch and simply clear the games list.
     if (!season && !selectedTeam) {
       setGames([]);
       setLoading(false);
@@ -75,10 +67,8 @@ export default function ScheduleResults() {
     }
 
     const queryParams = new URLSearchParams();
-
-    // Always add both parameters, even if empty. Backend will interpret empty as "all".
-    queryParams.append('season', season);
-    queryParams.append('team', selectedTeam);
+    if (season) queryParams.append('season', season);
+    if (selectedTeam) queryParams.append('team', selectedTeam);
 
     setLoading(true);
     fetch(`/api/games?${queryParams.toString()}`)
@@ -94,35 +84,30 @@ export default function ScheduleResults() {
       })
       .catch((err) => {
         console.error('Error loading schedule:', err);
-        setLoading(false);
         setGames([]);
+        setLoading(false);
       });
-  }, [season, selectedTeam]); // Re-run when season or selectedTeam changes
+  }, [season, selectedTeam]);
 
-  // ───────────────────────────────────────────────────────────────────────────
-  // Derived state for display
-  // ───────────────────────────────────────────────────────────────────────────
-  const gamesDisplay = selectedTeam
-    ? { 'All Games': games.sort((a, b) => a.week - b.week) } // If a team is selected, group all its games under 'All Games' and sort by week
-    : games.reduce((acc, game) => { // If no team selected, group by week
-        acc[game.week] = acc[game.week] || [];
-        acc[game.week].push(game);
-        return acc;
-      }, {});
+  // Group games for display
+  const gamesDisplay = games.reduce((acc, game) => {
+    const weekKey = selectedTeam ? 'All Games' : `Week ${game.week}`;
+    acc[weekKey] = acc[weekKey] || [];
+    acc[weekKey].push(game);
+    return acc;
+  }, {});
+  Object.keys(gamesDisplay).forEach((key) => {
+    gamesDisplay[key].sort((a, b) => a.week - b.week);
+  });
 
-  // ───────────────────────────────────────────────────────────────────────────
-  // UI
-  // ───────────────────────────────────────────────────────────────────────────
   return (
     <>
-      {/* Hero header – different palette from other pages */}
       <section className="relative isolate overflow-hidden bg-blue-900 pb-24 pt-28 sm:pt-32">
         <img
           src="https://source.unsplash.com/random/1600x800?football-night"
           alt="stadium night background"
           className="absolute inset-0 -z-10 h-full w-full object-cover opacity-30"
         />
-
         <div className="mx-auto max-w-4xl px-6 text-center">
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
@@ -130,7 +115,7 @@ export default function ScheduleResults() {
             transition={{ duration: 0.6 }}
             className="text-4xl font-extrabold tracking-tight text-black sm:text-5xl"
           >
-            NFL Schedule &amp; Results
+            NFL Schedule & Results
           </motion.h1>
           <p className="mt-4 text-lg text-blue-100">
             View every matchup, score, and venue — filter by team, all in one curated timeline.
@@ -140,7 +125,6 @@ export default function ScheduleResults() {
 
       <main className="bg-gray-50 py-12">
         <div className="mx-auto max-w-5xl px-6 space-y-10">
-          {/* Filters bar */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-white shadow rounded-xl p-6 ring-1 ring-gray-200">
             <div>
               <label htmlFor="season" className="block text-sm font-medium text-gray-900 mb-1">
@@ -155,20 +139,15 @@ export default function ScheduleResults() {
                   onChange={(e) => setSeason(e.target.value)}
                   className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-gray-900 text-md focus:border-blue-500 focus:ring-blue-500"
                 >
-                  <option value="">All Seasons</option> {/* Blank option */}
-                  {availableSeasons.length > 0 ? (
-                    availableSeasons.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="">No seasons available</option>
-                  )}
+                  <option value="">All Seasons</option>
+                  {availableSeasons.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
                 </select>
               )}
             </div>
-
             <div>
               <label htmlFor="team-filter" className="block text-sm font-medium text-gray-900 mb-1">
                 Team
@@ -189,7 +168,6 @@ export default function ScheduleResults() {
             </div>
           </div>
 
-          {/* Schedule */}
           {loading ? (
             <p className="text-gray-900">Loading schedule…</p>
           ) : Object.keys(gamesDisplay).length === 0 ? (
@@ -198,9 +176,8 @@ export default function ScheduleResults() {
             Object.keys(gamesDisplay).map((groupKey) => (
               <div key={groupKey} className="space-y-2">
                 <h2 className="text-xl font-semibold text-blue-800">
-                  {selectedTeam ? `${selectedTeam} Games` : `Week ${groupKey}`}
+                  {groupKey.startsWith('Week') ? groupKey : `${selectedTeam} Games`}
                 </h2>
-
                 <div className="overflow-x-auto rounded-xl shadow ring-1 ring-gray-200 bg-white">
                   <table className="min-w-full divide-y divide-gray-900 text-sm">
                     <thead className="bg-blue-50">
@@ -235,14 +212,14 @@ export default function ScheduleResults() {
                             : "—";
 
                         const displayVal = (val) =>
-                          val === null || val === undefined || val === '' ? <span>&mdash;</span> : val;
+                          val === null || val === undefined || val === '' ? <span>—</span> : val;
                         const yesNo = (val) =>
                           val === true ? (
                             <span className="inline-block px-2 py-0.5 rounded bg-green-100 text-gray-900">Yes</span>
                           ) : val === false ? (
                             <span className="inline-block px-2 py-0.5 rounded bg-gray-100 text-gray-900">No</span>
                           ) : (
-                            <span>&mdash;</span>
+                            <span>—</span>
                           );
                         return (
                           <tr key={game.game_id} className="hover:bg-blue-50/60">
