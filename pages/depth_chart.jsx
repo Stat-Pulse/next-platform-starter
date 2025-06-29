@@ -79,7 +79,7 @@ const DepthChart = () => {
   }, [teamId, viewMode, selectedSeason]); // Dependencies for refetching data
 
   // --- Helper to render a single player card ---
-  const renderPlayerCard = (player, position) => (
+  const renderPlayerCard = (player, positionAbbr) => (
     <div
       key={player.player_id} // Added key here for list rendering
       className="bg-gray-900/80 text-white rounded-md p-1 sm:p-2 shadow-lg border border-gray-700 text-center transform hover:scale-105 transition-transform duration-200 ease-in-out cursor-pointer
@@ -87,10 +87,10 @@ const DepthChart = () => {
                  flex flex-col items-center justify-center" // Added flex for centering content
     >
       <img
-        src={player.headshot_url || `https://placehold.co/40x40/E2E8F0/1A202C?text=${position}`} // Use position for placeholder text
+        src={player.headshot_url || `https://placehold.co/40x40/E2E8F0/1A202C?text=${positionAbbr}`} // Use positionAbbr for placeholder text
         alt={`${player.player_name} headshot`}
         className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover bg-gray-700 border border-gray-500 mb-1"
-        onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/40x40/E2E8F0/1A202C?text=${position}`; }}
+        onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/40x40/E2E8F0/1A202C?text=${positionAbbr}`; }}
       />
       <div className="text-[10px] sm:text-xs font-semibold leading-tight text-white whitespace-nowrap overflow-hidden text-ellipsis w-full">
         {player.player_name}
@@ -186,33 +186,34 @@ const DepthChart = () => {
         <>
           <FieldPositionGroup players={getStartersForPosition('QB')} style={fieldPositions.QB} positionLabel="QB" />
           <FieldPositionGroup players={getStartersForPosition('RB')} style={fieldPositions.RB} positionLabel="RB" />
-          <FieldPositionGroup players={getStartersForPosition('WR').filter(p => p.depth_rank === 1 && p.player_name === 'CeeDee Lamb')} style={fieldPositions.WR1} positionLabel="WR1" />
-          <FieldPositionGroup players={getStartersForPosition('WR').filter(p => p.depth_rank === 1 && p.player_name === 'Brandin Cooks')} style={fieldPositions.WR2} positionLabel="WR2" />
-          <FieldPositionGroup players={getStartersForPosition('WR').filter(p => p.depth_rank === 1 && p.player_name !== 'CeeDee Lamb' && p.player_name !== 'Brandin Cooks')} style={fieldPositions.SLOT} positionLabel="SLOT" />
-          <FieldPositionGroup players={getStartersForPosition('TE')} style={fieldPositions.TE} positionLabel="TE" />
+          {/* WRs: You might need to map specific WRs if your data distinguishes them (WR1, WR2, Slot) */}
+          {/* For now, assuming your DB returns generic 'WR' and we pick two for outside and one for slot */}
+          <FieldPositionGroup players={getStartersForPosition('WR').slice(0,1)} style={fieldPositions.WR1} positionLabel="WR1" />
+          <FieldPositionGroup players={getStartersForPosition('WR').slice(1,2)} style={fieldPositions.WR2} positionLabel="WR2" />
+          <FieldPositionGroup players={getStartersForPosition('WR').slice(2,3)} style={fieldPositions.SLOT} positionLabel="SLOT" />
+          <FieldPositionGroup players={getStartersForPosition('TE').slice(0,1)} style={fieldPositions.TE} positionLabel="TE" />
           <FieldPositionGroup players={getStartersForPosition('LT')} style={fieldPositions.LT} positionLabel="LT" />
           <FieldPositionGroup players={getStartersForPosition('LG')} style={fieldPositions.LG} positionLabel="LG" />
           <FieldPositionGroup players={getStartersForPosition('C')} style={fieldPositions.C} positionLabel="C" />
           <FieldPositionGroup players={getStartersForPosition('RG')} style={fieldPositions.RG} positionLabel="RG" />
           <FieldPositionGroup players={getStartersForPosition('RT')} style={fieldPositions.RT} positionLabel="RT" />
-          {/* Note: This is a basic 11-man offensive formation. Adjust based on common team schemes. */}
         </>
       );
     } else if (activeUnit === 'defense') {
       return (
         <>
-          <FieldPositionGroup players={getStartersForPosition('DE').filter(p => p.depth_rank === 1)} style={fieldPositions.DE1} positionLabel="DE1" />
-          <FieldPositionGroup players={getStartersForPosition('DE').filter(p => p.depth_rank === 2)} style={fieldPositions.DE2} positionLabel="DE2" />
-          <FieldPositionGroup players={getStartersForPosition('DT').filter(p => p.depth_rank === 1)} style={fieldPositions.DT1} positionLabel="DT1" />
-          <FieldPositionGroup players={getStartersForPosition('DT').filter(p => p.depth_rank === 2)} style={fieldPositions.DT2} positionLabel="DT2" />
+          <FieldPositionGroup players={getStartersForPosition('DE').slice(0,1)} style={fieldPositions.DE1} positionLabel="DE1" />
+          <FieldPositionGroup players={getStartersForPosition('DE').slice(1,2)} style={fieldPositions.DE2} positionLabel="DE2" />
+          <FieldPositionGroup players={getStartersForPosition('DT').slice(0,1)} style={fieldPositions.DT1} positionLabel="DT1" />
+          <FieldPositionGroup players={getStartersForPosition('DT').slice(1,2)} style={fieldPositions.DT2} positionLabel="DT2" />
           <FieldPositionGroup players={getStartersForPosition('NT')} style={fieldPositions.NT} positionLabel="NT" />
-          <FieldPositionGroup players={getStartersForPosition('LB').filter(p => p.depth_rank === 1)} style={fieldPositions.LB_MLB} positionLabel="MLB" />
-          <FieldPositionGroup players={getStartersForPosition('LB').filter(p => p.depth_rank === 2)} style={fieldPositions.LB_OLB1} positionLabel="OLB1" />
-          <FieldPositionGroup players={getStartersForPosition('LB').filter(p => p.depth_rank === 3)} style={fieldPositions.LB_OLB2} positionLabel="OLB2" />
-          <FieldPositionGroup players={getStartersForPosition('CB').filter(p => p.depth_rank === 1)} style={fieldPositions.CB1} positionLabel="CB1" />
-          <FieldPositionGroup players={getStartersForPosition('CB').filter(p => p.depth_rank === 2)} style={fieldPositions.CB2} positionLabel="CB2" />
-          <FieldPositionGroup players={getStartersForPosition('S').filter(p => p.depth_rank === 1)} style={fieldPositions.S1} positionLabel="S1" />
-          <FieldPositionGroup players={getStartersForPosition('S').filter(p => p.depth_rank === 2)} style={fieldPositions.S2} positionLabel="S2" />
+          <FieldPositionGroup players={getStartersForPosition('LB').slice(0,1)} style={fieldPositions.LB_MLB} positionLabel="MLB" />
+          <FieldPositionGroup players={getStartersForPosition('LB').slice(1,2)} style={fieldPositions.LB_OLB1} positionLabel="OLB1" />
+          <FieldPositionGroup players={getStartersForPosition('LB').slice(2,3)} style={fieldPositions.LB_OLB2} positionLabel="OLB2" />
+          <FieldPositionGroup players={getStartersForPosition('CB').slice(0,1)} style={fieldPositions.CB1} positionLabel="CB1" />
+          <FieldPositionGroup players={getStartersForPosition('CB').slice(1,2)} style={fieldPositions.CB2} positionLabel="CB2" />
+          <FieldPositionGroup players={getStartersForPosition('S').slice(0,1)} style={fieldPositions.S1} positionLabel="S1" />
+          <FieldPositionGroup players={getStartersForPosition('S').slice(1,2)} style={fieldPositions.S2} positionLabel="S2" />
         </>
       );
     } else if (activeUnit === 'specialTeams') {
@@ -221,7 +222,6 @@ const DepthChart = () => {
           <FieldPositionGroup players={getStartersForPosition('K')} style={fieldPositions.K} positionLabel="K" />
           <FieldPositionGroup players={getStartersForPosition('P')} style={fieldPositions.P} positionLabel="P" />
           <FieldPositionGroup players={getStartersForPosition('LS')} style={fieldPositions.LS} positionLabel="LS" />
-          {/* Add other core special team positions if desired, e.g., KR, PR, Gunners */}
         </>
       );
     }
@@ -306,11 +306,11 @@ const DepthChart = () => {
           <div className="text-center text-lg text-blue-400 p-5 bg-blue-900/50 rounded-lg">Loading Depth Chart...</div>
         ) : (
           <div
-            className="relative w-full aspect-[16/9] bg-green-800 rounded-lg shadow-inner overflow-hidden border border-gray-700" // Added border
+            className="relative w-full aspect-[16/9] bg-green-800 rounded-lg shadow-inner overflow-hidden border border-gray-700"
             style={{
-              // Using a direct Google Photos URL which is usually more stable for testing
-              backgroundImage: 'url(https://i.imgur.com/kK3hW9c.png)', // A good quality football field image
-              backgroundSize: '100% 100%', // Scale to cover the entire area
+              // Base64 encoded SVG for football field lines on green background
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 500'%3E%3Crect width='100%25' height='100%25' fill='%23228B22'/%3E%3Cline x1='0' y1='50%25' x2='100%25' y2='50%25' stroke='%23fff' stroke-width='3'/%3E%3C!-- Yard Lines --%3E%3C!-- 0-50 --%3E%3Cline x1='10%25' y1='0' x2='10%25' y2='100%25' stroke='%23fff' stroke-width='2'/%3E%3Cline x1='20%25' y1='0' x2='20%25' y2='100%25' stroke='%23fff' stroke-width='2'/%3E%3Cline x1='30%25' y1='0' x2='30%25' y2='100%25' stroke='%23fff' stroke-width='2'/%3E%3Cline x1='40%25' y1='0' x2='40%25' y2='100%25' stroke='%23fff' stroke-width='2'/%3E%3Cline x1='60%25' y1='0' x2='60%25' y2='100%25' stroke='%23fff' stroke-width='2'/%3E%3Cline x1='70%25' y1='0' x2='70%25' y2='100%25' stroke='%23fff' stroke-width='2'/%3E%3Cline x1='80%25' y1='0' x2='80%25' y2='100%25' stroke='%23fff' stroke-width='2'/%3E%3Cline x1='90%25' y1='0' x2='90%25' y2='100%25' stroke='%23fff' stroke-width='2'/%3E%3C!-- End Zones (simplified) --%3E%3Crect x='0' y='0' width='5%25' height='100%25' fill='%231E88E5'/%3E%3Crect x='95%25' y='0' width='5%25' height='100%25' fill='%231E88E5'/%3E%3C/svg%3E")`,
+              backgroundSize: '100% 100%',
               backgroundRepeat: 'no-repeat',
               backgroundPosition: 'center center'
             }}
