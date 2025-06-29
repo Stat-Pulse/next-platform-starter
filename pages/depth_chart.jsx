@@ -104,61 +104,66 @@ const DepthChart = () => {
         );
     }
 
-    // FINAL REVISION: The structure is now corrected for proper centering.
+    // FINAL REVISION using CSS Grid for perfect centering.
     return (
-      // This container is correct. It centers its direct children.
-      <div className="flex flex-col h-full justify-center items-center px-2 gap-y-16 py-8">
+      // 1. Switched from 'flex' to 'grid' and 'place-items-center'.
+      // This is a more forceful way to center the content in the middle of the parent.
+      <div className="grid h-full place-items-center">
 
-        {/* CHILD 1: The ENTIRE defensive unit is now inside this single block. */}
-        <div className="flex flex-col items-center w-full gap-y-6">
-            {/* Safeties (Deepest) */}
-            <div className="flex justify-center w-full max-w-lg mx-auto gap-x-28">
-                <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">FS</span>{getStartersForPosition('S', 2).slice(0, 1).map((p) => renderPlayerCard(p, 'FS'))}</div>
-                <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">SS</span>{getStartersForPosition('S', 2).slice(1, 2).map((p) => renderPlayerCard(p, 'SS'))}</div>
-            </div>
-
-            {/* Linebackers */}
-            <div className="flex justify-center w-full max-w-lg mx-auto gap-x-12">
-                <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">WILL</span>{getStartersForPosition('LB', 3).slice(0, 1).map((p) => renderPlayerCard(p, 'WILL'))}</div>
-                <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">MIKE</span>{getStartersForPosition('LB', 3).slice(1, 2).map((p) => renderPlayerCard(p, 'MIKE'))}</div>
-                <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">SAM</span>{getStartersForPosition('LB', 3).slice(2, 3).map((p) => renderPlayerCard(p, 'SAM'))}</div>
-            </div>
-
-            {/* D-Line & CBs (Moved inside the main defensive block) */}
-            <div className="flex justify-center items-end w-full max-w-5xl mx-auto gap-x-2">
-                <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">CB</span>{getStartersForPosition('CB', 2).slice(0, 1).map((p) => renderPlayerCard(p, 'CB'))}</div>
-                <div className="flex-grow flex justify-center gap-x-4">
-                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">DE</span>{getStartersForPosition('DE', 2).slice(0, 1).map((p) => renderPlayerCard(p, 'DE'))}</div>
-                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">DT</span>{getStartersForPosition('DT', 2).slice(0, 1).map((p) => renderPlayerCard(p, 'DT'))}</div>
-                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">DT</span>{getStartersForPosition('DT', 2).slice(1, 2).map((p) => renderPlayerCard(p, 'DT'))}</div>
-                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">DE</span>{getStartersForPosition('DE', 2).slice(1, 2).map((p) => renderPlayerCard(p, 'DE'))}</div>
+        {/* 2. Added a single wrapper div for all content.
+            The grid will center this one item perfectly. */}
+        <div>
+            {/* The defensive unit */}
+            <div className="flex flex-col items-center w-full gap-y-6 mb-16"> {/* Added margin-bottom (mb-16) for the line-of-scrimmage gap */}
+                {/* Safeties (Deepest) */}
+                <div className="flex justify-center w-full max-w-lg mx-auto gap-x-28">
+                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">FS</span>{getStartersForPosition('S', 2).slice(0, 1).map((p) => renderPlayerCard(p, 'FS'))}</div>
+                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">SS</span>{getStartersForPosition('S', 2).slice(1, 2).map((p) => renderPlayerCard(p, 'SS'))}</div>
                 </div>
-                <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">CB</span>{getStartersForPosition('CB', 2).slice(1, 2).map((p) => renderPlayerCard(p, 'CB'))}</div>
-            </div>
-        </div>
 
-
-        {/* CHILD 2: The ENTIRE offensive unit (this was already correct). */}
-        <div className="flex flex-col items-center w-full gap-y-8">
-            {/* O-Line & WRs */}
-             <div className="flex justify-center items-start w-full max-w-5xl mx-auto gap-x-4">
-                <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">WR</span>{getStartersForPosition('WR', 3).slice(0, 1).map((p) => renderPlayerCard(p, 'WR'))}</div>
-                <div className="flex-grow flex justify-center gap-x-2">
-                  <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">TE</span>{getStartersForPosition('TE', 1).map((p) => renderPlayerCard(p, 'TE'))}</div>
-                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">LT</span>{getStartersForPosition('LT', 1).map((p) => renderPlayerCard(p, 'LT'))}</div>
-                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">LG</span>{getStartersForPosition('LG', 1).map((p) => renderPlayerCard(p, 'LG'))}</div>
-                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">C</span>{getStartersForPosition('C', 1).map((p) => renderPlayerCard(p, 'C'))}</div>
-                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">RG</span>{getStartersForPosition('RG', 1).map((p) => renderPlayerCard(p, 'RG'))}</div>
-                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">RT</span>{getStartersForPosition('RT', 1).map((p) => renderPlayerCard(p, 'RT'))}</div>
+                {/* Linebackers */}
+                <div className="flex justify-center w-full max-w-lg mx-auto gap-x-12">
+                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">WILL</span>{getStartersForPosition('LB', 3).slice(0, 1).map((p) => renderPlayerCard(p, 'WILL'))}</div>
+                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">MIKE</span>{getStartersForPosition('LB', 3).slice(1, 2).map((p) => renderPlayerCard(p, 'MIKE'))}</div>
+                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">SAM</span>{getStartersForPosition('LB', 3).slice(2, 3).map((p) => renderPlayerCard(p, 'SAM'))}</div>
                 </div>
-                <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">SLOT</span>{getStartersForPosition('WR', 3).slice(2, 3).map((p) => renderPlayerCard(p, 'SLOT'))}</div>
-                <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">WR</span>{getStartersForPosition('WR', 3).slice(1, 2).map((p) => renderPlayerCard(p, 'WR'))}</div>
+
+                {/* D-Line & CBs */}
+                <div className="flex justify-center items-end w-full max-w-5xl mx-auto gap-x-2">
+                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">CB</span>{getStartersForPosition('CB', 2).slice(0, 1).map((p) => renderPlayerCard(p, 'CB'))}</div>
+                    <div className="flex-grow flex justify-center gap-x-4">
+                        <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">DE</span>{getStartersForPosition('DE', 2).slice(0, 1).map((p) => renderPlayerCard(p, 'DE'))}</div>
+                        <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">DT</span>{getStartersForPosition('DT', 2).slice(0, 1).map((p) => renderPlayerCard(p, 'DT'))}</div>
+                        <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">DT</span>{getStartersForPosition('DT', 2).slice(1, 2).map((p) => renderPlayerCard(p, 'DT'))}</div>
+                        <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">DE</span>{getStartersForPosition('DE', 2).slice(1, 2).map((p) => renderPlayerCard(p, 'DE'))}</div>
+                    </div>
+                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">CB</span>{getStartersForPosition('CB', 2).slice(1, 2).map((p) => renderPlayerCard(p, 'CB'))}</div>
+                </div>
             </div>
 
-            {/* QB & HB */}
-            <div className="flex justify-center w-full max-w-sm mx-auto gap-x-10">
-                <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">QB</span>{getStartersForPosition('QB', 1).map((p) => renderPlayerCard(p, 'QB'))}</div>
-                <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">HB</span>{getStartersForPosition('RB', 1).map((p) => renderPlayerCard(p, 'HB'))}</div>
+
+            {/* The offensive unit */}
+            <div className="flex flex-col items-center w-full gap-y-8">
+                {/* O-Line & WRs */}
+                 <div className="flex justify-center items-start w-full max-w-5xl mx-auto gap-x-4">
+                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">WR</span>{getStartersForPosition('WR', 3).slice(0, 1).map((p) => renderPlayerCard(p, 'WR'))}</div>
+                    <div className="flex-grow flex justify-center gap-x-2">
+                      <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">TE</span>{getStartersForPosition('TE', 1).map((p) => renderPlayerCard(p, 'TE'))}</div>
+                        <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">LT</span>{getStartersForPosition('LT', 1).map((p) => renderPlayerCard(p, 'LT'))}</div>
+                        <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">LG</span>{getStartersForPosition('LG', 1).map((p) => renderPlayerCard(p, 'LG'))}</div>
+                        <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">C</span>{getStartersForPosition('C', 1).map((p) => renderPlayerCard(p, 'C'))}</div>
+                        <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">RG</span>{getStartersForPosition('RG', 1).map((p) => renderPlayerCard(p, 'RG'))}</div>
+                        <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">RT</span>{getStartersForPosition('RT', 1).map((p) => renderPlayerCard(p, 'RT'))}</div>
+                    </div>
+                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">SLOT</span>{getStartersForPosition('WR', 3).slice(2, 3).map((p) => renderPlayerCard(p, 'SLOT'))}</div>
+                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">WR</span>{getStartersForPosition('WR', 3).slice(1, 2).map((p) => renderPlayerCard(p, 'WR'))}</div>
+                </div>
+
+                {/* QB & HB */}
+                <div className="flex justify-center w-full max-w-sm mx-auto gap-x-10">
+                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">QB</span>{getStartersForPosition('QB', 1).map((p) => renderPlayerCard(p, 'QB'))}</div>
+                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">HB</span>{getStartersForPosition('RB', 1).map((p) => renderPlayerCard(p, 'HB'))}</div>
+                </div>
             </div>
         </div>
       </div>
