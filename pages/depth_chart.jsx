@@ -108,7 +108,7 @@ const DepthChart = () => {
     return (
       // 1. Switched from 'flex' to 'grid' and 'place-items-center'.
       // This is a more forceful way to center the content in the middle of the parent.
-      <div className="pt-32">
+      <div className="pt-40">
 
         {/* 2. Added a single wrapper div for all content.
             The grid will center this one item perfectly. */}
