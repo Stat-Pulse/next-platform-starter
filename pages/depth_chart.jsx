@@ -144,15 +144,16 @@ const DepthChart = () => {
       );
     }
 
-    // CHANGED: Increased vertical padding (py-8) and main vertical gap (gap-y-8) to spread out the entire formation.
+    // REVISED: Using justify-center to vertically center the entire formation.
+    // Increased gap-y-16 to spread out offense and defense significantly.
     return (
-      <div className="flex flex-col h-full justify-around py-8 px-2 gap-y-8">
+      <div className="flex flex-col h-full justify-center items-center px-2 gap-y-16">
         {/* Defensive Side (Top) */}
-        <div className="flex flex-col items-center w-full gap-y-5"> {/* Increased gap between defensive rows */}
+        <div className="flex flex-col items-center w-full gap-y-6"> {/* Increased gap between defensive rows */}
             {/* Top Row: FS / SS */}
-            <div className="flex justify-center w-full max-w-[450px] mx-auto gap-x-24"> {/* Increased gap-x and max-width */}
+            <div className="flex justify-center w-full max-w-[450px] mx-auto gap-x-24">
                 <div className="flex flex-col items-center">
-                    <span className="text-sm font-semibold text-gray-500 mb-2 block">FS</span> {/* Lighter text color for position labels */}
+                    <span className="text-sm font-semibold text-gray-500 mb-2 block">FS</span>
                     {getStartersForPosition('S',1).map(player => renderPlayerCard(player, 'FS', true))}
                 </div>
                 <div className="flex flex-col items-center">
@@ -162,7 +163,7 @@ const DepthChart = () => {
             </div>
 
             {/* CBs and D-Line/Edge */}
-            <div className="flex justify-center w-full max-w-[800px] mx-auto gap-x-6"> {/* Increased gap-x and max-width */}
+            <div className="flex justify-center w-full max-w-[800px] mx-auto gap-x-6">
                 <div className="flex flex-col items-center">
                     <span className="text-sm font-semibold text-gray-500 mb-2 block">CB</span>
                     {getStartersForPosition('CB',1).map(player => renderPlayerCard(player, 'CB', true))}
@@ -190,7 +191,7 @@ const DepthChart = () => {
             </div>
 
             {/* LBs */}
-            <div className="flex justify-center w-full max-w-[600px] mx-auto gap-x-12"> {/* Increased gap-x and max-width */}
+            <div className="flex justify-center w-full max-w-[600px] mx-auto gap-x-12">
                 <div className="flex flex-col items-center">
                     <span className="text-sm font-semibold text-gray-500 mb-2 block">WILL</span>
                     {getStartersForPosition('LB',1).map(player => renderPlayerCard(player, 'WILL', true))}
@@ -207,9 +208,9 @@ const DepthChart = () => {
         </div>
 
         {/* Offensive Side (Bottom) */}
-        <div className="flex flex-col items-center w-full gap-y-5"> {/* Increased gap between offensive rows */}
+        <div className="flex flex-col items-center w-full gap-y-6"> {/* Increased gap between offensive rows */}
             {/* WRs, TEs, O-Line */}
-            <div className="flex justify-center w-full max-w-[800px] mx-auto gap-x-6"> {/* Increased gap-x and max-width */}
+            <div className="flex justify-center w-full max-w-[800px] mx-auto gap-x-6">
                  <div className="flex flex-col items-center">
                     <span className="text-sm font-semibold text-gray-500 mb-2 block">WR</span>
                     {getStartersForPosition('WR',1).map(player => renderPlayerCard(player, 'WR'))}
@@ -241,7 +242,7 @@ const DepthChart = () => {
             </div>
 
             {/* Slot & TE */}
-            <div className="flex justify-center w-full max-w-[450px] mx-auto gap-x-20"> {/* Increased gap-x */}
+            <div className="flex justify-center w-full max-w-[450px] mx-auto gap-x-20">
                 <div className="flex flex-col items-center">
                     <span className="text-sm font-semibold text-gray-500 mb-2 block">SLOT</span>
                     {getStartersForPosition('WR',3).map(player => renderPlayerCard(player, 'SLOT'))}
@@ -253,7 +254,7 @@ const DepthChart = () => {
             </div>
 
             {/* QB & HB */}
-            <div className="flex justify-center w-full max-w-[350px] mx-auto gap-x-24"> {/* Increased gap-x */}
+            <div className="flex justify-center w-full max-w-[350px] mx-auto gap-x-24">
                 <div className="flex flex-col items-center">
                     <span className="text-sm font-semibold text-gray-500 mb-2 block">QB</span>
                     {getStartersForPosition('QB').map(player => renderPlayerCard(player, 'QB'))}
@@ -322,32 +323,36 @@ const DepthChart = () => {
         ) : (
           <div
             className="relative w-full mx-auto rounded-lg shadow-inner overflow-hidden"
-            // CHANGED: Increased minHeight for better vertical spacing
             style={{
-                minHeight: '900px',
-                // CHANGED: Using a very light gray for a "glossy" white feel.
-                backgroundColor: '#F7F7F7',
+                minHeight: '950px', // Increased height slightly
+                backgroundColor: '#FBFBFB', // A very clean, almost white color
                 border: '1px solid #D1D5DB',
             }}
           >
-            {/* Background field with metallic gold endzones */}
-            <div className="absolute inset-0 z-0">
-                {/* CHANGED: Top end zone with metallic gold gradient */}
+            {/* Background structure with Endzones */}
+            <div className="absolute inset-0 z-0 flex flex-col">
+                {/* Top end zone */}
                 <div style={{
-                    height: '15%', // End zone height
+                    height: '14%', // End zone height
                     background: 'linear-gradient(145deg, #A47B1B, #E6C66E, #A47B1B)',
-                    borderBottom: '2px solid #C0C0C0' // Silver hash mark line
                 }}></div>
-                {/* Main field area */}
-                <div style={{ height: '70%' }}></div>
-                {/* CHANGED: Bottom end zone with metallic gold gradient */}
+                {/* REVISED: Main field area which will contain the lines */}
+                <div className="relative flex-grow">
+                    {/* This div will hold the horizontal lines */}
+                    <div className="absolute inset-0 flex flex-col justify-between py-5">
+                        {Array.from({ length: 9 }).map((_, i) => (
+                            <div key={i} className="w-full h-[1px] bg-gray-200"></div>
+                        ))}
+                    </div>
+                </div>
+                {/* Bottom end zone */}
                 <div style={{
-                    height: '15%', // End zone height
+                    height: '14%', // End zone height
                     background: 'linear-gradient(145deg, #A47B1B, #E6C66E, #A47B1B)',
-                    borderTop: '2px solid #C0C0C0' // Silver hash mark line
                 }}></div>
             </div>
-            <div className="relative z-10 h-full"> {/* Ensure content wrapper takes full height */}
+            {/* Player content, sits on top */}
+            <div className="relative z-10 h-full">
                 {renderCombinedPlayers()}
             </div>
           </div>
