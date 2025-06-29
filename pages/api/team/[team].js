@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   }
 
   let connection;
-  const currentSeason = 2024; // Explicitly define the season for stats aggregation
+  const currentSeason = 2025; // Explicitly define the season for stats aggregation
 
   try {
     connection = await mysql.createConnection({
@@ -86,7 +86,7 @@ export default async function handler(req, res) {
          jersey_number  AS number,
          rookie_year,
          headshot_url
-       FROM Rosters_2025
+       FROM Rosters
        WHERE team   = ?
          AND season = 2025`,
       [teamId]
@@ -99,7 +99,7 @@ export default async function handler(req, res) {
          r.full_name AS name,
          dc.depth_rank
        FROM Depth_Charts dc
-       JOIN Rosters_2025 r
+       JOIN Rosters r
          ON r.gsis_id COLLATE utf8mb4_unicode_ci = dc.player_id
         AND r.season  = 2025
        WHERE dc.team   = ?
