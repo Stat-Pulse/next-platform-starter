@@ -81,13 +81,13 @@ const DepthChart = () => {
   // --- Helper to render a single player card ---
   const renderPlayerCard = (player, positionAbbr) => (
     <div
-      key={player.player_id} // Added key here for list rendering
+      key={player.player_id}
       className="bg-gray-900/80 text-white rounded-md p-1 sm:p-2 shadow-lg border border-gray-700 text-center transform hover:scale-105 transition-transform duration-200 ease-in-out cursor-pointer
                  min-w-[70px] max-w-[110px] sm:min-w-[80px] sm:max-w-[120px] md:min-w-[90px] md:max-w-[130px]
-                 flex flex-col items-center justify-center" // Added flex for centering content
+                 flex flex-col items-center justify-center"
     >
       <img
-        src={player.headshot_url || `https://placehold.co/40x40/E2E8F0/1A202C?text=${positionAbbr}`} // Use positionAbbr for placeholder text
+        src={player.headshot_url || `https://placehold.co/40x40/E2E8F0/1A202C?text=${positionAbbr}`}
         alt={`${player.player_name} headshot`}
         className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover bg-gray-700 border border-gray-500 mb-1"
         onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/40x40/E2E8F0/1A202C?text=${positionAbbr}`; }}
@@ -122,48 +122,43 @@ const DepthChart = () => {
     );
   };
 
-  // Define explicit positions on the field (percentages relative to the field container)
-  // These are approximations and might need fine-tuning based on the actual background image.
+  // Define explicit positions on the vertical field (percentages relative to the field container)
   const fieldPositions = {
-    // Offensive positions (assuming team is driving left to right)
-    // Starters only (11 players)
-    QB: { top: '75%', left: '50%', transform: 'translate(-50%, -50%)' },
-    RB: { top: '80%', left: '45%', transform: 'translate(-50%, -50%)' }, // Default for a single RB
-    WR1: { top: '65%', left: '15%', transform: 'translate(-50%, -50%)' }, // Left outside receiver
-    WR2: { top: '65%', left: '85%', transform: 'translate(-50%, -50%)' }, // Right outside receiver
-    SLOT: { top: '70%', left: '65%', transform: 'translate(-50%, -50%)' }, // Slot receiver (assuming 3 WR set)
-    TE: { top: '70%', left: '35%', transform: 'translate(-50%, -50%)' }, // Tight End (often on one side)
-    LT: { top: '70%', left: '41%', transform: 'translate(-50%, -50%)' },
-    LG: { top: '70%', left: '46%', transform: 'translate(-50%, -50%)' },
-    C: { top: '70%', left: '50%', transform: 'translate(-50%, -50%)' },
-    RG: { top: '70%', left: '54%', transform: 'translate(-50%, -50%)' },
-    RT: { top: '70%', left: '59%', transform: 'translate(-50%, -50%)' },
+    // Offensive positions (assuming team is at bottom, driving upwards)
+    QB: { top: '85%', left: '50%', transform: 'translate(-50%, -50%)' },
+    RB: { top: '78%', left: '50%', transform: 'translate(-50%, -50%)' },
+    WR1: { top: '70%', left: '15%', transform: 'translate(-50%, -50%)' }, // Left outside receiver
+    WR2: { top: '70%', left: '85%', transform: 'translate(-50%, -50%)' }, // Right outside receiver
+    SLOT: { top: '73%', left: '65%', transform: 'translate(-50%, -50%)' }, // Slot receiver (approx.)
+    TE: { top: '73%', left: '35%', transform: 'translate(-50%, -50%)' }, // Tight End (approx.)
+    LT: { top: '75%', left: '40%', transform: 'translate(-50%, -50%)' },
+    LG: { top: '75%', left: '46%', transform: 'translate(-50%, -50%)' },
+    C: { top: '75%', left: '50%', transform: 'translate(-50%, -50%)' },
+    RG: { top: '75%', left: '54%', transform: 'translate(-50%, -50%)' },
+    RT: { top: '75%', left: '60%', transform: 'translate(-50%, -50%)' },
 
-    // Defensive positions (assuming team is defending right to left)
-    // Starters only (11 players) - approximate 4-3 or 3-4 base
-    DE1: { top: '25%', left: '15%', transform: 'translate(-50%, -50%)' }, // Left Defensive End
-    DE2: { top: '25%', left: '85%', transform: 'translate(-50%, -50%)' }, // Right Defensive End
-    DT1: { top: '28%', left: '45%', transform: 'translate(-50%, -50%)' }, // Left Defensive Tackle
-    DT2: { top: '28%', left: '55%', transform: 'translate(-50%, -50%)' }, // Right Defensive Tackle (or NT if 3-4)
-    LB_MLB: { top: '20%', left: '50%', transform: 'translate(-50%, -50%)' }, // Middle Linebacker
-    LB_OLB1: { top: '22%', left: '30%', transform: 'translate(-50%, -50%)' }, // Outside Linebacker 1
-    LB_OLB2: { top: '22%', left: '70%', transform: 'translate(-50%, -50%)' }, // Outside Linebacker 2
-    CB1: { top: '10%', left: '5%', transform: 'translate(-50%, -50%)' }, // Left Cornerback
-    CB2: { top: '10%', left: '95%', transform: 'translate(-50%, -50%)' }, // Right Cornerback
-    S1: { top: '5%', left: '35%', transform: 'translate(-50%, -50%)' }, // Strong Safety / Free Safety 1
-    S2: { top: '5%', left: '65%', transform: 'translate(-50%, -50%)' }, // Free Safety / Strong Safety 2
+    // Defensive positions (assuming team is at top, defending downwards)
+    DE1: { top: '15%', left: '15%', transform: 'translate(-50%, -50%)' },
+    DE2: { top: '15%', left: '85%', transform: 'translate(-50%, -50%)' },
+    DT1: { top: '20%', left: '40%', transform: 'translate(-50%, -50%)' },
+    DT2: { top: '20%', left: '60%', transform: 'translate(-50%, -50%)' },
+    NT: { top: '20%', left: '50%', transform: 'translate(-50%, -50%)' },
+    LB_MLB: { top: '30%', left: '50%', transform: 'translate(-50%, -50%)' },
+    LB_OLB1: { top: '25%', left: '30%', transform: 'translate(-50%, -50%)' },
+    LB_OLB2: { top: '25%', left: '70%', transform: 'translate(-50%, -50%)' },
+    CB1: { top: '5%', left: '5%', transform: 'translate(-50%, -50%)' },
+    CB2: { top: '5%', left: '95%', transform: 'translate(-50%, -50%)' },
+    S1: { top: '10%', left: '35%', transform: 'translate(-50%, -50%)' },
+    S2: { top: '10%', left: '65%', transform: 'translate(-50%, -50%)' },
 
     // Special Teams positions (kickoff/punt formation, very simplified)
-    // Starters only (minimal for kick/punt unit)
-    K: { top: '85%', left: '50%', transform: 'translate(-50%, -50%)' }, // Kicker
-    P: { top: '85%', left: '50%', transform: 'translate(-50%, -50%)' }, // Punter (same general spot as kicker but for punt)
-    LS: { top: '70%', left: '50%', transform: 'translate(-50%, -50%)' }, // Long Snapper
-    // Add other core special team positions if needed, e.g., Returner, Gunner
+    K: { top: '90%', left: '50%', transform: 'translate(-50%, -50%)' },
+    P: { top: '90%', left: '50%', transform: 'translate(-50%, -50%)' },
+    LS: { top: '75%', left: '50%', transform: 'translate(-50%, -50%)' },
   };
 
   // Helper to get players for a specific granular position (e.g., 'LT')
   const getStartersForPosition = (posAbbr) => {
-    // Return only players with depth_rank 1 for the given position
     return (depthData[posAbbr] || []).filter(p => p.depth_rank === 1);
   };
 
@@ -181,22 +176,23 @@ const DepthChart = () => {
       );
     }
 
+    // Heuristic for spreading out players if a single position (e.g., WR, DE) returns multiple starters
+    // This assumes specific player names or sub-positions might not be in the data.
+    // Adjust `slice` indices or logic if your backend provides more granular position fields (e.g., WR1, WR2)
     if (activeUnit === 'offense') {
       return (
         <>
           <FieldPositionGroup players={getStartersForPosition('QB')} style={fieldPositions.QB} positionLabel="QB" />
-          <FieldPositionGroup players={getStartersForPosition('RB')} style={fieldPositions.RB} positionLabel="RB" />
-          {/* WRs: You might need to map specific WRs if your data distinguishes them (WR1, WR2, Slot) */}
-          {/* For now, assuming your DB returns generic 'WR' and we pick two for outside and one for slot */}
+          <FieldPositionGroup players={getStartersForPosition('RB').slice(0,1)} style={fieldPositions.RB} positionLabel="RB" />
           <FieldPositionGroup players={getStartersForPosition('WR').slice(0,1)} style={fieldPositions.WR1} positionLabel="WR1" />
           <FieldPositionGroup players={getStartersForPosition('WR').slice(1,2)} style={fieldPositions.WR2} positionLabel="WR2" />
           <FieldPositionGroup players={getStartersForPosition('WR').slice(2,3)} style={fieldPositions.SLOT} positionLabel="SLOT" />
           <FieldPositionGroup players={getStartersForPosition('TE').slice(0,1)} style={fieldPositions.TE} positionLabel="TE" />
-          <FieldPositionGroup players={getStartersForPosition('LT')} style={fieldPositions.LT} positionLabel="LT" />
-          <FieldPositionGroup players={getStartersForPosition('LG')} style={fieldPositions.LG} positionLabel="LG" />
-          <FieldPositionGroup players={getStartersForPosition('C')} style={fieldPositions.C} positionLabel="C" />
-          <FieldPositionGroup players={getStartersForPosition('RG')} style={fieldPositions.RG} positionLabel="RG" />
-          <FieldPositionGroup players={getStartersForPosition('RT')} style={fieldPositions.RT} positionLabel="RT" />
+          <FieldPositionGroup players={getStartersForPosition('LT').slice(0,1)} style={fieldPositions.LT} positionLabel="LT" />
+          <FieldPositionGroup players={getStartersForPosition('LG').slice(0,1)} style={fieldPositions.LG} positionLabel="LG" />
+          <FieldPositionGroup players={getStartersForPosition('C').slice(0,1)} style={fieldPositions.C} positionLabel="C" />
+          <FieldPositionGroup players={getStartersForPosition('RG').slice(0,1)} style={fieldPositions.RG} positionLabel="RG" />
+          <FieldPositionGroup players={getStartersForPosition('RT').slice(0,1)} style={fieldPositions.RT} positionLabel="RT" />
         </>
       );
     } else if (activeUnit === 'defense') {
@@ -206,7 +202,7 @@ const DepthChart = () => {
           <FieldPositionGroup players={getStartersForPosition('DE').slice(1,2)} style={fieldPositions.DE2} positionLabel="DE2" />
           <FieldPositionGroup players={getStartersForPosition('DT').slice(0,1)} style={fieldPositions.DT1} positionLabel="DT1" />
           <FieldPositionGroup players={getStartersForPosition('DT').slice(1,2)} style={fieldPositions.DT2} positionLabel="DT2" />
-          <FieldPositionGroup players={getStartersForPosition('NT')} style={fieldPositions.NT} positionLabel="NT" />
+          <FieldPositionGroup players={getStartersForPosition('NT').slice(0,1)} style={fieldPositions.NT} positionLabel="NT" />
           <FieldPositionGroup players={getStartersForPosition('LB').slice(0,1)} style={fieldPositions.LB_MLB} positionLabel="MLB" />
           <FieldPositionGroup players={getStartersForPosition('LB').slice(1,2)} style={fieldPositions.LB_OLB1} positionLabel="OLB1" />
           <FieldPositionGroup players={getStartersForPosition('LB').slice(2,3)} style={fieldPositions.LB_OLB2} positionLabel="OLB2" />
@@ -219,9 +215,9 @@ const DepthChart = () => {
     } else if (activeUnit === 'specialTeams') {
       return (
         <>
-          <FieldPositionGroup players={getStartersForPosition('K')} style={fieldPositions.K} positionLabel="K" />
-          <FieldPositionGroup players={getStartersForPosition('P')} style={fieldPositions.P} positionLabel="P" />
-          <FieldPositionGroup players={getStartersForPosition('LS')} style={fieldPositions.LS} positionLabel="LS" />
+          <FieldPositionGroup players={getStartersForPosition('K').slice(0,1)} style={fieldPositions.K} positionLabel="K" />
+          <FieldPositionGroup players={getStartersForPosition('P').slice(0,1)} style={fieldPositions.P} positionLabel="P" />
+          <FieldPositionGroup players={getStartersForPosition('LS').slice(0,1)} style={fieldPositions.LS} positionLabel="LS" />
         </>
       );
     }
@@ -306,10 +302,10 @@ const DepthChart = () => {
           <div className="text-center text-lg text-blue-400 p-5 bg-blue-900/50 rounded-lg">Loading Depth Chart...</div>
         ) : (
           <div
-            className="relative w-full aspect-[16/9] bg-green-800 rounded-lg shadow-inner overflow-hidden border border-gray-700"
+            className="relative w-full aspect-[9/16] max-h-[800px] mx-auto bg-gray-700 rounded-lg shadow-inner overflow-hidden border border-gray-600" // Vertical aspect ratio and max height
             style={{
-              // Base64 encoded SVG for football field lines on green background
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 500'%3E%3Crect width='100%25' height='100%25' fill='%23228B22'/%3E%3Cline x1='0' y1='50%25' x2='100%25' y2='50%25' stroke='%23fff' stroke-width='3'/%3E%3C!-- Yard Lines --%3E%3C!-- 0-50 --%3E%3Cline x1='10%25' y1='0' x2='10%25' y2='100%25' stroke='%23fff' stroke-width='2'/%3E%3Cline x1='20%25' y1='0' x2='20%25' y2='100%25' stroke='%23fff' stroke-width='2'/%3E%3Cline x1='30%25' y1='0' x2='30%25' y2='100%25' stroke='%23fff' stroke-width='2'/%3E%3Cline x1='40%25' y1='0' x2='40%25' y2='100%25' stroke='%23fff' stroke-width='2'/%3E%3Cline x1='60%25' y1='0' x2='60%25' y2='100%25' stroke='%23fff' stroke-width='2'/%3E%3Cline x1='70%25' y1='0' x2='70%25' y2='100%25' stroke='%23fff' stroke-width='2'/%3E%3Cline x1='80%25' y1='0' x2='80%25' y2='100%25' stroke='%23fff' stroke-width='2'/%3E%3Cline x1='90%25' y1='0' x2='90%25' y2='100%25' stroke='%23fff' stroke-width='2'/%3E%3C!-- End Zones (simplified) --%3E%3Crect x='0' y='0' width='5%25' height='100%25' fill='%231E88E5'/%3E%3Crect x='95%25' y='0' width='5%25' height='100%25' fill='%231E88E5'/%3E%3C/svg%3E")`,
+              // Base64 encoded SVG for vertical football field lines (grey, black lines, dark grey endzones, 7 rectangles)
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 1000'%3E%3Crect width='100%25' height='100%25' fill='%236B7280'/%3E%3C!-- End Zones --%3E%3Crect x='0' y='0' width='100%25' height='5%25' fill='%23374151'/%3E%3Crect x='0' y='95%25' width='100%25' height='5%25' fill='%23374151'/%3E%3C!-- 6 lines for 7 even rectangles --%3E%3Cline x1='0' y1='17.857%25' x2='100%25' y2='17.857%25' stroke='%23000' stroke-width='2'/%3E%3Cline x1='0' y1='30.714%25' x2='100%25' y2='30.714%25' stroke='%23000' stroke-width='2'/%3E%3Cline x1='0' y1='43.571%25' x2='100%25' y2='43.571%25' stroke='%23000' stroke-width='2'/%3E%3Cline x1='0' y1='56.428%25' x2='100%25' y2='56.428%25' stroke='%23000' stroke-width='2'/%3E%3Cline x1='0' y1='69.285%25' x2='100%25' y2='69.285%25' stroke='%23000' stroke-width='2'/%3E%3Cline x1='0' y1='82.142%25' x2='100%25' y2='82.142%25' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E")`,
               backgroundSize: '100% 100%',
               backgroundRepeat: 'no-repeat',
               backgroundPosition: 'center center'
