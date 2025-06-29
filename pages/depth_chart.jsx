@@ -129,7 +129,7 @@ const DepthChart = () => {
                 </div>
 
                 {/* D-Line & CBs */}
-                <div className="flex justify-center items-end w-full max-w-5xl mx-auto gap-x-2">
+                <div className="flex justify-center items-end w-full max-w-5xl mx-auto gap-x-4">
                     <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">CB</span>{getStartersForPosition('CB', 2).slice(0, 1).map((p) => renderPlayerCard(p, 'CB'))}</div>
                     <div className="flex-grow flex justify-center gap-x-4">
                         <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">DE</span>{getStartersForPosition('DE', 2).slice(0, 1).map((p) => renderPlayerCard(p, 'DE'))}</div>
@@ -186,7 +186,7 @@ const DepthChart = () => {
         <div
             className="relative w-full mx-auto rounded-lg shadow-inner overflow-hidden"
             style={{
-                minHeight: '950px',
+                minHeight: '750px',
                 backgroundColor: '#FBFBFB',
                 border: '1px solid #D1D5DB',
             }}
@@ -195,10 +195,8 @@ const DepthChart = () => {
             <div className="absolute inset-0 z-0 flex flex-col">
                 <div style={{ height: '14%', background: 'linear-gradient(145deg, #A47B1B, #E6C66E, #A47B1B)' }}></div>
                 <div className="relative flex-grow">
-                    <div className="absolute inset-0 flex flex-col justify-between py-5">
-                        {Array.from({ length: 9 }).map((_, i) => (
-                            <div key={i} className="w-full h-[1px] bg-gray-200"></div>
-                        ))}
+                    <div className="absolute inset-0 flex flex-col justify-between py-4">
+                        <div key={i} className="w-full h-[1px] bg-gray-200"></div>
                     </div>
                 </div>
                 <div style={{ height: '14%', background: 'linear-gradient(145deg, #A47B1B, #E6C66E, #A47B1B)' }}></div>
