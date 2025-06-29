@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import Chart from 'chart.js/auto';
+import Chart from 'chart.js/auto'; // Still used for overall unit strength or if we add it back consolidated
 
 // Helper function to get readable depth position label
 const getDepthPositionLabel = (depthRank) => {
@@ -18,10 +18,11 @@ const DepthChart = () => {
   const [depthData, setDepthData] = useState({});
   const [viewMode, setViewMode] = useState('current'); // 'current', 'projected', 'historical'
   const [selectedSeason, setSelectedSeason] = useState(2024); // Default to 2024 as per current data
-  const [activeUnit, setActiveUnit] = useState('offense'); // 'offense', 'defense', 'specialTeams'
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const chartRefs = useRef({}); // Ref for Chart.js canvases (if used for consolidated charts later)
+  // chartRefs is not directly used for unit strength bars on player cards in this layout,
+  // but kept in case you want to add summary charts later.
+  const chartRefs = useRef({});
 
   // --- Effect to parse teamId from URL query on initial load ---
   useEffect(() => {
@@ -67,7 +68,7 @@ const DepthChart = () => {
 
     fetchData();
 
-    // Cleanup function for Chart.js instances (if used globally or consolidated later)
+    // Cleanup function for Chart.js instances (if any are used, e.g., for summary graphs)
     return () => {
       Object.values(chartRefs.current).forEach(ref => {
         if (ref && ref.chartInstance) {
@@ -78,157 +79,69 @@ const DepthChart = () => {
     };
   }, [teamId, viewMode, selectedSeason]); // Dependencies for refetching data
 
-  // --- Helper to render a single player card ---
-  const renderPlayerCard = (player, positionAbbr) => (
-    <div
-      key={player.player_id}
-      className="bg-gray-900/80 text-white rounded-md p-1 sm:p-2 shadow-lg border border-gray-700 text-center transform hover:scale-105 transition-transform duration-200 ease-in-out cursor-pointer
-                 min-w-[70px] max-w-[110px] sm:min-w-[80px] sm:max-w-[120px] md:min-w-[90px] md:max-w-[130px]
-                 flex flex-col items-center justify-center"
-    >
-      <img
-        src={player.headshot_url || `https://placehold.co/40x40/E2E8F0/1A202C?text=${positionAbbr}`}
-        alt={`${player.player_name} headshot`}
-        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover bg-gray-700 border border-gray-500 mb-1"
-        onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/40x40/E2E8F0/1A202C?text=${positionAbbr}`; }}
-      />
-      <div className="text-[10px] sm:text-xs font-semibold leading-tight text-white whitespace-nowrap overflow-hidden text-ellipsis w-full">
-        {player.player_name}
-      </div>
-      <div className="text-[9px] sm:text-[10px] text-gray-400">
-        #{player.jersey_number} {getDepthPositionLabel(player.depth_rank)}
-      </div>
-      {player.injury_status && (
-        <span className="text-[8px] sm:text-[9px] font-bold text-red-400 mt-0.5 block">
-          {player.injury_status.startsWith('Q') ? 'Q' : (player.injury_status.startsWith('D') ? 'D' : 'INJ')}
-        </span>
-      )}
-    </div>
-  );
+  // --- Helper to render a single player card with mock PFF-like data ---
+  // IMPORTANT: 'pff_grade', 'pff_rank', 'height_inches', 'weight_pounds', 'college', 'experience', 'contract_apy', 'contract_year'
+  // are NOT coming from your current API. These are mocked for visual demonstration.
+  // You need to extend your backend API and database to provide these for real data.
+  const renderPlayerCard = (player, primaryPositionAbbr, isDefense = false) => {
+    // Mock data for demonstration purposes to match the screenshot's detail
+    const mockPffGrade = (Math.random() * (95 - 50) + 50).toFixed(1);
+    const mockPffRank = Math.floor(Math.random() * 100) + 1;
+    const mockTotalPlayers = Math.floor(Math.random() * (150 - 100) + 100);
+    const mockHeightInches = Math.floor(Math.random() * (78 - 68) + 68); // 5'8" to 6'6"
+    const mockWeightPounds = Math.floor(Math.random() * (320 - 180) + 180);
+    const feet = Math.floor(mockHeightInches / 12);
+    const inches = mockHeightInches % 12;
 
-  // --- Component to render a position group on the field ---
-  const FieldPositionGroup = ({ players, style, positionLabel }) => {
-    // Filter to only show starters (depth_rank: 1)
-    const starters = players.filter(p => p.depth_rank === 1);
-    if (starters.length === 0) return null;
-
-    // Display the first starter for the position
-    const mainPlayer = starters[0];
+    const mockInjuryStatus = player.injury_status; // Use real injury status if available
 
     return (
-      <div className="absolute flex flex-col items-center z-10" style={style}>
-        {renderPlayerCard(mainPlayer, positionLabel)}
+      <div key={player.player_id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-2 text-gray-800 text-sm h-full flex flex-col justify-between">
+        <div className="flex items-center mb-1">
+          <img
+            src={player.headshot_url || `https://placehold.co/40x40/E2E8F0/1A202C?text=${primaryPositionAbbr}`}
+            alt={`${player.player_name} headshot`}
+            className="w-10 h-10 rounded-full object-cover bg-gray-100 border border-gray-300 mr-2 flex-shrink-0"
+            onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/40x40/E2E8F0/1A202C?text=${primaryPositionAbbr}`; }}
+          />
+          <div className="flex-grow">
+            <div className="font-bold text-base leading-tight">#{player.jersey_number} {player.player_name}</div>
+            <div className="text-xs text-gray-600">{getDepthPositionLabel(player.depth_rank)}</div>
+          </div>
+        </div>
+        <div className="text-xs text-gray-700 leading-tight">
+          <div className="font-semibold">{primaryPositionAbbr}</div>
+          <div className="text-xs text-gray-500 mb-1">
+            {mockHeightInches ? `${feet}'${inches}"` : '—'} / {mockWeightPounds ? `${mockWeightPounds} lbs` : '—'} {isDefense ? 'D' : 'O'}{primaryPositionAbbr.substring(0,1)}
+          </div>
+          <div className="flex justify-between items-end">
+            <span className="font-bold text-blue-600">{mockPffGrade}</span>
+            <span className="text-gray-500 text-xs">
+              {mockPffRank} / {mockTotalPlayers} {primaryPositionAbbr}
+            </span>
+          </div>
+          {mockInjuryStatus && (
+            <div className="text-red-500 font-bold text-xs mt-1">
+              {mockInjuryStatus.startsWith('Q') ? 'Q' : (mockInjuryStatus.startsWith('D') ? 'D' : 'INJ')}
+            </div>
+          )}
+        </div>
       </div>
     );
   };
 
-  // Define explicit positions on the vertical field (percentages relative to the field container)
-  const fieldPositions = {
-    // Offensive positions (assuming team is at bottom, driving upwards)
-    QB: { top: '85%', left: '50%', transform: 'translate(-50%, -50%)' },
-    RB: { top: '78%', left: '50%', transform: 'translate(-50%, -50%)' },
-    WR1: { top: '70%', left: '15%', transform: 'translate(-50%, -50%)' }, // Left outside receiver
-    WR2: { top: '70%', left: '85%', transform: 'translate(-50%, -50%)' }, // Right outside receiver
-    SLOT: { top: '73%', left: '65%', transform: 'translate(-50%, -50%)' }, // Slot receiver (approx.)
-    TE: { top: '73%', left: '35%', transform: 'translate(-50%, -50%)' }, // Tight End (approx.)
-    LT: { top: '75%', left: '40%', transform: 'translate(-50%, -50%)' },
-    LG: { top: '75%', left: '46%', transform: 'translate(-50%, -50%)' },
-    C: { top: '75%', left: '50%', transform: 'translate(-50%, -50%)' },
-    RG: { top: '75%', left: '54%', transform: 'translate(-50%, -50%)' },
-    RT: { top: '75%', left: '60%', transform: 'translate(-50%, -50%)' },
-
-    // Defensive positions (assuming team is at top, defending downwards)
-    DE1: { top: '15%', left: '15%', transform: 'translate(-50%, -50%)' },
-    DE2: { top: '15%', left: '85%', transform: 'translate(-50%, -50%)' },
-    DT1: { top: '20%', left: '40%', transform: 'translate(-50%, -50%)' },
-    DT2: { top: '20%', left: '60%', transform: 'translate(-50%, -50%)' },
-    NT: { top: '20%', left: '50%', transform: 'translate(-50%, -50%)' },
-    LB_MLB: { top: '30%', left: '50%', transform: 'translate(-50%, -50%)' },
-    LB_OLB1: { top: '25%', left: '30%', transform: 'translate(-50%, -50%)' },
-    LB_OLB2: { top: '25%', left: '70%', transform: 'translate(-50%, -50%)' },
-    CB1: { top: '5%', left: '5%', transform: 'translate(-50%, -50%)' },
-    CB2: { top: '5%', left: '95%', transform: 'translate(-50%, -50%)' },
-    S1: { top: '10%', left: '35%', transform: 'translate(-50%, -50%)' },
-    S2: { top: '10%', left: '65%', transform: 'translate(-50%, -50%)' },
-
-    // Special Teams positions (kickoff/punt formation, very simplified)
-    K: { top: '90%', left: '50%', transform: 'translate(-50%, -50%)' },
-    P: { top: '90%', left: '50%', transform: 'translate(-50%, -50%)' },
-    LS: { top: '75%', left: '50%', transform: 'translate(-50%, -50%)' },
-  };
-
-  // Helper to get players for a specific granular position (e.g., 'LT')
-  const getStartersForPosition = (posAbbr) => {
-    return (depthData[posAbbr] || []).filter(p => p.depth_rank === 1);
+  // Helper to get starters for a specific position, with fallback for multiple WR/TE/LB etc.
+  const getStartersForPosition = (posAbbr, count = 1) => {
+    const players = (depthData[posAbbr] || []).filter(p => p.depth_rank === 1);
+    return players.slice(0, count);
   };
 
   const years = Array.from({ length: 2024 - 1999 + 1 }, (_, i) => 1999 + i).reverse();
 
-  // Determine which player sets to render based on activeUnit
-  const renderPlayersOnField = () => {
-    if (Object.keys(depthData).filter(key => key !== 'unit_strength' && key !== 'message').length === 0) {
-      return (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <p className="text-gray-300 p-5 bg-gray-700/80 border border-gray-600 rounded-lg text-center font-medium">
-              {depthData.message || `No specific depth chart data available for ${teamId || 'the selected team'} for ${viewMode} view ${viewMode === 'historical' ? `in ${selectedSeason}` : ''}.`}
-          </p>
-        </div>
-      );
-    }
-
-    // Heuristic for spreading out players if a single position (e.g., WR, DE) returns multiple starters
-    // This assumes specific player names or sub-positions might not be in the data.
-    // Adjust `slice` indices or logic if your backend provides more granular position fields (e.g., WR1, WR2)
-    if (activeUnit === 'offense') {
-      return (
-        <>
-          <FieldPositionGroup players={getStartersForPosition('QB')} style={fieldPositions.QB} positionLabel="QB" />
-          <FieldPositionGroup players={getStartersForPosition('RB').slice(0,1)} style={fieldPositions.RB} positionLabel="RB" />
-          <FieldPositionGroup players={getStartersForPosition('WR').slice(0,1)} style={fieldPositions.WR1} positionLabel="WR1" />
-          <FieldPositionGroup players={getStartersForPosition('WR').slice(1,2)} style={fieldPositions.WR2} positionLabel="WR2" />
-          <FieldPositionGroup players={getStartersForPosition('WR').slice(2,3)} style={fieldPositions.SLOT} positionLabel="SLOT" />
-          <FieldPositionGroup players={getStartersForPosition('TE').slice(0,1)} style={fieldPositions.TE} positionLabel="TE" />
-          <FieldPositionGroup players={getStartersForPosition('LT').slice(0,1)} style={fieldPositions.LT} positionLabel="LT" />
-          <FieldPositionGroup players={getStartersForPosition('LG').slice(0,1)} style={fieldPositions.LG} positionLabel="LG" />
-          <FieldPositionGroup players={getStartersForPosition('C').slice(0,1)} style={fieldPositions.C} positionLabel="C" />
-          <FieldPositionGroup players={getStartersForPosition('RG').slice(0,1)} style={fieldPositions.RG} positionLabel="RG" />
-          <FieldPositionGroup players={getStartersForPosition('RT').slice(0,1)} style={fieldPositions.RT} positionLabel="RT" />
-        </>
-      );
-    } else if (activeUnit === 'defense') {
-      return (
-        <>
-          <FieldPositionGroup players={getStartersForPosition('DE').slice(0,1)} style={fieldPositions.DE1} positionLabel="DE1" />
-          <FieldPositionGroup players={getStartersForPosition('DE').slice(1,2)} style={fieldPositions.DE2} positionLabel="DE2" />
-          <FieldPositionGroup players={getStartersForPosition('DT').slice(0,1)} style={fieldPositions.DT1} positionLabel="DT1" />
-          <FieldPositionGroup players={getStartersForPosition('DT').slice(1,2)} style={fieldPositions.DT2} positionLabel="DT2" />
-          <FieldPositionGroup players={getStartersForPosition('NT').slice(0,1)} style={fieldPositions.NT} positionLabel="NT" />
-          <FieldPositionGroup players={getStartersForPosition('LB').slice(0,1)} style={fieldPositions.LB_MLB} positionLabel="MLB" />
-          <FieldPositionGroup players={getStartersForPosition('LB').slice(1,2)} style={fieldPositions.LB_OLB1} positionLabel="OLB1" />
-          <FieldPositionGroup players={getStartersForPosition('LB').slice(2,3)} style={fieldPositions.LB_OLB2} positionLabel="OLB2" />
-          <FieldPositionGroup players={getStartersForPosition('CB').slice(0,1)} style={fieldPositions.CB1} positionLabel="CB1" />
-          <FieldPositionGroup players={getStartersForPosition('CB').slice(1,2)} style={fieldPositions.CB2} positionLabel="CB2" />
-          <FieldPositionGroup players={getStartersForPosition('S').slice(0,1)} style={fieldPositions.S1} positionLabel="S1" />
-          <FieldPositionGroup players={getStartersForPosition('S').slice(1,2)} style={fieldPositions.S2} positionLabel="S2" />
-        </>
-      );
-    } else if (activeUnit === 'specialTeams') {
-      return (
-        <>
-          <FieldPositionGroup players={getStartersForPosition('K').slice(0,1)} style={fieldPositions.K} positionLabel="K" />
-          <FieldPositionGroup players={getStartersForPosition('P').slice(0,1)} style={fieldPositions.P} positionLabel="P" />
-          <FieldPositionGroup players={getStartersForPosition('LS').slice(0,1)} style={fieldPositions.LS} positionLabel="LS" />
-        </>
-      );
-    }
-    return null;
-  };
-
-
   return (
-    <div className="min-h-screen bg-gray-900 p-6 font-sans text-gray-100">
-      <div className="max-w-7xl mx-auto bg-gray-800 rounded-lg shadow-xl p-8">
-        <h1 className="text-4xl font-extrabold text-blue-400 mb-6 border-b-2 pb-3 border-blue-600">
+    <div className="min-h-screen bg-gray-100 p-6 font-sans text-gray-900">
+      <div className="max-w-7xl mx-auto bg-white rounded-lg shadow-xl p-8">
+        <h1 className="text-4xl font-extrabold text-gray-900 mb-6 border-b-2 pb-3 border-blue-600 flex items-center">
           <span className="mr-3 text-blue-600">📊</span> Depth Chart for {teamId || 'Selected Team'}
         </h1>
 
@@ -237,21 +150,21 @@ const DepthChart = () => {
           <button
             onClick={() => setViewMode('current')}
             className={`px-6 py-2 rounded-full text-sm font-semibold transition-all duration-200 shadow-md
-              ${viewMode === 'current' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-600 text-gray-200 hover:bg-gray-700'}`}
+              ${viewMode === 'current' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
           >
             Current (2024)
           </button>
           <button
             onClick={() => setViewMode('projected')}
             className={`px-6 py-2 rounded-full text-sm font-semibold transition-all duration-200 shadow-md
-              ${viewMode === 'projected' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-600 text-gray-200 hover:bg-gray-700'}`}
+              ${viewMode === 'projected' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
           >
             Projected
           </button>
           <button
             onClick={() => setViewMode('historical')}
             className={`px-6 py-2 rounded-full text-sm font-semibold transition-all duration-200 shadow-md
-              ${viewMode === 'historical' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-600 text-gray-200 hover:bg-gray-700'}`}
+              ${viewMode === 'historical' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
           >
             Historical
           </button>
@@ -259,7 +172,7 @@ const DepthChart = () => {
             <select
               value={selectedSeason}
               onChange={(e) => setSelectedSeason(parseInt(e.target.value))}
-              className="ml-4 p-2.5 border border-gray-600 rounded-lg bg-gray-700 text-gray-200 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              className="ml-4 p-2.5 border border-gray-300 rounded-lg bg-white text-gray-800 shadow-sm focus:ring-blue-500 focus:border-blue-500"
             >
               {years.map(year => (
                 <option key={year} value={year}>{year}</option>
@@ -268,54 +181,140 @@ const DepthChart = () => {
           )}
         </div>
 
-        {/* Unit Selection Buttons */}
-        <div className="mb-8 flex flex-wrap items-center justify-center space-x-4">
-          <button
-            onClick={() => setActiveUnit('offense')}
-            className={`px-6 py-2 rounded-full text-sm font-semibold transition-all duration-200 shadow-md
-              ${activeUnit === 'offense' ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-600 text-gray-200 hover:bg-gray-700'}`}
-          >
-            Offense
-          </button>
-          <button
-            onClick={() => setActiveUnit('defense')}
-            className={`px-6 py-2 rounded-full text-sm font-semibold transition-all duration-200 shadow-md
-              ${activeUnit === 'defense' ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-gray-600 text-gray-200 hover:bg-gray-700'}`}
-          >
-            Defense
-          </button>
-          <button
-            onClick={() => setActiveUnit('specialTeams')}
-            className={`px-6 py-2 rounded-full text-sm font-semibold transition-all duration-200 shadow-md
-              ${activeUnit === 'specialTeams' ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-gray-600 text-gray-200 hover:bg-gray-700'}`}
-          >
-            Special Teams
-          </button>
-        </div>
-
         {/* Loading, Error, or No Data Messages */}
         {error ? (
-          <div className="text-red-400 p-5 bg-red-900/50 border border-red-700 rounded-lg text-center font-medium">
+          <div className="text-red-700 p-5 bg-red-50 border border-red-200 rounded-lg text-center font-medium">
             Error: {error}
           </div>
         ) : isLoading ? (
-          <div className="text-center text-lg text-blue-400 p-5 bg-blue-900/50 rounded-lg">Loading Depth Chart...</div>
+          <div className="text-center text-lg text-blue-600 p-5 bg-blue-50 rounded-lg">Loading Depth Chart...</div>
         ) : (
-          <div
-            className="relative w-full aspect-[9/16] max-h-[800px] mx-auto bg-gray-700 rounded-lg shadow-inner overflow-hidden border border-gray-600" // Vertical aspect ratio and max height
-            style={{
-              // Base64 encoded SVG for vertical football field lines (grey, black lines, dark grey endzones, 7 rectangles)
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 1000'%3E%3Crect width='100%25' height='100%25' fill='%236B7280'/%3E%3C!-- End Zones --%3E%3Crect x='0' y='0' width='100%25' height='5%25' fill='%23374151'/%3E%3Crect x='0' y='95%25' width='100%25' height='5%25' fill='%23374151'/%3E%3C!-- 6 lines for 7 even rectangles --%3E%3Cline x1='0' y1='17.857%25' x2='100%25' y2='17.857%25' stroke='%23000' stroke-width='2'/%3E%3Cline x1='0' y1='30.714%25' x2='100%25' y2='30.714%25' stroke='%23000' stroke-width='2'/%3E%3Cline x1='0' y1='43.571%25' x2='100%25' y2='43.571%25' stroke='%23000' stroke-width='2'/%3E%3Cline x1='0' y1='56.428%25' x2='100%25' y2='56.428%25' stroke='%23000' stroke-width='2'/%3E%3Cline x1='0' y1='69.285%25' x2='100%25' y2='69.285%25' stroke='%23000' stroke-width='2'/%3E%3Cline x1='0' y1='82.142%25' x2='100%25' y2='82.142%25' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E")`,
-              backgroundSize: '100% 100%',
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'center center'
-            }}
-          >
-            {renderPlayersOnField()}
+          <div className="relative w-full overflow-hidden rounded-lg shadow-inner border border-gray-300">
+            {/* Background Grid - mimicking lines from screenshot */}
+            <div className="absolute inset-0 grid grid-rows-7 z-0">
+                {Array.from({ length: 7 }).map((_, i) => (
+                    <div key={i} className={`h-full ${i % 2 === 0 ? 'bg-gray-50' : 'bg-white'} border-b border-gray-200 last:border-b-0`}></div>
+                ))}
+            </div>
+
+            {Object.keys(depthData).filter(key => key !== 'unit_strength' && key !== 'message').length === 0 ? (
+                <div className="absolute inset-0 flex items-center justify-center z-10">
+                  <p className="text-gray-700 p-5 bg-yellow-50 border border-yellow-200 rounded-lg text-center font-medium">
+                      {depthData.message || `No specific depth chart data available for ${teamId || 'the selected team'} for ${viewMode} view ${viewMode === 'historical' ? `in ${selectedSeason}` : ''}.`}
+                  </p>
+                </div>
+            ) : (
+                <div className="relative z-10"> {/* Content wrapper */}
+                    {/* Defensive Side (Top) */}
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-6 p-4">
+                        <div className="col-span-2 lg:col-span-1 flex flex-col items-center">
+                            {getStartersForPosition('FS').map(player => renderPlayerCard(player, 'FS', true))}
+                        </div>
+                        <div className="col-span-2 lg:col-span-1 flex flex-col items-center">
+                            {getStartersForPosition('SS').map(player => renderPlayerCard(player, 'SS', true))}
+                        </div>
+                        {/* Defensive Line */}
+                        <div className="col-span-2 lg:col-span-3 grid grid-cols-5 gap-4 justify-center items-end mt-4">
+                            <div className="flex flex-col items-center justify-end">
+                                <span className="text-xs font-semibold text-gray-700 mb-1">CB</span>
+                                {getStartersForPosition('CB',1).map(player => renderPlayerCard(player, 'CB', true))}
+                            </div>
+                            <div className="flex flex-col items-center justify-end">
+                                <span className="text-xs font-semibold text-gray-700 mb-1">DRE</span>
+                                {getStartersForPosition('DE',1).map(player => renderPlayerCard(player, 'DE', true))}
+                            </div>
+                            <div className="flex flex-col items-center justify-end">
+                                <span className="text-xs font-semibold text-gray-700 mb-1">DRT</span>
+                                {getStartersForPosition('DT',1).map(player => renderPlayerCard(player, 'DT', true))}
+                            </div>
+                            <div className="flex flex-col items-center justify-end">
+                                <span className="text-xs font-semibold text-gray-700 mb-1">DLT</span>
+                                {getStartersForPosition('DT',2).map(player => renderPlayerCard(player, 'DT', true))}
+                            </div>
+                            <div className="flex flex-col items-center justify-end">
+                                <span className="text-xs font-semibold text-gray-700 mb-1">DLE</span>
+                                {getStartersForPosition('DE',2).map(player => renderPlayerCard(player, 'DE', true))}
+                            </div>
+                             <div className="col-span-5 grid grid-cols-2 gap-4 justify-center items-end mt-4">
+                                <div className="flex flex-col items-center justify-end">
+                                    <span className="text-xs font-semibold text-gray-700 mb-1">WILL</span>
+                                    {getStartersForPosition('LB',1).map(player => renderPlayerCard(player, 'LB', true))}
+                                </div>
+                                <div className="flex flex-col items-center justify-end">
+                                    <span className="text-xs font-semibold text-gray-700 mb-1">MIKE</span>
+                                    {getStartersForPosition('LB',2).map(player => renderPlayerCard(player, 'LB', true))}
+                                </div>
+                                <div className="flex flex-col items-center justify-end">
+                                    <span className="text-xs font-semibold text-gray-700 mb-1">SAM</span>
+                                    {getStartersForPosition('LB',3).map(player => renderPlayerCard(player, 'LB', true))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Central Star Logo */}
+                    <div className="flex justify-center items-center py-6">
+                        <svg className="w-24 h-24 text-blue-800" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 .587l3.668 7.568 7.378 1.071-5.352 5.212 1.265 7.351L12 18.232l-6.509 3.427 1.265-7.351-5.352-5.212 7.378-1.071L12 .587z"/>
+                        </svg>
+                    </div>
+
+                    {/* Offensive Side (Bottom) */}
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-6 p-4">
+                        <div className="col-span-2 lg:col-span-3 grid grid-cols-5 gap-4 justify-center items-start mb-4">
+                            <div className="flex flex-col items-center justify-start">
+                                <span className="text-xs font-semibold text-gray-700 mb-1">WR</span>
+                                {getStartersForPosition('WR',1).map(player => renderPlayerCard(player, 'WR'))}
+                            </div>
+                            <div className="flex flex-col items-center justify-start">
+                                <span className="text-xs font-semibold text-gray-700 mb-1">LT</span>
+                                {getStartersForPosition('LT').map(player => renderPlayerCard(player, 'LT'))}
+                            </div>
+                            <div className="flex flex-col items-center justify-start">
+                                <span className="text-xs font-semibold text-gray-700 mb-1">LG</span>
+                                {getStartersForPosition('LG').map(player => renderPlayerCard(player, 'LG'))}
+                            </div>
+                            <div className="flex flex-col items-center justify-start">
+                                <span className="text-xs font-semibold text-gray-700 mb-1">C</span>
+                                {getStartersForPosition('C').map(player => renderPlayerCard(player, 'C'))}
+                            </div>
+                            <div className="flex flex-col items-center justify-start">
+                                <span className="text-xs font-semibold text-gray-700 mb-1">RG</span>
+                                {getStartersForPosition('RG').map(player => renderPlayerCard(player, 'RG'))}
+                            </div>
+                            <div className="flex flex-col items-center justify-start">
+                                <span className="text-xs font-semibold text-gray-700 mb-1">RT</span>
+                                {getStartersForPosition('RT').map(player => renderPlayerCard(player, 'RT'))}
+                            </div>
+                            <div className="flex flex-col items-center justify-start">
+                                <span className="text-xs font-semibold text-gray-700 mb-1">WR</span>
+                                {getStartersForPosition('WR',2).map(player => renderPlayerCard(player, 'WR'))}
+                            </div>
+                             <div className="col-span-5 grid grid-cols-3 gap-4 justify-center items-start mt-4">
+                                <div className="flex flex-col items-center justify-start">
+                                    <span className="text-xs font-semibold text-gray-700 mb-1">SLOT</span>
+                                    {getStartersForPosition('WR',3).map(player => renderPlayerCard(player, 'SLOT'))}
+                                </div>
+                                <div className="flex flex-col items-center justify-start">
+                                    <span className="text-xs font-semibold text-gray-700 mb-1">TE</span>
+                                    {getStartersForPosition('TE').map(player => renderPlayerCard(player, 'TE'))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="col-span-2 lg:col-span-1 flex flex-col items-center mt-4">
+                            {getStartersForPosition('QB').map(player => renderPlayerCard(player, 'QB'))}
+                        </div>
+                        <div className="col-span-2 lg:col-span-1 flex flex-col items-center mt-4">
+                            {getStartersForPosition('RB').map(player => renderPlayerCard(player, 'RB'))}
+                        </div>
+                    </div>
+                </div>
+            )}
           </div>
         )}
 
-        {/* Overall Unit Strength Section (placed below the field for clarity) */}
+        {/* Overall Unit Strength Section - remains outside the main lineup display for clarity */}
         {depthData.unit_strength && Object.keys(depthData.unit_strength).filter(key => key !== 'message').length > 0 && (
           <div className="mt-8 bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
             <h3 className="text-xl font-bold text-blue-400 mb-4 border-b pb-2 border-blue-600">Overall Unit Strengths</h3>
@@ -341,10 +340,11 @@ const DepthChart = () => {
         <div className="mt-8 bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
           <h3 className="text-xl font-bold text-blue-400 mb-3 border-b pb-2 border-blue-600">Analyst Notes</h3>
           <p className="text-gray-300 text-base">
-            This interactive depth chart provides a dynamic visual overview of player positioning on the field for starters.
-            Toggle between Offense, Defense, and Special Teams to see the primary lineup.
-            Player placements are approximate and based on typical formations for the selected unit.
+            This interactive depth chart provides a detailed visual overview of starter positioning.
+            Player placements are approximate representations of a typical formation.
             Use the view mode and season selectors to explore current, projected, or historical lineups.
+            <br/><br/>
+            **Note:** Player attribute details (height, weight, PFF grades/ranks) are currently mocked for display purposes. For real data, please extend your backend API and database to include these fields.
           </p>
         </div>
       </div>
