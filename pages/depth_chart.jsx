@@ -104,26 +104,27 @@ const DepthChart = () => {
         );
     }
 
-    // REVISED: Major adjustments to layout to match the screenshot's formation.
+    // FINAL REVISION: The structure is now corrected for proper centering.
     return (
+      // This container is correct. It centers its direct children.
       <div className="flex flex-col h-full justify-center items-center px-2 gap-y-16 py-8">
-        {/* Defensive Side (Top) */}
-        <div className="flex flex-col items-center w-full gap-y-4">
+
+        {/* CHILD 1: The ENTIRE defensive unit is now inside this single block. */}
+        <div className="flex flex-col items-center w-full gap-y-6">
             {/* Safeties (Deepest) */}
             <div className="flex justify-center w-full max-w-lg mx-auto gap-x-28">
                 <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">FS</span>{getStartersForPosition('S', 2).slice(0, 1).map((p) => renderPlayerCard(p, 'FS'))}</div>
                 <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">SS</span>{getStartersForPosition('S', 2).slice(1, 2).map((p) => renderPlayerCard(p, 'SS'))}</div>
             </div>
 
-                        {/* Linebackers */}
+            {/* Linebackers */}
             <div className="flex justify-center w-full max-w-lg mx-auto gap-x-12">
                 <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">WILL</span>{getStartersForPosition('LB', 3).slice(0, 1).map((p) => renderPlayerCard(p, 'WILL'))}</div>
                 <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">MIKE</span>{getStartersForPosition('LB', 3).slice(1, 2).map((p) => renderPlayerCard(p, 'MIKE'))}</div>
                 <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">SAM</span>{getStartersForPosition('LB', 3).slice(2, 3).map((p) => renderPlayerCard(p, 'SAM'))}</div>
             </div>
-        </div>
 
-            {/* D-Line & CBs */}
+            {/* D-Line & CBs (Moved inside the main defensive block) */}
             <div className="flex justify-center items-end w-full max-w-5xl mx-auto gap-x-2">
                 <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">CB</span>{getStartersForPosition('CB', 2).slice(0, 1).map((p) => renderPlayerCard(p, 'CB'))}</div>
                 <div className="flex-grow flex justify-center gap-x-4">
@@ -134,8 +135,10 @@ const DepthChart = () => {
                 </div>
                 <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">CB</span>{getStartersForPosition('CB', 2).slice(1, 2).map((p) => renderPlayerCard(p, 'CB'))}</div>
             </div>
+        </div>
 
-        {/* Offensive Side (Bottom) */}
+
+        {/* CHILD 2: The ENTIRE offensive unit (this was already correct). */}
         <div className="flex flex-col items-center w-full gap-y-8">
             {/* O-Line & WRs */}
              <div className="flex justify-center items-start w-full max-w-5xl mx-auto gap-x-4">
