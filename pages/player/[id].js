@@ -21,6 +21,12 @@ export async function getServerSideProps({ params, req }) {
   const res = await fetch(`${baseUrl}/api/player/${playerId}`);
   if (!res.ok) return { notFound: true };
   const data = await res.json();
+
+  // Fetch season aggregate stats (including team, games_played, interceptions)
+  // If already present in data.seasonStats, skip extra fetch.
+  // Otherwise, you could fetch from a different endpoint if needed.
+  // For now, assume data.seasonStats comes from the /api/player/[id] endpoint and includes needed fields.
+
   return {
     props: {
       ...data,
@@ -279,15 +285,15 @@ export default function PlayerPage({
                   {seasonStats.map((s, idx) => (
                     <tr key={idx} className="border-b border-gray-600 hover:bg-gray-800">
                       <td className="p-2">{s.season || '—'}</td>
-                      <td className="p-2">{s.team || s.team_abbr || '—'}</td>
-                      <td className="p-2">{s.games_played ?? s.gp ?? '—'}</td>
-                      <td className="p-2">{s.passing_yards ?? s.pass_yards ?? '—'}</td>
-                      <td className="p-2">{s.passing_tds ?? s.pass_tds ?? '—'}</td>
-                      <td className="p-2">{s.interceptions ?? s.ints ?? '—'}</td>
-                      <td className="p-2">{s.rushing_yards ?? s.rush_yards ?? '—'}</td>
-                      <td className="p-2">{s.rushing_tds ?? s.rush_tds ?? '—'}</td>
-                      <td className="p-2">{s.receiving_yards ?? s.rec_yards ?? '—'}</td>
-                      <td className="p-2">{s.rec_touchdowns ?? s.rec_tds ?? '—'}</td>
+                      <td className="p-2">{s.team || '—'}</td>
+                      <td className="p-2">{s.games_played ?? '—'}</td>
+                      <td className="p-2">{s.passing_yards ?? '—'}</td>
+                      <td className="p-2">{s.passing_tds ?? '—'}</td>
+                      <td className="p-2">{s.interceptions ?? '—'}</td>
+                      <td className="p-2">{s.rushing_yards ?? '—'}</td>
+                      <td className="p-2">{s.rushing_tds ?? '—'}</td>
+                      <td className="p-2">{s.receiving_yards ?? '—'}</td>
+                      <td className="p-2">{s.rec_touchdowns ?? '—'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -306,13 +312,26 @@ export default function PlayerPage({
             <h2 className="text-xl font-bold text-white">Season Stats</h2>
 
             <div className="flex items-center gap-3">
-              {['receiving','rushing','passing'].map(t=>(
-                <button key={t} onClick={()=>setStatType(t)}
-                  className={`px-2 py-1 rounded text-xs uppercase font-semibold
-                    ${statType===t ? 'bg-cyan-500 text-black' : 'bg-gray-700 text-gray-300'}`}>
-                  {t.slice(0,3)}
-                </button>
-              ))}
+              {/*
+                Order statType buttons by position group:
+                  - QB: ['passing', 'rushing', 'receiving']
+                  - RB: ['rushing', 'receiving', 'passing']
+                  - else: ['receiving', 'rushing', 'passing']
+              */}
+              {(() => {
+                const statOrder = player.position_group === 'QB'
+                  ? ['passing', 'rushing', 'receiving']
+                  : player.position_group === 'RB'
+                    ? ['rushing', 'receiving', 'passing']
+                    : ['receiving', 'rushing', 'passing'];
+                return statOrder.map(t=>(
+                  <button key={t} onClick={()=>setStatType(t)}
+                    className={`px-2 py-1 rounded text-xs uppercase font-semibold
+                      ${statType===t ? 'bg-cyan-500 text-black' : 'bg-gray-700 text-gray-300'}`}>
+                    {t.slice(0,3)}
+                  </button>
+                ));
+              })()}
               <select value={selectedSeason} onChange={e=>setSelectedSeason(e.target.value)}
                 className="bg-gray-800 text-gray-200 text-xs px-2 py-1 rounded">
                 {seasonOptions.map(yr=>(
