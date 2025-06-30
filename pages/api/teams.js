@@ -10,7 +10,7 @@ export default async function handler(req, res) {
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
     });
-
+ 
     // Fetch distinct team names from both home_team and away_team columns
     // Use UNION to combine distinct teams from both columns
     const [rows] = await connection.execute(
