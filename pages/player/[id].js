@@ -21,7 +21,13 @@ export async function getServerSideProps({ params, req }) {
   const res = await fetch(`${baseUrl}/api/player/${playerId}`);
   if (!res.ok) return { notFound: true };
   const data = await res.json();
-  return { props: data };
+  return {
+    props: {
+      ...data,
+      weekly: data.weekly || [],
+      seasonStats: data.seasonStats || [],
+    },
+  };
 }
 
 /* ------------------------------------------------------------------ */
@@ -35,11 +41,37 @@ export default function PlayerPage({
   receivingMetrics = [],
   advancedMetrics = {},
   advancedRushing = {},
+  weekly = [],
 }) {
-  /* -------- normalize weekly arrays -------------------------------- */
-  const rushingMetricsArr   = rushingMetrics.length   ? rushingMetrics   : (player.rushingMetrics   || []);
-  const receivingMetricsArr = receivingMetrics.length ? receivingMetrics : (player.receivingMetrics || []);
-  const rawPassing          = passingMetrics.length   ? passingMetrics   : (player.passingMetrics   || []);
+  // If the metrics arrays are empty, build them from weekly
+  let rushingMetricsArr, receivingMetricsArr, rawPassing;
+  if (rushingMetrics.length) {
+    rushingMetricsArr = rushingMetrics;
+  } else if (player.rushingMetrics && player.rushingMetrics.length) {
+    rushingMetricsArr = player.rushingMetrics;
+  } else if (weekly && weekly.length) {
+    rushingMetricsArr = weekly.filter(w => w.carries !== undefined || w.rushing_yards !== undefined);
+  } else {
+    rushingMetricsArr = [];
+  }
+  if (receivingMetrics.length) {
+    receivingMetricsArr = receivingMetrics;
+  } else if (player.receivingMetrics && player.receivingMetrics.length) {
+    receivingMetricsArr = player.receivingMetrics;
+  } else if (weekly && weekly.length) {
+    receivingMetricsArr = weekly.filter(w => w.targets !== undefined || w.receptions !== undefined);
+  } else {
+    receivingMetricsArr = [];
+  }
+  if (passingMetrics.length) {
+    rawPassing = passingMetrics;
+  } else if (player.passingMetrics && player.passingMetrics.length) {
+    rawPassing = player.passingMetrics;
+  } else if (weekly && weekly.length) {
+    rawPassing = weekly.filter(w => w.attempts !== undefined || w.completions !== undefined);
+  } else {
+    rawPassing = [];
+  }
   const uniquePassingMetrics = Array.isArray(rawPassing)
     ? rawPassing.filter((v,i,self)=>v?.week && i===self.findIndex(r=>r.week===v.week))
     : [];
@@ -218,6 +250,51 @@ export default function PlayerPage({
               View AI Insights
             </button>
           </div>
+        </motion.div>
+
+        {/* --------------- SEASON AGGREGATES (per-season totals) --------------- */}
+        <motion.div className="glass-card p-6 mb-8"
+          initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:0.3 }}
+        >
+          <h2 className="text-xl font-bold text-white mb-4">Season Totals</h2>
+          {seasonStats && seasonStats.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="table-auto w-full text-xs text-gray-200">
+                <thead>
+                  <tr>
+                    <th className="text-left p-2 text-cyan-300">Season</th>
+                    <th className="text-left p-2 text-cyan-300">Team</th>
+                    <th className="text-left p-2 text-cyan-300">Games</th>
+                    <th className="text-left p-2 text-cyan-300">Pass Yds</th>
+                    <th className="text-left p-2 text-cyan-300">Pass TD</th>
+                    <th className="text-left p-2 text-cyan-300">INT</th>
+                    <th className="text-left p-2 text-cyan-300">Rush Yds</th>
+                    <th className="text-left p-2 text-cyan-300">Rush TD</th>
+                    <th className="text-left p-2 text-cyan-300">Rec Yds</th>
+                    <th className="text-left p-2 text-cyan-300">Rec TD</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {seasonStats.map((s, idx) => (
+                    <tr key={idx} className="border-b border-gray-600 hover:bg-gray-800">
+                      <td className="p-2">{s.season || '—'}</td>
+                      <td className="p-2">{s.team || s.team_abbr || '—'}</td>
+                      <td className="p-2">{s.games_played ?? s.gp ?? '—'}</td>
+                      <td className="p-2">{s.passing_yards ?? s.pass_yards ?? '—'}</td>
+                      <td className="p-2">{s.passing_tds ?? s.pass_tds ?? '—'}</td>
+                      <td className="p-2">{s.interceptions ?? s.ints ?? '—'}</td>
+                      <td className="p-2">{s.rushing_yards ?? s.rush_yards ?? '—'}</td>
+                      <td className="p-2">{s.rushing_tds ?? s.rush_tds ?? '—'}</td>
+                      <td className="p-2">{s.receiving_yards ?? s.rec_yards ?? '—'}</td>
+                      <td className="p-2">{s.rec_touchdowns ?? s.rec_tds ?? '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="text-gray-400">No season aggregate stats available.</p>
+          )}
         </motion.div>
 
         {/* --------------- SEASON STATS (weekly) --------------- */}

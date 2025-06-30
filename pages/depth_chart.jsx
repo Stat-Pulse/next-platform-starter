@@ -95,6 +95,7 @@ const DepthChart = () => {
   const years = Array.from({ length: 2025 - 1999 + 1 }, (_, i) => 1999 + i).reverse();
 
   const renderCombinedPlayers = () => {
+    // 1. Check for loading, error, or empty states first.
     if (isLoading) {
       return <div className="text-center p-10">Loading Players...</div>;
     }
@@ -108,29 +109,32 @@ const DepthChart = () => {
       return <div className="text-center p-10">No data available.</div>;
     }
 
-    const safeties = getStartersForPosition('S', 2);
-    const linebackers = getStartersForPosition('LB', 3);
+    // 2. Get player groups using the CORRECT keys from your API data.
+    const freeSafeties = getStartersForPosition('FS', 1);
+    const strongSafeties = getStartersForPosition('SS', 1);
+    const linebackers = getStartersForPosition('ILB', 3); // Using ILB now
     const cornerbacks = getStartersForPosition('CB', 2);
     const defensiveEnds = getStartersForPosition('DE', 2);
-    const defensiveTackles = getStartersForPosition('DT', 2);
+    // Combine DT and NT for the interior line, taking the first two available.
+    const defensiveTackles = [...getStartersForPosition('DT', 2), ...getStartersForPosition('NT', 1)];
+
     const wideReceivers = getStartersForPosition('WR', 3);
     const tightEnds = getStartersForPosition('TE', 1);
-    const tackles = getStartersForPosition('T', 2);
-    const guards = getStartersForPosition('G', 2);
+    const tackles = getStartersForPosition('T', 2);   // Using generic T for Tackles
+    const guards = getStartersForPosition('G', 2);     // Using generic G for Guards
     const center = getStartersForPosition('C', 1);
     const quarterback = getStartersForPosition('QB', 1);
     const runningback = getStartersForPosition('RB', 1);
-    const leftTackle = getStartersForPosition('LT', 1);
-    const leftGuard = getStartersForPosition('LG', 1);
-    const rightGuard = getStartersForPosition('RG', 1);
-    const rightTackle = getStartersForPosition('RT', 1);
+
 
     return (
         <div className="pt-32">
+            {/* --- Defensive Unit --- */}
             <div className="flex flex-col items-center w-full gap-y-6 mb-16">
+                {/* 3. Render each player by taking them from the correct arrays. */}
                 <div className="flex justify-center w-full max-w-lg mx-auto gap-x-28">
-                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">FS</span>{renderPlayerCard(safeties[0], 'FS')}</div>
-                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">SS</span>{renderPlayerCard(safeties[1], 'SS')}</div>
+                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">FS</span>{renderPlayerCard(freeSafeties[0], 'FS')}</div>
+                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">SS</span>{renderPlayerCard(strongSafeties[0], 'SS')}</div>
                 </div>
                 <div className="flex justify-center w-full max-w-lg mx-auto gap-x-12">
                     <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">WILL</span>{renderPlayerCard(linebackers[0], 'WILL')}</div>
@@ -148,16 +152,18 @@ const DepthChart = () => {
                     <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">CB</span>{renderPlayerCard(cornerbacks[1], 'CB')}</div>
                 </div>
             </div>
+
+            {/* --- Offensive Unit --- */}
             <div className="flex flex-col items-center w-full gap-y-8">
                 <div className="flex justify-center items-start w-full max-w-5xl mx-auto gap-x-4">
                     <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">WR</span>{renderPlayerCard(wideReceivers[0], 'WR')}</div>
                     <div className="flex-grow flex justify-center gap-x-2">
                         <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">TE</span>{renderPlayerCard(tightEnds[0], 'TE')}</div>
-                        <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">LT</span>{renderPlayerCard(leftTackle[0] || tackles[0], 'LT')}</div>
-                        <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">LG</span>{renderPlayerCard(leftGuard[0] || guards[0], 'LG')}</div>
+                        <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">LT</span>{renderPlayerCard(tackles[0], 'LT')}</div>
+                        <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">LG</span>{renderPlayerCard(guards[0], 'LG')}</div>
                         <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">C</span>{renderPlayerCard(center[0], 'C')}</div>
-                        <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">RG</span>{renderPlayerCard(rightGuard[0] || guards[1], 'RG')}</div>
-                        <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">RT</span>{renderPlayerCard(rightTackle[0] || tackles[1], 'RT')}</div>
+                        <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">RG</span>{renderPlayerCard(guards[1], 'RG')}</div>
+                        <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">RT</span>{renderPlayerCard(tackles[1], 'RT')}</div>
                     </div>
                     <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">SLOT</span>{renderPlayerCard(wideReceivers[1], 'SLOT')}</div>
                     <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">WR</span>{renderPlayerCard(wideReceivers[2], 'WR')}</div>
