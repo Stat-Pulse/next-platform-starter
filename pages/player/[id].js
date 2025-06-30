@@ -285,8 +285,8 @@ export default function PlayerPage({
                   {seasonStats.map((s, idx) => (
                     <tr key={idx} className="border-b border-gray-600 hover:bg-gray-800">
                       <td className="p-2">{s.season || '—'}</td>
-                      <td className="p-2">{s.team || s.team_abbr || '—'}</td>
-                      <td className="p-2">{s.games_played ?? s.gp ?? '—'}</td>
+                      <td className="p-2">{s.team || s.team || '—'}</td>
+                      <td className="p-2">{s.games ?? s.gp ?? '—'}</td>
                       <td className="p-2">{s.passing_yards ?? '—'}</td>
                       <td className="p-2">{s.passing_tds ?? '—'}</td>
                       <td className="p-2">{s.interceptions ?? s.ints ?? '—'}</td>

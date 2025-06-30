@@ -105,46 +105,29 @@ const DepthChart = () => {
     if (depthData.message) {
         return <div className="text-center p-10">{depthData.message}</div>;
     }
-
-    // =================================================================
-    // VVV THIS IS THE FINAL DEBUGGING LOG VVV
-    // It will show us the contents of the Quarterback array.
-    if (depthData.QB) {
-      console.log("Contents of the QB player array:", depthData.QB);
-    }
-    // =================================================================
-
-
-    // Check if the data object is empty for other reasons
     if (Object.keys(depthData).length === 0) {
       return <div className="text-center p-10">No data available.</div>;
     }
 
-    // ... rest of the function ...
-
-    // 2. Get player groups using the CORRECT keys from your API data.
+    // 2. Get all the player groups we need.
     const freeSafeties = getStartersForPosition('FS', 1);
     const strongSafeties = getStartersForPosition('SS', 1);
-    const linebackers = getStartersForPosition('ILB', 3); // Using ILB now
+    const linebackers = getStartersForPosition('ILB', 3);
     const cornerbacks = getStartersForPosition('CB', 2);
     const defensiveEnds = getStartersForPosition('DE', 2);
-    // Combine DT and NT for the interior line, taking the first two available.
     const defensiveTackles = [...getStartersForPosition('DT', 2), ...getStartersForPosition('NT', 1)];
-
     const wideReceivers = getStartersForPosition('WR', 3);
     const tightEnds = getStartersForPosition('TE', 1);
-    const tackles = getStartersForPosition('T', 2);   // Using generic T for Tackles
-    const guards = getStartersForPosition('G', 2);     // Using generic G for Guards
+    const tackles = getStartersForPosition('T', 2);
+    const guards = getStartersForPosition('G', 2);
     const center = getStartersForPosition('C', 1);
     const quarterback = getStartersForPosition('QB', 1);
     const runningback = getStartersForPosition('RB', 1);
-
 
     return (
         <div className="pt-32">
             {/* --- Defensive Unit --- */}
             <div className="flex flex-col items-center w-full gap-y-6 mb-16">
-                {/* 3. Render each player by taking them from the correct arrays. */}
                 <div className="flex justify-center w-full max-w-lg mx-auto gap-x-28">
                     <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">FS</span>{renderPlayerCard(freeSafeties[0], 'FS')}</div>
                     <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">SS</span>{renderPlayerCard(strongSafeties[0], 'SS')}</div>
@@ -181,9 +164,20 @@ const DepthChart = () => {
                     <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">SLOT</span>{renderPlayerCard(wideReceivers[1], 'SLOT')}</div>
                     <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">WR</span>{renderPlayerCard(wideReceivers[2], 'WR')}</div>
                 </div>
-                <div className="flex justify-center w-full max-w-sm mx-auto gap-x-10">
-                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">QB</span>{renderPlayerCard(quarterback[0], 'QB')}</div>
-                    <div className="flex flex-col items-center"><span className="text-xs font-semibold text-gray-400 mb-1 block">HB</span>{renderPlayerCard(runningback[0], 'HB')}</div>
+                {/* This structure perfectly centers the QB */}
+                <div className="flex w-full max-w-sm mx-auto">
+                    <div className="w-1/2 flex justify-end pr-1">
+                        <div className="flex flex-col items-center">
+                            <span className="text-xs font-semibold text-gray-400 mb-1 block">QB</span>
+                            {renderPlayerCard(quarterback[0], 'QB')}
+                        </div>
+                    </div>
+                    <div className="w-1/2 flex justify-start pl-1">
+                        <div className="flex flex-col items-center">
+                            <span className="text-xs font-semibold text-gray-400 mb-1 block">HB</span>
+                            {renderPlayerCard(runningback[0], 'HB')}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
