@@ -107,9 +107,22 @@ const DepthChart = () => {
     if (depthData.message) {
         return <div className="text-center p-10">{depthData.message}</div>;
     }
+
+    // =================================================================
+    // VVV THIS IS THE FINAL DEBUGGING LOG VVV
+    // It will show us the contents of the Quarterback array.
+    if (depthData.QB) {
+      console.log("Contents of the QB player array:", depthData.QB);
+    }
+    // =================================================================
+
+
+    // Check if the data object is empty for other reasons
     if (Object.keys(depthData).length === 0) {
       return <div className="text-center p-10">No data available.</div>;
     }
+
+    // ... rest of the function ...
 
     // 2. Get player groups using the CORRECT keys from your API data.
     const freeSafeties = getStartersForPosition('FS', 1);

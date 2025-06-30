@@ -8,7 +8,7 @@ import { loadFull } from 'tsparticles';
 import Chart from 'chart.js/auto';
 
 /* ------------------------------------------------------------------ */
-/*  getServerSideProps – fetch one player                             */
+/* getServerSideProps – fetch one player                             */
 /* ------------------------------------------------------------------ */
 export async function getServerSideProps({ params, req }) {
   const baseUrl =
@@ -31,7 +31,7 @@ export async function getServerSideProps({ params, req }) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  PlayerPage                                                        */
+/* PlayerPage                                                        */
 /* ------------------------------------------------------------------ */
 export default function PlayerPage({
   player,
@@ -170,6 +170,7 @@ export default function PlayerPage({
 
   /* primary color for glow */
   const primaryColor = player.primary_color || bgColor;
+  const careerOrder = ['Passing', 'Rushing', 'Receiving']; // Define order
 
   /* ------------------------------------------------------------------ */
   return (
@@ -382,28 +383,24 @@ export default function PlayerPage({
               <div ref={scrollRef}
                 className="overflow-x-auto py-6 hide-scrollbar snap-x snap-mandatory">
                 <div className="flex">
-            {careerOrder.map(type => {
-              const data = player.career?.[type.toLowerCase()] || {};
-              let ints = 'N/A';
-              if (type === 'Passing') {
-                  ints = data.interceptions ?? data.ints ?? 'N/A';
-              }
-                return (
-                <motion.div key={type}
-                  className="bg-black/50 p-4 rounded-lg min-w-full snap-center"
-                  whileHover={{ scale:1.05 }}>
-                  <h3 className="text-sm uppercase font-semibold text-cyan-300">{type} Career</h3>
-                  <p className="text-white">Seasons: {data.seasons||'N/A'}</p>
-                  <p className="text-white">Yards:   {data.yards  ||'N/A'}</p>
-                  <p className="text-white">TDs:     {data.tds    ||'N/A'}</p>
-                  {type === 'Passing' && (
-                    <p className="text-white">INT:     {ints}</p>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
-
+                  {careerOrder.map(type => {
+                    const data = player.career?.[type.toLowerCase()] || {};
+                    let ints = 'N/A';
+                    if (type === 'Passing') {
+                      ints = data.interceptions ?? data.ints ?? 'N/A';
+                    }
+                    return (
+                      <motion.div key={type}
+                        className="bg-black/50 p-4 rounded-lg min-w-full snap-center"
+                        whileHover={{ scale:1.05 }}>
+                        <h3 className="text-sm uppercase font-semibold text-cyan-300">{type} Career</h3>
+                        <p className="text-white">Seasons: {data.seasons||'N/A'}</p>
+                        <p className="text-white">Yards:   {data.yards  ||'N/A'}</p>
+                        <p className="text-white">TDs:     {data.tds    ||'N/A'}</p>
+                        {type === 'Passing' && (
+                          <p className="text-white">INT:     {ints}</p>
+                        )}
+                      </motion.div>
                     );
                   })}
                 </div>
@@ -455,8 +452,10 @@ export default function PlayerPage({
       </div>
 
       {/* styles */}
+      <Head>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
+      </Head>
       <style jsx>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
         .font-orbitron{ font-family:'Orbitron',sans-serif; }
         .glass-card{
           background:rgba(255,255,255,0.07);
