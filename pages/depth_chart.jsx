@@ -76,9 +76,7 @@ const DepthChart = () => {
         <div className="font-bold text-xs">
           {player.jersey_number ? `#${player.jersey_number} ` : ''}{player.player_name}
         </div>
-        <div className="text-[8px] text-gray-500 mt-1">
-          {primaryPositionAbbr}
-        </div>
+        {/* The div that showed the position label has been removed. */}
       </div>
     );
   };
