@@ -30,7 +30,7 @@ const DepthChart = () => {
     }
   }, []);
 
-  // This useEffect now performs the REAL API call.
+ // This useEffect now performs the REAL API call.
   useEffect(() => {
     if (!teamId) return;
 
@@ -46,6 +46,11 @@ const DepthChart = () => {
       try {
         const response = await fetch(apiUrl);
         const data = await response.json();
+
+        // =================================================================
+        // VVV THIS IS THE IMPORTANT DEBUGGING LINE VVV
+        console.log('Data received from API:', data);
+        // =================================================================
 
         if (!response.ok) {
           throw new Error(data.error || `Failed to fetch depth data.`);
@@ -63,7 +68,7 @@ const DepthChart = () => {
     fetchData();
 
   }, [teamId, viewMode, selectedSeason]);
-
+  
   // This function now only displays REAL data from the API.
   const renderPlayerCard = (player, primaryPositionAbbr) => {
     if (!player) {
