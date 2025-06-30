@@ -3,46 +3,36 @@ import mysql from 'mysql2/promise';
 
 export default async function handler(req, res) {
   const playerId = req.query.id;
-  const season = req.query.season || '2024';
   let conn;
 
   try {
-    conn = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-    });
+    conn = await mysql.createConnection({ host: process.env.DB_HOST, user: process.env.DB_USER, password: process.env.DB_PASSWORD, database: process.env.DB_NAME });
 
     const [meta] = await conn.execute(`SELECT * FROM Active_Player_Profiles WHERE player_id = ?`, [playerId]);
     if (!meta.length) return res.status(404).json({ error: 'Player not found' });
     const player = meta[0];
 
     const [weekly] = await conn.execute(`SELECT * FROM offense_weekly_stats WHERE player_id = ? AND season_type = 'REG' ORDER BY season, CAST(week AS UNSIGNED)`, [playerId]);
-    const passingMetrics = weekly.filter(r => +r.attempts > 0);
-    const rushingMetrics = weekly.filter(r => +r.carries > 0);
-    const receivingMetrics = weekly.filter(r => +r.targets > 0);
 
-    const [seasonStats] = await conn.execute(`SELECT season, SUM(passing_yards) as passing_yards, SUM(passing_tds) as passing_tds, SUM(rushing_yards) as rushing_yards, SUM(rushing_tds) as rushing_tds, SUM(receiving_yards) as receiving_yards, SUM(receiving_tds) as receiving_tds FROM offense_weekly_stats WHERE player_id = ? GROUP BY season ORDER BY season`, [playerId]);
+    const [seasonStats] = await conn.execute(`SELECT season, 
+      SUM(completions) AS completions, SUM(attempts) AS attempts, SUM(passing_yards) AS passing_yards, SUM(passing_tds) AS passing_tds, SUM(passing_interceptions) AS passing_interceptions,
+      SUM(carries) AS carries, SUM(rushing_yards) AS rushing_yards, SUM(rushing_tds) AS rushing_tds,
+      SUM(receptions) AS receptions, SUM(targets) AS targets, SUM(receiving_yards) AS receiving_yards, SUM(receiving_tds) AS receiving_tds,
+      SUM(def_tackles_solo) AS def_tackles_solo, SUM(def_tds) AS def_tds,
+      SUM(fantasy_points) AS fantasy_points, SUM(fantasy_points_ppr) AS fantasy_points_ppr
+      FROM offense_weekly_stats WHERE player_id = ? GROUP BY season ORDER BY season`, [playerId]);
 
-    const [career] = await conn.execute(`SELECT COUNT(DISTINCT season) as seasons, SUM(passing_yards) as pass_yards, SUM(passing_tds) as pass_tds, SUM(rushing_yards) as rush_yards, SUM(rushing_tds) as rush_tds, SUM(receiving_yards) as rec_yards, SUM(receiving_tds) as rec_tds FROM offense_weekly_stats WHERE player_id = ?`, [playerId]);
+    const [career] = await conn.execute(`SELECT COUNT(DISTINCT season) AS seasons,
+      SUM(completions) AS completions, SUM(attempts) AS attempts, SUM(passing_yards) AS passing_yards, SUM(passing_tds) AS passing_tds, SUM(passing_interceptions) AS passing_interceptions,
+      SUM(carries) AS carries, SUM(rushing_yards) AS rushing_yards, SUM(rushing_tds) AS rushing_tds,
+      SUM(receptions) AS receptions, SUM(targets) AS targets, SUM(receiving_yards) AS receiving_yards, SUM(receiving_tds) AS receiving_tds,
+      SUM(def_tackles_solo) AS def_tackles_solo, SUM(def_tds) AS def_tds,
+      SUM(fantasy_points) AS fantasy_points, SUM(fantasy_points_ppr) AS fantasy_points_ppr
+      FROM offense_weekly_stats WHERE player_id = ?`, [playerId]);
 
-    player.career = {
-      passing: { seasons: career[0].seasons, yards: career[0].pass_yards, tds: career[0].pass_tds },
-      rushing: { seasons: career[0].seasons, yards: career[0].rush_yards, tds: career[0].rush_tds },
-      receiving: { seasons: career[0].seasons, yards: career[0].rec_yards, tds: career[0].rec_tds },
-    };
+    player.career = career[0];
 
-    res.status(200).json({
-      player,
-      seasonStats,
-      passingMetrics,
-      rushingMetrics,
-      receivingMetrics,
-      advancedMetrics: {},
-      advancedRushing: {},
-      advancedPassing: {},
-    });
+    res.status(200).json({ player, weekly, seasonStats });
 
   } catch (err) {
     console.error(err);
