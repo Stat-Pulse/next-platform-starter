@@ -404,10 +404,8 @@ export default function PlayerPage({
                 <div className="flex">
                   {careerOrder.map(type => {
                     const data = player.career?.[type.toLowerCase()] || {};
-                    let ints = 'N/A';
-                    if (type === 'Passing') {
-                      ints = data.interceptions ?? data.ints ?? 'N/A';
-                    }
+                    // Ensure interceptions value for career passing
+                    let ints = data.interceptions ?? data.ints ?? 'N/A';
                     return (
                       <motion.div key={type}
                         className="bg-black/50 p-4 rounded-lg min-w-full snap-center"
@@ -416,7 +414,7 @@ export default function PlayerPage({
                         <p className="text-white">Seasons: {data.seasons||'N/A'}</p>
                         <p className="text-white">Yards:   {data.yards  ||'N/A'}</p>
                         <p className="text-white">TDs:     {data.tds    ||'N/A'}</p>
-                        {type === 'Passing' && (
+                        {type === 'Passing' && ints !== 'N/A' && (
                           <p className="text-white">INT:     {ints}</p>
                         )}
                       </motion.div>
