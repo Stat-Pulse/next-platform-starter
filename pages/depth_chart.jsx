@@ -84,7 +84,9 @@ const DepthChart = () => {
   };
 
   const getStartersForPosition = (posAbbr, count = 1) => {
-    const players = (depthData[posAbbr] || []).filter(p => p.depth_rank === 1);
+    // Using `==` handles cases where depth_rank might be the string "1" instead of the number 1.
+    // This is a much safer way to filter.
+    const players = (depthData[posAbbr] || []).filter(p => p.depth_rank == 1); 
     const result = [];
     for (let i = 0; i < count; i++) {
         result.push(players[i] || null);

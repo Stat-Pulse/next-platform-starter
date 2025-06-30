@@ -384,6 +384,10 @@ export default function PlayerPage({
                 <div className="flex">
                   {['Receiving','Rushing','Passing'].map(type=>{
                     const data=player.career?.[type.toLowerCase()]||{};
+                    let ints = 'N/A';
+                    if (type === 'Passing') {
+                      ints = data.interceptions ?? data.ints ?? 'N/A';
+                    }
                     return(
                       <motion.div key={type}
                         className="bg-black/50 p-4 rounded-lg min-w-full snap-center"
@@ -392,6 +396,15 @@ export default function PlayerPage({
                         <p className="text-white">Seasons: {data.seasons||'N/A'}</p>
                         <p className="text-white">Yards:   {data.yards  ||'N/A'}</p>
                         <p className="text-white">TDs:     {data.tds    ||'N/A'}</p>
+                        {type === 'Passing' && (
+                          <p className="text-white">INT:     {ints}</p>
+                        )}
+                        {type === 'Rushing' && data.interceptions !== undefined && (
+                          <p className="text-white">INT:     {data.interceptions}</p>
+                        )}
+                        {type === 'Receiving' && data.interceptions !== undefined && (
+                          <p className="text-white">INT:     {data.interceptions}</p>
+                        )}
                       </motion.div>
                     );
                   })}
