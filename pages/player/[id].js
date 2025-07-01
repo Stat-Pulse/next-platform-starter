@@ -36,9 +36,6 @@ export async function getServerSideProps({ params, req }) {
 export default function PlayerPage({
   player,
   seasonStats = [],
-  passingMetrics = [],
-  rushingMetrics = [],
-  receivingMetrics = [],
   advancedMetrics = {},
   advancedRushing = {},
   weekly = [],
@@ -50,11 +47,17 @@ export default function PlayerPage({
   const [expandedCard, setExpandedCard] = useState(null);
   const [collapsed, setCollapsed] = useState(true);
   const scrollRef = useRef();
-
-  // --- REMOVED: snapsChartRef ---
   const weeklyChartRef = useRef(null);
 
-  // --- FIX: CALCULATE CAREER STATS MANUALLY ---
+  // --- FIX 1: Add state to track if we are on the client-side ---
+  const [isClient, setIsClient] = useState(false);
+
+  // --- FIX 2: Set isClient to true only after the component mounts on the browser ---
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // --- Calculate Career Stats from seasonStats prop ---
   const careerStats = seasonStats.reduce((acc, season) => {
     acc.seasons = (acc.seasons || 0) + 1;
     if (season.passing_yards || season.passing_tds) {
@@ -73,7 +76,7 @@ export default function PlayerPage({
     return acc;
   }, { passing: {}, rushing: {}, receiving: {} });
 
-  // --- Process Weekly Metrics for display filtering ---
+  // --- Process Weekly Metrics from weekly prop ---
   const rushingMetricsArr = (weekly || []).filter(w => w.carries > 0);
   const receivingMetricsArr = (weekly || []).filter(w => w.targets > 0);
   const rawPassing = (weekly || []).filter(w => w.attempts > 0);
@@ -96,7 +99,7 @@ export default function PlayerPage({
   })();
   const displayRows = collapsed ? weeklyRows.slice(-3) : weeklyRows;
 
-  /* -------- Side Effects ------------------------------------------ */
+  // --- Side Effects ---
   useEffect(() => {
     if (player?.primary_color) setBgColor(player.primary_color);
     if (player?.secondary_color) setBorderColor(player.secondary_color);
@@ -112,35 +115,53 @@ export default function PlayerPage({
 
   const particlesInit = main => loadFull(main);
 
-  // --- Chart.js useEffect (Now only for the Weekly Chart) ---
+  // --- Chart.js useEffect ---
   useEffect(() => {
-    if (!player) return;
+    // This now waits for the component to be mounted on the client
+    if (!isClient || !player) return;
 
     const ctxWeekly = document.getElementById('weeklyChart')?.getContext('2d');
     if (ctxWeekly) {
-       if (weeklyChartRef.current) {
+      if (weeklyChartRef.current) {
         weeklyChartRef.current.destroy();
       }
-      const weeks   = receivingMetricsArr.map(r=>`W${r.week}`);
-      const targets = receivingMetricsArr.map(r=>r.targets);
-      const recs    = receivingMetricsArr.map(r=>r.receptions);
+
+      let labels = [];
+      let datasets = [];
+
+      // Logic to populate chart data based on selected statType
+      if (statType === 'receiving') {
+        labels = receivingMetricsArr.map(r => `W${r.week}`);
+        datasets = [
+          { label: 'Targets', data: receivingMetricsArr.map(r => r.targets), backgroundColor: '#00FFFF' },
+          { label: 'Receptions', data: receivingMetricsArr.map(r => r.receptions), backgroundColor: '#0088ff' }
+        ];
+      } else if (statType === 'rushing') {
+        labels = rushingMetricsArr.map(r => `W${r.week}`);
+        datasets = [
+          { label: 'Carries', data: rushingMetricsArr.map(r => r.carries), backgroundColor: '#FF00FF' },
+        ];
+      } else if (statType === 'passing') {
+        labels = uniquePassingMetrics.map(r => `W${r.week}`);
+        datasets = [
+          { label: 'Attempts', data: uniquePassingMetrics.map(r => r.attempts), backgroundColor: '#00FFFF' },
+          { label: 'Completions', data: uniquePassingMetrics.map(r => r.completions), backgroundColor: '#0088ff' }
+        ];
+      }
+
       weeklyChartRef.current = new Chart(ctxWeekly, {
-        type:'bar',
-        data:{ labels:weeks, datasets:[
-          { label:'Targets', data:targets, backgroundColor:'#00FFFF' },
-          { label:'Receptions', data:recs, backgroundColor:'#0088ff' }
-        ]},
-        options:{ plugins:{ legend:{ labels:{ color:'#fff' } } }, scales:{ x:{ ticks:{ color:'#fff' } }, y:{ ticks:{ color:'#fff' } } } }
+        type: 'bar',
+        data: { labels: labels, datasets: datasets },
+        options: { plugins: { legend: { labels: { color: '#fff' } } }, scales: { x: { ticks: { color: '#fff' } }, y: { ticks: { color: '#fff' } } } }
       });
     }
-
     return () => {
       if (weeklyChartRef.current) {
         weeklyChartRef.current.destroy();
         weeklyChartRef.current = null;
       }
     };
-  }, [player, receivingMetricsArr]);
+  }, [isClient, player, statType, receivingMetricsArr, rushingMetricsArr, uniquePassingMetrics]);
 
   if (!player) return <p className="text-center text-white">Player not found</p>;
 
@@ -150,7 +171,6 @@ export default function PlayerPage({
   const hasAdvancedReceiving = advancedMetrics && Object.values(advancedMetrics).some(v => v !== 0);
   const hasAdvancedRushing = advancedRushing && Object.values(advancedRushing).some(v => v !== 0);
 
-  /* ------------------------------------------------------------------ */
   return (
     <>
       <Head>
@@ -160,12 +180,11 @@ export default function PlayerPage({
 
       <Particles id="tsparticles" init={particlesInit}
         className="fixed inset-0 -z-10"
-        options={{ background:{ color:'#0a0a0a' }, particles:{ number:{ value:60 }, color:{ value:'#00FFFF' }, opacity:{ value:0.5 }, size:{ value:3 }, move:{ enable:true, speed:0.6 } } }}
+        options={{ background: { color: '#0a0a0a' }, particles: { number: { value: 60 }, color: { value: '#00FFFF' }, opacity: { value: 0.5 }, size: { value: 3 }, move: { enable: true, speed: 0.6 } } }}
       />
 
       <div className="relative max-w-7xl mx-auto px-4 py-8 font-orbitron text-sm">
 
-        {/* HERO */}
         <motion.div className="relative mb-8 rounded-xl overflow-hidden"
           initial={{ opacity:0,y:-50 }} animate={{ opacity:1,y:0 }} transition={{ duration:0.8 }}>
           <div className="relative bg-black/70 p-6 flex flex-col md:flex-row items-center justify-between">
@@ -225,7 +244,6 @@ export default function PlayerPage({
           </div>
         </motion.div>
 
-        {/* SEASON AGGREGATES */}
         <motion.div className="glass-card p-6 mb-8"
           initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:0.3 }}>
           <h2 className="text-xl font-bold text-white mb-4">Season Totals</h2>
@@ -269,18 +287,13 @@ export default function PlayerPage({
           )}
         </motion.div>
 
-        {/* SEASON STATS (weekly) */}
         <motion.div className="glass-card p-6 mb-8"
           initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:0.2 }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-white">Season Stats</h2>
             <div className="flex items-center gap-3">
               {(() => {
-                const statOrder = player.position_group === 'QB'
-                  ? ['passing', 'rushing', 'receiving']
-                  : player.position_group === 'RB'
-                    ? ['rushing', 'receiving', 'passing']
-                    : ['receiving', 'rushing', 'passing'];
+                const statOrder = player.position_group === 'QB' ? ['passing', 'rushing', 'receiving'] : player.position_group === 'RB' ? ['rushing', 'receiving', 'passing'] : ['receiving', 'rushing', 'passing'];
                 return statOrder.map(t => (
                   <button key={t} onClick={() => setStatType(t)}
                     className={`px-2 py-1 rounded text-xs uppercase font-semibold ${statType === t ? 'bg-cyan-500 text-black' : 'bg-gray-700 text-gray-300'}`}>
@@ -290,20 +303,14 @@ export default function PlayerPage({
               })()}
               <select value={selectedSeason} onChange={e => setSelectedSeason(e.target.value)}
                 className="bg-gray-800 text-gray-200 text-xs px-2 py-1 rounded">
-                {seasonOptions.map(yr => (
-                  <option key={yr} value={yr}>{yr}</option>
-                ))}
+                {seasonOptions.map(yr => (<option key={yr} value={yr}>{yr}</option>))}
               </select>
             </div>
           </div>
           {displayRows.length > 0 ? (
             <StatsCard
               title={`${selectedSeason} ${statType.charAt(0).toUpperCase() + statType.slice(1)} (${collapsed ? 'Last 3' : 'Full'} games)`}
-              columns={statType === 'receiving'
-                ? ['Week', 'Opp', 'Tgt', 'Rec', 'Yds', 'TD']
-                : statType === 'rushing'
-                  ? ['Week', 'Opp', 'Car', 'Yds', 'TD', 'EPA']
-                  : ['Week', 'Opp', 'Cmp', 'Att', 'Yds', 'TD', 'INT', 'EPA']}
+              columns={statType === 'receiving' ? ['Week', 'Opp', 'Tgt', 'Rec', 'Yds', 'TD'] : statType === 'rushing' ? ['Week', 'Opp', 'Car', 'Yds', 'TD', 'EPA'] : ['Week', 'Opp', 'Cmp', 'Att', 'Yds', 'TD', 'INT', 'EPA']}
               rows={displayRows.map(g => (
                 statType === 'receiving' ? [g.week, g.opponent_team, g.targets, g.receptions, g.receiving_yards, g.rec_touchdowns]
                 : statType === 'rushing' ? [g.week, g.opponent_team, g.carries, g.rushing_yards, g.rushing_tds, typeof g.rushing_epa === 'number' ? g.rushing_epa.toFixed(2) : '—']
@@ -320,9 +327,7 @@ export default function PlayerPage({
           )}
         </motion.div>
 
-        {/* GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* left column */}
           <div className="space-y-6">
             <motion.div className="glass-card p-4"
               whileHover={{ scale:1.05 }}
@@ -332,14 +337,9 @@ export default function PlayerPage({
                 Active <span className="font-semibold">{player.position}</span> for&nbsp;
                 <span className="font-semibold">{player.recent_team}</span>.
               </p>
-              {expandedCard==='summary' && (
-                <div className="mt-4 text-gray-300">
-                  <p>Additional details or chart…</p>
-                </div>
-              )}
+              {expandedCard==='summary' && (<div className="mt-4 text-gray-300"><p>Additional details or chart…</p></div>)}
             </motion.div>
           </div>
-          {/* center column */}
           <div className="space-y-8">
             <div className="glass-card p-4">
               <div ref={scrollRef} className="overflow-x-auto py-6 hide-scrollbar snap-x snap-mandatory">
@@ -366,36 +366,22 @@ export default function PlayerPage({
                 ))}
               </div>
             </div>
-            {hasAdvancedPassing && (
-              <AdvancedCard title="2024 Advanced Passing" rows={[
-                ['Avg Time to Throw',`${player.advancedPassing.avg_time_to_throw?.toFixed(2)||'N/A'} s`],
-                ['Passer Rating', player.advancedPassing.passer_rating?.toFixed(1)||'N/A'],
-              ]}/>
-            )}
-            {hasAdvancedReceiving && (
-              <AdvancedCard title="2024 Advanced Receiving" rows={[
-                ['Avg Cushion', `${advancedMetrics.avg_cushion?.toFixed(2)||'N/A'} yds`],
-                ['Air Yards Share', advancedMetrics.percent_share_of_intended_air_yards != null
-                  ? `${(advancedMetrics.percent_share_of_intended_air_yards * 100).toFixed(1)} %`
-                  : 'N/A'],
-              ]}/>
-            )}
-            {hasAdvancedRushing && (
-              <AdvancedCard title="2024 Advanced Rushing" rows={[
-                ['RYOE', advancedRushing.rushing_yards_over_expected?.toFixed(1)||'N/A'],
-                ['Rush EPA', advancedRushing.rushing_epa?.toFixed(2)||'N/A'],
-              ]}/>
-            )}
+            {hasAdvancedPassing && (<AdvancedCard title="2024 Advanced Passing" rows={[['Avg Time to Throw',`${player.advancedPassing.avg_time_to_throw?.toFixed(2)||'N/A'} s`],['Passer Rating', player.advancedPassing.passer_rating?.toFixed(1)||'N/A'],]}/>)}
+            {hasAdvancedReceiving && (<AdvancedCard title="2024 Advanced Receiving" rows={[['Avg Cushion', `${advancedMetrics.avg_cushion?.toFixed(2)||'N/A'} yds`],['Air Yards Share', advancedMetrics.percent_share_of_intended_air_yards != null ? `${(advancedMetrics.percent_share_of_intended_air_yards * 100).toFixed(1)} %` : 'N/A'],]}/>)}
+            {hasAdvancedRushing && (<AdvancedCard title="2024 Advanced Rushing" rows={[['RYOE', advancedRushing.rushing_yards_over_expected?.toFixed(1)||'N/A'],['Rush EPA', advancedRushing.rushing_epa?.toFixed(2)||'N/A'],]}/>)}
           </div>
-          {/* right column */}
           <div className="space-y-8">
-            <motion.div className="glass-card p-4" whileHover={{ scale: 1.05 }}>
-              <h2 className="text-sm uppercase font-semibold text-cyan-300">Weekly Targets vs. Receptions</h2>
-              <canvas id="weeklyChart" className="w-full h-64"/>
-            </motion.div>
+            {/* --- FIX 3: Conditionally render the chart component --- */}
+            {isClient && (
+              <motion.div className="glass-card p-4" whileHover={{ scale: 1.05 }}>
+                <h2 className="text-sm uppercase font-semibold text-cyan-300">Weekly Targets vs. Receptions</h2>
+                <canvas id="weeklyChart" className="w-full h-64"/>
+              </motion.div>
+            )}
           </div>
         </div>
       </div>
+
       <style jsx>{`
         .font-orbitron{ font-family:'Orbitron',sans-serif; }
         .glass-card{
@@ -410,7 +396,6 @@ export default function PlayerPage({
   );
 }
 
-/* ---------------- reusable table + advanced card ------------------ */
 function StatsCard({ title, columns, rows }) {
     return (
       <div className="glass-card p-4 overflow-x-auto">
@@ -427,9 +412,9 @@ function StatsCard({ title, columns, rows }) {
         </table>
       </div>
     );
-  }
+}
   
-  function AdvancedCard({ title, rows }) {
+function AdvancedCard({ title, rows }) {
     return (
       <div className="glass-card p-4">
         <h3 className="text-sm uppercase font-semibold text-cyan-300 mb-2">{title}</h3>
@@ -438,4 +423,4 @@ function StatsCard({ title, columns, rows }) {
         ))}</div>
       </div>
     );
-  }
+}
