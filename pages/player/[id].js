@@ -50,25 +50,22 @@ export default function PlayerPage({
   const [expandedCard, setExpandedCard] = useState(null);
   const [collapsed, setCollapsed] = useState(true);
   const scrollRef = useRef();
-  const snapsChartRef = useRef(null);
+
+  // --- REMOVED: snapsChartRef ---
   const weeklyChartRef = useRef(null);
 
   // --- FIX: CALCULATE CAREER STATS MANUALLY ---
-  // This makes the career card work even if the API doesn't send a pre-aggregated career object.
   const careerStats = seasonStats.reduce((acc, season) => {
     acc.seasons = (acc.seasons || 0) + 1;
-    // Aggregate Passing Stats
     if (season.passing_yards || season.passing_tds) {
       acc.passing.yards = (acc.passing.yards || 0) + (season.passing_yards || 0);
       acc.passing.tds = (acc.passing.tds || 0) + (season.passing_tds || 0);
       acc.passing.interceptions = (acc.passing.interceptions || 0) + (season.interceptions || season.ints || 0);
     }
-    // Aggregate Rushing Stats
     if (season.rushing_yards || season.rushing_tds) {
       acc.rushing.yards = (acc.rushing.yards || 0) + (season.rushing_yards || 0);
       acc.rushing.tds = (acc.rushing.tds || 0) + (season.rushing_tds || 0);
     }
-    // Aggregate Receiving Stats
     if (season.receiving_yards || season.rec_touchdowns) {
       acc.receiving.yards = (acc.receiving.yards || 0) + (season.receiving_yards || 0);
       acc.receiving.tds = (acc.receiving.tds || 0) + (season.rec_touchdowns || 0);
@@ -115,40 +112,35 @@ export default function PlayerPage({
 
   const particlesInit = main => loadFull(main);
 
-  // --- FIX: Corrected Chart.js useEffect to prevent rendering errors ---
+  // --- Chart.js useEffect (Now only for the Weekly Chart) ---
   useEffect(() => {
-    if (!player) return; // Don't run if player data isn't loaded yet
+    if (!player) return;
 
-    // Snaps Chart
-    const ctxSnaps = document.getElementById('snapsChart')?.getContext('2d');
-    if (ctxSnaps) {
-      if (snapsChartRef.current) snapsChartRef.current.destroy();
-      snapsChartRef.current = new Chart(ctxSnaps, {
-        type: 'polarArea',
-        data: { labels: ['Offense', 'Defense', 'Special'], datasets: [{ data: [75, 20, 5], backgroundColor: ['#00FFFF', '#FF00FF', '#00FF00'] }] },
-        options: { plugins: { legend: { position: 'bottom', labels: { color: '#fff' } } } }
-      });
-    }
-
-    // Weekly Chart
     const ctxWeekly = document.getElementById('weeklyChart')?.getContext('2d');
     if (ctxWeekly) {
-      if (weeklyChartRef.current) weeklyChartRef.current.destroy();
-      const weeks = receivingMetricsArr.map(r => `W${r.week}`);
-      const targets = receivingMetricsArr.map(r => r.targets);
-      const recs = receivingMetricsArr.map(r => r.receptions);
+       if (weeklyChartRef.current) {
+        weeklyChartRef.current.destroy();
+      }
+      const weeks   = receivingMetricsArr.map(r=>`W${r.week}`);
+      const targets = receivingMetricsArr.map(r=>r.targets);
+      const recs    = receivingMetricsArr.map(r=>r.receptions);
       weeklyChartRef.current = new Chart(ctxWeekly, {
-        type: 'bar',
-        data: { labels: weeks, datasets: [{ label: 'Targets', data: targets, backgroundColor: '#00FFFF' }, { label: 'Receptions', data: recs, backgroundColor: '#0088ff' }] },
-        options: { plugins: { legend: { labels: { color: '#fff' } } }, scales: { x: { ticks: { color: '#fff' } }, y: { ticks: { color: '#fff' } } } }
+        type:'bar',
+        data:{ labels:weeks, datasets:[
+          { label:'Targets', data:targets, backgroundColor:'#00FFFF' },
+          { label:'Receptions', data:recs, backgroundColor:'#0088ff' }
+        ]},
+        options:{ plugins:{ legend:{ labels:{ color:'#fff' } } }, scales:{ x:{ ticks:{ color:'#fff' } }, y:{ ticks:{ color:'#fff' } } } }
       });
     }
 
     return () => {
-      if (snapsChartRef.current) snapsChartRef.current.destroy();
-      if (weeklyChartRef.current) weeklyChartRef.current.destroy();
+      if (weeklyChartRef.current) {
+        weeklyChartRef.current.destroy();
+        weeklyChartRef.current = null;
+      }
     };
-  }, [player, receivingMetricsArr]); // Dependency ensures charts update when data changes
+  }, [player, receivingMetricsArr]);
 
   if (!player) return <p className="text-center text-white">Player not found</p>;
 
@@ -161,11 +153,14 @@ export default function PlayerPage({
   /* ------------------------------------------------------------------ */
   return (
     <>
-      <Head><title>{player.player_name} | StatPulse</title></Head>
+      <Head>
+        <title>{player.player_name} | StatPulse</title>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
+      </Head>
 
       <Particles id="tsparticles" init={particlesInit}
         className="fixed inset-0 -z-10"
-        options={{ background: { color: '#0a0a0a' }, particles: { number: { value: 60 }, color: { value: '#00FFFF' }, opacity: { value: 0.5 }, size: { value: 3 }, move: { enable: true, speed: 0.6 } } }}
+        options={{ background:{ color:'#0a0a0a' }, particles:{ number:{ value:60 }, color:{ value:'#00FFFF' }, opacity:{ value:0.5 }, size:{ value:3 }, move:{ enable:true, speed:0.6 } } }}
       />
 
       <div className="relative max-w-7xl mx-auto px-4 py-8 font-orbitron text-sm">
@@ -207,8 +202,26 @@ export default function PlayerPage({
                     ? new Date(player.date_of_birth).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
                     : 'N/A'}</span>
                 </div>
+                <div className="text-gray-300 flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
+                  <span><strong>Contract:</strong> {player.contract_value
+                    ? `$${Number(player.contract_value).toLocaleString()}M`
+                    : 'N/A'}</span>
+                  <span><strong>Avg/Year:</strong> {player.contract_apy
+                    ? `$${Number(player.contract_apy).toLocaleString()}M`
+                    : 'N/A'}</span>
+                  <span><strong>Guaranteed:</strong> {player.contract_guaranteed
+                    ? `$${Number(player.contract_guaranteed).toLocaleString()}M`
+                    : 'N/A'}</span>
+                  <span><strong>Cap %:</strong> {player.contract_apy_cap_pct
+                    ? `${(Number(player.contract_apy_cap_pct)*100).toFixed(1)}%`
+                    : 'N/A'}</span>
+                </div>
               </div>
             </div>
+            <button className="mt-4 md:mt-0 bg-cyan-500 text-black px-4 py-2 rounded-full font-semibold hover:bg-cyan-300 transition"
+              style={{ boxShadow:`0 0 12px ${primaryColor}` }}>
+              View AI Insights
+            </button>
           </div>
         </motion.div>
 
@@ -283,7 +296,7 @@ export default function PlayerPage({
               </select>
             </div>
           </div>
-          {displayRows.length ? (
+          {displayRows.length > 0 ? (
             <StatsCard
               title={`${selectedSeason} ${statType.charAt(0).toUpperCase() + statType.slice(1)} (${collapsed ? 'Last 3' : 'Full'} games)`}
               columns={statType === 'receiving'
@@ -311,13 +324,25 @@ export default function PlayerPage({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* left column */}
           <div className="space-y-6">
-             {/* Player Summary Card Here... */}
+            <motion.div className="glass-card p-4"
+              whileHover={{ scale:1.05 }}
+              onClick={()=>setExpandedCard(expandedCard==='summary'?null:'summary')}>
+              <h2 className="text-sm uppercase font-semibold text-cyan-300">Player Summary</h2>
+              <p className="text-white">
+                Active <span className="font-semibold">{player.position}</span> for&nbsp;
+                <span className="font-semibold">{player.recent_team}</span>.
+              </p>
+              {expandedCard==='summary' && (
+                <div className="mt-4 text-gray-300">
+                  <p>Additional details or chart…</p>
+                </div>
+              )}
+            </motion.div>
           </div>
           {/* center column */}
           <div className="space-y-8">
             <div className="glass-card p-4">
               <div ref={scrollRef} className="overflow-x-auto py-6 hide-scrollbar snap-x snap-mandatory">
-                {/* --- FIX: UPDATED CAREER CARD --- */}
                 <div className="flex">
                   {careerOrder.map(type => {
                     const data = careerStats?.[type.toLowerCase()] || {};
@@ -341,25 +366,36 @@ export default function PlayerPage({
                 ))}
               </div>
             </div>
-            {/* ... other advanced cards ... */}
+            {hasAdvancedPassing && (
+              <AdvancedCard title="2024 Advanced Passing" rows={[
+                ['Avg Time to Throw',`${player.advancedPassing.avg_time_to_throw?.toFixed(2)||'N/A'} s`],
+                ['Passer Rating', player.advancedPassing.passer_rating?.toFixed(1)||'N/A'],
+              ]}/>
+            )}
+            {hasAdvancedReceiving && (
+              <AdvancedCard title="2024 Advanced Receiving" rows={[
+                ['Avg Cushion', `${advancedMetrics.avg_cushion?.toFixed(2)||'N/A'} yds`],
+                ['Air Yards Share', advancedMetrics.percent_share_of_intended_air_yards != null
+                  ? `${(advancedMetrics.percent_share_of_intended_air_yards * 100).toFixed(1)} %`
+                  : 'N/A'],
+              ]}/>
+            )}
+            {hasAdvancedRushing && (
+              <AdvancedCard title="2024 Advanced Rushing" rows={[
+                ['RYOE', advancedRushing.rushing_yards_over_expected?.toFixed(1)||'N/A'],
+                ['Rush EPA', advancedRushing.rushing_epa?.toFixed(2)||'N/A'],
+              ]}/>
+            )}
           </div>
           {/* right column */}
           <div className="space-y-8">
-            <motion.div className="glass-card p-4 flex flex-col items-center" whileHover={{ scale: 1.05 }}>
-              <h2 className="text-sm uppercase font-semibold text-cyan-300">Snaps</h2>
-              <canvas id="snapsChart" className="w-40 h-40" />
-            </motion.div>
             <motion.div className="glass-card p-4" whileHover={{ scale: 1.05 }}>
               <h2 className="text-sm uppercase font-semibold text-cyan-300">Weekly Targets vs. Receptions</h2>
-              <canvas id="weeklyChart" className="w-full h-64" />
+              <canvas id="weeklyChart" className="w-full h-64"/>
             </motion.div>
           </div>
         </div>
       </div>
-
-      <Head>
-        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
-      </Head>
       <style jsx>{`
         .font-orbitron{ font-family:'Orbitron',sans-serif; }
         .glass-card{
