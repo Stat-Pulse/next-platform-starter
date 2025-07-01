@@ -44,7 +44,7 @@ export default function PlayerPage({
   advancedRushing = {},
   weekly = [],
 }) {
-  
+
   console.log("Weekly Stats Prop Content:", weekly);
 
   // If the metrics arrays are empty, build them from weekly
@@ -163,10 +163,17 @@ export default function PlayerPage({
   const snapsChartRef  = useRef(null);
   const weeklyChartRef = useRef(null);
 
+  /* Chart.js – FIX: Stabilize useEffect to prevent hydration errors */
   useEffect(() => {
+    // Only attempt to create charts if data has finished loading and a player exists.
+    if (isLoading || !player) return;
+
+    // --- Snaps Chart ---
     const ctxSnaps = document.getElementById('snapsChart')?.getContext('2d');
     if (ctxSnaps) {
-      snapsChartRef.current && snapsChartRef.current.destroy();
+      if (snapsChartRef.current) {
+        snapsChartRef.current.destroy();
+      }
       snapsChartRef.current = new Chart(ctxSnaps, {
         type:'polarArea',
         data:{ labels:['Offense','Defense','Special'], datasets:[{ data:[75,20,5], backgroundColor:['#00FFFF','#FF00FF','#00FF00'] }] },
@@ -174,9 +181,12 @@ export default function PlayerPage({
       });
     }
 
+    // --- Weekly Chart ---
     const ctxWeekly = document.getElementById('weeklyChart')?.getContext('2d');
     if (ctxWeekly) {
-      weeklyChartRef.current && weeklyChartRef.current.destroy();
+       if (weeklyChartRef.current) {
+        weeklyChartRef.current.destroy();
+      }
       const weeks   = receivingMetricsArr.map(r=>`W${r.week}`);
       const targets = receivingMetricsArr.map(r=>r.targets);
       const recs    = receivingMetricsArr.map(r=>r.receptions);
@@ -190,11 +200,19 @@ export default function PlayerPage({
       });
     }
 
+    // Cleanup function to destroy charts when the component unmounts
     return () => {
-      snapsChartRef.current  && snapsChartRef.current.destroy();
-      weeklyChartRef.current && weeklyChartRef.current.destroy();
+      if (snapsChartRef.current) {
+        snapsChartRef.current.destroy();
+        snapsChartRef.current = null;
+      }
+      if (weeklyChartRef.current) {
+        weeklyChartRef.current.destroy();
+        weeklyChartRef.current = null;
+      }
     };
-  }, [receivingMetricsArr]);
+  // Dependency array now correctly triggers the effect when data changes.
+  }, [isLoading, player, receivingMetricsArr]);
 
   if (!player) return <p className="text-center text-white">Player not found</p>;
 
