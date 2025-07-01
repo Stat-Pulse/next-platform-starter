@@ -44,6 +44,9 @@ export default function PlayerPage({
   advancedRushing = {},
   weekly = [],
 }) {
+  
+  console.log("Weekly Stats Prop Content:", weekly);
+
   // If the metrics arrays are empty, build them from weekly
   let rushingMetricsArr, receivingMetricsArr, rawPassing;
   if (rushingMetrics.length) {

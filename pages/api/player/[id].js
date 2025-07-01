@@ -37,7 +37,7 @@ export default async function handler(req, res) {
           SUM(IFNULL(attempts, 0)) AS attempts, 
           SUM(IFNULL(passing_yards, 0)) AS passing_yards, 
           SUM(IFNULL(passing_tds, 0)) AS passing_tds, 
-          SUM(IFNULL(interceptions, 0)) AS interceptions,
+          SUM(IFNULL(passing_interceptions, 0)) AS interceptions,
           SUM(IFNULL(carries, 0)) AS carries, 
           SUM(IFNULL(rushing_yards, 0)) AS rushing_yards, 
           SUM(IFNULL(rushing_tds, 0)) AS rushing_tds,
@@ -70,9 +70,9 @@ export default async function handler(req, res) {
         seasons: seasonStats.length,
         yards: (career.passing_yards || 0) + (career.rushing_yards || 0) + (career.receiving_yards || 0),
         tds: (career.passing_tds || 0) + (career.rushing_tds || 0) + (career.rec_touchdowns || 0),
-        interceptions: career.interceptions || 0,
+        passing_interceptions: career.interceptions || 0,
         // You can add more specific career stats here if needed
-        passing: { yards: career.passing_yards, tds: career.passing_tds, interceptions: career.interceptions },
+        passing: { yards: career.passing_yards, tds: career.passing_tds, passing_interceptionsinterceptions: career.interceptions },
         rushing: { yards: career.rushing_yards, tds: career.rushing_tds },
         receiving: { yards: career.receiving_yards, tds: career.rec_touchdowns },
     };
