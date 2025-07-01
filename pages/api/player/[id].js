@@ -27,15 +27,32 @@ export default async function handler(req, res) {
     const [weekly] = await pool.execute(`SELECT * FROM offense_weekly_stats WHERE player_id = ? AND season_type = 'REG' ORDER BY season, CAST(week AS UNSIGNED)`, [playerId]);
 
     // Query 3: Get Season Stats
-    const [seasonStats] = await pool.execute(
-        `SELECT season, team, COUNT(week) as games_played,
-          SUM(completions) AS completions, SUM(attempts) AS attempts, SUM(passing_yards) AS passing_yards, SUM(passing_tds) AS passing_tds, 
-          SUM(interceptions) AS interceptions, -- <-- FIX: Changed alias from passing_interceptions
-          SUM(carries) AS carries, SUM(rushing_yards) AS rushing_yards, SUM(rushing_tds) AS rushing_tds,
-          SUM(receptions) AS receptions, SUM(targets) AS targets, SUM(receiving_yards) AS receiving_yards, SUM(receiving_tds) AS rec_touchdowns, -- <-- FIX: Changed alias to match front-end
-          SUM(def_tackles_solo) AS def_tackles_solo, SUM(def_tds) AS def_tds,
-          SUM(fantasy_points) AS fantasy_points, SUM(fantasy_points_ppr) AS fantasy_points_ppr
-        FROM offense_weekly_stats WHERE player_id = ? GROUP BY season, team ORDER BY season`, 
+     const [seasonStats] = await pool.execute(
+        // --- FIX: Using IFNULL to prevent null results from SUM() ---
+        `SELECT 
+          season, 
+          team, 
+          COUNT(week) as games_played,
+          SUM(IFNULL(completions, 0)) AS completions, 
+          SUM(IFNULL(attempts, 0)) AS attempts, 
+          SUM(IFNULL(passing_yards, 0)) AS passing_yards, 
+          SUM(IFNULL(passing_tds, 0)) AS passing_tds, 
+          SUM(IFNULL(interceptions, 0)) AS interceptions,
+          SUM(IFNULL(carries, 0)) AS carries, 
+          SUM(IFNULL(rushing_yards, 0)) AS rushing_yards, 
+          SUM(IFNULL(rushing_tds, 0)) AS rushing_tds,
+          SUM(IFNULL(receptions, 0)) AS receptions, 
+          SUM(IFNULL(targets, 0)) AS targets, 
+          SUM(IFNULL(receiving_yards, 0)) AS receiving_yards, 
+          SUM(IFNULL(receiving_tds, 0)) AS rec_touchdowns,
+          SUM(IFNULL(def_tackles_solo, 0)) AS def_tackles_solo, 
+          SUM(IFNULL(def_tds, 0)) AS def_tds,
+          SUM(IFNULL(fantasy_points, 0)) AS fantasy_points, 
+          SUM(IFNULL(fantasy_points_ppr, 0)) AS fantasy_points_ppr
+        FROM offense_weekly_stats 
+        WHERE player_id = ? 
+        GROUP BY season, team 
+        ORDER BY season`, 
       [playerId]
     );
 
