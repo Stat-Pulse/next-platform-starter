@@ -7,7 +7,7 @@ import { loadFull } from 'tsparticles';
 import Chart from 'chart.js/auto';
 
 /* ------------------------------------------------------------------ */
-/* getServerSideProps – This function stays the same                  */
+/* getServerSideProps                                                 */
 /* ------------------------------------------------------------------ */
 export async function getServerSideProps({ params, req }) {
   const baseUrl =
@@ -48,11 +48,11 @@ export default function PlayerPage({
   const [collapsed, setCollapsed] = useState(true);
   const scrollRef = useRef();
   const weeklyChartRef = useRef(null);
-
-  // --- FIX 1: Add state to track if we are on the client-side ---
+  
+  // --- FIX: Add state to track if we are on the client-side ---
   const [isClient, setIsClient] = useState(false);
 
-  // --- FIX 2: Set isClient to true only after the component mounts on the browser ---
+  // --- FIX: Set isClient to true only after the component mounts on the browser ---
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -374,14 +374,13 @@ export default function PlayerPage({
             {/* --- FIX 3: Conditionally render the chart component --- */}
             {isClient && (
               <motion.div className="glass-card p-4" whileHover={{ scale: 1.05 }}>
-                <h2 className="text-sm uppercase font-semibold text-cyan-300">Weekly Targets vs. Receptions</h2>
+                <h2 className="text-sm uppercase font-semibold text-cyan-300">Weekly Chart</h2>
                 <canvas id="weeklyChart" className="w-full h-64"/>
               </motion.div>
             )}
           </div>
         </div>
       </div>
-
       <style jsx>{`
         .font-orbitron{ font-family:'Orbitron',sans-serif; }
         .glass-card{
