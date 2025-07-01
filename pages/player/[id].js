@@ -22,11 +22,6 @@ export async function getServerSideProps({ params, req }) {
   if (!res.ok) return { notFound: true };
   const data = await res.json();
 
-  // Fetch season aggregate stats (including team, games_played, interceptions)
-  // If already present in data.seasonStats, skip extra fetch.
-  // Otherwise, you could fetch from a different endpoint if needed.
-  // For now, assume data.seasonStats comes from the /api/player/[id] endpoint and includes needed fields.
-
   return {
     props: {
       ...data,
@@ -100,6 +95,32 @@ export default function PlayerPage({
   const [expandedCard,  setExpandedCard]  = useState(null);
   const [collapsed,     setCollapsed]     = useState(true);
   const scrollRef = useRef();
+  
+  // --- FIX: CALCULATE CAREER STATS MANUALLY ---
+  // This makes the career card work even if the API doesn't send a pre-aggregated career object.
+  const careerStats = seasonStats.reduce((acc, season) => {
+    acc.seasons = (acc.seasons || 0) + 1;
+    
+    // Aggregate Passing Stats
+    if (season.passing_yards || season.passing_tds) {
+      acc.passing.yards = (acc.passing.yards || 0) + (season.passing_yards || 0);
+      acc.passing.tds = (acc.passing.tds || 0) + (season.passing_tds || 0);
+      acc.passing.interceptions = (acc.passing.interceptions || 0) + (season.interceptions || season.ints || 0);
+    }
+    // Aggregate Rushing Stats
+    if (season.rushing_yards || season.rushing_tds) {
+      acc.rushing.yards = (acc.rushing.yards || 0) + (season.rushing_yards || 0);
+      acc.rushing.tds = (acc.rushing.tds || 0) + (season.rushing_tds || 0);
+    }
+    // Aggregate Receiving Stats
+    if (season.receiving_yards || season.rec_touchdowns) {
+      acc.receiving.yards = (acc.receiving.yards || 0) + (season.receiving_yards || 0);
+      acc.receiving.tds = (acc.receiving.tds || 0) + (season.rec_touchdowns || 0);
+    }
+    
+    return acc;
+  }, { passing: {}, rushing: {}, receiving: {} });
+  // --- END OF FIX ---
 
   /* season & stat-type controls */
   const seasonOptions = [...new Set(
@@ -264,6 +285,7 @@ export default function PlayerPage({
           initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:0.3 }}
         >
           <h2 className="text-xl font-bold text-white mb-4">Season Totals</h2>
+          {/* NOTE: For this table to show data, the `seasonStats` prop must be an array of objects from your API. */}
           {seasonStats && seasonStats.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="table-auto w-full text-xs text-gray-200">
@@ -285,15 +307,16 @@ export default function PlayerPage({
                   {seasonStats.map((s, idx) => (
                     <tr key={idx} className="border-b border-gray-600 hover:bg-gray-800">
                       <td className="p-2">{s.season || '—'}</td>
-                      <td className="p-2">{s.team || s.team || '—'}</td>
-                      <td className="p-2">{s.games ?? s.gp ?? '—'}</td>
-                      <td className="p-2">{s.passing_yards ?? '—'}</td>
-                      <td className="p-2">{s.passing_tds ?? '—'}</td>
+                      <td className="p-2">{s.team || s.team_abbr || '—'}</td>
+                      <td className="p-2">{s.games_played ?? s.gp ?? '—'}</td>
+                      <td className="p-2">{s.passing_yards?.toLocaleString() ?? '—'}</td>
+                      <td className="p-2">{s.passing_tds?.toLocaleString() ?? '—'}</td>
+                      {/* NOTE: Your API must send a field named `interceptions` or `ints` for this to work. */}
                       <td className="p-2">{s.interceptions ?? s.ints ?? '—'}</td>
-                      <td className="p-2">{s.rushing_yards ?? '—'}</td>
-                      <td className="p-2">{s.rushing_tds ?? '—'}</td>
-                      <td className="p-2">{s.receiving_yards ?? '—'}</td>
-                      <td className="p-2">{s.rec_touchdowns ?? '—'}</td>
+                      <td className="p-2">{s.rushing_yards?.toLocaleString() ?? '—'}</td>
+                      <td className="p-2">{s.rushing_tds?.toLocaleString() ?? '—'}</td>
+                      <td className="p-2">{s.receiving_yards?.toLocaleString() ?? '—'}</td>
+                      <td className="p-2">{s.rec_touchdowns?.toLocaleString() ?? '—'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -305,6 +328,7 @@ export default function PlayerPage({
         </motion.div>
 
         {/* --------------- SEASON STATS (weekly) --------------- */}
+        {/* NOTE: For this card to work, the `weekly` prop from your API must contain game-by-game stats. */}
         <motion.div className="glass-card p-6 mb-8"
           initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:0.2 }}
         >
@@ -312,12 +336,6 @@ export default function PlayerPage({
             <h2 className="text-xl font-bold text-white">Season Stats</h2>
 
             <div className="flex items-center gap-3">
-              {/*
-                Order statType buttons by position group:
-                  - QB: ['passing', 'rushing', 'receiving']
-                  - RB: ['rushing', 'receiving', 'passing']
-                  - else: ['receiving', 'rushing', 'passing']
-              */}
               {(() => {
                 const statOrder = player.position_group === 'QB'
                   ? ['passing', 'rushing', 'receiving']
@@ -385,7 +403,7 @@ export default function PlayerPage({
               <h2 className="text-sm uppercase font-semibold text-cyan-300">Player Summary</h2>
               <p className="text-white">
                 Active <span className="font-semibold">{player.position}</span> for&nbsp;
-                <span className="font-semibold">{player.recent_team}</span>.
+                <span className="font-semibold">{player.recent_team || player.team_abbr}</span>.
               </p>
               {expandedCard==='summary' && (
                 <div className="mt-4 text-gray-300">
@@ -397,24 +415,23 @@ export default function PlayerPage({
 
           {/* center column ---------------------------------------------- */}
           <div className="space-y-8">
-            {/* career carousel */}
+            {/* --- FIX: UPDATED CAREER CARD TO USE CALCULATED STATS --- */}
             <div className="glass-card p-4">
               <div ref={scrollRef}
                 className="overflow-x-auto py-6 hide-scrollbar snap-x snap-mandatory">
                 <div className="flex">
                   {careerOrder.map(type => {
-                    const data = player.career?.[type.toLowerCase()] || {};
-                    // Ensure interceptions value for career passing
-                    let ints = data.interceptions ?? data.ints ?? 'N/A';
+                    const data = careerStats?.[type.toLowerCase()] || {};
+                    const ints = data.interceptions ?? 'N/A';
                     return (
                       <motion.div key={type}
                         className="bg-black/50 p-4 rounded-lg min-w-full snap-center"
                         whileHover={{ scale:1.05 }}>
                         <h3 className="text-sm uppercase font-semibold text-cyan-300">{type} Career</h3>
-                        <p className="text-white">Seasons: {data.seasons||'N/A'}</p>
-                        <p className="text-white">Yards:   {data.yards  ||'N/A'}</p>
-                        <p className="text-white">TDs:     {data.tds    ||'N/A'}</p>
-                        {type === 'Passing' && ints !== 'N/A' && (
+                        <p className="text-white">Seasons: {careerStats.seasons || 'N/A'}</p>
+                        <p className="text-white">Yards:   {data.yards?.toLocaleString() || 'N/A'}</p>
+                        <p className="text-white">TDs:     {data.tds?.toLocaleString() || 'N/A'}</p>
+                        {type === 'Passing' && (
                           <p className="text-white">INT:     {ints}</p>
                         )}
                       </motion.div>
@@ -478,7 +495,6 @@ export default function PlayerPage({
           background:rgba(255,255,255,0.07);
           backdrop-filter:blur(12px);
           border:1px solid rgba(255,255,255,0.15);
-          border-radius:12px;
           box-shadow:0 4px 25px rgba(0,255,255,0.15);
         }
         .hide-scrollbar::-webkit-scrollbar{ display:none; }
@@ -498,7 +514,7 @@ function StatsCard({ title, columns, rows }) {
         ))}</tr></thead>
         <tbody>{rows.map((vals,i)=>(
           <tr key={i} className="border-b border-gray-600 hover:bg-gray-800">
-            {vals.map((v,j)=><td key={j} className="p-2">{v}</td>)}
+            {vals.map((v,j)=><td key={j} className="p-2">{v ?? '—'}</td>)}
           </tr>
         ))}</tbody>
       </table>
