@@ -57,7 +57,7 @@ export default function PlayerPage({
   const scrollRef = useRef(null);
   const weeklyChartRef = useRef(null);
   
-  // FIX: State to track client-side mounting
+  // State to track client-side mounting
   const [isClient, setIsClient] = useState(false);
   useEffect(() => {
     setIsClient(true);
@@ -148,19 +148,19 @@ export default function PlayerPage({
       if (statType === 'receiving') {
         labels = weeklyDataForSeason.map(r => `W${r.week}`);
         datasets = [
-          { label: 'Targets', data: weeklyDataForSeason.map(r => r.targets), backgroundColor: '#00FFFF' },
-          { label: 'Receptions', data: weeklyDataForSeason.map(r => r.receptions), backgroundColor: '#0088ff' }
+          { label: 'Targets', data: weeklyDataForseason.map(r => r.targets), backgroundColor: '#00FFFF' },
+          { label: 'Receptions', data: weeklyDataForseason.map(r => r.receptions), backgroundColor: '#0088ff' }
         ];
       } else if (statType === 'rushing') {
         labels = weeklyDataForSeason.map(r => `W${r.week}`);
         datasets = [
-          { label: 'Carries', data: weeklyDataForSeason.map(r => r.carries), backgroundColor: '#FF00FF' },
+          { label: 'Carries', data: weeklyDataForseason.map(r => r.carries), backgroundColor: '#FF00FF' },
         ];
       } else if (statType === 'passing') {
         labels = weeklyDataForSeason.map(r => `W${r.week}`);
         datasets = [
-          { label: 'Attempts', data: weeklyDataForSeason.map(r => r.attempts), backgroundColor: '#00FFFF' },
-          { label: 'Completions', data: weeklyDataForSeason.map(r => r.completions), backgroundColor: '#0088ff' }
+          { label: 'Attempts', data: weeklyDataForseason.map(r => r.attempts), backgroundColor: '#00FFFF' },
+          { label: 'Completions', data: weeklyDataForseason.map(r => r.completions), backgroundColor: '#0088ff' }
         ];
       }
 
@@ -199,30 +199,31 @@ export default function PlayerPage({
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
       </Head>
 
+      {/* THIS IS THE KEY FIX: Ensure Particles only renders on the client */}
       {isClient && (
-  <Particles id="tsparticles" init={particlesInit}
-    className="fixed inset-0 -z-10"
-    options={{
-      background: { color: { value: "#000" } },
-      fpsLimit: 60,
-      interactivity: {
-        events: { onClick: { enable: true, mode: "push" }, onHover: { enable: true, mode: "repulse" }, resize: true },
-        modes: { push: { quantity: 4 }, repulse: { distance: 100, duration: 0.4 } }
-      },
-      particles: {
-        color: { value: "#00ffff" },
-        links: { color: "#00ffff", distance: 150, enable: true, opacity: 0.3, width: 1 },
-        collisions: { enable: false },
-        move: { direction: "none", enable: true, outModes: { default: "bounce" }, random: false, speed: 1, straight: false },
-        number: { density: { enable: true, area: 800 }, value: 40 },
-        opacity: { value: 0.3 },
-        shape: { type: "circle" },
-        size: { value: { min: 1, max: 4 } }
-      },
-      detectRetina: true
-    }}
-  />
-)}
+        <Particles id="tsparticles" init={particlesInit}
+          className="fixed inset-0 -z-10"
+          options={{
+            background: { color: { value: "#000" } },
+            fpsLimit: 60,
+            interactivity: {
+              events: { onClick: { enable: true, mode: "push" }, onHover: { enable: true, mode: "repulse" }, resize: true },
+              modes: { push: { quantity: 4 }, repulse: { distance: 100, duration: 0.4 } }
+            },
+            particles: {
+              color: { value: "#00ffff" },
+              links: { color: "#00ffff", distance: 150, enable: true, opacity: 0.3, width: 1 },
+              collisions: { enable: false },
+              move: { direction: "none", enable: true, outModes: { default: "bounce" }, random: false, speed: 1, straight: false },
+              number: { density: { enable: true, area: 800 }, value: 40 },
+              opacity: { value: 0.3 },
+              shape: { type: "circle" },
+              size: { value: { min: 1, max: 4 } }
+            },
+            detectRetina: true
+          }}
+        />
+      )}
 
       <div className="relative max-w-7xl mx-auto px-4 py-8 font-orbitron text-sm">
 
@@ -333,7 +334,7 @@ export default function PlayerPage({
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-white">Season Stats</h2>
             <div className="flex items-center gap-3">
-              {/* --- UPDATED: Guard added to prevent render error --- */}
+              {/* Guard added to prevent render error */}
               {player && (() => {
                 const statOrder = player.position_group === 'QB' 
                   ? ['passing', 'rushing', 'receiving'] 
