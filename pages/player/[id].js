@@ -142,25 +142,25 @@ export default function PlayerPage({
       }
 
       let labels = [];
-      let datasets = [];
-      const weeklyDataForSeason = weeklyRows;
+let datasets = [];
+const weeklyDataForSeason = weeklyRows; // This line is not needed
 
-      if (statType === 'receiving') {
-        labels = weeklyDataForSeason.map(r => `W${r.week}`);
-        datasets = [
-          { label: 'Targets', data: weeklyDataForseason.map(r => r.targets), backgroundColor: '#00FFFF' },
-          { label: 'Receptions', data: weeklyDataForseason.map(r => r.receptions), backgroundColor: '#0088ff' }
-        ];
-      } else if (statType === 'rushing') {
-        labels = weeklyDataForSeason.map(r => `W${r.week}`);
-        datasets = [
-          { label: 'Carries', data: weeklyDataForseason.map(r => r.carries), backgroundColor: '#FF00FF' },
-        ];
-      } else if (statType === 'passing') {
-        labels = weeklyDataForSeason.map(r => `W${r.week}`);
-        datasets = [
-          { label: 'Attempts', data: weeklyDataForseason.map(r => r.attempts), backgroundColor: '#00FFFF' },
-          { label: 'Completions', data: weeklyDataForseason.map(r => r.completions), backgroundColor: '#0088ff' }
+if (statType === 'receiving') {
+  labels = weeklyDataForSeason.map(r => `W${r.week}`);
+  datasets = [
+    { label: 'Targets', data: weeklyDataForSeason.map(r => r.targets), backgroundColor: '#00FFFF' },
+    { label: 'Receptions', data: weeklyDataForSeason.map(r => r.receptions), backgroundColor: '#0088ff' }
+  ];
+} else if (statType === 'rushing') {
+  labels = weeklyDataForSeason.map(r => `W${r.week}`);
+  datasets = [
+    { label: 'Carries', data: weeklyDataForSeason.map(r => r.carries), backgroundColor: '#FF00FF' },
+  ];
+} else if (statType === 'passing') {
+  labels = weeklyDataForSeason.map(r => `W${r.week}`);
+  datasets = [
+    { label: 'Attempts', data: weeklyDataForSeason.map(r => r.attempts), backgroundColor: '#00FFFF' },
+    { label: 'Completions', data: weeklyDataForSeason.map(r => r.completions), backgroundColor: '#0088ff' }
         ];
       }
 
