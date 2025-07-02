@@ -17,17 +17,25 @@ export async function getServerSideProps({ params, req }) {
 
   const playerId = params.id;
   if (!playerId) return { notFound: true };
-  const res = await fetch(`${baseUrl}/api/player/${playerId}`);
-  if (!res.ok) return { notFound: true };
-  const data = await res.json();
 
-  return {
-    props: {
-      ...data,
-      weekly: data.weekly || [],
-      seasonStats: data.seasonStats || [],
-    },
-  };
+  try {
+    const res = await fetch(`${baseUrl}/api/player/${playerId}`);
+    if (!res.ok) return { notFound: true };
+    const data = await res.json();
+
+    return {
+      props: {
+        player: data.player || null, // Ensure player is not undefined
+        seasonStats: data.seasonStats || [],
+        advancedMetrics: data.advancedMetrics || {},
+        advancedRushing: data.advancedRushing || {},
+        weekly: data.weekly || [],
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching player data:", error);
+    return { notFound: true };
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -46,13 +54,11 @@ export default function PlayerPage({
   const [borderColor, setBorderColor] = useState(player?.secondary_color || '#000');
   const [expandedCard, setExpandedCard] = useState(null);
   const [collapsed, setCollapsed] = useState(true);
-  const scrollRef = useRef();
+  const scrollRef = useRef(null);
   const weeklyChartRef = useRef(null);
   
-  // --- FIX: Add state to track if we are on the client-side ---
+  // FIX: State to track client-side mounting
   const [isClient, setIsClient] = useState(false);
-
-  // --- FIX: Set isClient to true only after the component mounts on the browser ---
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -61,15 +67,18 @@ export default function PlayerPage({
   const careerStats = seasonStats.reduce((acc, season) => {
     acc.seasons = (acc.seasons || 0) + 1;
     if (season.passing_yards || season.passing_tds) {
+      acc.passing = acc.passing || {};
       acc.passing.yards = (acc.passing.yards || 0) + (season.passing_yards || 0);
       acc.passing.tds = (acc.passing.tds || 0) + (season.passing_tds || 0);
       acc.passing.interceptions = (acc.passing.interceptions || 0) + (season.interceptions || season.ints || 0);
     }
     if (season.rushing_yards || season.rushing_tds) {
+      acc.rushing = acc.rushing || {};
       acc.rushing.yards = (acc.rushing.yards || 0) + (season.rushing_yards || 0);
       acc.rushing.tds = (acc.rushing.tds || 0) + (season.rushing_tds || 0);
     }
     if (season.receiving_yards || season.rec_touchdowns) {
+      acc.receiving = acc.receiving || {};
       acc.receiving.yards = (acc.receiving.yards || 0) + (season.receiving_yards || 0);
       acc.receiving.tds = (acc.receiving.tds || 0) + (season.rec_touchdowns || 0);
     }
@@ -89,7 +98,14 @@ export default function PlayerPage({
   )].sort((a, b) => b - a);
   const defaultSeason = seasonOptions[0] || new Date().getFullYear();
   const [selectedSeason, setSelectedSeason] = useState(defaultSeason);
+
+  // Set initial statType based on player position after data is available
   const [statType, setStatType] = useState('receiving');
+  useEffect(() => {
+    if (player?.position_group === 'QB') setStatType('passing');
+    else if (player?.position_group === 'RB') setStatType('rushing');
+    else setStatType('receiving');
+  }, [player?.position_group]);
 
   const weeklyRows = (() => {
     const filterSeason = arr => arr.filter(r => String(r.season) === String(selectedSeason));
@@ -109,18 +125,17 @@ export default function PlayerPage({
     const el = scrollRef.current;
     if (!el) return;
     const handleScroll = () => setActiveIndex(Math.round(el.scrollLeft / el.clientWidth));
-    el.addEventListener('scroll', handleScroll);
+    el.addEventListener('scroll', handleScroll, { passive: true });
     return () => el.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const particlesInit = main => loadFull(main);
+  const particlesInit = (main) => loadFull(main);
 
   // --- Chart.js useEffect ---
   useEffect(() => {
-    // This now waits for the component to be mounted on the client
-    if (!isClient || !player) return;
+    if (!isClient || !player || !document.getElementById('weeklyChart')) return;
 
-    const ctxWeekly = document.getElementById('weeklyChart')?.getContext('2d');
+    const ctxWeekly = document.getElementById('weeklyChart').getContext('2d');
     if (ctxWeekly) {
       if (weeklyChartRef.current) {
         weeklyChartRef.current.destroy();
@@ -128,30 +143,30 @@ export default function PlayerPage({
 
       let labels = [];
       let datasets = [];
+      const weeklyDataForSeason = weeklyRows;
 
-      // Logic to populate chart data based on selected statType
       if (statType === 'receiving') {
-        labels = receivingMetricsArr.map(r => `W${r.week}`);
+        labels = weeklyDataForSeason.map(r => `W${r.week}`);
         datasets = [
-          { label: 'Targets', data: receivingMetricsArr.map(r => r.targets), backgroundColor: '#00FFFF' },
-          { label: 'Receptions', data: receivingMetricsArr.map(r => r.receptions), backgroundColor: '#0088ff' }
+          { label: 'Targets', data: weeklyDataForSeason.map(r => r.targets), backgroundColor: '#00FFFF' },
+          { label: 'Receptions', data: weeklyDataForSeason.map(r => r.receptions), backgroundColor: '#0088ff' }
         ];
       } else if (statType === 'rushing') {
-        labels = rushingMetricsArr.map(r => `W${r.week}`);
+        labels = weeklyDataForSeason.map(r => `W${r.week}`);
         datasets = [
-          { label: 'Carries', data: rushingMetricsArr.map(r => r.carries), backgroundColor: '#FF00FF' },
+          { label: 'Carries', data: weeklyDataForSeason.map(r => r.carries), backgroundColor: '#FF00FF' },
         ];
       } else if (statType === 'passing') {
-        labels = uniquePassingMetrics.map(r => `W${r.week}`);
+        labels = weeklyDataForSeason.map(r => `W${r.week}`);
         datasets = [
-          { label: 'Attempts', data: uniquePassingMetrics.map(r => r.attempts), backgroundColor: '#00FFFF' },
-          { label: 'Completions', data: uniquePassingMetrics.map(r => r.completions), backgroundColor: '#0088ff' }
+          { label: 'Attempts', data: weeklyDataForSeason.map(r => r.attempts), backgroundColor: '#00FFFF' },
+          { label: 'Completions', data: weeklyDataForSeason.map(r => r.completions), backgroundColor: '#0088ff' }
         ];
       }
 
       weeklyChartRef.current = new Chart(ctxWeekly, {
         type: 'bar',
-        data: { labels: labels, datasets: datasets },
+        data: { labels, datasets },
         options: { plugins: { legend: { labels: { color: '#fff' } } }, scales: { x: { ticks: { color: '#fff' } }, y: { ticks: { color: '#fff' } } } }
       });
     }
@@ -161,9 +176,15 @@ export default function PlayerPage({
         weeklyChartRef.current = null;
       }
     };
-  }, [isClient, player, statType, receivingMetricsArr, rushingMetricsArr, uniquePassingMetrics]);
+  }, [isClient, player, statType, selectedSeason, weeklyRows]);
 
-  if (!player) return <p className="text-center text-white">Player not found</p>;
+  if (!player) {
+    return (
+      <div className="text-center text-white p-10">
+        <p>Player not found</p>
+      </div>
+    );
+  }
 
   const primaryColor = player.primary_color || bgColor;
   const careerOrder = ['Passing', 'Rushing', 'Receiving'];
@@ -178,10 +199,10 @@ export default function PlayerPage({
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
       </Head>
 
-      <Particles id="tsparticles" init={particlesInit}
+      {isClient && <Particles id="tsparticles" init={particlesInit}
         className="fixed inset-0 -z-10"
         options={{ background: { color: '#0a0a0a' }, particles: { number: { value: 60 }, color: { value: '#00FFFF' }, opacity: { value: 0.5 }, size: { value: 3 }, move: { enable: true, speed: 0.6 } } }}
-      />
+      />}
 
       <div className="relative max-w-7xl mx-auto px-4 py-8 font-orbitron text-sm">
 
@@ -217,9 +238,9 @@ export default function PlayerPage({
                   <span><strong>College:</strong> {player.college || 'N/A'}</span>
                   <span><strong>Ht:</strong> {player.height_inches ? `${player.height_inches}"` : 'N/A'}</span>
                   <span><strong>Wt:</strong> {player.weight_pounds ? `${player.weight_pounds} lbs` : 'N/A'}</span>
-                  <span><strong>DOB:</strong> {player.date_of_birth
+                  {isClient && <span><strong>DOB:</strong> {player.date_of_birth
                     ? new Date(player.date_of_birth).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-                    : 'N/A'}</span>
+                    : 'N/A'}</span>}
                 </div>
                 <div className="text-gray-300 flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
                   <span><strong>Contract:</strong> {player.contract_value
@@ -292,8 +313,13 @@ export default function PlayerPage({
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-white">Season Stats</h2>
             <div className="flex items-center gap-3">
-              {(() => {
-                const statOrder = player.position_group === 'QB' ? ['passing', 'rushing', 'receiving'] : player.position_group === 'RB' ? ['rushing', 'receiving', 'passing'] : ['receiving', 'rushing', 'passing'];
+              {/* --- UPDATED: Guard added to prevent render error --- */}
+              {player && (() => {
+                const statOrder = player.position_group === 'QB' 
+                  ? ['passing', 'rushing', 'receiving'] 
+                  : player.position_group === 'RB' 
+                    ? ['rushing', 'receiving', 'passing'] 
+                    : ['receiving', 'rushing', 'passing'];
                 return statOrder.map(t => (
                   <button key={t} onClick={() => setStatType(t)}
                     className={`px-2 py-1 rounded text-xs uppercase font-semibold ${statType === t ? 'bg-cyan-500 text-black' : 'bg-gray-700 text-gray-300'}`}>
@@ -361,7 +387,7 @@ export default function PlayerPage({
               </div>
               <div className="flex justify-center space-x-2 mt-2">
                 {[...Array(3)].map((_, i) => (
-                  <button key={i} onClick={() => scrollRef.current.scrollTo({ left: i * scrollRef.current.clientWidth, behavior: 'smooth' })}
+                  <button key={i} onClick={() => scrollRef.current?.scrollTo({ left: i * (scrollRef.current?.clientWidth || 0), behavior: 'smooth' })}
                     className={`h-2 w-2 rounded-full ${i === activeIndex ? 'bg-cyan-400' : 'bg-gray-600'}`} />
                 ))}
               </div>
@@ -371,7 +397,6 @@ export default function PlayerPage({
             {hasAdvancedRushing && (<AdvancedCard title="2024 Advanced Rushing" rows={[['RYOE', advancedRushing.rushing_yards_over_expected?.toFixed(1)||'N/A'],['Rush EPA', advancedRushing.rushing_epa?.toFixed(2)||'N/A'],]}/>)}
           </div>
           <div className="space-y-8">
-            {/* --- FIX 3: Conditionally render the chart component --- */}
             {isClient && (
               <motion.div className="glass-card p-4" whileHover={{ scale: 1.05 }}>
                 <h2 className="text-sm uppercase font-semibold text-cyan-300">Weekly Chart</h2>
@@ -389,6 +414,7 @@ export default function PlayerPage({
           border:1px solid rgba(255,255,255,0.15);
           box-shadow:0 4px 25px rgba(0,255,255,0.15);
         }
+        .hide-scrollbar { scrollbar-width: none; }
         .hide-scrollbar::-webkit-scrollbar{ display:none; }
       `}</style>
     </>
